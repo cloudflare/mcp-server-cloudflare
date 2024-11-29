@@ -2,7 +2,7 @@
   "name": "@cloudflare/mcp-server-cloudflare",
   "version": "0.1.7",
   "description": "MCP server for interacting with Cloudflare API",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": "Cloudflare, Inc. (https://cloudflare.com)",
   "homepage": "https://github.com/cloudflare/mcp-server-cloudflare",
   "bugs": "https://github.com/cloudflare/mcp-server-cloudflare/issues",
