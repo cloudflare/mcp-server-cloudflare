@@ -8,22 +8,22 @@ import { KV_HANDLERS, KV_TOOLS } from './tools/kv'
 import { ANALYTICS_HANDLERS, ANALYTICS_TOOLS } from './tools/analytics'
 import { WORKER_TOOLS, WORKERS_HANDLERS } from './tools/workers'
 
-// Types for Cloudflare responses
-
 // Combine all tools
-
 const ALL_TOOLS = [...KV_TOOLS, ...WORKER_TOOLS, ...ANALYTICS_TOOLS, ...R2_TOOLS, ...D1_TOOLS]
 
 // Create server
 const server = new Server(
-  { name: 'cloudflare', version: '1.0.0' }, // Changed from cloudflare-kv to cloudflare
+  { name: 'cloudflare', version: '1.0.0' },
   { capabilities: { tools: {} } },
 )
 
 // Handle list tools request
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   log('Received list tools request')
-  return { tools: ALL_TOOLS }
+  return {
+    jsonrpc: '2.0',
+    result: { tools: ALL_TOOLS }
+  }
 })
 
 // Handle tool calls
@@ -32,35 +32,33 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   log('Received tool call:', toolName)
 
   try {
+    let result
     if (toolName in ANALYTICS_HANDLERS) {
-      return await ANALYTICS_HANDLERS[toolName](request)
-    }
-    if (toolName in D1_HANDLERS) {
-      return await D1_HANDLERS[toolName](request)
-    }
-    if (toolName in KV_HANDLERS) {
-      return await KV_HANDLERS[toolName](request)
-    }
-    if (toolName in WORKERS_HANDLERS) {
-      return await WORKERS_HANDLERS[toolName](request)
-    }
-    if (toolName in R2_HANDLERS) {
-      return await R2_HANDLERS[toolName](request)
+      result = await ANALYTICS_HANDLERS[toolName](request)
+    } else if (toolName in D1_HANDLERS) {
+      result = await D1_HANDLERS[toolName](request)
+    } else if (toolName in KV_HANDLERS) {
+      result = await KV_HANDLERS[toolName](request)
+    } else if (toolName in WORKERS_HANDLERS) {
+      result = await WORKERS_HANDLERS[toolName](request)
+    } else if (toolName in R2_HANDLERS) {
+      result = await R2_HANDLERS[toolName](request)
+    } else {
+      throw new Error(`Unknown tool: ${toolName}`)
     }
 
-    throw new Error(`Unknown tool: ${toolName}`)
+    return {
+      jsonrpc: '2.0',
+      result
+    }
   } catch (error) {
     log('Error handling tool call:', error)
     return {
-      toolResult: {
-        content: [
-          {
-            type: 'text',
-            text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-          },
-        ],
-        isError: true,
-      },
+      jsonrpc: '2.0',
+      error: {
+        code: -32000,
+        message: error instanceof Error ? error.message : String(error)
+      }
     }
   }
 })
