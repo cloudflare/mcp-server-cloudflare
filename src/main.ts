@@ -7,12 +7,12 @@ import { D1_HANDLERS, D1_TOOLS } from './tools/d1'
 import { KV_HANDLERS, KV_TOOLS } from './tools/kv'
 import { ANALYTICS_HANDLERS, ANALYTICS_TOOLS } from './tools/analytics'
 import { WORKER_TOOLS, WORKERS_HANDLERS } from './tools/workers'
+import { WAE_TOOLS, WAE_HANDLERS } from './tools/wae'
 
 // Types for Cloudflare responses
 
 // Combine all tools
-
-const ALL_TOOLS = [...KV_TOOLS, ...WORKER_TOOLS, ...ANALYTICS_TOOLS, ...R2_TOOLS, ...D1_TOOLS]
+const ALL_TOOLS = [...KV_TOOLS, ...WORKER_TOOLS, ...ANALYTICS_TOOLS, ...R2_TOOLS, ...D1_TOOLS, ...WAE_TOOLS]
 
 // Create server
 const server = new Server(
@@ -47,20 +47,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     if (toolName in R2_HANDLERS) {
       return await R2_HANDLERS[toolName](request)
     }
+    if (toolName in WAE_HANDLERS) {
+      return await (WAE_HANDLERS as Record<string, Function>)[toolName](request)
+    }
 
     throw new Error(`Unknown tool: ${toolName}`)
   } catch (error) {
     log('Error handling tool call:', error)
     return {
-      toolResult: {
-        content: [
-          {
-            type: 'text',
-            text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-          },
-        ],
-        isError: true,
-      },
+      content: [
+        {
+          type: 'text',
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
+      metadata: {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      }
     }
   }
 })
