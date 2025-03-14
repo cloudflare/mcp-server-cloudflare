@@ -11,6 +11,8 @@ import TOML from '@iarna/toml'
 import assert from 'node:assert'
 import { mcpCloudflareVersion } from './helpers'
 import { fetch, Headers, Response, RequestInit, HeadersInit } from 'undici'
+import { exec } from 'child_process'
+import { promisify } from 'util'
 
 export function isDirectory(configPath: string) {
   try {
@@ -449,3 +451,48 @@ export interface FetchResult<ResponseType = unknown> {
 }
 
 export type AccountInfo = { name: string; id: string }
+
+const execAsync = promisify(exec)
+
+/**
+ * Checks if the user is authenticated with Wrangler and runs the login command if needed.
+ * @returns A promise that resolves to true if the user is authenticated, false otherwise
+ */
+export async function ensureWranglerAuthentication(): Promise<boolean> {
+  try {
+    // Try to get auth tokens
+    getAuthTokens()
+    
+    // If tokens are expired, try to refresh them
+    if (isAccessTokenExpired()) {
+      console.log('Wrangler access token expired, attempting to refresh...')
+      if (await refreshToken()) {
+        console.log('Successfully refreshed Wrangler access token')
+        return true
+      } else {
+        console.log('Failed to refresh Wrangler access token, running wrangler login...')
+      }
+    } else {
+      // Tokens exist and are not expired
+      return true
+    }
+  } catch (e) {
+    // If we can't get auth tokens, we need to run wrangler login
+    console.log('No Wrangler authentication found, running wrangler login...')
+  }
+
+  try {
+    // Run wrangler login
+    console.log('Running npx wrangler login. Please follow the prompts in your browser...')
+    const { stderr, stdout } = await execAsync('npx wrangler@latest login')
+    if (stderr) console.error(stderr)
+    if (stdout) console.log(stdout)
+    
+    // Try to get auth tokens again
+    getAuthTokens()
+    return true
+  } catch (error) {
+    console.error('Failed to run wrangler login:', error)
+    return false
+  }
+}

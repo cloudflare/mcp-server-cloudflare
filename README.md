@@ -18,13 +18,9 @@ This lets you use Claude Desktop, or any MCP Client, to use natural language to 
 
 ## Setup
 
-1. Make sure you are logged in to Cloudflare via Wrangler:
-   ```bash
-   npx wrangler login
-   ```
-   This authentication is required for the MCP server to access your Cloudflare resources when testing locally.
+1. Run `npx @cloudflare/mcp-server-cloudflare init`
 
-2. Run `npx @cloudflare/mcp-server-cloudflare init`
+   > **Note:** The MCP server will automatically run `npx wrangler login` if you're not already authenticated with Cloudflare. You'll be prompted to complete the authentication process in your browser if needed.
 
 <div align="left">
     <img src="https://github.com/user-attachments/assets/163bed75-ec0c-478a-94b2-179969a90923" alt="Example console output" width="300"/>
@@ -178,7 +174,7 @@ Then, in a second terminal:
 node dist/index.js init
 ```
 
-This will link Claude Desktop against your locally-installed version for you to test.
+This will link Claude Desktop against your locally-installed version for you to test. If you're not already authenticated with Wrangler, the server will automatically prompt you to complete the authentication process in your browser.
 
 ## Testing
 

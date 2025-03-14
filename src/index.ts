@@ -2,7 +2,7 @@
 import { init } from './init'
 import { config, log } from './utils/helpers'
 import { main } from './main'
-import { getAuthTokens, isAccessTokenExpired, LocalState, refreshToken } from './utils/wrangler'
+import { getAuthTokens, isAccessTokenExpired, LocalState, refreshToken, ensureWranglerAuthentication } from './utils/wrangler'
 
 // Handle process events
 process.on('uncaughtException', (error) => {
@@ -32,15 +32,13 @@ if (cmd === 'init') {
   config.accountId = accountId
 
   if (!config.accountId || !config.apiToken) {
-    getAuthTokens()
-
-    if (isAccessTokenExpired()) {
-      if (await refreshToken()) {
-        console.log('Successfully refreshed access token')
-      } else {
-        console.log('Failed to refresh access token')
-      }
+    // Ensure the user is authenticated with Wrangler
+    const isAuthenticated = await ensureWranglerAuthentication()
+    if (!isAuthenticated) {
+      throw new Error('Failed to authenticate with Wrangler. Please run `npx wrangler login` manually and try again.')
     }
+    
+    // Set the API token from the authenticated state
     config.apiToken = LocalState.accessToken?.value
   }
 
