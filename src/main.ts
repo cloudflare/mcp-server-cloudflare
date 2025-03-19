@@ -123,15 +123,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   } catch (error) {
     log('Error handling tool call:', error)
     return {
-      toolResult: {
-        content: [
-          {
-            type: 'text',
-            text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-          },
-        ],
-        isError: true,
-      },
+      content: [
+        {
+          type: 'text',
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
+      isError: true,
     }
   }
 })
