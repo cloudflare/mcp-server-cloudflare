@@ -1,6 +1,6 @@
 # Cloudflare MCP Server
 
-[![smithery badge](https://smithery.ai/badge/@cloudflare/mcp-server-cloudflare)](https://smithery.ai/protocol/@cloudflare/mcp-server-cloudflare)
+[![smithery badge](https://smithery.ai/badge/@cloudflare/mcp-server-cloudflare)](https://smithery.ai/server/@cloudflare/mcp-server-cloudflare)
 
 Model Context Protocol (MCP) is a [new, standardized protocol](https://modelcontextprotocol.io/introduction) for managing context between large language models (LLMs) and external systems. In this repository, we provide an installer as well as an MCP Server for [Cloudflare's API](https://api.cloudflare.com).
 
@@ -22,7 +22,7 @@ This lets you use Claude Desktop, or any MCP Client, to use natural language to 
 
 ### Installing via Smithery
 
-To install Cloudflare MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/protocol/@cloudflare/mcp-server-cloudflare):
+To install Cloudflare MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@cloudflare/mcp-server-cloudflare):
 
 ```bash
 npx @smithery/cli install @cloudflare/mcp-server-cloudflare --client claude
