@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url'
 import { createDialog, endSection, logRaw, startSection, updateStatus } from './utils/c3'
 import { mcpCloudflareVersion } from './utils/helpers'
 import which from 'which'
+import readline from 'node:readline/promises'
 
 const __filename = fileURLToPath(import.meta.url)
 
@@ -54,11 +55,32 @@ export async function init(accountTag: string | undefined) {
       break
     default:
       if (!accountTag) {
-        throw new Error(
-          `${chalk.red('Multiple accounts found.')}\nUse ${chalk.yellow('npx @cloudflare/mcp-server-cloudflare init [account_id]')} to specify which account to use.\nYou have access to:\n${accounts.map((a) => `  • ${a.name} — ${a.id}`).join('\n')}`,
-        )
+                updateStatus(chalk.blue('Multiple accounts detected. Please select an account to use:'))
+        
+        accounts.forEach((a, i) => {
+          updateStatus(`${i + 1}. ${a.name} (${a.id})`)
+        })
+        
+        const rl = readline.createInterface({
+          input: process.stdin,
+          output: process.stdout
+        })
+        
+        let selection
+        do {
+          const answer = await rl.question('Enter the number of the account you want to use: ')
+          selection = parseInt(answer) - 1
+        } while (isNaN(selection) || selection < 0 || selection >= accounts.length)
+        
+        rl.close()
+        account = accounts[selection].id
+      } else {
+        const validAccount = accounts.find(a => a.id === accountTag)
+        if (!validAccount) {
+          throw new Error(`You don't have access to account ${accountTag}. Please choose from your available accounts.`)
       }
       account = accountTag
+    }
       break
   }
 
