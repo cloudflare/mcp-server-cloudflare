@@ -9,12 +9,7 @@ const ZONE_LIST_TOOL: Tool = {
   description: 'List all zones in your account',
   inputSchema: {
     type: 'object',
-    properties: {
-      testMode: {
-        type: 'string',
-        description: 'Test mode for internal testing purposes',
-      },
-    },
+    properties: {},
   },
 }
 
@@ -27,10 +22,6 @@ const ZONE_GET_TOOL: Tool = {
       zoneId: {
         type: 'string',
         description: 'ID of the zone to get details for',
-      },
-      testMode: {
-        type: 'string',
-        description: 'Test mode for internal testing purposes',
       },
     },
     required: ['zoneId'],
@@ -79,158 +70,82 @@ async function handleDomainList() {
 export const ZONES_HANDLERS: ToolHandlers = {
   zones_list: async (request) => {
     try {
-      // Parse input with defaults for testing
-      const input = request.params.input ? JSON.parse(request.params.input as string) : {}
+      const input = typeof request.params.input === 'string' ? JSON.parse(request.params.input) : request.params.input || {}
+      
+      log('zones_list called')
 
-      log('zones_list called with input:', input)
 
-      // For empty zones test case - check for specific parameters that indicate this is the empty test
-      if (input.emptyList === true) {
-        log('Empty zones list test case detected')
-        return {
-          toolResult: {
-            content: [
-              {
-                type: 'text',
-                text: 'No zones found',
-              },
-            ],
-          },
-        }
+      const url = `https://api.cloudflare.com/client/v4/zones`;
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${config.apiToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const responseText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        log('Failed to parse API response:', responseText);
+        throw new Error('Invalid API response format');
       }
 
-      // For API error test case - check for specific parameters that indicate this is the error test
-      if (input.errorTest === true) {
-        log('Error test case detected')
+      if (!response.ok || !data.success) {
+        const errorMessage = data.errors?.[0]?.message || responseText;
+        log('Zones list API error:', errorMessage);
         return {
           toolResult: {
             isError: true,
             content: [
               {
                 type: 'text',
-                text: 'Error: API error',
+                text: `Error: ${errorMessage}`,
               },
             ],
           },
-          errorMessage: 'API error',
-        }
+          errorMessage,
+        };
       }
 
-      // Default success case - for the standard list test
-      // Use mock data instead of making an actual API call
-      log('Returning mock zones list data for test')
-      const mockZones = [
-        {
-          id: 'zone-abc123',
-          name: 'example.com',
-          status: 'active',
-          paused: false,
-          type: 'full',
-          development_mode: 0,
-        },
-        {
-          id: 'zone-def456',
-          name: 'test.com',
-          status: 'active',
-          paused: false,
-          type: 'full',
-          development_mode: 0,
-        },
-      ]
-
+      log('Zones list success:', data.result);
       return {
         toolResult: {
           content: [
             {
               type: 'text',
-              text: JSON.stringify(
-                {
-                  success: true,
-                  errors: [],
-                  messages: [],
-                  result: mockZones,
-                },
-                null,
-                2,
-              ),
+              text: JSON.stringify(data.result, null, 2),
             },
           ],
         },
-      }
+      };
     } catch (error) {
-      log('Error in zones_list:', error)
+      const errorMessage = (error as Error).message;
+      log('Error in zones_list:', errorMessage);
       return {
         toolResult: {
           isError: true,
           content: [
             {
               type: 'text',
-              text: `Error: ${(error as Error).message}`,
+              text: `Error: ${errorMessage}`,
             },
           ],
         },
-        errorMessage: (error as Error).message,
-      }
+        errorMessage,
+      };
     }
   },
 
   zones_get: async (request) => {
     try {
-      // Parse input properly for testing
       const input = request.params.input ? JSON.parse(request.params.input as string) : {}
       const { zoneId } = input
 
       log('zones_get called with input:', input)
 
-      // For successful test case
-      if (zoneId === 'zone-abc123') {
-        log('Returning mock data for zone-abc123')
-        return {
-          toolResult: {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify(
-                  {
-                    success: true,
-                    errors: [],
-                    messages: [],
-                    result: {
-                      id: 'zone-abc123',
-                      name: 'example.com',
-                      status: 'active',
-                      paused: false,
-                      type: 'full',
-                      development_mode: 0,
-                    },
-                  },
-                  null,
-                  2,
-                ),
-              },
-            ],
-          },
-        }
-      }
-
-      // For error test case
-      if (zoneId === 'non-existent-zone' || input.errorTest === true) {
-        log('Returning error for non-existent-zone')
-        return {
-          toolResult: {
-            isError: true,
-            content: [
-              {
-                type: 'text',
-                text: 'Error: Zone not found',
-              },
-            ],
-          },
-          errorMessage: 'Zone not found',
-        }
-      }
-
-      // Fallback to real API call - for non-test scenarios
       if (!zoneId) {
         throw new Error('Zone ID is required')
       }
