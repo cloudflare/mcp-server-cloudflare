@@ -2,6 +2,8 @@
 
 Model Context Protocol (MCP) is a [new, standardized protocol](https://modelcontextprotocol.io/introduction) for managing context between large language models (LLMs) and external systems. In this repository, we provide an installer as well as an MCP Server for [Cloudflare's API](https://api.cloudflare.com).
 
+[![Install with NPX in VS Code](https://img.shields.io/badge/VS_Code-NPM-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=cloudflare&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40cloudflare%2Fmcp-server-cloudflare%22%5D%7D) [![Install with NPX in VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-NPM-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=cloudflare&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40cloudflare%2Fmcp-server-cloudflare%22%5D%7D&quality=insiders)
+
 This lets you use Claude Desktop, or any MCP Client, to use natural language to accomplish things on your Cloudflare account, e.g.:
 
 * `Please deploy me a new Worker with an example durable object.`
@@ -32,6 +34,40 @@ This lets you use Claude Desktop, or any MCP Client, to use natural language to 
     <img src="https://github.com/user-attachments/assets/a24275b1-1c6f-4754-96ef-dd7b9f0f5903" alt="Example tool icon" height="160"/>
     <img src="https://github.com/user-attachments/assets/4fb8badb-6800-4a3f-a530-a344b3584bec" alt="Example tool list" height="160"/>
 </div>
+
+## VS Code Installation
+
+For VS Code users, click one of the installation buttons at the top of this page to install with a single click.
+
+### Manual VS Code Installation
+
+Add the following JSON block to your User Settings (JSON) file in VS Code. You can do this by pressing `Ctrl + Shift + P` and typing `Preferences: Open User Settings (JSON)`. 
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "cloudflare": {
+        "command": "npx",
+        "args": ["-y", "@cloudflare/mcp-server-cloudflare"]
+      }
+    }
+  }
+}
+```
+
+Optionally, you can add it to a file called `.vscode/mcp.json` in your workspace. This will allow you to share the configuration with others.
+
+```json
+{
+  "servers": {
+    "cloudflare": {
+      "command": "npx",
+      "args": ["-y", "@cloudflare/mcp-server-cloudflare"]
+    }
+  }
+}
+```
 
 ## Paid Features
 
