@@ -1,10 +1,10 @@
-import { defineWorkersConfig } from "@cloudflare/vitest-pool-workers/config";
+import { defineWorkersConfig } from '@cloudflare/vitest-pool-workers/config'
 
-import type { Env } from "./worker-configuration";
+import type { Env } from './worker-configuration'
 
 export interface TestEnv extends Env {
-	CLOUDFLARE_MOCK_ACCOUNT_ID: string;
-	CLOUDFLARE_MOCK_API_TOKEN: string;
+	CLOUDFLARE_MOCK_ACCOUNT_ID: string
+	CLOUDFLARE_MOCK_API_TOKEN: string
 }
 
 export default defineWorkersConfig({
@@ -14,11 +14,11 @@ export default defineWorkersConfig({
 				wrangler: { configPath: `${__dirname}/wrangler.jsonc` },
 				miniflare: {
 					bindings: {
-						CLOUDFLARE_MOCK_ACCOUNT_ID: "mock-account-id",
-						CLOUDFLARE_MOCK_API_TOKEN: "mock-api-token",
+						CLOUDFLARE_MOCK_ACCOUNT_ID: 'mock-account-id',
+						CLOUDFLARE_MOCK_API_TOKEN: 'mock-api-token',
 					} satisfies Partial<TestEnv>,
 				},
 			},
 		},
 	},
-});
+})

@@ -13,7 +13,11 @@
 		"jsx": "react",
 		"module": "es2022",
 		"moduleResolution": "bundler",
-		"types": ["./worker-configuration.d.ts", "@cloudflare/vitest-pool-workers", "@cloudflare/workers-types/2023-07-01"],
+		"types": [
+			"./worker-configuration.d.ts",
+			"@cloudflare/vitest-pool-workers",
+			"@cloudflare/workers-types/2023-07-01"
+		],
 		"resolveJsonModule": true,
 		"allowJs": true,
 		"checkJs": false,

@@ -13,11 +13,11 @@
 		"**/packages/tools/bin/*": "shellscript",
 		"**/*.css": "tailwindcss",
 		"turbo.json": "jsonc",
-		"**/packages/typescript-config/*.json": "jsonc",
+		"**/packages/typescript-config/*.json": "jsonc"
 	},
 	"eslint.workingDirectories": [
 		{
 			"mode": "auto"
 		}
-	],
+	]
 }

@@ -1,4 +1,4 @@
-import type { Cloudflare } from 'cloudflare';
+import type { Cloudflare } from 'cloudflare'
 
 /**
  * Fetches list of workers from Cloudflare API
@@ -11,9 +11,9 @@ export async function handleWorkersList({
 	accountId,
 }: {
 	client: Cloudflare
-	accountId: string,
+	accountId: string
 }): Promise<Cloudflare.Workers.Scripts.Script[]> {
-	return (await client.workers.scripts.list({account_id: accountId})).result
+	return (await client.workers.scripts.list({ account_id: accountId })).result
 }
 
 /**
@@ -29,8 +29,8 @@ export async function handleWorkerScriptDownload({
 	accountId,
 }: {
 	client: Cloudflare
-	scriptName: string,
-	accountId: string,
+	scriptName: string
+	accountId: string
 }): Promise<string> {
-	return await client.workers.scripts.get(scriptName, {account_id: accountId})
+	return await client.workers.scripts.get(scriptName, { account_id: accountId })
 }

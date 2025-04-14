@@ -1,5 +1,6 @@
-import type { z } from "zod";
-import { Cloudflare } from 'cloudflare';
+import { Cloudflare } from 'cloudflare'
+
+import type { z } from 'zod'
 
 export function getCloudflareClient(apiToken: string) {
 	return new Cloudflare({ apiToken })
@@ -20,13 +21,13 @@ export async function fetchCloudflareApi<T>({
 	responseSchema,
 	options = {},
 }: {
-	endpoint: string;
-	accountId: string;
-	apiToken: string;
-	responseSchema?: z.ZodType<T>;
-	options?: RequestInit;
+	endpoint: string
+	accountId: string
+	apiToken: string
+	responseSchema?: z.ZodType<T>
+	options?: RequestInit
 }): Promise<T> {
-	const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}${endpoint}`;
+	const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}${endpoint}`
 
 	const response = await fetch(url, {
 		...options,
@@ -34,19 +35,19 @@ export async function fetchCloudflareApi<T>({
 			Authorization: `Bearer ${apiToken}`,
 			...(options.headers || {}),
 		},
-	});
+	})
 
 	if (!response.ok) {
-		const error = await response.text();
-		throw new Error(`Cloudflare API request failed: ${error}`);
+		const error = await response.text()
+		throw new Error(`Cloudflare API request failed: ${error}`)
 	}
 
-	const data = await response.json();
+	const data = await response.json()
 
 	// If a schema is provided, validate the response
 	if (responseSchema) {
-		return responseSchema.parse(data);
+		return responseSchema.parse(data)
 	}
 
-	return data as T;
+	return data as T
 }

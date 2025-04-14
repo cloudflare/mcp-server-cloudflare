@@ -54,7 +54,7 @@
 					"binding": "OAUTH_KV",
 					"id": "18e839155d00407095d793dcf7e78f25"
 				}
-			],
+			]
 		},
 		"production": {
 			"name": "mcp-cloudflare-production",
@@ -73,7 +73,7 @@
 					"binding": "OAUTH_KV",
 					"id": "f9782295993747df90c29c45ca89edb1"
 				}
-			],
+			]
 		}
-	},
+	}
 }
