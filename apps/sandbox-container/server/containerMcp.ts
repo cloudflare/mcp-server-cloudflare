@@ -2,14 +2,15 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { McpAgent } from 'agents/mcp'
 import { z } from 'zod'
 
-import type { Env, Props } from '.'
 import { OPEN_CONTAINER_PORT } from '../shared/consts'
-import type { FileList } from '../shared/schema'
 import { ExecParams, FilePathParam, FilesWrite } from '../shared/schema'
 import { MAX_CONTAINERS, proxyFetch, startAndWaitForPort } from './containerHelpers'
 import { getContainerManager } from './containerManager'
 import { BASE_INSTRUCTIONS } from './prompts'
 import { fileToBase64 } from './utils'
+
+import type { FileList } from '../shared/schema'
+import type { Env, Props } from '.'
 
 export class ContainerMcpAgent extends McpAgent<Env, Props> {
 	server = new McpServer(
@@ -74,14 +75,13 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 		this.server.tool(
 			'container_file_delete',
 			'Delete file and its contents',
-			{ args: FilePathParam},
+			{ args: FilePathParam },
 			async ({ args }) => {
 				const deleted = await this.container_file_delete(args)
 				return {
-					content: [{ type: 'text', text: `File deleted: ${deleted}.`}]
+					content: [{ type: 'text', text: `File deleted: ${deleted}.` }],
 				}
 			}
-
 		)
 		this.server.tool(
 			'container_files_write',
@@ -242,12 +242,12 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 		return json
 	}
 
-	async container_file_delete(filePath: string): Promise<boolean>{
+	async container_file_delete(filePath: string): Promise<boolean> {
 		const res = await proxyFetch(
 			this.env.ENVIRONMENT,
 			this.ctx.container,
 			new Request(`http://host:${OPEN_CONTAINER_PORT}/files/contents/${filePath}`, {
-				method: 'DELETE'
+				method: 'DELETE',
 			}),
 			OPEN_CONTAINER_PORT
 		)
