@@ -11,6 +11,7 @@
 		"start": "wrangler dev",
 		"start:container": "tsx container/index.ts",
 		"postinstall": "mkdir -p workdir",
+		"test": "vitest",
 		"types": "wrangler types"
 	},
 	"dependencies": {

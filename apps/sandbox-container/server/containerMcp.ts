@@ -2,9 +2,10 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { McpAgent } from 'agents/mcp'
 import { z } from 'zod'
 
-import { Env, Props } from '.'
+import type { Env, Props } from '.'
 import { OPEN_CONTAINER_PORT } from '../shared/consts'
-import { ExecParams, FileList, FilePathParam, FilesWrite } from '../shared/schema'
+import type { FileList } from '../shared/schema'
+import { ExecParams, FilePathParam, FilesWrite } from '../shared/schema'
 import { MAX_CONTAINERS, proxyFetch, startAndWaitForPort } from './containerHelpers'
 import { getContainerManager } from './containerManager'
 import { BASE_INSTRUCTIONS } from './prompts'
@@ -70,7 +71,6 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 				}
 			}
 		)
-		//COURT: At some point we should split the tools into separate files
 		this.server.tool(
 			'container_file_delete',
 			'Delete file and its contents',
@@ -84,7 +84,6 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 
 		)
 		this.server.tool(
-			//TODO: make this file to be consistent with others
 			'container_files_write',
 			'Write file contents',
 			{ args: FilesWrite },
@@ -243,7 +242,6 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 		return json
 	}
 
-	//TODO: Abstract these
 	async container_file_delete(filePath: string): Promise<boolean>{
 		const res = await proxyFetch(
 			this.env.ENVIRONMENT,
