@@ -37,8 +37,6 @@ Visit <https://www.npmjs.com/package/@cloudflare/mcp-server-cloudflare>
 
 Some features may require a paid Cloudflare Workers plan. Ensure your Cloudflare account has the necessary subscription level for the features you intend to use.
 
-Ensure your Cloudflare account has the necessary subscription level for the features you intend to use.
-
 ## Features
 
 ### Workers Management
