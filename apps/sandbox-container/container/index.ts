@@ -1,11 +1,11 @@
-import { exec } from 'node:child_process'
-import * as fs from 'node:fs/promises'
-import path from 'node:path'
 import { serve } from '@hono/node-server'
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { streamText } from 'hono/streaming'
 import mime from 'mime'
+import { exec } from 'node:child_process'
+import * as fs from 'node:fs/promises'
+import path from 'node:path'
 
 import { ExecParams, FileList, FilesWrite } from '../shared/schema.ts'
 
@@ -111,6 +111,28 @@ app.post('/files/contents', zValidator('json', FilesWrite), async (c) => {
 		return c.newResponse(null, 200)
 	} catch (e) {
 		return c.newResponse(`Error: ${e}`, 400)
+	}
+})
+
+/**
+ * DELETE /files/contents/{filepath}
+ *
+ * Delete a file or directory
+ */
+app.delete('/files/contents/*', async (c) => {
+	let reqPath = c.req.path.replace('/files/contents', '')
+	reqPath = reqPath.endsWith('/') ? reqPath.substring(0, reqPath.length - 1) : reqPath
+	try {
+		await fs.rm(path.join(process.cwd(), reqPath), {recursive: true})
+		return c.newResponse('ok', 200)
+	} catch (e: any) {
+		if (e.code) {
+			if (e.code === 'ENOENT') {
+				return c.notFound()
+			}
+		}
+
+		throw e
 	}
 })
 

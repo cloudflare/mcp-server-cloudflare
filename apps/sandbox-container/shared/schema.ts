@@ -13,6 +13,9 @@ export const FilesWrite = z.object({
 	text: z.string().describe('Full text content of the file you want to write.'),
 })
 
+export type FilePathParam = z.infer<typeof FilePathParam>
+export const FilePathParam = z.string()
+
 export type FileList = z.infer<typeof FileList>
 export const FileList = z.object({
 	resources: z
