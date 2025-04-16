@@ -49,6 +49,40 @@ importers:
         specifier: 3.0.9
         version: 3.0.9(@types/node@22.14.1)(@vitest/ui@3.0.9)(lightningcss@1.29.2)
 
+  apps/auth-server:
+    dependencies:
+      '@hono/zod-validator':
+        specifier: 0.4.3
+        version: 0.4.3(hono@4.7.6)(zod@3.24.2)
+      '@repo/mcp-common':
+        specifier: workspace:*
+        version: link:../../packages/mcp-common
+      hono:
+        specifier: 4.7.6
+        version: 4.7.6
+      zod:
+        specifier: 3.24.2
+        version: 3.24.2
+    devDependencies:
+      '@cloudflare/vitest-pool-workers':
+        specifier: 0.8.14
+        version: 0.8.14(@cloudflare/workers-types@4.20250410.0)(@vitest/runner@3.0.9)(@vitest/snapshot@3.0.9)(vitest@3.0.9)
+      '@cloudflare/workers-types':
+        specifier: 4.20250410.0
+        version: 4.20250410.0
+      prettier:
+        specifier: 3.5.3
+        version: 3.5.3
+      typescript:
+        specifier: 5.5.4
+        version: 5.5.4
+      vitest:
+        specifier: 3.0.9
+        version: 3.0.9(@types/node@22.14.1)(@vitest/ui@3.0.9)(lightningcss@1.29.2)
+      wrangler:
+        specifier: 4.9.1
+        version: 4.9.1(@cloudflare/workers-types@4.20250410.0)
+
   apps/sandbox-container:
     dependencies:
       '@cloudflare/workers-oauth-provider':
@@ -186,9 +220,6 @@ importers:
       '@cloudflare/workers-types':
         specifier: 4.20250410.0
         version: 4.20250410.0
-      '@types/jsonwebtoken':
-        specifier: 9.0.9
-        version: 9.0.9
       prettier:
         specifier: 3.5.3
         version: 3.5.3
@@ -1105,9 +1136,6 @@ packages:
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
 
-  '@types/jsonwebtoken@9.0.9':
-    resolution: {integrity: sha512-uoe+GxEuHbvy12OUQct2X9JenKM3qAscquYymuQN4fMWG9DBQtykrQEFcAbVACF7qaLw9BePSodUL0kquqBJpQ==}
-
   '@types/linkify-it@5.0.0':
     resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
 
@@ -1116,9 +1144,6 @@ packages:
 
   '@types/mdurl@2.0.0':
     resolution: {integrity: sha512-RGdgjQUZba5p6QEFAVx2OGb8rQDL/cPRG7GiedRzMcJ1tYnUANBncjbSB1NRGwbvjcPeikRABz2nshyPk1bhWg==}
-
-  '@types/ms@2.1.0':
-    resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
   '@types/node-fetch@2.6.12':
     resolution: {integrity: sha512-8nneRWKCg3rMtF69nLQJnOYUcbafYeFSjqkw3jCRLsqkWFlHaoQrr5mXmofFGOx3DKn7UfmBMyov8ySvLRVldA==}
@@ -4390,11 +4415,6 @@ snapshots:
 
   '@types/json5@0.0.29': {}
 
-  '@types/jsonwebtoken@9.0.9':
-    dependencies:
-      '@types/ms': 2.1.0
-      '@types/node': 22.14.1
-
   '@types/linkify-it@5.0.0': {}
 
   '@types/markdown-it@14.1.2':
@@ -4403,8 +4423,6 @@ snapshots:
       '@types/mdurl': 2.0.0
 
   '@types/mdurl@2.0.0': {}
-
-  '@types/ms@2.1.0': {}
 
   '@types/node-fetch@2.6.12':
     dependencies:

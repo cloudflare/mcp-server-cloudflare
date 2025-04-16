@@ -8,10 +8,10 @@ import {
 	getAuthToken,
 	refreshAuthToken,
 } from './cloudflare-auth'
+import { MCPEnvironment } from './config'
 import { McpError } from './mcp-error'
 
 import type {
-	AuthRequest,
 	OAuthHelpers,
 	TokenExchangeCallbackOptions,
 	TokenExchangeCallbackResult,
@@ -25,9 +25,30 @@ type AuthContext = {
 		CLOUDFLARE_CLIENT_SECRET: string
 	}
 }
-const app = new Hono<AuthContext>()
 
-const AuthQuery = z.object({
+const AuthRequestSchema = z.object({
+	responseType: z.string(),
+	clientId: z.string(),
+	redirectUri: z.string(),
+	scope: z.array(z.string()),
+	state: z.string(),
+	codeChallenge: z.string().optional(),
+	codeChallengeMethod: z.string().optional(),
+})
+
+// AuthRequest but with extra params that we use in our authentication logic
+export const AuthRequestSchemaWithExtraParams = AuthRequestSchema.merge(
+	z.object({ codeVerifier: z.string(), serverPath: z.string() })
+)
+
+export type ValidServers = z.infer<typeof ValidServers>
+export const ValidServers = z.enum([
+	'workers/observability',
+	'workers/containers',
+	'workers/bindings',
+])
+
+export const AuthQuery = z.object({
 	code: z.string().describe('OAuth code from CF dash'),
 	state: z.string().describe('Value of the OAuth state'),
 	scope: z.string().describe('OAuth scopes granted'),
@@ -127,16 +148,10 @@ export async function handleTokenExchangeCallback(
 	}
 }
 
-/**f
- * OAuth Authorization Endpoint
- *
- * This route initiates the GitHub OAuth flow when a user wants to log in.
- * It creates a random state parameter to prevent CSRF attacks and stores the
- * original OAuth request information in KV storage for later retrieval.
- * Then it redirects the user to GitHub's authorization page with the appropriate
- * parameters so the user can authenticate and grant permissions.
- */
-app.get('/oauth/authorize', async (c) => {
+async function handleAuthorize(
+	c: Context<AuthContext>,
+	{ serverPath }: { serverPath: ValidServers }
+): Promise<Response> {
 	try {
 		const oauthReqInfo = await c.env.OAUTH_PROVIDER.parseAuthRequest(c.req.raw)
 		oauthReqInfo.scope = Object.keys(DefaultScopes)
@@ -148,6 +163,7 @@ app.get('/oauth/authorize', async (c) => {
 			client_id: c.env.CLOUDFLARE_CLIENT_ID,
 			redirect_uri: new URL('/oauth/callback', c.req.url).href,
 			state: oauthReqInfo,
+			serverPath,
 		})
 
 		return Response.redirect(res.authUrl, 302)
@@ -158,20 +174,14 @@ app.get('/oauth/authorize', async (c) => {
 		console.error(e)
 		return c.text('Internal Error', 500)
 	}
-})
+}
 
-/**
- * OAuth Callback Endpoint
- *
- * This route handles the callback from GitHub after user authentication.
- * It exchanges the temporary code for an access token, then stores some
- * user metadata & the auth token as part of the 'props' on the token passed
- * down to the client. It ends by redirecting the client back to _its_ callback URL
- */
-app.get('/oauth/callback', zValidator('query', AuthQuery), async (c) => {
+async function handleCallback(
+	c: Context<AuthContext>,
+	{ state, code }: { state: string; code: string }
+): Promise<Response> {
 	try {
-		const { state, code } = c.req.valid('query')
-		const oauthReqInfo = JSON.parse(atob(state)) as AuthRequest & { codeVerifier: string }
+		const oauthReqInfo = AuthRequestSchemaWithExtraParams.parse(JSON.parse(atob(state)))
 		// Get the oathReqInfo out of KV
 		if (!oauthReqInfo.clientId) {
 			throw new McpError('Invalid State', 400)
@@ -221,6 +231,58 @@ app.get('/oauth/callback', zValidator('query', AuthQuery), async (c) => {
 		}
 		return c.text('Internal Error', 500)
 	}
-})
+}
 
-export const CloudflareAuthHandler = app
+/**
+ * Creates a Hono app with OAuth routes for a specific Cloudflare worker
+ *
+ * @param serverPath - The path segment for the server (e.g., 'workers/observability')
+ * @param environment - The McpEnvironment
+ * @returns A Hono app with configured OAuth routes
+ */
+export function createAuthHandlers({
+	serverPath,
+	environment,
+}: {
+	serverPath: ValidServers
+	environment: MCPEnvironment
+}) {
+	const app = new Hono<AuthContext>()
+
+	/**
+	 * OAuth Authorization Endpoint
+	 *
+	 * This route initiates the Cloudflare OAuth flow when a user wants to log in.
+	 * It creates a random state parameter to prevent CSRF attacks and stores the
+	 * original OAuth request information in KV storage for later retrieval.
+	 * Then it redirects the user to Cloudflare's authorization page with the appropriate
+	 * parameters so the user can authenticate and grant permissions.
+	 */
+	app.get(`/oauth/${serverPath}/authorize`, async (c) => {
+		return await handleAuthorize(c, { serverPath })
+	})
+
+	/**
+	 * OAuth Callback Endpoint
+	 *
+	 * This route handles the callback from the auth-server after user authentication.
+	 * It exchanges the temporary code for an access token, then stores some
+	 * user metadata & the auth token as part of the 'props' on the token passed
+	 * down to the client. It ends by redirecting the client back to _its_ callback URL
+	 */
+	app.get(`/oauth/${serverPath}/callback`, zValidator('query', AuthQuery), async (c) => {
+		const { state, code } = c.req.valid('query')
+		return await handleCallback(c, { state, code })
+	})
+
+	// In development, we receive callbacks on /oauth/callback directly from Cloudflare
+	// rather than having callbacks forwarded to us from the auth-server
+	if (environment === 'development') {
+		app.get('/oauth/callback', zValidator('query', AuthQuery), async (c) => {
+			const { state, code } = c.req.valid('query')
+			return await handleCallback(c, { state, code })
+		})
+	}
+
+	return app
+}

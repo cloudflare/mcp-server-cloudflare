@@ -86,10 +86,12 @@ export async function getAuthorizationURL({
 	client_id,
 	redirect_uri,
 	state,
+	serverPath,
 }: {
 	client_id: string
 	redirect_uri: string
 	state: AuthRequest
+	serverPath: string
 }): Promise<{ authUrl: string; codeVerifier: string }> {
 	const { codeChallenge, codeVerifier } = await generatePKCECodes()
 
@@ -97,7 +99,7 @@ export async function getAuthorizationURL({
 		authUrl: generateAuthUrl({
 			client_id,
 			redirect_uri,
-			state: btoa(JSON.stringify({ ...state, codeVerifier })),
+			state: btoa(JSON.stringify({ ...state, codeVerifier, serverPath })),
 			code_challenge: codeChallenge,
 		}),
 		codeVerifier: codeVerifier,
