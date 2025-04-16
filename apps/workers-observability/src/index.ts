@@ -76,7 +76,7 @@ export default new OAuthProvider({
 		serverPath: 'workers/observability',
 		environment: getEnvironment(env.ENVIRONMENT),
 	}),
-	authorizeEndpoint: '/oauth/workers/observability/authorize',
+	authorizeEndpoint: '/workers/observability/oauth/authorize',
 	tokenEndpoint: '/workers/observability/token',
 	tokenExchangeCallback: (options) =>
 		handleTokenExchangeCallback(options, env.CLOUDFLARE_CLIENT_ID, env.CLOUDFLARE_CLIENT_SECRET),

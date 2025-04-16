@@ -2,9 +2,10 @@ import OAuthProvider from '@cloudflare/workers-oauth-provider'
 import { env } from 'cloudflare:workers'
 
 import {
-	CloudflareAuthHandler,
+	createAuthHandlers,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
+import { getEnvironment } from '@repo/mcp-common/src/config'
 
 import { ContainerManager } from './containerManager'
 import { ContainerMcpAgent } from './containerMcp'
@@ -32,7 +33,10 @@ export default new OAuthProvider({
 	// @ts-ignore
 	apiHandler: ContainerMcpAgent.mount('/workers/sandbox/sse', { binding: 'CONTAINER_MCP_AGENT' }),
 	// @ts-ignore
-	defaultHandler: CloudflareAuthHandler,
+	defaultHandler: createAuthHandlers({
+		serverPath: 'workers/containers',
+		environment: getEnvironment(env.ENVIRONMENT),
+	}),
 	authorizeEndpoint: '/oauth/authorize',
 	tokenEndpoint: '/token',
 	tokenExchangeCallback: (options) =>

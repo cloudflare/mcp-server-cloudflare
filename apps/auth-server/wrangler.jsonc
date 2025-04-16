@@ -20,12 +20,12 @@
 		"staging": {
 			"name": "mcp-cloudflare-auth-server-staging",
 			"account_id": "8995c0f49cdcf57eb54d2c1e52b7d2f3",
-			"routes": ["staging.mcp.cloudflare.com/oauth/callback"],
+			"routes": ["staging.mcp.cloudflare.com/oauth/callback"]
 		},
 		"production": {
 			"name": "mcp-cloudflare-auth-server-production",
 			"account_id": "8995c0f49cdcf57eb54d2c1e52b7d2f3",
-			"routes": ["mcp.cloudflare.com/oauth/callback"],
+			"routes": ["mcp.cloudflare.com/oauth/callback"]
 		}
 	}
 }

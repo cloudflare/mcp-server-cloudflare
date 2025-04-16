@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "sandbox-container",
+	"name": "sandbox-container-dev",
 	"main": "server/index.ts",
 	"compatibility_date": "2025-04-03",
 	"containers": [
@@ -41,5 +41,8 @@
 	],
 	"dev": {
 		"port": 8976
+	},
+	"vars": {
+		"ENVIRONMENT": "development"
 	}
 }

@@ -4,7 +4,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "workers-bindings",
+	"name": "workers-bindings-dev",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
@@ -33,6 +33,9 @@
 	},
 	"dev": {
 		"port": 8976
+	},
+	"vars": {
+		"ENVIRONMENT": "development"
 	}
 	/**
 	 * Smart Placement

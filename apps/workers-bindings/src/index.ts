@@ -4,9 +4,10 @@ import { McpAgent } from 'agents/mcp'
 import { env } from 'cloudflare:workers'
 
 import {
-	CloudflareAuthHandler,
+	createAuthHandlers,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
+import { getEnvironment } from '@repo/mcp-common/src/config'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account'
 import { registerKVTools } from '@repo/mcp-common/src/tools/kv_namespace'
 import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker'
@@ -66,11 +67,18 @@ export default new OAuthProvider({
 	// @ts-ignore
 	apiHandler: WorkersBindingsMCP.mount('/workers/bindings/sse'),
 	// @ts-ignore
-	defaultHandler: CloudflareAuthHandler,
+	defaultHandler: createAuthHandlers({
+		serverPath: 'workers/containers',
+		environment: getEnvironment(env.ENVIRONMENT),
+	}),
 	authorizeEndpoint: '/oauth/authorize',
 	tokenEndpoint: '/token',
 	tokenExchangeCallback: (options) =>
-		handleTokenExchangeCallback(options, env.CLOUDFLARE_CLIENT_ID, env.CLOUDFLARE_CLIENT_SECRET),
+		handleTokenExchangeCallback(
+			options,
+			env.CLOUDFLARE_CLIENT_ID,
+			env.CLOUDFLARE_CLIENT_SECRET
+		),
 	// Cloudflare access token TTL
 	accessTokenTTL: 3600,
 	clientRegistrationEndpoint: '/register',

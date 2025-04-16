@@ -8,7 +8,6 @@ import {
 	getAuthToken,
 	refreshAuthToken,
 } from './cloudflare-auth'
-import { MCPEnvironment } from './config'
 import { McpError } from './mcp-error'
 
 import type {
@@ -17,6 +16,7 @@ import type {
 	TokenExchangeCallbackResult,
 } from '@cloudflare/workers-oauth-provider'
 import type { Context } from 'hono'
+import type { MCPEnvironment } from './config'
 
 type AuthContext = {
 	Bindings: {
@@ -258,7 +258,7 @@ export function createAuthHandlers({
 	 * Then it redirects the user to Cloudflare's authorization page with the appropriate
 	 * parameters so the user can authenticate and grant permissions.
 	 */
-	app.get(`/oauth/${serverPath}/authorize`, async (c) => {
+	app.get(`/${serverPath}/oauth/authorize`, async (c) => {
 		return await handleAuthorize(c, { serverPath })
 	})
 
@@ -270,7 +270,7 @@ export function createAuthHandlers({
 	 * user metadata & the auth token as part of the 'props' on the token passed
 	 * down to the client. It ends by redirecting the client back to _its_ callback URL
 	 */
-	app.get(`/oauth/${serverPath}/callback`, zValidator('query', AuthQuery), async (c) => {
+	app.get(`/${serverPath}/oauth/callback`, zValidator('query', AuthQuery), async (c) => {
 		const { state, code } = c.req.valid('query')
 		return await handleCallback(c, { state, code })
 	})

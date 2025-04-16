@@ -7,8 +7,8 @@ import { Hono } from 'hono'
 import { streamText } from 'hono/streaming'
 import mime from 'mime'
 
-import { ExecParams, FilesWrite } from '../shared/schema.ts'
-import { get_file_name_from_path } from './fileUtils.ts'
+import { ExecParams, FilesWrite } from '../shared/schema'
+import { get_file_name_from_path } from './fileUtils'
 
 import type { FileList } from '../shared/schema.ts'
 

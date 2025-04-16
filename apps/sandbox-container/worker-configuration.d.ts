@@ -2,11 +2,14 @@
 // Runtime types generated with workerd@1.20250409.0 2025-04-03
 declare namespace Cloudflare {
 	interface Env {
-		OAUTH_KV: KVNamespace
-		CONTAINER_MCP_AGENT: DurableObjectNamespace<import('./server/index').ContainerMcpAgent>
-		CONTAINER_MANAGER: DurableObjectNamespace<import('./server/index').ContainerManager>
-		CLOUDFLARE_CLIENT_ID: string
-		CLOUDFLARE_CLIENT_SECRET: string
+		OAUTH_KV: KVNamespace;
+		// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+		CONTAINER_MCP_AGENT: DurableObjectNamespace<import("./server/index").ContainerMcpAgent>;
+		// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+		CONTAINER_MANAGER: DurableObjectNamespace<import("./server/index").ContainerManager>;
+		CLOUDFLARE_CLIENT_ID: string;
+		CLOUDFLARE_CLIENT_SECRET: string;
+        ENVIRONMENT: string
 	}
 }
 interface Env extends Cloudflare.Env {}
