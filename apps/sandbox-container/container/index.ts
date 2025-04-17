@@ -1,14 +1,19 @@
+import { exec } from 'node:child_process'
+import * as fs from 'node:fs/promises'
+import path from 'node:path'
 import { serve } from '@hono/node-server'
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { streamText } from 'hono/streaming'
 import mime from 'mime'
-import { exec } from 'node:child_process'
-import * as fs from 'node:fs/promises'
-import path from 'node:path'
 
 import { ExecParams, FilesWrite } from '../shared/schema.ts'
-import { DIRECTORY_CONTENT_TYPE, get_file_name_from_path, get_mime_type, list_files_in_directory } from './fileUtils.ts'
+import {
+	DIRECTORY_CONTENT_TYPE,
+	get_file_name_from_path,
+	get_mime_type,
+	list_files_in_directory,
+} from './fileUtils.ts'
 
 import type { FileList } from '../shared/schema.ts'
 
@@ -65,7 +70,7 @@ app.get('/files/ls', async (c) => {
 app.get('/files/contents/*', async (c) => {
 	const reqPath = await get_file_name_from_path(c.req.path)
 	try {
-		const mimeType = await get_mime_type(reqPath) 
+		const mimeType = await get_mime_type(reqPath)
 		const headers = mimeType ? { 'Content-Type': mimeType } : undefined
 		const contents = await fs.readFile(path.join(process.cwd(), reqPath))
 		return c.newResponse(contents, 200, headers)

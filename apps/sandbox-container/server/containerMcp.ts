@@ -8,8 +8,8 @@ import { getContainerManager } from './containerManager'
 import { BASE_INSTRUCTIONS } from './prompts'
 import { fileToBase64, stripProtocolFromFilePath } from './utils'
 
-import type { Env, Props } from '.'
 import type { FileList } from '../shared/schema'
+import type { Env, Props } from '.'
 
 export class ContainerMcpAgent extends McpAgent<Env, Props> {
 	server = new McpServer(
@@ -124,7 +124,7 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 				const path = await stripProtocolFromFilePath(args.path)
 				const { blob, mimeType } = await this.container_file_read(path)
 
-				if (mimeType && (mimeType.startsWith('text'))) {
+				if (mimeType && mimeType.startsWith('text')) {
 					return {
 						content: [
 							{
