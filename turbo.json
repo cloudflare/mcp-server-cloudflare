@@ -10,6 +10,9 @@
 		"check:lint": {
 			"dependsOn": ["^check:lint"]
 		},
+		"eval": {
+			"dependsOn": ["^eval"]
+		},
 		"//#check:format": {},
 		"//#check:deps": {}
 	}

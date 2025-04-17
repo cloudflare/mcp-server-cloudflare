@@ -58,7 +58,7 @@ Replace the content with the following configuration. Once you restart Claude De
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://mcp-cloudflare-staging.<your-subdomain>.workers.dev/workers/observability/sse"
+        "https://<your-subdomain>.workers.dev/sse"
       ]
     }
   }
@@ -69,11 +69,8 @@ Once the Tools (under 🔨) show up in the interface, you can ask Claude to use 
 
 ### For Local Development
 
-If you'd like to iterate and test your MCP server, you can do so in local development. This will require you to create another OAuth App on GitHub:
+If you'd like to iterate and test your MCP server, you can do so in local development. This will require you to create another OAuth App on Cloudflare:
 
-- For the Homepage URL, specify `http://localhost:8788`
-- For the Authorization callback URL, specify `http://localhost:8788/callback`
-- Note your Client ID and generate a Client secret.
 - Create a `.dev.vars` file in your project root with:
 
 ```
@@ -107,7 +104,7 @@ You can connect your MCP server to other MCP clients like Windsurf by opening th
 The OAuth Provider library serves as a complete OAuth 2.1 server implementation for Cloudflare Workers. It handles the complexities of the OAuth flow, including token issuance, validation, and management. In this project, it plays the dual role of:
 
 - Authenticating MCP clients that connect to your server
-- Managing the connection to GitHub's OAuth services
+- Managing the connection to Cloudflare's OAuth services
 - Securely storing tokens and authentication state in KV storage
 
 #### Durable MCP

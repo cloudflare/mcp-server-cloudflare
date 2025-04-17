@@ -1,0 +1,10 @@
+{
+	"name": "stub-worker",
+	"compatibility_date": "2025-04-14",
+	"vars": {
+		"OPENAI_API_KEY": "TODO"
+	},
+	"ai": {
+		"binding": "AI"
+	}
+}

@@ -17,6 +17,8 @@ export type Env = {
 	CONTAINER_MCP_AGENT: DurableObjectNamespace<ContainerMcpAgent>
 	CONTAINER_MANAGER: DurableObjectNamespace<ContainerManager>
 	ENVIRONMENT: 'dev' | 'prod'
+	CLOUDFLARE_CLIENT_ID: string
+	CLOUDFLARE_CLIENT_SECRET: string
 }
 
 // Context from the auth process, encrypted & stored in the auth token
@@ -28,9 +30,9 @@ export type Props = {
 }
 
 export default new OAuthProvider({
-	apiRoute: '/workers/sandbox/sse',
+	apiRoute: '/sse',
 	// @ts-ignore
-	apiHandler: ContainerMcpAgent.mount('/workers/sandbox/sse', { binding: 'CONTAINER_MCP_AGENT' }),
+	apiHandler: ContainerMcpAgent.mount('/sse', { binding: 'CONTAINER_MCP_AGENT' }),
 	// @ts-ignore
 	defaultHandler: CloudflareAuthHandler,
 	authorizeEndpoint: '/oauth/authorize',

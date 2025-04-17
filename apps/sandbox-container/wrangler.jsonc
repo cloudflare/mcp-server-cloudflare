@@ -1,8 +1,9 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "sandbox-container",
+	"name": "sandbox-container-dev",
 	"main": "server/index.ts",
 	"compatibility_date": "2025-04-03",
+	"compatibility_flags": ["nodejs_compat"],
 	"containers": [
 		{
 			"name": "sandbox-container",
@@ -41,5 +42,13 @@
 	],
 	"dev": {
 		"port": 8976
+	},
+	"ai": {
+		"binding": "AI"
+	},
+	"vars": {
+		"CLOUDFLARE_CLIENT_ID": "<PLACEHOLDER>",
+		"CLOUDFLARE_CLIENT_SECRET": "<PLACEHOLDER>",
+		"ENVIRONMENT": "development"
 	}
 }

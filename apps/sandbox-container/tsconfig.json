@@ -1,16 +1,5 @@
 {
-	"compilerOptions": {
-		"target": "ESNext",
-		"lib": ["ESNext", "DOM"],
-		"jsx": "react-jsx",
-		"module": "ESNext",
-		"moduleResolution": "bundler",
-		"types": ["./worker-configuration.d.ts", "@cloudflare/workers-types/2023-07-01"],
-		"noEmit": true,
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"strict": true,
-		"skipLibCheck": true
-	},
-	"include": ["server/**.ts", "shared/**.ts"]
+	"extends": "@repo/typescript-config/workers.json",
+	"include": ["*/**.ts", "./vitest.config.evals.ts"],
+	"exclude": ["container/**.ts"]
 }

@@ -11,7 +11,6 @@ import {
 import { McpError } from './mcp-error'
 
 import type {
-	AuthRequest,
 	OAuthHelpers,
 	TokenExchangeCallbackOptions,
 	TokenExchangeCallbackResult,
@@ -25,9 +24,23 @@ type AuthContext = {
 		CLOUDFLARE_CLIENT_SECRET: string
 	}
 }
-const app = new Hono<AuthContext>()
 
-const AuthQuery = z.object({
+const AuthRequestSchema = z.object({
+	responseType: z.string(),
+	clientId: z.string(),
+	redirectUri: z.string(),
+	scope: z.array(z.string()),
+	state: z.string(),
+	codeChallenge: z.string().optional(),
+	codeChallengeMethod: z.string().optional(),
+})
+
+// AuthRequest but with extra params that we use in our authentication logic
+export const AuthRequestSchemaWithExtraParams = AuthRequestSchema.merge(
+	z.object({ codeVerifier: z.string() })
+)
+
+export const AuthQuery = z.object({
 	code: z.string().describe('OAuth code from CF dash'),
 	state: z.string().describe('Value of the OAuth state'),
 	scope: z.string().describe('OAuth scopes granted'),
@@ -127,16 +140,18 @@ export async function handleTokenExchangeCallback(
 	}
 }
 
-/**f
+const app = new Hono<AuthContext>()
+
+/**
  * OAuth Authorization Endpoint
  *
- * This route initiates the GitHub OAuth flow when a user wants to log in.
+ * This route initiates the Cloudflare OAuth flow when a user wants to log in.
  * It creates a random state parameter to prevent CSRF attacks and stores the
  * original OAuth request information in KV storage for later retrieval.
- * Then it redirects the user to GitHub's authorization page with the appropriate
+ * Then it redirects the user to Cloudflare's authorization page with the appropriate
  * parameters so the user can authenticate and grant permissions.
  */
-app.get('/oauth/authorize', async (c) => {
+app.get(`/oauth/authorize`, async (c) => {
 	try {
 		const oauthReqInfo = await c.env.OAUTH_PROVIDER.parseAuthRequest(c.req.raw)
 		oauthReqInfo.scope = Object.keys(DefaultScopes)
@@ -163,15 +178,15 @@ app.get('/oauth/authorize', async (c) => {
 /**
  * OAuth Callback Endpoint
  *
- * This route handles the callback from GitHub after user authentication.
+ * This route handles the callback from Cloudflare after user authentication.
  * It exchanges the temporary code for an access token, then stores some
  * user metadata & the auth token as part of the 'props' on the token passed
  * down to the client. It ends by redirecting the client back to _its_ callback URL
  */
-app.get('/oauth/callback', zValidator('query', AuthQuery), async (c) => {
+app.get(`/oauth/callback`, zValidator('query', AuthQuery), async (c) => {
 	try {
 		const { state, code } = c.req.valid('query')
-		const oauthReqInfo = JSON.parse(atob(state)) as AuthRequest & { codeVerifier: string }
+		const oauthReqInfo = AuthRequestSchemaWithExtraParams.parse(JSON.parse(atob(state)))
 		// Get the oathReqInfo out of KV
 		if (!oauthReqInfo.clientId) {
 			throw new McpError('Invalid State', 400)

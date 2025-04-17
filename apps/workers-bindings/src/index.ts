@@ -62,9 +62,9 @@ export class WorkersBindingsMCP extends McpAgent<Env, WorkersBindingsMCPState, P
 
 // Export the OAuth handler as the default
 export default new OAuthProvider({
-	apiRoute: '/workers/bindings/sse',
+	apiRoute: '/sse',
 	// @ts-ignore
-	apiHandler: WorkersBindingsMCP.mount('/workers/bindings/sse'),
+	apiHandler: WorkersBindingsMCP.mount('/sse'),
 	// @ts-ignore
 	defaultHandler: CloudflareAuthHandler,
 	authorizeEndpoint: '/oauth/authorize',

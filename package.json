@@ -24,10 +24,12 @@
 		"test:ci": "run-vitest-ci",
 		"test": "vitest run",
 		"fix:format": "prettier . --write",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"eval": "run-turbo eval"
 	},
 	"devDependencies": {
 		"@changesets/cli": "2.28.1",
+		"@cloudflare/vitest-pool-workers": "0.8.14",
 		"@ianvs/prettier-plugin-sort-imports": "4.4.1",
 		"@repo/eslint-config": "workspace:*",
 		"@repo/tools": "workspace:*",
