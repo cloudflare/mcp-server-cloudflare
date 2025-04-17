@@ -5,6 +5,8 @@ declare namespace Cloudflare {
 		OAUTH_KV: KVNamespace;
 		CLOUDFLARE_CLIENT_ID: string;
 		CLOUDFLARE_CLIENT_SECRET: string;
+        ENVIRONMENT: string;
+		// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 		MCP_OBJECT: DurableObjectNamespace<import("./src/index").MyMCP>;
 	}
 }

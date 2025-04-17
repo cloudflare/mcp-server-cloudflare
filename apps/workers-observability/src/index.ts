@@ -67,9 +67,9 @@ export class MyMCP extends McpAgent<Env, State, Props> {
 }
 
 export default new OAuthProvider({
-	apiRoute: '/workers/observability/sse',
+	apiRoute: '/sse',
 	// @ts-ignore
-	apiHandler: MyMCP.mount('/workers/observability/sse'),
+	apiHandler: MyMCP.mount('/sse'),
 	// @ts-ignore
 	defaultHandler: CloudflareAuthHandler,
 	authorizeEndpoint: '/oauth/authorize',

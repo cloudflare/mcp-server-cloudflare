@@ -9,6 +9,7 @@ declare namespace Cloudflare {
 		CONTAINER_MCP_AGENT: DurableObjectNamespace<import("./server/index").ContainerMcpAgent>;
 		CONTAINER_MANAGER: DurableObjectNamespace<import("./server/index").ContainerManager>;
 		AI: Ai;
+		ENVIRONMENT: string
 	}
 }
 interface Env extends Cloudflare.Env {}

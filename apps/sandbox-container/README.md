@@ -12,7 +12,7 @@ Do the following from within the sandbox-container app:
 2. Get the Cloudflare client id and secret from a team member and add them to the `.dev.vars` file.
 3. Run `pnpm i` then `pnpm dev` to start the MCP server.
 4. Run `pnpx @modelcontextprotocol/inspector` to start the MCP inspector client.
-5. Open the inspector client in your browser and connect to the server via `http://localhost:8976/workers/sandbox/sse`.
+5. Open the inspector client in your browser and connect to the server via `http://localhost:8976/sse`.
 
 Note: Temporary files created through files tool calls are stored in the workdir folder of this app.
 

@@ -30,9 +30,9 @@ export type Props = {
 }
 
 export default new OAuthProvider({
-	apiRoute: '/workers/sandbox/sse',
+	apiRoute: '/sse',
 	// @ts-ignore
-	apiHandler: ContainerMcpAgent.mount('/workers/sandbox/sse', { binding: 'CONTAINER_MCP_AGENT' }),
+	apiHandler: ContainerMcpAgent.mount('/sse', { binding: 'CONTAINER_MCP_AGENT' }),
 	// @ts-ignore
 	defaultHandler: CloudflareAuthHandler,
 	authorizeEndpoint: '/oauth/authorize',
