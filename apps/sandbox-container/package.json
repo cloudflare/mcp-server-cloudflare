@@ -20,6 +20,7 @@
 		"@hono/node-server": "^1.13.8",
 		"@hono/zod-validator": "^0.4.3",
 		"@modelcontextprotocol/sdk": "^1.7.0",
+		"@repo/mcp-common": "workspace:*",
 		"@types/node": "^22.13.10",
 		"agents": "^0.0.42",
 		"cron-schedule": "^5.0.4",
@@ -30,10 +31,11 @@
 		"partyserver": "^0.0.65",
 		"tsx": "^4.19.3",
 		"workers-mcp": "0.1.0-3",
-		"zod": "^3.24.2",
-		"@repo/mcp-common": "workspace:*"
+		"zod": "^3.24.2"
 	},
 	"devDependencies": {
+		"@types/mock-fs": "^4.13.4",
+		"mock-fs": "^5.5.0",
 		"concurrently": "^9.1.2",
 		"wrangler": "^4.9.1"
 	}

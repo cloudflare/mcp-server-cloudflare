@@ -14,7 +14,9 @@ export const FilesWrite = z.object({
 })
 
 export type FilePathParam = z.infer<typeof FilePathParam>
-export const FilePathParam = z.string()
+export const FilePathParam = z.object({
+	path: z.string()
+})
 
 export type FileList = z.infer<typeof FileList>
 export const FileList = z.object({

@@ -12,3 +12,8 @@ export async function fileToBase64(blob: Blob): Promise<string> {
 	// Apply base64 encoding
 	return btoa(binary)
 }
+
+// Used for file related tool calls in case the llm sends a full resource URI
+export async function stripProtocolFromFilePath(path: string): Promise<string> {
+	return path.startsWith('file://') ? path.replace('file://', '') : path
+}

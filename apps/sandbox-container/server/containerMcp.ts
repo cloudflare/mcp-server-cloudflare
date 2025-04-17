@@ -1,16 +1,15 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { McpAgent } from 'agents/mcp'
-import { z } from 'zod'
 
 import { OPEN_CONTAINER_PORT } from '../shared/consts'
 import { ExecParams, FilePathParam, FilesWrite } from '../shared/schema'
 import { MAX_CONTAINERS, proxyFetch, startAndWaitForPort } from './containerHelpers'
 import { getContainerManager } from './containerManager'
 import { BASE_INSTRUCTIONS } from './prompts'
-import { fileToBase64 } from './utils'
+import { fileToBase64, stripProtocolFromFilePath } from './utils'
 
-import type { FileList } from '../shared/schema'
 import type { Env, Props } from '.'
+import type { FileList } from '../shared/schema'
 
 export class ContainerMcpAgent extends McpAgent<Env, Props> {
 	server = new McpServer(
@@ -77,7 +76,8 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 			'Delete file and its contents',
 			{ args: FilePathParam },
 			async ({ args }) => {
-				const deleted = await this.container_file_delete(args)
+				const path = await stripProtocolFromFilePath(args.path)
+				const deleted = await this.container_file_delete(path)
 				return {
 					content: [{ type: 'text', text: `File deleted: ${deleted}.` }],
 				}
@@ -88,6 +88,7 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 			'Write file contents',
 			{ args: FilesWrite },
 			async ({ args }) => {
+				args.path = await stripProtocolFromFilePath(args.path)
 				return {
 					content: [{ type: 'text', text: await this.container_files_write(args) }],
 				}
@@ -117,19 +118,13 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 		})
 		this.server.tool(
 			'container_file_read',
-			'Read a specific file',
-			{ path: z.string() },
-			async ({ path }) => {
-				// normalize
-				path = path.startsWith('file://') ? path.replace('file://', '') : path
-				let { blob, mimeType } = await this.container_files_read(path)
+			'Read a specific file or list of files within a specific directory',
+			{ args: FilePathParam },
+			async ({ args }) => {
+				const path = await stripProtocolFromFilePath(args.path)
+				const { blob, mimeType } = await this.container_file_read(path)
 
-				if (mimeType && (mimeType.startsWith('text') || mimeType === 'inode/directory')) {
-					// this is because there isn't a "real" directory mime type, so we're reusing the "text/directory" mime type
-					// so claude doesn't give an error
-					mimeType = mimeType === 'inode/directory' ? 'text/directory' : mimeType
-
-					// maybe "inode/directory" should list out multiple files in the contents list?
+				if (mimeType && (mimeType.startsWith('text'))) {
 					return {
 						content: [
 							{
@@ -253,7 +248,7 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 		)
 		return res.ok
 	}
-	async container_files_read(
+	async container_file_read(
 		filePath: string
 	): Promise<{ blob: Blob; mimeType: string | undefined }> {
 		const res = await proxyFetch(
@@ -267,15 +262,11 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 		}
 		return {
 			blob: await res.blob(),
-			mimeType: res.headers.get('content-type') ?? undefined,
+			mimeType: res.headers.get('Content-Type') ?? undefined,
 		}
 	}
 
 	async container_files_write(file: FilesWrite): Promise<string> {
-		if (file.path.startsWith('file://')) {
-			// normalize just in case the LLM sends the full resource URI
-			file.path = file.path.replace('file://', '')
-		}
 		const res = await proxyFetch(
 			this.env.ENVIRONMENT,
 			this.ctx.container,
