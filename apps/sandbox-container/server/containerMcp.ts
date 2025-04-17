@@ -8,8 +8,8 @@ import { getContainerManager } from './containerManager'
 import { BASE_INSTRUCTIONS } from './prompts'
 import { fileToBase64, stripProtocolFromFilePath } from './utils'
 
-import type { FileList } from '../shared/schema'
 import type { Env, Props } from '.'
+import type { FileList } from '../shared/schema'
 
 export class ContainerMcpAgent extends McpAgent<Env, Props> {
 	server = new McpServer(

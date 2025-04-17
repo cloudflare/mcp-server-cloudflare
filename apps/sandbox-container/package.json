@@ -21,9 +21,15 @@
 		"@cloudflare/workers-types": "^4.20250320.0",
 		"@hono/node-server": "^1.13.8",
 		"@hono/zod-validator": "^0.4.3",
+<<<<<<< HEAD
 		"@modelcontextprotocol/sdk": "^1.9.0",
 		"@n8n/json-schema-to-zod": "^1.1.0",
 		"@repo/eval-tools": "workspace:*",
+||||||| parent of da1ae7e (Update read tool call)
+		"@modelcontextprotocol/sdk": "^1.7.0",
+=======
+		"@modelcontextprotocol/sdk": "^1.7.0",
+>>>>>>> da1ae7e (Update read tool call)
 		"@repo/mcp-common": "workspace:*",
 		"@types/node": "^22.13.10",
 		"agents": "^0.0.60",

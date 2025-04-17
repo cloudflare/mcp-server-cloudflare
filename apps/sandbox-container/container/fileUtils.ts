@@ -1,6 +1,6 @@
+import mime from 'mime'
 import * as fs from 'node:fs/promises'
 import path from 'node:path'
-import mime from 'mime'
 
 // this is because there isn't a "real" directory mime type, so we're reusing the "text/directory" mime type
 // so claude doesn't give an error
