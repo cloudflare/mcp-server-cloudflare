@@ -48,9 +48,10 @@ npx https://prerelease-registry.devprod.cloudflare.dev/workers-sdk/runs/14387504
 - `container_initialize`: (Re)start a container. Containers are intended to be ephemeral and don't save any state. Containers are only guaranteed to last 10m (this is just because I have a max of like ~5 containers per account).
 - `container_ping`: Ping a container for connectivity
 - `container_exec`: Run a command in the shell
-- `container_files_write`: Write to a file
+- `container_file_write`: Write to a file
 - `container_files_list`: List all files in the work directory
 - `container_file_read`: Read the contents of a single file or directory
+- `container_file_delete`: Delete a single file or directory
 
 ## Resources
 

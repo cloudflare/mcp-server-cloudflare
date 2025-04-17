@@ -1,13 +1,13 @@
-import { exec } from 'node:child_process'
-import * as fs from 'node:fs/promises'
-import path from 'node:path'
 import { serve } from '@hono/node-server'
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { streamText } from 'hono/streaming'
 import mime from 'mime'
+import { exec } from 'node:child_process'
+import * as fs from 'node:fs/promises'
+import path from 'node:path'
 
-import { ExecParams, FilesWrite } from '../shared/schema.ts'
+import { ExecParams, FileWrite } from '../shared/schema.ts'
 import {
 	DIRECTORY_CONTENT_TYPE,
 	get_file_name_from_path,
@@ -96,7 +96,7 @@ app.get('/files/contents/*', async (c) => {
  *
  * Create or update file contents
  */
-app.post('/files/contents', zValidator('json', FilesWrite), async (c) => {
+app.post('/files/contents', zValidator('json', FileWrite), async (c) => {
 	const file = c.req.valid('json')
 	const reqPath = await get_file_name_from_path(file.path)
 

@@ -2,14 +2,14 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { McpAgent } from 'agents/mcp'
 
 import { OPEN_CONTAINER_PORT } from '../shared/consts'
-import { ExecParams, FilePathParam, FilesWrite } from '../shared/schema'
+import { ExecParams, FilePathParam, FileWrite } from '../shared/schema'
 import { MAX_CONTAINERS, proxyFetch, startAndWaitForPort } from './containerHelpers'
 import { getContainerManager } from './containerManager'
 import { BASE_INSTRUCTIONS } from './prompts'
 import { fileToBase64, stripProtocolFromFilePath } from './utils'
 
-import type { FileList } from '../shared/schema'
 import type { Env, Props } from '.'
+import type { FileList } from '../shared/schema'
 
 export class ContainerMcpAgent extends McpAgent<Env, Props> {
 	server = new McpServer(
@@ -84,13 +84,13 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 			}
 		)
 		this.server.tool(
-			'container_files_write',
+			'container_file_write',
 			'Write file contents',
-			{ args: FilesWrite },
+			{ args: FileWrite },
 			async ({ args }) => {
 				args.path = await stripProtocolFromFilePath(args.path)
 				return {
-					content: [{ type: 'text', text: await this.container_files_write(args) }],
+					content: [{ type: 'text', text: await this.container_file_write(args) }],
 				}
 			}
 		)
@@ -266,7 +266,7 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 		}
 	}
 
-	async container_files_write(file: FilesWrite): Promise<string> {
+	async container_file_write(file: FileWrite): Promise<string> {
 		const res = await proxyFetch(
 			this.env.ENVIRONMENT,
 			this.ctx.container,

@@ -48,7 +48,7 @@ AVOID manually reading or writing files using the \`container_exec\` tool. You s
 To manage container lifecycle, use the \`container_start\` and \`container_kill\` tools. If you run into errors where you can't connect to the container, attempt to kill and restart the container. If that doesn't work, the system is probably overloaded.
 
 You can execute actions in the container using the \`container_exec\` tool. By default, stdout is returned back as a string.
-To write a file, use the \`container_files_write\` tool.
+To write a file, use the \`container_file_write\` tool. To delete a file, use the \`container_file_delete\` tool.
 
 The \`container_files_list\` allows you to list file resources. Content is omitted from the response of this tool and all mimeTypes are \`text/plain\` even if the file ending suggests otherwise.
 If you want to get the file contents of a file resource, use \`container_file_read\`, which will return the file contents.
