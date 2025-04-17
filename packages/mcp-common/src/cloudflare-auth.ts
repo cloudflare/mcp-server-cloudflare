@@ -7,15 +7,6 @@ import type { AuthRequest } from '@cloudflare/workers-oauth-provider'
 // Constants
 const PKCE_CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'
 const RECOMMENDED_CODE_VERIFIER_LENGTH = 96
-export const DefaultScopes = {
-	'account:read': 'See your account info such as account details, analytics, and memberships.',
-	'user:read': 'See your user info such as name, email address, and account memberships.',
-	'workers:write':
-		'See and change Cloudflare Workers data such as zones, KV storage, namespaces, scripts, and routes.',
-	'workers_observability:read': 'See observability logs for your account',
-	offline_access: 'Grants refresh tokens for long-lived access.',
-} as const
-
 function base64urlEncode(value: string): string {
 	let base64 = btoa(value)
 	base64 = base64.replace(/\+/g, '-')
@@ -52,11 +43,13 @@ function generateAuthUrl({
 	redirect_uri,
 	state,
 	code_challenge,
+	scopes,
 }: {
 	client_id: string
 	redirect_uri: string
 	code_challenge: string
 	state: string
+	scopes: Record<string, string>
 }) {
 	const params = new URLSearchParams({
 		response_type: 'code',
@@ -65,7 +58,7 @@ function generateAuthUrl({
 		state,
 		code_challenge,
 		code_challenge_method: 'S256',
-		scope: Object.keys(DefaultScopes).join(' '),
+		scope: Object.keys(scopes).join(' '),
 	})
 
 	const upstream = new URL(`https://dash.cloudflare.com/oauth2/auth?${params.toString()}`)
@@ -86,10 +79,12 @@ export async function getAuthorizationURL({
 	client_id,
 	redirect_uri,
 	state,
+	scopes,
 }: {
 	client_id: string
 	redirect_uri: string
 	state: AuthRequest
+	scopes: Record<string, string>
 }): Promise<{ authUrl: string; codeVerifier: string }> {
 	const { codeChallenge, codeVerifier } = await generatePKCECodes()
 
@@ -99,6 +94,7 @@ export async function getAuthorizationURL({
 			redirect_uri,
 			state: btoa(JSON.stringify({ ...state, codeVerifier })),
 			code_challenge: codeChallenge,
+			scopes,
 		}),
 		codeVerifier: codeVerifier,
 	}

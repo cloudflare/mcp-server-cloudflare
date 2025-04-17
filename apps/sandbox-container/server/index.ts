@@ -2,7 +2,7 @@ import OAuthProvider from '@cloudflare/workers-oauth-provider'
 import { env } from 'cloudflare:workers'
 
 import {
-	CloudflareAuthHandler,
+	createAuthHandlers,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 
@@ -29,12 +29,21 @@ export type Props = {
 	accounts: AccountSchema['result']
 }
 
+const ContainerScopes = {
+	'account:read': 'See your account info such as account details, analytics, and memberships.',
+	'user:read': 'See your user info such as name, email address, and account memberships.',
+	'workers:write':
+		'See and change Cloudflare Workers data such as zones, KV storage, namespaces, scripts, and routes.',
+	'workers_observability:read': 'See observability logs for your account',
+	offline_access: 'Grants refresh tokens for long-lived access.',
+} as const
+
 export default new OAuthProvider({
 	apiRoute: '/sse',
 	// @ts-ignore
 	apiHandler: ContainerMcpAgent.mount('/sse', { binding: 'CONTAINER_MCP_AGENT' }),
 	// @ts-ignore
-	defaultHandler: CloudflareAuthHandler,
+	defaultHandler: createAuthHandlers({ scopes: ContainerScopes }),
 	authorizeEndpoint: '/oauth/authorize',
 	tokenEndpoint: '/token',
 	tokenExchangeCallback: (options) =>

@@ -2,12 +2,7 @@ import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
-import {
-	DefaultScopes,
-	getAuthorizationURL,
-	getAuthToken,
-	refreshAuthToken,
-} from './cloudflare-auth'
+import { getAuthorizationURL, getAuthToken, refreshAuthToken } from './cloudflare-auth'
 import { McpError } from './mcp-error'
 
 import type {
@@ -140,102 +135,112 @@ export async function handleTokenExchangeCallback(
 	}
 }
 
-const app = new Hono<AuthContext>()
-
 /**
- * OAuth Authorization Endpoint
+ * Creates a Hono app with OAuth routes for a specific Cloudflare worker
  *
- * This route initiates the Cloudflare OAuth flow when a user wants to log in.
- * It creates a random state parameter to prevent CSRF attacks and stores the
- * original OAuth request information in KV storage for later retrieval.
- * Then it redirects the user to Cloudflare's authorization page with the appropriate
- * parameters so the user can authenticate and grant permissions.
+ * @param scopes optional subset of scopes to request when handling authorization requests
+ * @returns a Hono app with configured OAuth routes
  */
-app.get(`/oauth/authorize`, async (c) => {
-	try {
-		const oauthReqInfo = await c.env.OAUTH_PROVIDER.parseAuthRequest(c.req.raw)
-		oauthReqInfo.scope = Object.keys(DefaultScopes)
-		if (!oauthReqInfo.clientId) {
-			return c.text('Invalid request', 400)
-		}
+export function createAuthHandlers({ scopes }: { scopes: Record<string, string> }) {
+	{
+		const app = new Hono<AuthContext>()
 
-		const res = await getAuthorizationURL({
-			client_id: c.env.CLOUDFLARE_CLIENT_ID,
-			redirect_uri: new URL('/oauth/callback', c.req.url).href,
-			state: oauthReqInfo,
+		/**
+		 * OAuth Authorization Endpoint
+		 *
+		 * This route initiates the Cloudflare OAuth flow when a user wants to log in.
+		 * It creates a random state parameter to prevent CSRF attacks and stores the
+		 * original OAuth request information in KV storage for later retrieval.
+		 * Then it redirects the user to Cloudflare's authorization page with the appropriate
+		 * parameters so the user can authenticate and grant permissions.
+		 */
+		app.get(`/oauth/authorize`, async (c) => {
+			try {
+				const oauthReqInfo = await c.env.OAUTH_PROVIDER.parseAuthRequest(c.req.raw)
+				oauthReqInfo.scope = Object.keys(scopes)
+				if (!oauthReqInfo.clientId) {
+					return c.text('Invalid request', 400)
+				}
+				const res = await getAuthorizationURL({
+					client_id: c.env.CLOUDFLARE_CLIENT_ID,
+					redirect_uri: new URL('/oauth/callback', c.req.url).href,
+					state: oauthReqInfo,
+					scopes,
+				})
+
+				return Response.redirect(res.authUrl, 302)
+			} catch (e) {
+				if (e instanceof McpError) {
+					return c.text(e.message, { status: e.code })
+				}
+				console.error(e)
+				return c.text('Internal Error', 500)
+			}
 		})
 
-		return Response.redirect(res.authUrl, 302)
-	} catch (e) {
-		if (e instanceof McpError) {
-			return c.text(e.message, { status: e.code })
-		}
-		console.error(e)
-		return c.text('Internal Error', 500)
-	}
-})
+		/**
+		 * OAuth Callback Endpoint
+		 *
+		 * This route handles the callback from Cloudflare after user authentication.
+		 * It exchanges the temporary code for an access token, then stores some
+		 * user metadata & the auth token as part of the 'props' on the token passed
+		 * down to the client. It ends by redirecting the client back to _its_ callback URL
+		 */
+		app.get(`/oauth/callback`, zValidator('query', AuthQuery), async (c) => {
+			try {
+				const { state, code } = c.req.valid('query')
+				const oauthReqInfo = AuthRequestSchemaWithExtraParams.parse(JSON.parse(atob(state)))
+				// Get the oathReqInfo out of KV
+				if (!oauthReqInfo.clientId) {
+					throw new McpError('Invalid State', 400)
+				}
 
-/**
- * OAuth Callback Endpoint
- *
- * This route handles the callback from Cloudflare after user authentication.
- * It exchanges the temporary code for an access token, then stores some
- * user metadata & the auth token as part of the 'props' on the token passed
- * down to the client. It ends by redirecting the client back to _its_ callback URL
- */
-app.get(`/oauth/callback`, zValidator('query', AuthQuery), async (c) => {
-	try {
-		const { state, code } = c.req.valid('query')
-		const oauthReqInfo = AuthRequestSchemaWithExtraParams.parse(JSON.parse(atob(state)))
-		// Get the oathReqInfo out of KV
-		if (!oauthReqInfo.clientId) {
-			throw new McpError('Invalid State', 400)
-		}
+				const [{ accessToken, refreshToken, user, accounts }] = await Promise.all([
+					getTokenAndUser(c, code, oauthReqInfo.codeVerifier),
+					c.env.OAUTH_PROVIDER.createClient({
+						clientId: oauthReqInfo.clientId,
+						tokenEndpointAuthMethod: 'none',
+					}),
+				])
 
-		const [{ accessToken, refreshToken, user, accounts }] = await Promise.all([
-			getTokenAndUser(c, code, oauthReqInfo.codeVerifier),
-			c.env.OAUTH_PROVIDER.createClient({
-				clientId: oauthReqInfo.clientId,
-				tokenEndpointAuthMethod: 'none',
-			}),
-		])
+				// TODO: Implement auth restriction in staging
+				// if (
+				// 	!user.email.endsWith("@cloudflare.com") &&
+				// 	!(c.env.PERMITTED_USERS ?? []).includes(user.email)
+				// ) {
+				// 	throw new McpError(
+				// 		`This user ${user.email} is not allowed to access this restricted MCP server`,
+				// 		401,
+				// 	);
+				// }
 
-		// TODO: Implement auth restriction in staging
-		// if (
-		// 	!user.email.endsWith("@cloudflare.com") &&
-		// 	!(c.env.PERMITTED_USERS ?? []).includes(user.email)
-		// ) {
-		// 	throw new McpError(
-		// 		`This user ${user.email} is not allowed to access this restricted MCP server`,
-		// 		401,
-		// 	);
-		// }
+				// Return back to the MCP client a new token
+				const { redirectTo } = await c.env.OAUTH_PROVIDER.completeAuthorization({
+					request: oauthReqInfo,
+					userId: user.id,
+					metadata: {
+						label: user.email,
+					},
+					scope: oauthReqInfo.scope,
+					// This will be available on this.props inside MyMCP
+					props: {
+						user,
+						accounts,
+						accessToken,
+						refreshToken,
+					},
+				})
 
-		// Return back to the MCP client a new token
-		const { redirectTo } = await c.env.OAUTH_PROVIDER.completeAuthorization({
-			request: oauthReqInfo,
-			userId: user.id,
-			metadata: {
-				label: user.email,
-			},
-			scope: oauthReqInfo.scope,
-			// This will be available on this.props inside MyMCP
-			props: {
-				user,
-				accounts,
-				accessToken,
-				refreshToken,
-			},
+				return Response.redirect(redirectTo, 302)
+			} catch (e) {
+				console.error(e)
+				if (e instanceof McpError) {
+					return c.text(e.message, { status: e.code })
+				}
+				return c.text('Internal Error', 500)
+			}
 		})
 
-		return Response.redirect(redirectTo, 302)
-	} catch (e) {
-		console.error(e)
-		if (e instanceof McpError) {
-			return c.text(e.message, { status: e.code })
-		}
-		return c.text('Internal Error', 500)
+		return app
 	}
-})
-
-export const CloudflareAuthHandler = app
+}

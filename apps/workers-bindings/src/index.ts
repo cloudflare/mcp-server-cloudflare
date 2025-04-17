@@ -4,7 +4,7 @@ import { McpAgent } from 'agents/mcp'
 import { env } from 'cloudflare:workers'
 
 import {
-	CloudflareAuthHandler,
+	createAuthHandlers,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account'
@@ -60,13 +60,22 @@ export class WorkersBindingsMCP extends McpAgent<Env, WorkersBindingsMCPState, P
 	}
 }
 
+const BindingsScopes = {
+	'account:read': 'See your account info such as account details, analytics, and memberships.',
+	'user:read': 'See your user info such as name, email address, and account memberships.',
+	'workers:write':
+		'See and change Cloudflare Workers data such as zones, KV storage, namespaces, scripts, and routes.',
+	'workers_observability:read': 'See observability logs for your account',
+	offline_access: 'Grants refresh tokens for long-lived access.',
+} as const
+
 // Export the OAuth handler as the default
 export default new OAuthProvider({
 	apiRoute: '/sse',
 	// @ts-ignore
 	apiHandler: WorkersBindingsMCP.mount('/sse'),
 	// @ts-ignore
-	defaultHandler: CloudflareAuthHandler,
+	defaultHandler: createAuthHandlers({ scopes: BindingsScopes }),
 	authorizeEndpoint: '/oauth/authorize',
 	tokenEndpoint: '/token',
 	tokenExchangeCallback: (options) =>
