@@ -42,7 +42,7 @@
 	"env": {
 		"staging": {
 			"name": "mcp-cloudflare-workers-bindings-staging",
-			"account_id": "8995c0f49cdcf57eb54d2c1e52b7d2f3",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "bindings-staging.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
@@ -55,7 +55,7 @@
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",
-					"id": "18e839155d00407095d793dcf7e78f25"
+					"id": "4258ce2dee98428db6c9870eb5097f26"
 				}
 			],
 			"vars": {
@@ -64,7 +64,7 @@
 		},
 		"production": {
 			"name": "mcp-cloudflare-workers-bindings-production",
-			"account_id": "8995c0f49cdcf57eb54d2c1e52b7d2f3",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "bindings.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
@@ -77,7 +77,7 @@
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",
-					"id": "f9782295993747df90c29c45ca89edb1"
+					"id": "22aa3726a2d74a49ba867605a8684cee"
 				}
 			],
 			"vars": {
