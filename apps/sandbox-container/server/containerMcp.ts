@@ -85,7 +85,7 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 		)
 		this.server.tool(
 			'container_file_write',
-			'Write file contents',
+			'Create a new file with the provided contents, overwriting the file if it already exists',
 			{ args: FileWrite },
 			async ({ args }) => {
 				args.path = await stripProtocolFromFilePath(args.path)
@@ -118,7 +118,7 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 		})
 		this.server.tool(
 			'container_file_read',
-			'Read a specific file or list of files within a specific directory',
+			'Read a specific file or directory',
 			{ args: FilePathParam },
 			async ({ args }) => {
 				const path = await stripProtocolFromFilePath(args.path)
