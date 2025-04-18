@@ -8,8 +8,8 @@ import { getContainerManager } from './containerManager'
 import { BASE_INSTRUCTIONS } from './prompts'
 import { fileToBase64, stripProtocolFromFilePath } from './utils'
 
-import type { FileList } from '../shared/schema'
 import type { Env, Props } from '.'
+import type { FileList } from '../shared/schema'
 
 export class ContainerMcpAgent extends McpAgent<Env, Props> {
 	server = new McpServer(
@@ -95,25 +95,40 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 			}
 		)
 		this.server.tool('container_files_list', 'List working directory file tree', {}, async ({}) => {
-			const files = await this.container_ls()
+			// This approach relies on resources, which aren't handled well by Claude right now. Until that's sorted, we can just use file read, since it lists all files in a directory if a directory is passed to it.
+			//const files = await this.container_ls()
 
-			// this is a bit of a hack around the poor handling of resources in claude desktop
-			const resources: {
-				type: 'resource'
-				resource: { uri: string; text: string; mimeType: string }
-			}[] = files.resources.map((r) => {
-				return {
-					type: 'resource',
-					resource: {
-						uri: r.uri,
-						text: r.uri,
-						mimeType: 'text/plain',
-					},
-				}
-			})
+			// const resources: {
+			// 	type: 'resource'
+			// 	resource: { uri: string; text: string; mimeType: string }
+			// }[] = files.resources.map((r) => {
+			// 	return {
+			// 		type: 'resource',
+			// 		resource: {
+			// 			uri: r.uri,
+			// 			text: r.uri,
+			// 			mimeType: 'text/plain',
+			// 		},
+			// 	}
+			// })
 
+			// return {
+			// 	content: resources,
+			// }
+
+			// Begin workaround using container read rather than ls:
+			const { blob, mimeType } = await this.container_file_read('.')
 			return {
-				content: resources,
+				content: [
+					{
+						type: 'resource',
+						resource: {
+							text: await blob.text(),
+							uri: `file://`,
+							mimeType: mimeType,
+						},
+					},
+				],
 			}
 		})
 		this.server.tool(
