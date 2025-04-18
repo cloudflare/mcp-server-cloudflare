@@ -10,7 +10,7 @@
 	"name": "mcp-cloudflare-workers-observability-dev",
 	"migrations": [
 		{
-			"new_sqlite_classes": ["MyMCP"],
+			"new_sqlite_classes": ["ObservabilityMCP"],
 			"tag": "v1"
 		}
 	],
@@ -20,7 +20,7 @@
 	"durable_objects": {
 		"bindings": [
 			{
-				"class_name": "MyMCP",
+				"class_name": "ObservabilityMCP",
 				"name": "MCP_OBJECT"
 			}
 		]
@@ -47,7 +47,7 @@
 			"durable_objects": {
 				"bindings": [
 					{
-						"class_name": "MyMCP",
+						"class_name": "ObservabilityMCP",
 						"name": "MCP_OBJECT"
 					}
 				]
@@ -69,7 +69,7 @@
 			"durable_objects": {
 				"bindings": [
 					{
-						"class_name": "MyMCP",
+						"class_name": "ObservabilityMCP",
 						"name": "MCP_OBJECT"
 					}
 				]

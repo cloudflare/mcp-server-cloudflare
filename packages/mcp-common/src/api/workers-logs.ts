@@ -1,5 +1,5 @@
 import { fetchCloudflareApi } from '../cloudflare-api'
-import { zKeysResponse, zReturnedQueryRunResult } from '../schemas/workers-logs-schemas'
+import { zKeysResponse, zReturnedQueryRunResult } from '../types/workers-logs-schemas'
 import { V4Schema } from '../v4-api'
 
 /**

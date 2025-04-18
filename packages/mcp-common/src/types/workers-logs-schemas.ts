@@ -115,8 +115,27 @@ export const zStatistics = z.object({
 	bytes_read: z.number(),
 })
 
+const zCloudflareMiniEventDetailsRequest = z.object({
+	url: z.string().optional(),
+	method: z.string().optional(),
+	path: z.string().optional(),
+	search: z.record(z.string()).optional(),
+})
+
+const zCloudflareMiniEventDetailsResponse = z.object({
+	status: z.number().optional(),
+})
+
+const zCloudflareMiniEventDetails = z.object({
+	request: zCloudflareMiniEventDetailsRequest.optional(),
+	response: zCloudflareMiniEventDetailsResponse.optional(),
+	rpcMethod: z.string().optional(),
+	rayId: z.string().optional(),
+	executionModel: z.string().optional(),
+})
+
 export const zCloudflareMiniEvent = z.object({
-	event: z.record(z.string(), z.unknown()).optional(),
+	event: zCloudflareMiniEventDetails,
 	scriptName: z.string(),
 	outcome: z.string(),
 	eventType: z.enum([
@@ -161,10 +180,21 @@ export const zCloudflareEvent = zCloudflareMiniEvent.extend({
 	cpuTimeMs: z.number(),
 })
 
+const zSourceSchema = z.object({
+	exception: z
+		.object({
+			stack: z.string().optional(),
+			name: z.string().optional(),
+			message: z.string().optional(),
+			timestamp: z.number().optional(),
+		})
+		.optional(),
+})
+
 export const zReturnedTelemetryEvent = z.object({
 	dataset: z.string(),
 	timestamp: z.number().int().positive(),
-	source: z.union([z.string(), z.object({})]),
+	source: z.union([z.string(), zSourceSchema]),
 	$workers: z.union([zCloudflareMiniEvent, zCloudflareEvent]).optional(),
 	$metadata: z.object({
 		id: z.string(),
@@ -198,6 +228,7 @@ export const zReturnedTelemetryEvent = z.object({
 	}),
 })
 
+export type zReturnedQueryRunEvents = z.infer<typeof zReturnedQueryRunEvents>
 export const zReturnedQueryRunEvents = z.object({
 	events: z.array(zReturnedTelemetryEvent).optional(),
 	fields: z

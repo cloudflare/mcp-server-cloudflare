@@ -24,7 +24,7 @@ export type Props = {
 
 export type State = { activeAccountId: string | null }
 
-export class MyMCP extends McpAgent<Env, State, Props> {
+export class ObservabilityMCP extends McpAgent<Env, State, Props> {
 	server = new McpServer({
 		name: 'Remote MCP Server with Workers Observability',
 		version: '1.0.0',
@@ -78,7 +78,7 @@ const ObservabilityScopes = {
 export default new OAuthProvider({
 	apiRoute: '/sse',
 	// @ts-ignore
-	apiHandler: MyMCP.mount('/sse'),
+	apiHandler: ObservabilityMCP.mount('/sse'),
 	// @ts-ignore
 	defaultHandler: createAuthHandlers({ scopes: ObservabilityScopes }),
 	authorizeEndpoint: '/oauth/authorize',

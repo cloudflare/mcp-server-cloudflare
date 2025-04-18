@@ -7,7 +7,7 @@ declare namespace Cloudflare {
 		CLOUDFLARE_CLIENT_SECRET: string;
         ENVIRONMENT: string;
 		// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-		MCP_OBJECT: DurableObjectNamespace<import("./src/index").MyMCP>;
+		MCP_OBJECT: DurableObjectNamespace<import("./src/index").ObservabilityMCP>;
 	}
 }
 interface Env extends Cloudflare.Env {}
