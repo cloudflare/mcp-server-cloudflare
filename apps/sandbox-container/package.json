@@ -7,7 +7,7 @@
 		"check:types": "run-tsc",
 		"deploy": "wrangler deploy",
 		"dev": "concurrently \"tsx container/index.ts\" \"wrangler dev --var \"ENVIRONMENT:dev\"\"",
-		"build": "docker build .",
+		"build": "docker build -f Dockerfile ../../",
 		"start": "wrangler dev",
 		"start:container": "tsx container/index.ts",
 		"postinstall": "mkdir -p workdir",
