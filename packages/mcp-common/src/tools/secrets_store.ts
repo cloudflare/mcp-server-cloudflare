@@ -24,7 +24,7 @@ export function registerStoreTools(agent: CloudflareMcpAgent) {
 	 */
 	agent.server.tool(
 		'secrets_store_list',
-		'List all of the secrets in your Cloudflare account',
+		'List the Secret Store in your Cloudflare account',
 
 
 		async (params) => {
