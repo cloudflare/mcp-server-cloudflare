@@ -5,6 +5,9 @@
 	"sideEffects": false,
 	"type": "module",
 	"main": "./src/index.ts",
+	"scripts": {
+		"types": "wrangler types --include-env=false"
+	},
 	"directories": {
 		"bin": "bin"
 	},

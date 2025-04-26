@@ -1,9 +1,13 @@
 import { McpAgent } from 'agents/mcp'
-import { env } from 'cloudflare:workers'
 
+import { getEnv } from '@repo/mcp-common/src/env'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 
 import { registerDocsTools } from './tools/docs'
+
+import type { Env } from './context'
+
+const env = getEnv<Env>()
 
 // The docs MCP server isn't stateful, so we don't have state/props
 export type Props = never

@@ -10,6 +10,7 @@ import { BASE_INSTRUCTIONS } from './prompts'
 import { fileToBase64, stripProtocolFromFilePath } from './utils'
 
 import type { FileList } from '../shared/schema'
+import type { Env } from './context'
 import type { Props } from '.'
 
 export class ContainerMcpAgent extends McpAgent<Env, {}, Props> {

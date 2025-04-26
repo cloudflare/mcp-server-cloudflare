@@ -10,12 +10,11 @@
 		"deploy:production": "wrangler deploy --env production",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
-		"types": "wrangler types",
+		"types": "wrangler types --include-env=false",
 		"test": "vitest"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.8.14",
-		"@cloudflare/workers-types": "4.20250414.0",
 		"@types/node": "22.14.1",
 		"marked": "15.0.7",
 		"typescript": "5.5.4",

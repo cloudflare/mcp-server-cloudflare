@@ -21,6 +21,7 @@
 		"check:deps": "pnpm exec syncpack lint",
 		"check:format": "prettier . --check --cache --ignore-unknown",
 		"check:turbo": "run-turbo check",
+		"types": "run-turbo types",
 		"test:ci": "run-vitest-ci",
 		"test": "vitest run",
 		"fix:format": "prettier . --write",

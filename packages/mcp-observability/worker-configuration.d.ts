@@ -1,4 +1,4 @@
-// Runtime types generated with workerd@1.20250409.0 2025-03-10 nodejs_compat
+// Runtime types generated with workerd@1.20250409.0 2025-01-14 
 // Begin runtime types
 /*! *****************************************************************************
 Copyright (c) Cloudflare. All rights reserved.

@@ -12,14 +12,13 @@
 		"start:container": "tsx container/index.ts",
 		"postinstall": "mkdir -p workdir",
 		"test": "vitest",
-		"types": "wrangler types",
+		"types": "wrangler types --include-env=false",
 		"eval:dev": "start-server-and-test --expect 404 eval:server http://localhost:8976 'vitest --testTimeout=60000 --config vitest.config.evals.ts'",
 		"eval:server": "concurrently \"tsx container/index.ts\" \"wrangler dev --var \"ENVIRONMENT:test\"\"",
 		"eval:ci": "start-server-and-test --expect 404 eval:server http://localhost:8976 'vitest run --testTimeout=60000 --config vitest.config.evals.ts'"
 	},
 	"dependencies": {
 		"@cloudflare/workers-oauth-provider": "0.0.2",
-		"@cloudflare/workers-types": "4.20250414.0",
 		"@hono/node-server": "1.13.8",
 		"@hono/zod-validator": "0.4.3",
 		"@modelcontextprotocol/sdk": "1.9.0",

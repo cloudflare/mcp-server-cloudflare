@@ -1,11 +1,11 @@
 import OAuthProvider from '@cloudflare/workers-oauth-provider'
 import { McpAgent } from 'agents/mcp'
-import { env } from 'cloudflare:workers'
 
 import {
 	createAuthHandlers,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
+import { getEnv } from '@repo/mcp-common/src/env'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account'
 import { registerD1Tools } from '@repo/mcp-common/src/tools/d1'
@@ -15,6 +15,9 @@ import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker'
 import { MetricsTracker } from '@repo/mcp-observability'
 
 import type { AccountSchema, UserSchema } from '@repo/mcp-common/src/cloudflare-oauth-handler'
+import type { Env } from './context'
+
+const env = getEnv<Env>()
 
 const metrics = new MetricsTracker(env.MCP_METRICS, {
 	name: env.MCP_SERVER_NAME,
