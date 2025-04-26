@@ -57,9 +57,13 @@ export class WorkersBindingsMCP extends McpAgent<Env, WorkersBindingsMCPState, P
 	}
 
 	async init() {
-		this.server = new CloudflareMCPServer(this.props.user.id, this.env.MCP_METRICS, {
-			name: this.env.MCP_SERVER_NAME,
-			version: this.env.MCP_SERVER_VERSION,
+		this.server = new CloudflareMCPServer({
+			userId: this.props.user.id,
+			wae: this.env.MCP_METRICS,
+			serverInfo: {
+				name: this.env.MCP_SERVER_NAME,
+				version: this.env.MCP_SERVER_VERSION,
+			},
 		})
 
 		registerAccountTools(this)

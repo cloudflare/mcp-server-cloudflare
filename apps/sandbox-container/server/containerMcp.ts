@@ -52,15 +52,15 @@ export class ContainerMcpAgent extends McpAgent<Env, {}, Props> {
 
 	async init() {
 		this.props.user.id
-		this.server = new CloudflareMCPServer(
-			this.props.user.id,
-			this.env.MCP_METRICS,
-			{
+		this.server = new CloudflareMCPServer({
+			userId: this.props.user.id,
+			wae: this.env.MCP_METRICS,
+			serverInfo: {
 				name: this.env.MCP_SERVER_NAME,
 				version: this.env.MCP_SERVER_VERSION,
 			},
-			{ instructions: BASE_INSTRUCTIONS }
-		)
+			options: { instructions: BASE_INSTRUCTIONS },
+		})
 
 		this.server.tool(
 			'container_initialize',

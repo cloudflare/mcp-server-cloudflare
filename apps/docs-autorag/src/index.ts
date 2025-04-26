@@ -15,9 +15,12 @@ export type Props = never
 export type State = never
 
 export class CloudflareDocumentationMCP extends McpAgent<Env, State, Props> {
-	server = new CloudflareMCPServer(undefined, env.MCP_METRICS, {
-		name: env.MCP_SERVER_NAME,
-		version: env.MCP_SERVER_VERSION,
+	server = new CloudflareMCPServer({
+		wae: env.MCP_METRICS,
+		serverInfo: {
+			name: env.MCP_SERVER_NAME,
+			version: env.MCP_SERVER_VERSION,
+		},
 	})
 
 	constructor(

@@ -7,22 +7,32 @@ import { MetricsTracker, SessionStart, ToolCall } from '../../mcp-observability/
 import { McpError } from './mcp-error'
 
 import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js'
+import type { SentryClient } from './sentry'
 
 export class CloudflareMCPServer extends McpServer {
 	private metrics
+	private sentry?: SentryClient
 
-	constructor(
-		userId: string | undefined,
-		wae: AnalyticsEngineDataset,
+	constructor({
+		userId,
+		wae,
+		serverInfo,
+		options,
+		sentry,
+	}: {
+		userId?: string
+		wae: AnalyticsEngineDataset
 		serverInfo: {
 			[x: string]: unknown
 			name: string
 			version: string
-		},
+		}
 		options?: ServerOptions
-	) {
+		sentry?: SentryClient
+	}) {
 		super(serverInfo, options)
 		this.metrics = new MetricsTracker(wae, serverInfo)
+		this.sentry = sentry
 
 		this.server.oninitialized = () => {
 			const clientInfo = this.server.getClientVersion()
@@ -34,6 +44,10 @@ export class CloudflareMCPServer extends McpServer {
 					clientCapabilities,
 				})
 			)
+		}
+
+		this.server.onerror = (e) => {
+			this.recordError(e)
 		}
 
 		const _tool = this.tool.bind(this)
@@ -96,5 +110,9 @@ export class CloudflareMCPServer extends McpServer {
 				errorCode: errorCode,
 			})
 		)
+	}
+
+	public recordError(e: unknown) {
+		this.sentry?.recordError(e)
 	}
 }

@@ -57,12 +57,13 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 					},
 				],
 			}
-		} catch (error) {
+		} catch (e) {
+			agent.server.recordError(e)
 			return {
 				content: [
 					{
 						type: 'text',
-						text: `Error listing workers: ${error instanceof Error && error.message}`,
+						text: `Error listing workers: ${e instanceof Error && e.message}`,
 					},
 				],
 			}
@@ -101,12 +102,13 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 						},
 					],
 				}
-			} catch (error) {
+			} catch (e) {
+				agent.server.recordError(e)
 				return {
 					content: [
 						{
 							type: 'text',
-							text: `Error retrieving worker script: ${error instanceof Error && error.message}`,
+							text: `Error retrieving worker script: ${e instanceof Error && e.message}`,
 						},
 					],
 				}

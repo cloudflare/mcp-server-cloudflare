@@ -6,6 +6,7 @@ import {
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import { getEnv } from '@repo/mcp-common/src/env'
+import { initSentryWithUser } from '@repo/mcp-common/src/sentry'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account'
 import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker'
@@ -38,7 +39,6 @@ export class ObservabilityMCP extends McpAgent<Env, State, Props> {
 	set server(server: CloudflareMCPServer) {
 		this._server = server
 	}
-
 	get server(): CloudflareMCPServer {
 		if (!this._server) {
 			throw new Error('Tried to access server before it was initialized')
@@ -47,18 +47,19 @@ export class ObservabilityMCP extends McpAgent<Env, State, Props> {
 		return this._server
 	}
 
-	initialState: State = {
-		activeAccountId: null,
-	}
-
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env)
 	}
 
 	async init() {
-		this.server = new CloudflareMCPServer(this.props.user.id, this.env.MCP_METRICS, {
-			name: this.env.MCP_SERVER_NAME,
-			version: this.env.MCP_SERVER_VERSION,
+		this.server = new CloudflareMCPServer({
+			userId: this.props.user.id,
+			wae: this.env.MCP_METRICS,
+			serverInfo: {
+				name: this.env.MCP_SERVER_NAME,
+				version: this.env.MCP_SERVER_VERSION,
+			},
+			sentry: initSentryWithUser(env, this.ctx, this.props.user.id),
 		})
 
 		registerAccountTools(this)
@@ -75,6 +76,7 @@ export class ObservabilityMCP extends McpAgent<Env, State, Props> {
 		try {
 			return this.state.activeAccountId ?? null
 		} catch (e) {
+			this.server.recordError(e)
 			return null
 		}
 	}
@@ -87,6 +89,7 @@ export class ObservabilityMCP extends McpAgent<Env, State, Props> {
 				activeAccountId: accountId,
 			})
 		} catch (e) {
+			this.server.recordError(e)
 			return null
 		}
 	}

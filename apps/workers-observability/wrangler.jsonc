@@ -69,7 +69,11 @@
 				}
 			],
 			"vars": {
-				"ENVIRONMENT": "staging"
+				"ENVIRONMENT": "staging",
+				"GIT_HASH": "OVERRIDEN_DURING_DEPLOYMENT",
+				"SENTRY_DSN": "https://033e673c1b004626609d9a68a8b86b56@sentry10.cfdata.org/1764",
+				"MCP_SERVER_NAME": "workers-staging-observability",
+				"MCP_SERVER_VERSION": "1.0.0"
 			},
 			"analytics_engine_datasets": [
 				{
@@ -97,7 +101,11 @@
 				}
 			],
 			"vars": {
-				"ENVIRONMENT": "production"
+				"ENVIRONMENT": "production",
+				"GIT_HASH": "OVERRIDEN_DURING_DEPLOYMENT",
+				"SENTRY_DSN": "https://033e673c1b004626609d9a68a8b86b56@sentry10.cfdata.org/1764",
+				"MCP_SERVER_NAME": "workers-observability",
+				"MCP_SERVER_VERSION": "1.0.0"
 			},
 			"analytics_engine_datasets": [
 				{

@@ -35,12 +35,13 @@ export function registerAccountTools(agent: CloudflareMcpAgent) {
 						},
 					],
 				}
-			} catch (error) {
+			} catch (e) {
+				agent.server.recordError(e)
 				return {
 					content: [
 						{
 							type: 'text',
-							text: `Error listing accounts: ${error instanceof Error && error.message}`,
+							text: `Error listing accounts: ${e instanceof Error && e.message}`,
 						},
 					],
 				}
@@ -73,12 +74,13 @@ export function registerAccountTools(agent: CloudflareMcpAgent) {
 						},
 					],
 				}
-			} catch (error) {
+			} catch (e) {
+				agent.server.recordError(e)
 				return {
 					content: [
 						{
 							type: 'text',
-							text: `Error setting activeAccountID: ${error instanceof Error && error.message}`,
+							text: `Error setting activeAccountID: ${e instanceof Error && e.message}`,
 						},
 					],
 				}
