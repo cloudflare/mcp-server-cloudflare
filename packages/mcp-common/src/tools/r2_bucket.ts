@@ -688,7 +688,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 	}
 	// )
 
-	// agent.server.tool('r2_metrics_list', 'List metrics for an R2 bucket', {}, async () => {
+	// agent.server.tool('r2_metrics_list', 'List metrics for an R2 bucket', async () => {
 	// 	const account_id = agent.getActiveAccountId()
 	// 	if (!account_id) {
 	// 		return MISSING_ACCOUNT_ID_RESPONSE

@@ -12,12 +12,12 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@cloudflare/workers-oauth-provider": "0.0.2",
+		"@cloudflare/workers-oauth-provider": "0.0.3",
 		"@hono/zod-validator": "0.4.3",
-		"@modelcontextprotocol/sdk": "1.9.0",
+		"@modelcontextprotocol/sdk": "1.10.2",
 		"@repo/mcp-common": "workspace:*",
 		"@repo/mcp-observability": "workspace:*",
-		"agents": "0.0.62",
+		"agents": "0.0.67",
 		"cloudflare": "4.2.0",
 		"hono": "4.7.6",
 		"zod": "3.24.2"

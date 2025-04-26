@@ -15,7 +15,7 @@ const workerNameParam = z.string().describe('The name of the worker script to re
 
 export function registerWorkersTools(agent: CloudflareMcpAgent) {
 	// Tool to list all workers
-	agent.server.tool('workers_list', 'List all Workers in your Cloudflare account', {}, async () => {
+	agent.server.tool('workers_list', 'List all Workers in your Cloudflare account', async () => {
 		const accountId = agent.getActiveAccountId()
 		if (!accountId) {
 			return {
