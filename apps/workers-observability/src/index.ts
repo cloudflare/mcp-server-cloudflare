@@ -6,6 +6,7 @@ import {
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import { getEnv } from '@repo/mcp-common/src/env'
+import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { initSentryWithUser } from '@repo/mcp-common/src/sentry'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account'
@@ -96,17 +97,15 @@ export class ObservabilityMCP extends McpAgent<Env, State, Props> {
 }
 
 const ObservabilityScopes = {
+	...RequiredScopes,
 	'account:read': 'See your account info such as account details, analytics, and memberships.',
-	'user:read': 'See your user info such as name, email address, and account memberships.',
 	'workers:write':
 		'See and change Cloudflare Workers data such as zones, KV storage, namespaces, scripts, and routes.',
 	'workers_observability:read': 'See observability logs for your account',
-	offline_access: 'Grants refresh tokens for long-lived access.',
 } as const
 
 export default new OAuthProvider({
 	apiRoute: '/sse',
-	// @ts-ignore
 	apiHandler: ObservabilityMCP.mount('/sse'),
 	// @ts-ignore
 	defaultHandler: createAuthHandlers({ scopes: ObservabilityScopes, metrics }),

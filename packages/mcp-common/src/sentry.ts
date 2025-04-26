@@ -76,7 +76,7 @@ function initSentry<T extends BaseBindings>(
 				'content-type',
 				'host',
 			],
-			// Allow ONLY the “scope” param in order to recording jwt, code, state and any other callback params
+			// Allow ONLY the “scope” param in order to avoid recording jwt, code, state and any other callback params
 			allowedSearchParams: /^scope$/,
 		},
 		integrations: [
