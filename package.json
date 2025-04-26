@@ -52,8 +52,5 @@
 		"overrides": {
 			"esbuild": "0.25.1"
 		}
-	},
-	"dependencies": {
-		"workers-observability": "link:apps/workers-observability"
 	}
 }

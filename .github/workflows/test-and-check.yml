@@ -21,6 +21,8 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
+      - name: Syncpack lint
+        run: pnpm syncpack lint
       - name: Run linter
         run: pnpm check:turbo
       - name: Run linter (formatting)
