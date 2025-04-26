@@ -76,8 +76,8 @@ function initSentry<T extends BaseBindings>(
 				'content-type',
 				'host',
 			],
-			// Allow all search params **except** jwt, code, state
-			allowedSearchParams: /^(?!(?:jwt|code|state)$).*$/,
+			// Allow ONLY the “scope” param in order to recording jwt, code, state and any other callback params
+			allowedSearchParams: /^scope$/,
 		},
 		integrations: [
 			zodErrorsIntegration({ saveAttachments: true }),
