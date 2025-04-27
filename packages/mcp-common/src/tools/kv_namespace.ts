@@ -16,7 +16,7 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 		'List all of the kv namespaces in your Cloudflare account',
 		{ params: KvNamespacesListParamsSchema.optional() },
 		async ({ params }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}
@@ -63,7 +63,7 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 			title: KvNamespaceTitleSchema,
 		},
 		async ({ title }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}
@@ -101,7 +101,7 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 			namespace_id: KvNamespaceIdSchema,
 		},
 		async ({ namespace_id }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}
@@ -139,7 +139,7 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 			namespace_id: KvNamespaceIdSchema,
 		},
 		async ({ namespace_id }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}
@@ -178,7 +178,7 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 			title: KvNamespaceTitleSchema,
 		},
 		async ({ namespace_id, title }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}

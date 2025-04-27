@@ -58,7 +58,7 @@ export function registerAccountTools(agent: CloudflareMcpAgent) {
 		async (params) => {
 			try {
 				const { activeAccountIdParam: activeAccountId } = params
-				agent.setActiveAccountId(activeAccountId)
+				await agent.setActiveAccountId(activeAccountId)
 				return {
 					content: [
 						{

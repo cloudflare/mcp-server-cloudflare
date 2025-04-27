@@ -5,6 +5,7 @@ import {
 	createAuthHandlers,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
+import { getUserDetails, UserDetails } from '@repo/mcp-common/src/durable-objects/user_details'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
@@ -17,6 +18,8 @@ import { MetricsTracker } from '@repo/mcp-observability'
 
 import type { AccountSchema, UserSchema } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './context'
+
+export { UserDetails }
 
 const env = getEnv<Env>()
 
@@ -73,24 +76,25 @@ export class WorkersBindingsMCP extends McpAgent<Env, WorkersBindingsMCPState, P
 		registerR2BucketTools(this)
 		registerD1Tools(this)
 	}
-	getActiveAccountId() {
-		// TODO: Figure out why this fail sometimes, and why we need to wrap this in a try catch
+
+	async getActiveAccountId() {
 		try {
-			return this.state.activeAccountId ?? null
+			// Get UserDetails Durable Object based off the userId and retrieve the activeAccountId from it
+			// we do this so we can persist activeAccountId across sessions
+			const userDetails = getUserDetails(env, this.props.user.id)
+			return await userDetails.getActiveAccountId()
 		} catch (e) {
+			this.server.recordError(e)
 			return null
 		}
 	}
 
-	setActiveAccountId(accountId: string) {
-		// TODO: Figure out why this fail sometimes, and why we need to wrap this in a try catch
+	async setActiveAccountId(accountId: string) {
 		try {
-			this.setState({
-				...this.state,
-				activeAccountId: accountId,
-			})
+			const userDetails = getUserDetails(env, this.props.user.id)
+			await userDetails.setActiveAccountId(accountId)
 		} catch (e) {
-			return null
+			this.server.recordError(e)
 		}
 	}
 }

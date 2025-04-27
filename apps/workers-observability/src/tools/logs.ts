@@ -123,7 +123,7 @@ export function registerLogsTools(agent: ObservabilityMCP) {
 			rayId: rayIdParam,
 		},
 		async (params) => {
-			const accountId = agent.getActiveAccountId()
+			const accountId = await agent.getActiveAccountId()
 			if (!accountId) {
 				return {
 					content: [
@@ -188,7 +188,7 @@ export function registerLogsTools(agent: ObservabilityMCP) {
 			minutesAgoParam,
 		},
 		async (params) => {
-			const accountId = agent.getActiveAccountId()
+			const accountId = await agent.getActiveAccountId()
 			if (!accountId) {
 				return {
 					content: [
@@ -248,7 +248,7 @@ export function registerLogsTools(agent: ObservabilityMCP) {
 		'Get available telemetry keys for a Cloudflare Worker',
 		{ scriptName: workerNameParam, minutesAgoParam },
 		async (params) => {
-			const accountId = agent.getActiveAccountId()
+			const accountId = await agent.getActiveAccountId()
 			if (!accountId) {
 				return {
 					content: [

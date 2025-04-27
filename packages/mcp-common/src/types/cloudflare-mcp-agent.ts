@@ -20,6 +20,6 @@ type McpAgentWithoutServer<EnvType = unknown> = Omit<
 
 export interface CloudflareMcpAgent<EnvType = unknown> extends McpAgentWithoutServer<EnvType> {
 	server: CloudflareMCPServer
-	setActiveAccountId(accountId: string): void
-	getActiveAccountId(): string | null
+	setActiveAccountId(accountId: string): Promise<void>
+	getActiveAccountId(): Promise<string | null>
 }
