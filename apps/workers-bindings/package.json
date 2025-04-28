@@ -10,12 +10,11 @@
 		"deploy:production": "wrangler deploy --env production",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
-		"types": "wrangler types",
+		"types": "wrangler types --include-env=false",
 		"test": "vitest"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.8.14",
-		"@cloudflare/workers-types": "4.20250410.0",
 		"@types/node": "22.14.1",
 		"marked": "15.0.7",
 		"typescript": "5.5.4",
@@ -23,10 +22,12 @@
 		"wrangler": "4.10.0"
 	},
 	"dependencies": {
-		"@cloudflare/workers-oauth-provider": "0.0.2",
-		"@modelcontextprotocol/sdk": "1.9.0",
+		"@cloudflare/workers-oauth-provider": "0.0.3",
+		"@modelcontextprotocol/sdk": "1.10.2",
+		"@n8n/json-schema-to-zod": "1.1.0",
 		"@repo/mcp-common": "workspace:*",
-		"agents": "0.0.62",
+		"@repo/mcp-observability": "workspace:*",
+		"agents": "0.0.67",
 		"hono": "4.7.6",
 		"zod": "3.24.2"
 	}

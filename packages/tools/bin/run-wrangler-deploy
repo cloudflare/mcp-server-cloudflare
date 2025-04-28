@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Extract name and version from package.json using jq
+NAME=$(jq -r '.name' package.json)
+VERSION=$(jq -r '.version' package.json)
+
+# Deploy with wrangler using the extracted values as binding variables
+echo "Deploying MCP server $NAME version $VERSION"
+pnpx wrangler deploy --var MCP_SERVER_NAME:"$NAME" --var MCP_SERVER_VERSION:"$VERSION" "$@"

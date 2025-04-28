@@ -2,8 +2,10 @@ import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
+import { AuthUser } from '../../mcp-observability/src'
 import { getAuthorizationURL, getAuthToken, refreshAuthToken } from './cloudflare-auth'
 import { McpError } from './mcp-error'
+import { useSentry } from './sentry'
 
 import type {
 	OAuthHelpers,
@@ -11,6 +13,8 @@ import type {
 	TokenExchangeCallbackResult,
 } from '@cloudflare/workers-oauth-provider'
 import type { Context } from 'hono'
+import type { MetricsTracker } from '../../mcp-observability/src'
+import type { BaseHonoContext } from './sentry'
 
 type AuthContext = {
 	Bindings: {
@@ -18,7 +22,7 @@ type AuthContext = {
 		CLOUDFLARE_CLIENT_ID: string
 		CLOUDFLARE_CLIENT_SECRET: string
 	}
-}
+} & BaseHonoContext
 
 const AuthRequestSchema = z.object({
 	responseType: z.string(),
@@ -92,11 +96,11 @@ async function getTokenAndUser(
 
 	if (!userResponse.ok) {
 		console.log(await userResponse.text())
-		throw new McpError('Failed to fetch user', 500)
+		throw new McpError('Failed to fetch user', 500, { reportToSentry: true })
 	}
 	if (!accountsResponse.ok) {
 		console.log(await accountsResponse.text())
-		throw new McpError('Failed to fetch accounts', 500)
+		throw new McpError('Failed to fetch accounts', 500, { reportToSentry: true })
 	}
 
 	// Fetch the user & accounts info from Cloudflare
@@ -139,12 +143,21 @@ export async function handleTokenExchangeCallback(
  * Creates a Hono app with OAuth routes for a specific Cloudflare worker
  *
  * @param scopes optional subset of scopes to request when handling authorization requests
+ * @param metrics MetricsTracker which is used to track auth metrics
  * @returns a Hono app with configured OAuth routes
  */
-export function createAuthHandlers({ scopes }: { scopes: Record<string, string> }) {
+export function createAuthHandlers({
+	scopes,
+	metrics,
+}: {
+	scopes: Record<string, string>
+	metrics: MetricsTracker
+}) {
 	{
 		const app = new Hono<AuthContext>()
-
+		app.use(useSentry)
+		// TODO: Add useOnError middleware rather than handling errors in each handler
+		// app.onError(useOnError)
 		/**
 		 * OAuth Authorization Endpoint
 		 *
@@ -170,6 +183,14 @@ export function createAuthHandlers({ scopes }: { scopes: Record<string, string> 
 
 				return Response.redirect(res.authUrl, 302)
 			} catch (e) {
+				c.var.sentry?.recordError(e)
+				if (e instanceof Error) {
+					metrics.logEvent(
+						new AuthUser({
+							errorMessage: `Authorize Error: ${e.name}: ${e.message}`,
+						})
+					)
+				}
 				if (e instanceof McpError) {
 					return c.text(e.message, { status: e.code })
 				}
@@ -231,9 +252,23 @@ export function createAuthHandlers({ scopes }: { scopes: Record<string, string> 
 					},
 				})
 
+				metrics.logEvent(
+					new AuthUser({
+						userId: user.id,
+					})
+				)
+
 				return Response.redirect(redirectTo, 302)
 			} catch (e) {
-				console.error(e)
+				c.var.sentry?.recordError(e)
+				if (e instanceof Error) {
+					console.error(e)
+					metrics.logEvent(
+						new AuthUser({
+							errorMessage: `Callback Error: ${e.name}: ${e.message}`,
+						})
+					)
+				}
 				if (e instanceof McpError) {
 					return c.text(e.message, { status: e.code })
 				}

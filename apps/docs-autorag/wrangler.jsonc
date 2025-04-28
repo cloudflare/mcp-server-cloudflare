@@ -30,13 +30,21 @@
 	},
 	"vars": {
 		"ENVIRONMENT": "development",
-		"AUTORAG_NAME": "cloudflare-docs-autorag"
+		"AUTORAG_NAME": "cloudflare-docs-autorag",
+		"MCP_SERVER_NAME": "PLACEHOLDER",
+		"MCP_SERVER_VERSION": "PLACEHOLDER"
 	},
 	"dev": {
 		"port": 8976
 	},
 	"workers_dev": false,
 	"preview_urls": false,
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-dev"
+		}
+	],
 	"env": {
 		"staging": {
 			"name": "mcp-cloudflare-docs-autorag-staging",
@@ -54,10 +62,15 @@
 				"ENVIRONMENT": "staging",
 				"AUTORAG_NAME": "cloudflare-docs-autorag"
 			},
-
 			"ai": {
 				"binding": "AI"
-			}
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-staging"
+				}
+			]
 		},
 		"production": {
 			"name": "mcp-cloudflare-docs-autorag-production",
@@ -77,7 +90,13 @@
 			},
 			"ai": {
 				"binding": "AI"
-			}
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-production"
+				}
+			]
 		}
 	}
 }

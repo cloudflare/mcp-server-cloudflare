@@ -1,5 +1,6 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { McpAgent } from 'agents/mcp'
+
+import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 
 import { OPEN_CONTAINER_PORT } from '../shared/consts'
 import { ExecParams, FilePathParam, FileWrite } from '../shared/schema'
@@ -9,16 +10,22 @@ import { BASE_INSTRUCTIONS } from './prompts'
 import { fileToBase64, stripProtocolFromFilePath } from './utils'
 
 import type { FileList } from '../shared/schema'
-import type { Env, Props } from '.'
+import type { Env } from './context'
+import type { Props } from '.'
 
-export class ContainerMcpAgent extends McpAgent<Env, Props> {
-	server = new McpServer(
-		{
-			name: 'Container MCP Agent',
-			version: '1.0.0',
-		},
-		{ instructions: BASE_INSTRUCTIONS }
-	)
+export class ContainerMcpAgent extends McpAgent<Env, {}, Props> {
+	_server: CloudflareMCPServer | undefined
+	set server(server: CloudflareMCPServer) {
+		this._server = server
+	}
+
+	get server(): CloudflareMCPServer {
+		if (!this._server) {
+			throw new Error('Tried to access server before it was initialized')
+		}
+
+		return this._server
+	}
 
 	constructor(
 		public ctx: DurableObjectState,
@@ -44,6 +51,17 @@ export class ContainerMcpAgent extends McpAgent<Env, Props> {
 	}
 
 	async init() {
+		this.props.user.id
+		this.server = new CloudflareMCPServer({
+			userId: this.props.user.id,
+			wae: this.env.MCP_METRICS,
+			serverInfo: {
+				name: this.env.MCP_SERVER_NAME,
+				version: this.env.MCP_SERVER_VERSION,
+			},
+			options: { instructions: BASE_INSTRUCTIONS },
+		})
+
 		this.server.tool(
 			'container_initialize',
 			'Start or reset the container',

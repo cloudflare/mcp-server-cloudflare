@@ -6,47 +6,43 @@ import { type CloudflareMcpAgent } from '../types/cloudflare-mcp-agent'
 
 export function registerAccountTools(agent: CloudflareMcpAgent) {
 	// Tool to list all accounts
-	agent.server.tool(
-		'accounts_list',
-		'List all accounts in your Cloudflare account',
-		{},
-		async () => {
-			try {
-				const results = await handleAccountsList({
-					client: getCloudflareClient(agent.props.accessToken),
+	agent.server.tool('accounts_list', 'List all accounts in your Cloudflare account', async () => {
+		try {
+			const results = await handleAccountsList({
+				client: getCloudflareClient(agent.props.accessToken),
+			})
+			// Sort accounts by created_on date (newest first)
+			const accounts = results
+				// order by created_on desc ( newest first )
+				.sort((a, b) => {
+					if (!a.created_on) return 1
+					if (!b.created_on) return -1
+					return new Date(b.created_on).getTime() - new Date(a.created_on).getTime()
 				})
-				// Sort accounts by created_on date (newest first)
-				const accounts = results
-					// order by created_on desc ( newest first )
-					.sort((a, b) => {
-						if (!a.created_on) return 1
-						if (!b.created_on) return -1
-						return new Date(b.created_on).getTime() - new Date(a.created_on).getTime()
-					})
 
-				return {
-					content: [
-						{
-							type: 'text',
-							text: JSON.stringify({
-								accounts,
-								count: accounts.length,
-							}),
-						},
-					],
-				}
-			} catch (error) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: `Error listing accounts: ${error instanceof Error && error.message}`,
-						},
-					],
-				}
+			return {
+				content: [
+					{
+						type: 'text',
+						text: JSON.stringify({
+							accounts,
+							count: accounts.length,
+						}),
+					},
+				],
+			}
+		} catch (e) {
+			agent.server.recordError(e)
+			return {
+				content: [
+					{
+						type: 'text',
+						text: `Error listing accounts: ${e instanceof Error && e.message}`,
+					},
+				],
 			}
 		}
-	)
+	})
 
 	const activeAccountIdParam = z
 		.string()
@@ -62,7 +58,7 @@ export function registerAccountTools(agent: CloudflareMcpAgent) {
 		async (params) => {
 			try {
 				const { activeAccountIdParam: activeAccountId } = params
-				agent.setActiveAccountId(activeAccountId)
+				await agent.setActiveAccountId(activeAccountId)
 				return {
 					content: [
 						{
@@ -73,12 +69,13 @@ export function registerAccountTools(agent: CloudflareMcpAgent) {
 						},
 					],
 				}
-			} catch (error) {
+			} catch (e) {
+				agent.server.recordError(e)
 				return {
 					content: [
 						{
 							type: 'text',
-							text: `Error setting activeAccountID: ${error instanceof Error && error.message}`,
+							text: `Error setting activeAccountID: ${e instanceof Error && e.message}`,
 						},
 					],
 				}

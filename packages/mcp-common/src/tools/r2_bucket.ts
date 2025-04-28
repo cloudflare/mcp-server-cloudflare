@@ -22,7 +22,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 			start_after: BucketListStartAfterParam,
 		},
 		async ({ cursor, direction, name_contains, per_page, start_after }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}
@@ -66,7 +66,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 		'Create a new r2 bucket in your Cloudflare account',
 		{ name: BucketNameSchema },
 		async ({ name }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}
@@ -102,7 +102,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 		'Get details about a specific R2 bucket',
 		{ name: BucketNameSchema },
 		async ({ name }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}
@@ -135,7 +135,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 		'Delete an R2 bucket',
 		{ name: BucketNameSchema },
 		async ({ name }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}
@@ -172,7 +172,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 		params: CorsGetParamsSchema.optional(),
 	// 	},
 	// 	async ({ name, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -211,7 +211,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 		cors_config: CorsRulesSchema,
 	// 	},
 	// 	async ({ name, cors_config }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -250,7 +250,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 		params: CorsDeleteParamsSchema.optional(),
 	// 	},
 	// 	async ({ name, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -286,7 +286,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 	'List all of the domains for an R2 bucket',
 	// 	{ name: BucketNameSchema, params: CustomDomainListParamsSchema.optional() },
 	// 	async ({ name, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -323,7 +323,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 		params: CustomDomainGetParamsSchema.optional(),
 	// 	},
 	// 	async ({ name, domain, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -359,7 +359,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 	'Create a new domain for an R2 bucket',
 	// 	{ name: BucketNameSchema, params: CustomDomainCreateParamsSchema },
 	// 	async ({ name, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -399,7 +399,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 		params: CustomDomainDeleteParamsSchema.optional(),
 	// 	},
 	// 	async ({ name, domain, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -439,7 +439,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 		params: CustomDomainUpdateParamsSchema,
 	// 	},
 	// 	async ({ name, domain, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -475,7 +475,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 	'Get event notifications for an R2 bucket',
 	// 	{ name: BucketNameSchema, params: EventNotificationGetParamsSchema.optional() },
 	// 	async ({ name, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -515,7 +515,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 		params: EventNotificationUpdateParamsSchema.optional(),
 	// 	},
 	// 	async ({ name, queueId, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -555,7 +555,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 		params: EventNotificationDeleteParamsSchema.optional(),
 	// 	},
 	// 	async ({ name, queueId, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -591,7 +591,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 	'Get locks for an R2 bucket',
 	// 	{ name: BucketNameSchema, params: LockGetParamsSchema.optional() },
 	// 	async ({ name, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -624,7 +624,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 	'Update locks for an R2 bucket',
 	// 	{ name: BucketNameSchema, params: LockUpdateParamsSchema },
 	// 	async ({ name, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -657,7 +657,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 	'Create temporary credentials for an R2 bucket',
 	// 	{ params: TemporaryCredentialsCreateParamsSchema },
 	// 	async ({ params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -688,8 +688,8 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 	}
 	// )
 
-	// agent.server.tool('r2_metrics_list', 'List metrics for an R2 bucket', {}, async () => {
-	// 	const account_id = agent.getActiveAccountId()
+	// agent.server.tool('r2_metrics_list', 'List metrics for an R2 bucket', async () => {
+	// 	const account_id = await agent.getActiveAccountId()
 	// 	if (!account_id) {
 	// 		return MISSING_ACCOUNT_ID_RESPONSE
 	// 	}
@@ -721,7 +721,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 	'Get configuration for sippy for an R2 bucket',
 	// 	{ bucketName: BucketNameSchema, params: SippyGetParamsSchema.optional() },
 	// 	async ({ bucketName, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -755,7 +755,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 	'Update configuration for sippy for an R2 bucket',
 	// 	{ bucketName: BucketNameSchema, params: SippyUpdateParamsSchema },
 	// 	async ({ bucketName, params }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}
@@ -788,7 +788,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 	'Delete sippy for an R2 bucket',
 	// 	{ bucketName: BucketNameSchema },
 	// 	async ({ bucketName }) => {
-	// 		const account_id = agent.getActiveAccountId()
+	// 		const account_id = await agent.getActiveAccountId()
 	// 		if (!account_id) {
 	// 			return MISSING_ACCOUNT_ID_RESPONSE
 	// 		}

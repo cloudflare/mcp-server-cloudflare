@@ -1,0 +1,115 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"name": "mcp-cloudflare-radar-dev",
+	"migrations": [
+		{
+			"new_sqlite_classes": ["RadarMCP"],
+			"tag": "v1"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "RadarMCP",
+				"name": "MCP_OBJECT"
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "DEV_KV"
+		}
+	],
+	"vars": {
+		"ENVIRONMENT": "development",
+		"ACCOUNT_ID": "6702657b6aa048cf3081ff3ff3c9c52f",
+		"MCP_SERVER_NAME": "Cloudflare Radar Remote MCP Server - Dev",
+		"MCP_SERVER_VERSION": "1.0.0"
+	},
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-dev"
+		}
+	],
+	"dev": {
+		"port": 8976
+	},
+	"workers_dev": false,
+	"preview_urls": false,
+	"env": {
+		"staging": {
+			"name": "mcp-cloudflare-radar-staging",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "radar-staging.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "RadarMCP",
+						"name": "MCP_OBJECT"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "51342186c2f54c1d82946ffc35e74143"
+				}
+			],
+			"vars": {
+				"ENVIRONMENT": "staging",
+				"ACCOUNT_ID": "6702657b6aa048cf3081ff3ff3c9c52f",
+				"MCP_SERVER_NAME": "Cloudflare Radar Remote MCP Server - Staging",
+				"MCP_SERVER_VERSION": "1.0.0"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-staging"
+				}
+			]
+		},
+		"production": {
+			"name": "mcp-cloudflare-radar-production",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "radar.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "RadarMCP",
+						"name": "MCP_OBJECT"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "5193d970c2cb43a28cc38d4d839b102e"
+				}
+			],
+			"vars": {
+				"ENVIRONMENT": "production",
+				"ACCOUNT_ID": "6702657b6aa048cf3081ff3ff3c9c52f",
+				"MCP_SERVER_NAME": "Cloudflare Radar Remote MCP Server",
+				"MCP_SERVER_VERSION": "1.0.0"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-production"
+				}
+			]
+		}
+	}
+}

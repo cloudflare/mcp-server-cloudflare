@@ -1,6 +1,6 @@
 import { DurableObject } from 'cloudflare:workers'
 
-import { Env } from './index'
+import type { Env } from './context'
 
 export class ContainerManager extends DurableObject<Env> {
 	constructor(

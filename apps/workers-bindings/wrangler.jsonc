@@ -19,6 +19,10 @@
 			{
 				"class_name": "WorkersBindingsMCP",
 				"name": "MCP_OBJECT"
+			},
+			{
+				"class_name": "UserDetails",
+				"name": "USER_DETAILS"
 			}
 		]
 	},
@@ -35,10 +39,20 @@
 		"port": 8976
 	},
 	"vars": {
-		"ENVIRONMENT": "development"
+		"ENVIRONMENT": "development",
+		"MCP_SERVER_NAME": "<PLACEHOLDER>",
+		"MCP_SERVER_VERSION": "<PLACEHOLDER>",
+		"CLOUDFLARE_CLIENT_ID": "<PLACEHOLDER>",
+		"CLOUDFLARE_CLIENT_SECRET": "<PLACEHOLDER>"
 	},
 	"workers_dev": false,
 	"preview_urls": false,
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-dev"
+		}
+	],
 	"env": {
 		"staging": {
 			"name": "mcp-cloudflare-workers-bindings-staging",
@@ -49,6 +63,11 @@
 					{
 						"class_name": "WorkersBindingsMCP",
 						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "UserDetails",
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-staging"
 					}
 				]
 			},
@@ -59,8 +78,16 @@
 				}
 			],
 			"vars": {
-				"ENVIRONMENT": "staging"
-			}
+				"ENVIRONMENT": "staging",
+				"MCP_SERVER_NAME": "workers-bindings-staging",
+				"MCP_SERVER_VERSION": "1.0.0"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-staging"
+				}
+			]
 		},
 		"production": {
 			"name": "mcp-cloudflare-workers-bindings-production",
@@ -71,6 +98,11 @@
 					{
 						"class_name": "WorkersBindingsMCP",
 						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "UserDetails",
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-production"
 					}
 				]
 			},
@@ -81,8 +113,16 @@
 				}
 			],
 			"vars": {
-				"ENVIRONMENT": "production"
-			}
+				"ENVIRONMENT": "production",
+				"MCP_SERVER_NAME": "workers-bindings",
+				"MCP_SERVER_VERSION": "1.0.0"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-production"
+				}
+			]
 		}
 	}
 }

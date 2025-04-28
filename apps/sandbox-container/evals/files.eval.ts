@@ -51,6 +51,7 @@ eachModel('$modelName', ({ model }) => {
 		},
 		scorers: [checkFactuality],
 		threshold: 1,
+		timeout: 60000,
 	})
 
 	describeEval('Runs container file delete', {
@@ -102,5 +103,6 @@ eachModel('$modelName', ({ model }) => {
 		},
 		scorers: [checkFactuality],
 		threshold: 1,
+		timeout: 60000,
 	})
 })

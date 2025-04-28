@@ -123,7 +123,7 @@ export function registerLogsTools(agent: ObservabilityMCP) {
 			rayId: rayIdParam,
 		},
 		async (params) => {
-			const accountId = agent.getActiveAccountId()
+			const accountId = await agent.getActiveAccountId()
 			if (!accountId) {
 				return {
 					content: [
@@ -161,13 +161,14 @@ export function registerLogsTools(agent: ObservabilityMCP) {
 						},
 					],
 				}
-			} catch (error) {
+			} catch (e) {
+				agent.server.recordError(e)
 				return {
 					content: [
 						{
 							type: 'text',
 							text: JSON.stringify({
-								error: `Error analyzing worker logs: ${error instanceof Error && error.message}`,
+								error: `Error analyzing worker logs: ${e instanceof Error && e.message}`,
 							}),
 						},
 					],
@@ -187,7 +188,7 @@ export function registerLogsTools(agent: ObservabilityMCP) {
 			minutesAgoParam,
 		},
 		async (params) => {
-			const accountId = agent.getActiveAccountId()
+			const accountId = await agent.getActiveAccountId()
 			if (!accountId) {
 				return {
 					content: [
@@ -225,13 +226,14 @@ export function registerLogsTools(agent: ObservabilityMCP) {
 						},
 					],
 				}
-			} catch (error) {
+			} catch (e) {
+				agent.server.recordError(e)
 				return {
 					content: [
 						{
 							type: 'text',
 							text: JSON.stringify({
-								error: `Error analyzing logs by Ray ID: ${error instanceof Error && error.message}`,
+								error: `Error analyzing logs by Ray ID: ${e instanceof Error && e.message}`,
 							}),
 						},
 					],
@@ -246,7 +248,7 @@ export function registerLogsTools(agent: ObservabilityMCP) {
 		'Get available telemetry keys for a Cloudflare Worker',
 		{ scriptName: workerNameParam, minutesAgoParam },
 		async (params) => {
-			const accountId = agent.getActiveAccountId()
+			const accountId = await agent.getActiveAccountId()
 			if (!accountId) {
 				return {
 					content: [
@@ -290,13 +292,14 @@ export function registerLogsTools(agent: ObservabilityMCP) {
 						},
 					],
 				}
-			} catch (error) {
+			} catch (e) {
+				agent.server.recordError(e)
 				return {
 					content: [
 						{
 							type: 'text',
 							text: JSON.stringify({
-								error: `Error retrieving worker telemetry keys: ${error instanceof Error && error.message}`,
+								error: `Error retrieving worker telemetry keys: ${e instanceof Error && e.message}`,
 							}),
 						},
 					],

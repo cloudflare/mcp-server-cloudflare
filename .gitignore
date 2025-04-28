@@ -48,5 +48,6 @@ yarn-error.log*
 .sentryclirc.lock/
 tmp.json
 tmp.ts
+.idea
 
 apps/sandbox-container/workdir

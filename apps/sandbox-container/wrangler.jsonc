@@ -49,6 +49,14 @@
 	"vars": {
 		"CLOUDFLARE_CLIENT_ID": "<PLACEHOLDER>",
 		"CLOUDFLARE_CLIENT_SECRET": "<PLACEHOLDER>",
-		"ENVIRONMENT": "development"
-	}
+		"ENVIRONMENT": "dev",
+		"MCP_SERVER_NAME": "<PLACEHOLDER>",
+		"MCP_SERVER_VERSION": "<PLACEHOLDER>"
+	},
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-dev"
+		}
+	]
 }

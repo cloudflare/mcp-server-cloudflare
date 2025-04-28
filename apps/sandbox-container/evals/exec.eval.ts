@@ -52,5 +52,6 @@ eachModel('$modelName', ({ model }) => {
 		},
 		scorers: [checkFactuality],
 		threshold: 1,
+		timeout: 60000,
 	})
 })

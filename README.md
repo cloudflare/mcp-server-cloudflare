@@ -13,17 +13,14 @@ Open Claude Desktop and navigate to Settings -> Developer -> Edit Config. This o
 
 Replace the content with the following configuration. Once you restart Claude Desktop, a browser window will open showing your OAuth login page. Complete the authentication flow to grant Claude access to your MCP server. After you grant access, the tools will become available for you to use.
 
-```
+```json
 {
-  "mcpServers": {
-    "cloudflare": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://observability.mcp.cloudflare.com/sse"
-      ]
-    }
-  }
+	"mcpServers": {
+		"cloudflare": {
+			"command": "npx",
+			"args": ["mcp-remote", "https://observability.mcp.cloudflare.com/sse"]
+		}
+	}
 }
 ```
 
@@ -54,7 +51,8 @@ Some features may require a paid Cloudflare Workers plan. Ensure your Cloudflare
 
 ### Apps
 
-- [workers-observability](apps/workers-observability/): The Workers Observability MCP server
+- [workers-observability](apps/workers-observability): The Workers Observability MCP server
+- [radar](apps/radar): The Cloudflare Radar MCP server
 
 ### Packages
 

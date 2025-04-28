@@ -11,22 +11,25 @@
 		"test:coverage": "run-vitest-coverage"
 	},
 	"dependencies": {
-		"@cloudflare/workers-oauth-provider": "0.0.2",
+		"@cloudflare/workers-oauth-provider": "0.0.3",
 		"@hono/zod-validator": "0.4.3",
-		"@modelcontextprotocol/sdk": "1.9.0",
-		"agents": "0.0.62",
+		"@modelcontextprotocol/sdk": "1.10.2",
+		"@repo/mcp-observability": "workspace:*",
+		"agents": "0.0.67",
 		"cloudflare": "4.2.0",
 		"hono": "4.7.6",
+		"toucan-js": "4.1.1",
 		"zod": "3.24.2"
 	},
 	"devDependencies": {
-		"@cloudflare/types": "6.29.1",
 		"@cloudflare/vitest-pool-workers": "0.8.14",
-		"@cloudflare/workers-types": "4.20250410.0",
 		"@repo/eslint-config": "workspace:*",
 		"@repo/tools": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
+		"@types/node": "22.14.1",
+		"@sentry/types": "8.9.2",
 		"@vitest/ui": "3.0.9",
-		"vitest": "3.0.9"
+		"vitest": "3.0.9",
+		"wrangler": "4.10.0"
 	}
 }

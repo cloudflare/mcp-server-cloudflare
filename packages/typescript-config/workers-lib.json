@@ -4,6 +4,6 @@
 	"include": ["${configDir}/**/*.ts", "${configDir}/**/*.tsx"],
 	"exclude": ["${configDir}/node_modules/", "${configDir}/dist/"],
 	"compilerOptions": {
-		"types": ["@cloudflare/workers-types/2023-07-01", "@cloudflare/vitest-pool-workers"]
+		"types": ["@cloudflare/vitest-pool-workers"]
 	}
 }

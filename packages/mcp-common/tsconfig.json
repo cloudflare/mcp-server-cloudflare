@@ -1,5 +1,8 @@
 {
 	"extends": "@repo/typescript-config/workers-lib.json",
 	"include": ["**/*.ts"],
-	"exclude": ["node_modules", "tsconfig.json"]
+	"exclude": ["node_modules", "tsconfig.json"],
+	"compilerOptions": {
+		"types": ["@cloudflare/vitest-pool-workers"]
+	}
 }
