@@ -64,6 +64,7 @@ export class SecretsStoreMCP extends McpAgent<Env, State, Props> {
 			return null
 		}
 	}
+	
 }
 
 const SecretsStoreScopes = {
