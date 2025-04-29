@@ -8,7 +8,6 @@ import {
 import { getUserDetails, UserDetails } from '@repo/mcp-common/src/durable-objects/user_details'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
-import { initSentryWithUser } from '@repo/mcp-common/src/sentry'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account'
 
@@ -16,12 +15,11 @@ import { MetricsTracker } from '../../../packages/mcp-observability/src'
 import { registerLogsTools } from './tools/logs'
 
 import type { AccountSchema, UserSchema } from '@repo/mcp-common/src/cloudflare-oauth-handler'
-
 import type { Env } from './context'
 
-export { UserDetails }
-
 const env = getEnv<Env>()
+
+export { UserDetails }
 
 const metrics = new MetricsTracker(env.MCP_METRICS, {
 	name: env.MCP_SERVER_NAME,
@@ -64,15 +62,12 @@ export class LogsMCP extends McpAgent<Env, State, Props> {
 				name: this.env.MCP_SERVER_NAME,
 				version: this.env.MCP_SERVER_VERSION,
 			},
-			sentry: initSentryWithUser(env, this.ctx, this.props.user.id),
 		})
-
-		this.props.apiToken = env.CLOUDFLARE_ACCESS_TOKEN
 
 		registerAccountTools(this)
 
-		// Register Cloudflare Workers logs tools
-		registerLogsTools(this)
+		// Register Cloudflare Log Push tools
+		registerLogsTools(this, env.CLOUDFLARE_ACCESS_TOKEN)
 	}
 
 	async getActiveAccountId() {
@@ -97,17 +92,18 @@ export class LogsMCP extends McpAgent<Env, State, Props> {
 	}
 }
 
-const ObservabilityScopes = {
+const LogPushScopes = {
 	...RequiredScopes,
 	'account:read': 'See your account info such as account details, analytics, and memberships.',
-	'logpush:write': 'Grants read and write access to Logpull and Logpush, and read access to Instant Logs. Note that all Logpush API operations require Logs: Write permission because Logpush jobs contain sensitive information.',
+	'logpush:write':
+		'Grants read and write access to Logpull and Logpush, and read access to Instant Logs. Note that all Logpush API operations require Logs: Write permission because Logpush jobs contain sensitive information.',
 } as const
 
 export default new OAuthProvider({
 	apiRoute: '/sse',
 	apiHandler: LogsMCP.mount('/sse'),
 	// @ts-ignore
-	defaultHandler: createAuthHandlers({ scopes: ObservabilityScopes, metrics }),
+	defaultHandler: createAuthHandlers({ scopes: LogPushScopes, metrics }),
 	authorizeEndpoint: '/oauth/authorize',
 	tokenEndpoint: '/token',
 	tokenExchangeCallback: (options) =>

@@ -1,58 +1,67 @@
 import { z } from 'zod'
 
 import { fetchCloudflareApi } from '@repo/mcp-common/src/cloudflare-api'
+
 import type { LogsMCP } from '../index'
 
-const zJobIdentifier = z.number().int().min(1).optional().describe("Unique id of the job.");
-const zEnabled = z.boolean().optional().describe("Flag that indicates if the job is enabled.");
-const zName = z.string()
-  .regex(/^[a-zA-Z0-9\-\.]*$/)
-  .max(512)
-  .nullable()
-  .optional()
-  .describe("Optional human readable job name. Not unique.");
-const zDataset = z.string()
-  .regex(/^[a-zA-Z0-9_\-]*$/)
-  .max(256)
-  .nullable()
-  .optional()
-  .describe("Name of the dataset.");
-const zLastComplete = z.string()
-  .datetime()
-  .nullable()
-  .optional()
-  .describe("Records the last time for which logs have been successfully pushed.");
-const zLastError = z.string()
-  .datetime()
-  .nullable()
-  .optional()
-  .describe("Records the last time the job failed.");
-const zErrorMessage = z.string()
-  .nullable()
-  .optional()
-  .describe("If not null, the job is currently failing.");
+const zJobIdentifier = z.number().int().min(1).optional().describe('Unique id of the job.')
+const zEnabled = z.boolean().optional().describe('Flag that indicates if the job is enabled.')
+const zName = z
+	.string()
+	.regex(/^[a-zA-Z0-9\-\.]*$/)
+	.max(512)
+	.nullable()
+	.optional()
+	.describe('Optional human readable job name. Not unique.')
+const zDataset = z
+	.string()
+	.regex(/^[a-zA-Z0-9_\-]*$/)
+	.max(256)
+	.nullable()
+	.optional()
+	.describe('Name of the dataset.')
+const zLastComplete = z
+	.string()
+	.datetime()
+	.nullable()
+	.optional()
+	.describe('Records the last time for which logs have been successfully pushed.')
+const zLastError = z
+	.string()
+	.datetime()
+	.nullable()
+	.optional()
+	.describe('Records the last time the job failed.')
+const zErrorMessage = z
+	.string()
+	.nullable()
+	.optional()
+	.describe('If not null, the job is currently failing.')
 
-export const zLogpushJob = z.object({
-	id: zJobIdentifier,
-	enabled: zEnabled,
-	name: zName,
-	dataset: zDataset,
-	last_complete: zLastComplete,
-	last_error: zLastError,
-	error_message: zErrorMessage,
-  }).nullable().optional();
-  
-  const zApiResponseCommon = z.object({
+export const zLogpushJob = z
+	.object({
+		id: zJobIdentifier,
+		enabled: zEnabled,
+		name: zName,
+		dataset: zDataset,
+		last_complete: zLastComplete,
+		last_error: zLastError,
+		error_message: zErrorMessage,
+	})
+	.nullable()
+	.optional()
+
+const zApiResponseCommon = z.object({
 	success: z.literal(true),
-	errors: z.array(z.object({ message: z.string() })).optional()
-  });
+	errors: z.array(z.object({ message: z.string() })).optional(),
+})
 
 const zLogPushJobResults = z.array(zLogpushJob).optional()
-  
-  // The complete schema for zone_logpush_job_response_collection
+
+// The complete schema for zone_logpush_job_response_collection
 export const zLogpushJobResponseCollection = zApiResponseCommon.extend({
-	result: zLogPushJobResults
-});
+	result: zLogPushJobResults,
+})
 
 /**
  * Fetches available telemetry keys for a specified Cloudflare Worker
@@ -63,7 +72,7 @@ export const zLogpushJobResponseCollection = zApiResponseCommon.extend({
 
 export async function handleGetAccountLogPushJobs(
 	accountId: string,
-	apiToken: string,
+	apiToken: string
 ): Promise<z.infer<typeof zLogPushJobResults>> {
 	// Call the Public API
 	const data = await fetchCloudflareApi({
@@ -81,9 +90,8 @@ export async function handleGetAccountLogPushJobs(
 	})
 
 	const res = data as z.infer<typeof zLogpushJobResponseCollection>
-	return (res.result.slice(0, 100) || [])
+	return res.result?.slice(0, 100) || []
 }
-
 
 /**
  * Registers the logs analysis tool with the MCP server
@@ -91,7 +99,7 @@ export async function handleGetAccountLogPushJobs(
  * @param accountId Cloudflare account ID
  * @param apiToken Cloudflare API token
  */
-export function registerLogsTools(agent: LogsMCP) {
+export function registerLogsTools(agent: LogsMCP, devToken: string) {
 	// Register the worker logs analysis tool by worker name
 	agent.server.tool(
 		'logpush_jobs_by_account_id',
@@ -117,8 +125,8 @@ export function registerLogsTools(agent: LogsMCP) {
 				}
 			}
 			try {
-				const token = agent.props.apiToken.length > 0 ? agent.props.apiToken : agent.props.accessToken
-				const result  = await handleGetAccountLogPushJobs(accountId, token)
+				const token = devToken.length > 0 ? devToken : agent.props.accessToken
+				const result = await handleGetAccountLogPushJobs(accountId, token)
 				return {
 					content: [
 						{

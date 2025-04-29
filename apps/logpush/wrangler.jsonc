@@ -7,7 +7,7 @@
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
-	"name": "mcp-cloudflare-logs-dev",
+	"name": "mcp-cloudflare-logpush-dev",
 	"migrations": [
 		{
 			"new_sqlite_classes": ["UserDetails", "LogsMCP"],
@@ -55,7 +55,7 @@
 	],
 	"env": {
 		"staging": {
-			"name": "mcp-cloudflare-logs-staging",
+			"name": "mcp-cloudflare-logpush-staging",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "logs-staging.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
@@ -72,13 +72,13 @@
 			},
 			"kv_namespaces": [
 				{
-					"binding": "OAUTH_KV_LOGS_STAGING",
-					"id": "a6ad24203a244d248f2fe1acfeb7b3a3"
+					"binding": "OAUTH_KV_LOGPUSH_STAGING",
+					"id": "3804747ed31344cca8e4ebecd255e417"
 				}
 			],
 			"vars": {
 				"ENVIRONMENT": "staging",
-				"MCP_SERVER_NAME": "logs-staging",
+				"MCP_SERVER_NAME": "logpush-staging",
 				"MCP_SERVER_VERSION": "1.0.0"
 			},
 			"analytics_engine_datasets": [
@@ -89,7 +89,7 @@
 			]
 		},
 		"production": {
-			"name": "mcp-cloudflare-logs-production",
+			"name": "mcp-cloudflare-logpush-production",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "logs.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
@@ -106,13 +106,13 @@
 			},
 			"kv_namespaces": [
 				{
-					"binding": "OAUTH_KV_LOGS_PRODUCTION",
-					"id": "753f27a19ef94d7dbd49de05588ca890"
+					"binding": "OAUTH_KV_LOGPUSH_PRODUCTION",
+					"id": "400ff7a67c824f9698f9e5c25bf51a1c"
 				}
 			],
 			"vars": {
 				"ENVIRONMENT": "production",
-				"MCP_SERVER_NAME": "logs",
+				"MCP_SERVER_NAME": "logpush",
 				"MCP_SERVER_VERSION": "1.0.0"
 			},
 			"analytics_engine_datasets": [
