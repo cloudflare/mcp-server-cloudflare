@@ -6,6 +6,7 @@ import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
 import { env } from 'cloudflare:workers'
 import { AccountGetParams } from 'cloudflare/resources/accounts/accounts.mjs';
 import { ZoneGetParams } from 'cloudflare/resources/dns/settings.mjs';
+import { ZoneListParams } from 'cloudflare/resources/zones/zones.mjs';
 
 //
 function getStartDate(days : number) {
@@ -126,6 +127,57 @@ export function registerAnalyticTools(agent: AnalyticMCP) {
 					zone_id: zone
 				}
 				const result = await client.dns.settings.zone.get(params)
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								result,
+							}),
+						}
+					]
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error fetching DNS report: ${error instanceof Error && error.message}`,
+						}
+					]
+				}
+			}
+
+		}
+	)
+
+	// Register Zone DNS Settings display tool
+	agent.server.tool(
+		"list-zones-under-account",
+		"List zones under the current active account",
+		{},
+		async () => {
+			try {
+				console.log("List zones under the current active account");
+				const client = getCloudflareClient(env.CLOUDFLARE_API_TOKEN)
+				const accountId = agent.getActiveAccountId()
+				if (!accountId) {
+					return {
+						content: [
+							{
+								type: 'text',
+								text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
+							},
+						],
+					}
+				}
+				const zone_list_account : ZoneListParams.Account = {
+					id: accountId
+				}
+				const zone_list_params: ZoneListParams = {
+					account: zone_list_account
+				}
+				const result = await client.zones.list(zone_list_params)
 				return {
 					content: [
 						{
