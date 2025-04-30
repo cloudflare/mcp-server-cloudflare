@@ -17,8 +17,8 @@ import {
 	DomainParam,
 	DomainRankingTypeParam,
 	HttpDimensionParam,
-	L7AttackDimensionParam,
 	IpParam,
+	L7AttackDimensionParam,
 	LocationArrayParam,
 	LocationListParam,
 	LocationParam,
@@ -267,9 +267,10 @@ export function registerRadarTools(agent: RadarMCP) {
 
 	agent.server.tool(
 		'get_http_requests_data',
-		'Retrieve HTTP traffic request trends. Provide either a `dateRange`, or both `dateStart` and `dateEnd`, to define the time window. ' +
+		'Retrieve HTTP requests traffic trends. ' +
 			'Use arrays to compare multiple filters — the array index determines which series each filter value belongs to.' +
-			'For each filter series, you must provide a corresponding `dateRange`, or a `dateStart`/`dateEnd` pair. If the user asks for one statistic related to device type, bot traffic, ip, tls or http version or protocol use summary parameter, otherwise use timeseries or timeseries groups if they ask for breakdown per some dimension. For parsing the results here are some suggestions: Analyze the data if the response is a summary, If the response is a timeseries visualize, the data appropriately, but do not use pie charts. ',
+			'For each filter series, you must provide a corresponding `dateRange`, or a `dateStart`/`dateEnd` pair. ' +
+			'Analyze the results and generate visualizations when appropriate.',
 		{
 			dateRange: DateRangeArrayParam.optional(),
 			dateStart: DateStartArrayParam.optional(),
@@ -324,12 +325,12 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-
 	agent.server.tool(
 		'get_l7_attack_data',
-		'Retrieve L7 app attack trends. Provide either a `dateRange`, or both `dateStart` and `dateEnd`, to define the time window. ' +
+		'Retrieve application layer (L7) attack trends. ' +
 			'Use arrays to compare multiple filters — the array index determines which series each filter value belongs to.' +
-			'For each filter series, you must provide a corresponding `dateRange`, or a `dateStart`/`dateEnd` pair. For each filter series, you must provide a corresponding `dateRange`, or a `dateStart`/`dateEnd` pair. If the user asks for one statistic related to ip, or http version or protocol or mitigation product, use summary parameter, otherwise use timeseries or timeseries groups if they ask for breakdown per some dimension. For parsing the results here are some suggestions: Analyze the data if the response is a summary, If the response is a timeseries, visualize the data appropriately, but do not use pie charts. ',
+			'For each filter series, you must provide a corresponding `dateRange`, or a `dateStart`/`dateEnd` pair. ' +
+			'Analyze the results and generate visualizations when appropriate.',
 		{
 			dateRange: DateRangeArrayParam.optional(),
 			dateStart: DateStartArrayParam.optional(),

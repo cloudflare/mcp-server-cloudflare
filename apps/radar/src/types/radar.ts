@@ -4,8 +4,6 @@
 import { z } from 'zod'
 
 import type { HTTPTimeseriesParams, RankingTopParams } from 'cloudflare/resources/radar'
-import type {  Layer7TimeseriesParams } from 'cloudflare/resources/radar/attacks'
-
 import type { ASNListParams } from 'cloudflare/resources/radar/entities'
 
 export const AsnParam = z
@@ -158,11 +156,12 @@ export const HttpDimensionParam = z
 
 export const L7AttackDimensionParam = z
 	.enum([
-	
 		'httpMethod',
 		'httpVersion',
 		'ipVersion',
 		'mitigationProduct',
+		'managedRules',
+		// TODO: add 'vertical' and 'industry' once they are in the cloudflare API lib
 	])
 	.optional()
 	.describe(
