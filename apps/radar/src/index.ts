@@ -66,9 +66,11 @@ export class RadarMCP extends McpAgent<Env, State, Props> {
 	}
 }
 
-// TODO add radar:read and url_scanner:write scopes once they are available
-// Also remove URL_SCANNER_API_TOKEN env var
-const RadarScopes = { ...RequiredScopes } as const
+const RadarScopes = {
+	...RequiredScopes,
+	// TODO 'radar:read': 'Grants access to read Cloudflare Radar data.',
+	// TODO 'url_scanner:write': 'Grants write level access to URL Scanner', // Remove URL_SCANNER_API_TOKEN env var
+} as const
 
 export default {
 	fetch: async (req: Request, env: Env, ctx: ExecutionContext) => {
