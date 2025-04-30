@@ -55,7 +55,7 @@
 	"env": {
 		"staging": {
 			"name": "mcp-cloudflare-casb-staging",
-			"account_id": "8995c0f49cdcf57eb54d2c1e52b7d2f3",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "casb-staging.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
@@ -73,7 +73,7 @@
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",
-					"id": "18e839155d00407095d793dcf7e78f25"
+					"id": "a5f066bbcf134200b6b3565b0802f9a8"
 				}
 			],
 			"analytics_engine_datasets": [
@@ -84,14 +84,18 @@
 			]
 		},
 		"production": {
-			"name": "mcp-cloudflare-production",
-			"account_id": "8995c0f49cdcf57eb54d2c1e52b7d2f3",
+			"name": "mcp-cloudflare-casb-production",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "casb.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
 					{
 						"class_name": "CASBMCP",
-						"name": "MCP_OBJECT",
+						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "UserDetails",
+						"name": "USER_DETAILS",
 						"script_name": "mcp-cloudflare-workers-observability-production"
 					}
 				]
@@ -99,7 +103,7 @@
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",
-					"id": "f9782295993747df90c29c45ca89edb1"
+					"id": "fef47746f4384a52bad2c56ff8010aee"
 				}
 			],
 			"analytics_engine_datasets": [

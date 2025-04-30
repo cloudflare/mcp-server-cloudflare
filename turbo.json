@@ -1,6 +1,15 @@
 {
 	"$schema": "https://turbo.build/schema.json",
 	"tasks": {
+		"deploy": {
+			"cache": false,
+			"passThroughEnv": [
+				"CLOUDFLARE_ACCOUNT_ID",
+				"CLOUDFLARE_API_TOKEN",
+				"CLOUDFLARE_STAGING_API_TOKEN"
+			],
+			"outputs": ["dist"]
+		},
 		"check": {
 			"dependsOn": ["^check:types", "^check:lint", "check:types", "check:lint"]
 		},
