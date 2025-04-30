@@ -1,5 +1,6 @@
 import { McpAgent } from 'agents/mcp'
 
+import { createApiHandler } from '@repo/mcp-common/src/api-handler'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 
@@ -35,4 +36,4 @@ export class CloudflareDocumentationMCP extends McpAgent<Env, State, Props> {
 	}
 }
 
-export default CloudflareDocumentationMCP.mount('/sse')
+export default createApiHandler(CloudflareDocumentationMCP)

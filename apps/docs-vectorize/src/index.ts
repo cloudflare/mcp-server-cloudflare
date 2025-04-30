@@ -1,5 +1,6 @@
 import { McpAgent } from 'agents/mcp'
 
+import { createApiHandler } from '@repo/mcp-common/src/api-handler'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 
@@ -35,18 +36,4 @@ export class CloudflareDocumentationMCP extends McpAgent<Env, State, Props> {
 	}
 }
 
-export default {
-	fetch(request: Request, env: Env, ctx: ExecutionContext) {
-		const url = new URL(request.url)
-
-		if (url.pathname === '/sse' || url.pathname === '/sse/message') {
-			return CloudflareDocumentationMCP.serveSSE('/sse').fetch(request, env, ctx)
-		}
-
-		if (url.pathname === '/mcp') {
-			return CloudflareDocumentationMCP.serve('/mcp').fetch(request, env, ctx)
-		}
-
-		return new Response('Not found', { status: 404 })
-	},
-}
+export default createApiHandler(CloudflareDocumentationMCP)
