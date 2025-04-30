@@ -1,15 +1,8 @@
-# Model Context Protocol (MCP) Server + Cloudflare OAuth
+# Model Context Protocol (MCP) Server + Cloudflare DNS API Endpoints
 
-This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP connections, with Cloudflare OAuth built-in.
+This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server based on [MCP Server + Cloudflare OAuth](https://github.com/axiapubsub/mcp-server-cloudflare/tree/main/apps/workers-observability). In addition, this MCP server also introduces the tool functions to access DNS information from Cloudflare API Endpoints.
 
-You can deploy it to your own Cloudflare account, and after you create your own Cloudflare OAuth client app, you'll have a fully functional remote MCP server that you can build off. Users will be able to connect to your MCP server by signing in with their Cloudflare account.
-
-You can use this as a reference example for how to integrate other OAuth providers with an MCP server deployed to Cloudflare, using the [`workers-oauth-provider` library](https://github.com/cloudflare/workers-oauth-provider).
-
-The MCP server (powered by [Cloudflare Workers](https://developers.cloudflare.com/workers/)):
-
-- Acts as OAuth _Server_ to your MCP clients
-- Acts as OAuth _Client_ to your _real_ OAuth server (in this case, Cloudflare)
+You can use this as an example for how to integrate MCP server with [Cloudflare API](https://developers.cloudflare.com/api/).
 
 ## Getting Started
 
@@ -20,6 +13,7 @@ The MCP server (powered by [Cloudflare Workers](https://developers.cloudflare.co
 ```bash
 wrangler secret put CLOUDFLARE_CLIENT_ID
 wrangler secret put CLOUDFLARE_CLIENT_SECRET
+wrangler secret put CLOUDFLARE_API_TOKEN
 ```
 
 #### Set up a KV namespace
@@ -69,21 +63,22 @@ Once the Tools (under 🔨) show up in the interface, you can ask Claude to use 
 
 ### For Local Development
 
-If you'd like to iterate and test your MCP server, you can do so in local development. This will require you to create another OAuth App on Cloudflare:
+If you'd like to iterate and test your MCP server, you can do so in local development. This will require you to create another OAuth App and an API Token on Cloudflare:
 
 - Create a `.dev.vars` file in your project root with:
 
 ```
 CLOUDFLARE_CLIENT_ID=your_development_cloudflare_client_id
 CLOUDFLARE_CLIENT_SECRET=your_development_cloudflare_client_secret
+CLOUDFLARE_API_TOKEN=your_development_cloudflare_api_token
 ```
 
 #### Develop & Test
 
-Run the server locally to make it available at `http://localhost:8788`
+Run the server locally to make it available at `http://localhost:8976`
 `wrangler dev`
 
-To test the local server, enter `http://localhost:8788/sse` into Inspector and hit connect. Once you follow the prompts, you'll be able to "List Tools".
+To test the local server, enter `http://localhost:8976/sse` into Inspector and hit connect. Once you follow the prompts, you'll be able to "List Tools".
 
 #### Using Claude and other MCP Clients
 
@@ -96,31 +91,3 @@ To connect Cursor with your MCP server, choose `Type`: "Command" and in the `Com
 Note that while Cursor supports HTTP+SSE servers, it doesn't support authentication, so you still need to use `mcp-remote` (and to use a STDIO server, not an HTTP one).
 
 You can connect your MCP server to other MCP clients like Windsurf by opening the client's configuration file, adding the same JSON that was used for the Claude setup, and restarting the MCP client.
-
-## How does it work?
-
-#### OAuth Provider
-
-The OAuth Provider library serves as a complete OAuth 2.1 server implementation for Cloudflare Workers. It handles the complexities of the OAuth flow, including token issuance, validation, and management. In this project, it plays the dual role of:
-
-- Authenticating MCP clients that connect to your server
-- Managing the connection to Cloudflare's OAuth services
-- Securely storing tokens and authentication state in KV storage
-
-#### Durable MCP
-
-Durable MCP extends the base MCP functionality with Cloudflare's Durable Objects, providing:
-
-- Persistent state management for your MCP server
-- Secure storage of authentication context between requests
-- Access to authenticated user information via `this.props`
-- Support for conditional tool availability based on user identity
-
-#### MCP Remote
-
-The MCP Remote library enables your server to expose tools that can be invoked by MCP clients like the Inspector. It:
-
-- Defines the protocol for communication between clients and your server
-- Provides a structured way to define tools
-- Handles serialization and deserialization of requests and responses
-- Maintains the Server-Sent Events (SSE) connection between clients and your server
