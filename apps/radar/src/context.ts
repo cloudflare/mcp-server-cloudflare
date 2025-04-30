@@ -11,4 +11,7 @@ export interface Env {
 	URL_SCANNER_API_TOKEN: string
 	MCP_OBJECT: DurableObjectNamespace<RadarMCP>
 	MCP_METRICS: AnalyticsEngineDataset
+	DEV_DISABLE_OAUTH: string
+	DEV_CLOUDFLARE_API_TOKEN: string
+	DEV_CLOUDFLARE_EMAIL: string
 }

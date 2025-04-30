@@ -2,6 +2,7 @@ import OAuthProvider from '@cloudflare/workers-oauth-provider'
 
 import {
 	createAuthHandlers,
+	getUserAndAccounts,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import { getEnv } from '@repo/mcp-common/src/env'
@@ -39,8 +40,22 @@ const ContainerScopes = {
 		'See and change Cloudflare Workers data such as zones, KV storage, namespaces, scripts, and routes.',
 } as const
 
+// TODO: Move this in to mcp-common
+async function handleDevMode(req: Request, env: Env, ctx: ExecutionContext) {
+	const { user, accounts } = await getUserAndAccounts(env.DEV_CLOUDFLARE_API_TOKEN, {
+		'X-Auth-Email': env.DEV_CLOUDFLARE_EMAIL,
+		'X-Auth-Key': env.DEV_CLOUDFLARE_API_TOKEN,
+	})
+	ctx.props = {
+		accessToken: env.DEV_CLOUDFLARE_API_TOKEN,
+		user,
+		accounts,
+	} as Props
+	return ContainerMcpAgent.mount('/sse').fetch(req, env, ctx)
+}
+
 export default {
-	fetch: (req: Request, env: Env, ctx: ExecutionContext) => {
+	fetch: async (req: Request, env: Env, ctx: ExecutionContext) => {
 		// @ts-ignore
 		if (env.ENVIRONMENT === 'test') {
 			ctx.props = {
@@ -56,6 +71,10 @@ export default {
 				env as Record<string, DurableObjectNamespace<McpAgent> | any>,
 				ctx
 			)
+		}
+
+		if (env.ENVIRONMENT === 'dev' && env.DEV_DISABLE_OAUTH === 'true') {
+			return await handleDevMode(req, env, ctx)
 		}
 
 		return new OAuthProvider({

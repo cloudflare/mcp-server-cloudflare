@@ -3,9 +3,11 @@ import { McpAgent } from 'agents/mcp'
 
 import {
 	createAuthHandlers,
+	getUserAndAccounts,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import { getEnv } from '@repo/mcp-common/src/env'
+import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { MetricsTracker } from '@repo/mcp-observability'
 
@@ -69,21 +71,44 @@ export class RadarMCP extends McpAgent<Env, State, Props> {
 
 // TODO add radar:read and url_scanner:write scopes once they are available
 // Also remove URL_SCANNER_API_TOKEN env var
-const RadarScopes = {
-	'user:read': 'See your user info such as name, email address, and account memberships.',
-	offline_access: 'Grants refresh tokens for long-lived access.',
-} as const
+const RadarScopes = { ...RequiredScopes } as const
 
-export default new OAuthProvider({
-	apiRoute: '/sse',
-	apiHandler: RadarMCP.mount('/sse'),
-	// @ts-ignore
-	defaultHandler: createAuthHandlers({ scopes: RadarScopes, metrics }),
-	authorizeEndpoint: '/oauth/authorize',
-	tokenEndpoint: '/token',
-	tokenExchangeCallback: (options) =>
-		handleTokenExchangeCallback(options, env.CLOUDFLARE_CLIENT_ID, env.CLOUDFLARE_CLIENT_SECRET),
-	// Cloudflare access token TTL
-	accessTokenTTL: 3600,
-	clientRegistrationEndpoint: '/register',
-})
+// TODO: Move this in to mcp-common
+async function handleDevMode(req: Request, env: Env, ctx: ExecutionContext) {
+	const { user, accounts } = await getUserAndAccounts(env.DEV_CLOUDFLARE_API_TOKEN, {
+		'X-Auth-Email': env.DEV_CLOUDFLARE_EMAIL,
+		'X-Auth-Key': env.DEV_CLOUDFLARE_API_TOKEN,
+	})
+	ctx.props = {
+		accessToken: env.DEV_CLOUDFLARE_API_TOKEN,
+		user,
+		accounts,
+	} as Props
+	return RadarMCP.mount('/sse').fetch(req, env, ctx)
+}
+
+export default {
+	fetch: async (req: Request, env: Env, ctx: ExecutionContext) => {
+		if (env.ENVIRONMENT === 'development' && env.DEV_DISABLE_OAUTH === 'true') {
+			return await handleDevMode(req, env, ctx)
+		}
+
+		return new OAuthProvider({
+			apiRoute: '/sse',
+			apiHandler: RadarMCP.mount('/sse'),
+			// @ts-ignore
+			defaultHandler: createAuthHandlers({ scopes: RadarScopes, metrics }),
+			authorizeEndpoint: '/oauth/authorize',
+			tokenEndpoint: '/token',
+			tokenExchangeCallback: (options) =>
+				handleTokenExchangeCallback(
+					options,
+					env.CLOUDFLARE_CLIENT_ID,
+					env.CLOUDFLARE_CLIENT_SECRET
+				),
+			// Cloudflare access token TTL
+			accessTokenTTL: 3600,
+			clientRegistrationEndpoint: '/register',
+		}).fetch(req, env, ctx)
+	},
+}

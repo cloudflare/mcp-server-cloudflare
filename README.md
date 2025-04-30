@@ -1,24 +1,34 @@
 # Cloudflare MCP Server
 
-Model Context Protocol (MCP) is a [new, standardized protocol](https://modelcontextprotocol.io/introduction) for managing context between large language models (LLMs) and external systems. In this repository, we provide an installer as well as an MCP Server for [Cloudflare's API](https://api.cloudflare.com).
+Model Context Protocol (MCP) is a [new, standardized protocol](https://modelcontextprotocol.io/introduction) for managing context between large language models (LLMs) and external systems. In this repository, you can find several MCP servers allowing you to connect to Cloudflare's service from an MCP client (e.g. Cursor, Claude) and use natural language to accomplish tasks through your Cloudflare account.
 
-This lets you use Claude Desktop, or any MCP Client, to use natural language to accomplish things on your Cloudflare account, e.g.:
+These MCP servers allow your [MCP Client](https://modelcontextprotocol.io/clients) to read configurations from your account, process information, make suggestions based on data, and even make those suggested changes for you. All of these actions can happen across cloudflare's many services including application development, security and performance.
 
-- `List all the Cloudflare workers on my <some-email>@gmail.com account.`
-- `Can you tell me about any potential issues on this particular worker '...'?`
+The following servers are included in this repository:
 
-## Access the remote MCP server from Claude Desktop
+| Server Name                                     | Description                                                                  | Server URL                                     |
+| ----------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
+| [**Documentation server**](/apps/docs-autorag)  | Get up to date reference information on Cloudflare                           | `https://docs.mcp.cloudflare.com/sse`          |
+| [**Workers Bindings server**](/apps/bindings)   | Build Workers applications with storage, AI, and compute primitives          | `https://bindings.mcp.cloudflare.com/sse`      |
+| [**Observability server**](/apps/observability) | Debug and get insight into your application’s logs and analytics             | `https://observability.mcp.cloudflare.com/sse` |
+| [**Radar server**](/apps/radar)                 | Get global Internet traffic insights, trends, URL scans, and other utilities | `https://radar.mcp.cloudflare.com/sse`         |
 
-Open Claude Desktop and navigate to Settings -> Developer -> Edit Config. This opens the configuration file that controls which MCP servers Claude can access.
+## Access the remote MCP server from any MCP client
 
-Replace the content with the following configuration. Once you restart Claude Desktop, a browser window will open showing your OAuth login page. Complete the authentication flow to grant Claude access to your MCP server. After you grant access, the tools will become available for you to use.
+If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL directly within its interface (e.g. [Cloudflare AI Playground](https://playground.ai.cloudflare.com/))
+
+If your client does not yet support remote MCP servers, you will need to set up its resepective configuration file using mcp-remote (https://www.npmjs.com/package/mcp-remote) to specify which servers your client can access.
 
 ```json
 {
 	"mcpServers": {
-		"cloudflare": {
+		"cloudflare-observability": {
 			"command": "npx",
 			"args": ["mcp-remote", "https://observability.mcp.cloudflare.com/sse"]
+		},
+		"cloudflare-bindings": {
+			"command": "npx",
+			"args": ["mcp-remote", "https://bindings.mcp.cloudflare.com/sse"]
 		}
 	}
 }
@@ -26,66 +36,12 @@ Replace the content with the following configuration. Once you restart Claude De
 
 ## Need access to more Cloudflare tools?
 
-We're gradually moving over functionality to this remote MCP server repo. In the meantime please take a look at the local only mcp-server-cloudflare package which currently has more tools available.
-
-Visit <https://www.npmjs.com/package/@cloudflare/mcp-server-cloudflare>
+We're continuing to add more functionality to this remote MCP server repo. If you'd like to leave feedback, file a bug or provide a feature request, [please open an issue](https://github.com/cloudflare/mcp-server-cloudflare/issues/new/choose) on this repository
 
 ## Paid Features
 
 Some features may require a paid Cloudflare Workers plan. Ensure your Cloudflare account has the necessary subscription level for the features you intend to use.
 
-## Features
-
-### Workers Management
-
-- `worker_list`: List all Workers in your account
-- `worker_get_worker`: Get a Worker's script content
-
-### Workers Logs
-
-- `worker_logs_by_worker_name`: Analyze recent logs for a Cloudflare Worker by worker name
-- `worker_logs_by_ray_id`: Analyze recent logs across all workers for a specific request by Cloudflare Ray ID
-- `worker_logs_keys`: Get available telemetry keys for a Cloudflare Worker
-
-## Developing
-
-### Apps
-
-- [workers-observability](apps/workers-observability): The Workers Observability MCP server
-- [radar](apps/radar): The Cloudflare Radar MCP server
-
-### Packages
-
-- eslint-config: Eslint config used by all apps and packages.
-- typescript-config: tsconfig used by all apps and packages.
-- mcp-common: Shared common tools and scripts to help manage this repo.
-
-For more details on development in this monorepo, take a look at apps/workers-observability
-
-## Testing
-
-The project uses Vitest as the testing framework with MSW (Mock Service Worker) for API mocking.
-
-### Running Tests
-
-To run all tests:
-
-```bash
-pnpm test
-```
-
-To run a specific test file:
-
-```bash
-pnpm test -- tests/tools/queues.test.ts
-```
-
-To run tests in watch mode (useful during development):
-
-```bash
-pnpm test:watch
-```
-
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Interested in contributing, and running this server locally? See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.

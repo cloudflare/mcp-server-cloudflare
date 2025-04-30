@@ -12,4 +12,7 @@ export interface Env {
 	CONTAINER_MANAGER: DurableObjectNamespace<ContainerManager>
 	MCP_METRICS: AnalyticsEngineDataset
 	AI: Ai
+	DEV_DISABLE_OAUTH: string
+	DEV_CLOUDFLARE_API_TOKEN: string
+	DEV_CLOUDFLARE_EMAIL: string
 }

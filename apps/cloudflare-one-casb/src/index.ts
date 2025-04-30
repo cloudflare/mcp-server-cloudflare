@@ -7,6 +7,7 @@ import {
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import { getUserDetails, UserDetails } from '@repo/mcp-common/src/durable-objects/user_details'
 import { getEnv } from '@repo/mcp-common/src/env'
+import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account'
 
@@ -86,10 +87,9 @@ export class CASBMCP extends McpAgent<Env, State, Props> {
 	}
 }
 const CloudflareOneCasbScopes = {
+	...RequiredScopes,
 	'account:read': 'See your account info such as account details, analytics, and memberships.',
-	'user:read': 'See your user info such as name, email address, and account memberships.',
 	'teams:read': 'See Cloudflare One Resources',
-	offline_access: 'Grants refresh tokens for long-lived access.',
 } as const
 
 export default new OAuthProvider({

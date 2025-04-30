@@ -3,6 +3,7 @@ import { McpAgent } from 'agents/mcp'
 
 import {
 	createAuthHandlers,
+	getUserAndAccounts,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import { getUserDetails, UserDetails } from '@repo/mcp-common/src/durable-objects/user_details'
@@ -96,16 +97,42 @@ const DexScopes = {
 	'dex:read': 'See Cloudflare Cloudflare DEX data for your account',
 } as const
 
-export default new OAuthProvider({
-	apiRoute: '/sse',
-	apiHandler: CloudflareDEXMCP.mount('/sse'),
-	// @ts-ignore
-	defaultHandler: createAuthHandlers({ scopes: DexScopes, metrics }),
-	authorizeEndpoint: '/oauth/authorize',
-	tokenEndpoint: '/token',
-	tokenExchangeCallback: (options) =>
-		handleTokenExchangeCallback(options, env.CLOUDFLARE_CLIENT_ID, env.CLOUDFLARE_CLIENT_SECRET),
-	// Cloudflare access token TTL
-	accessTokenTTL: 3600,
-	clientRegistrationEndpoint: '/register',
-})
+// TODO: Move this in to mcp-common
+async function handleDevMode(req: Request, env: Env, ctx: ExecutionContext) {
+	const { user, accounts } = await getUserAndAccounts(env.DEV_CLOUDFLARE_API_TOKEN, {
+		'X-Auth-Email': env.DEV_CLOUDFLARE_EMAIL,
+		'X-Auth-Key': env.DEV_CLOUDFLARE_API_TOKEN,
+	})
+	ctx.props = {
+		accessToken: env.DEV_CLOUDFLARE_API_TOKEN,
+		user,
+		accounts,
+	} as Props
+	return CloudflareDEXMCP.mount('/sse').fetch(req, env, ctx)
+}
+
+export default {
+	fetch: async (req: Request, env: Env, ctx: ExecutionContext) => {
+		if (env.ENVIRONMENT === 'development' && env.DEV_DISABLE_OAUTH === 'true') {
+			return await handleDevMode(req, env, ctx)
+		}
+
+		return new OAuthProvider({
+			apiRoute: '/sse',
+			apiHandler: CloudflareDEXMCP.mount('/sse'),
+			// @ts-ignore
+			defaultHandler: createAuthHandlers({ scopes: DexScopes, metrics }),
+			authorizeEndpoint: '/oauth/authorize',
+			tokenEndpoint: '/token',
+			tokenExchangeCallback: (options) =>
+				handleTokenExchangeCallback(
+					options,
+					env.CLOUDFLARE_CLIENT_ID,
+					env.CLOUDFLARE_CLIENT_SECRET
+				),
+			// Cloudflare access token TTL
+			accessTokenTTL: 3600,
+			clientRegistrationEndpoint: '/register',
+		}).fetch(req, env, ctx)
+	},
+}

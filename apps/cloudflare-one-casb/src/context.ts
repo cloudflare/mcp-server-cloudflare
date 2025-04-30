@@ -7,9 +7,10 @@ export interface Env {
 	MCP_OBJECT: DurableObjectNamespace<CASBMCP>
 	MCP_METRICS: AnalyticsEngineDataset
 	AI: Ai
-
 	CLOUDFLARE_CLIENT_ID: string
 	CLOUDFLARE_CLIENT_SECRET: string
-
 	USER_DETAILS: DurableObjectNamespace<UserDetails>
+	DEV_DISABLE_OAUTH: string
+	DEV_CLOUDFLARE_API_TOKEN: string
+	DEV_CLOUDFLARE_EMAIL: string
 }

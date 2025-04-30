@@ -2,7 +2,7 @@
  * For more details on how to configure Wrangler, refer to:
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
- {
+{
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-10",
@@ -80,7 +80,7 @@
 					"binding": "MCP_METRICS",
 					"dataset": "mcp-metrics-staging"
 				}
-			],
+			]
 		},
 		"production": {
 			"name": "mcp-cloudflare-workers-dex-production",
@@ -113,7 +113,7 @@
 					"binding": "MCP_METRICS",
 					"dataset": "mcp-metrics-production"
 				}
-			],
+			]
 		}
 	}
 }

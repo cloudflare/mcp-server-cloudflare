@@ -11,4 +11,7 @@ export interface Env {
 	MCP_OBJECT: DurableObjectNamespace<CloudflareDEXMCP>
 	USER_DETAILS: DurableObjectNamespace<UserDetails>
 	MCP_METRICS: AnalyticsEngineDataset
+	DEV_DISABLE_OAUTH: string
+	DEV_CLOUDFLARE_API_TOKEN: string
+	DEV_CLOUDFLARE_EMAIL: string
 }
