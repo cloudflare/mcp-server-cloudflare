@@ -20,6 +20,14 @@ export function registerAccountTools(agent: CloudflareMcpAgent) {
 					if (!b.created_on) return -1
 					return new Date(b.created_on).getTime() - new Date(a.created_on).getTime()
 				})
+				// Remove fields not needed by the LLM
+				.map((account) => {
+					return {
+						id: account.id,
+						name: account.name,
+						created_on: account.created_on,
+					}
+				})
 
 			return {
 				content: [
