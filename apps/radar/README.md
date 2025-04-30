@@ -13,6 +13,7 @@ Currently available tools:
 | **Category**           | **Tool**                  | **Description**                                                                                                           |
 | ---------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | **HTTP Requests**      | `get_http_requests_data`  | Fetches HTTP request data (timeseries, summaries, and grouped timeseries across dimensions like `deviceType`, `botClass`) |
+| **L7 Attacks**      | `get_l7_attack_data`  | Fetches L7 attack data (timeseries, summaries, and grouped timeseries across dimensions like `mitigationProduct`, `ipVersion`) |
 | **Autonomous Systems** | `list_autonomous_systems` | Lists ASes; filter by location and sort by population size                                                                |
 |                        | `get_as_details`          | Retrieves detailed info for a specific ASN                                                                                |
 | **IP Addresses**       | `get_ip_details`          | Provides details about a specific IP address                                                                              |

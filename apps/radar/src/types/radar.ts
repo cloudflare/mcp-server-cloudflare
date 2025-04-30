@@ -4,6 +4,8 @@
 import { z } from 'zod'
 
 import type { HTTPTimeseriesParams, RankingTopParams } from 'cloudflare/resources/radar'
+import type {  Layer7TimeseriesParams } from 'cloudflare/resources/radar/attacks'
+
 import type { ASNListParams } from 'cloudflare/resources/radar/entities'
 
 export const AsnParam = z
@@ -152,4 +154,17 @@ export const HttpDimensionParam = z
 	.optional()
 	.describe(
 		"Dimension used to group HTTP data. Allowed only when the format is 'summary' or 'timeseriesGroups'."
+	)
+
+export const L7AttackDimensionParam = z
+	.enum([
+	
+		'httpMethod',
+		'httpVersion',
+		'ipVersion',
+		'mitigationProduct',
+	])
+	.optional()
+	.describe(
+		"Dimension used to group L7 attack data. Allowed only when the format is 'summary' or 'timeseriesGroups'."
 	)

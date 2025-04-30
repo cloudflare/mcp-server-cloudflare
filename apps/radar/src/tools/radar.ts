@@ -17,6 +17,7 @@ import {
 	DomainParam,
 	DomainRankingTypeParam,
 	HttpDimensionParam,
+	L7AttackDimensionParam,
 	IpParam,
 	LocationArrayParam,
 	LocationListParam,
@@ -268,7 +269,7 @@ export function registerRadarTools(agent: RadarMCP) {
 		'get_http_requests_data',
 		'Retrieve HTTP request trends. Provide either a `dateRange`, or both `dateStart` and `dateEnd`, to define the time window. ' +
 			'Use arrays to compare multiple filters — the array index determines which series each filter value belongs to.' +
-			'For each filter series, you must provide a corresponding `dateRange`, or a `dateStart`/`dateEnd` pair.',
+			'For each filter series, you must provide a corresponding `dateRange`, or a `dateStart`/`dateEnd` pair. For parsing the results here are some suggestions: Analyze the data if the response is a summary, If the response is a timeseries visualize the data',
 		{
 			dateRange: DateRangeArrayParam.optional(),
 			dateStart: DateStartArrayParam.optional(),
@@ -316,6 +317,66 @@ export function registerRadarTools(agent: RadarMCP) {
 						{
 							type: 'text',
 							text: `Error getting HTTP data: ${error instanceof Error && error.message}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+
+	agent.server.tool(
+		'get_l7_attack_data',
+		'Retrieve L7 app attack trends. Provide either a `dateRange`, or both `dateStart` and `dateEnd`, to define the time window. ' +
+			'Use arrays to compare multiple filters — the array index determines which series each filter value belongs to.' +
+			'For each filter series, you must provide a corresponding `dateRange`, or a `dateStart`/`dateEnd` pair.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			asn: AsnArrayParam,
+			continent: ContinentArrayParam,
+			location: LocationArrayParam,
+			format: DataFormatParam,
+			dimension: L7AttackDimensionParam,
+		},
+		async ({ dateStart, dateEnd, dateRange, asn, location, continent, format, dimension }) => {
+			try {
+				if (format !== 'timeseries' && !dimension) {
+					throw new Error(`The '${format}' format requires a 'dimension' to group the data.`)
+				}
+
+				const client = getCloudflareClient(agent.props.accessToken)
+				const endpoint = (...args: any) =>
+					format === 'timeseries'
+						? client.radar.attacks.layer7[format](...args)
+						: client.radar.attacks.layer7[format][dimension!](...args)
+
+				const r = await endpoint({
+					asn,
+					continent,
+					location,
+					dateRange,
+					dateStart,
+					dateEnd,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								result: r,
+							}),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting L7 attack data: ${error instanceof Error && error.message}`,
 						},
 					],
 				}
