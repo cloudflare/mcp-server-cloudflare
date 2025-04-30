@@ -1,0 +1,46 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+	"routes": [{ "pattern": "demo-day.mcp.cloudflare.com", "custom_domain": true }],
+	"name": "mcp-cloudflare-demo-day",
+	"migrations": [
+		{
+			"new_sqlite_classes": ["CloudflareDemoDayMCP"],
+			"tag": "v1"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "CloudflareDemoDayMCP",
+				"name": "MCP_OBJECT"
+			}
+		]
+	},
+	"assets": {
+		"directory": "./frontend",
+		"binding": "ASSETS"
+	},
+	"vars": {
+		"ENVIRONMENT": "development",
+		"MCP_SERVER_NAME": "PLACEHOLDER",
+		"MCP_SERVER_VERSION": "PLACEHOLDER"
+	},
+	"dev": {
+		"port": 8976
+	},
+	"workers_dev": false,
+	"preview_urls": false,
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-production"
+		}
+	]
+}

@@ -1,0 +1,128 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"name": "mcp-cloudflare-logpush-dev",
+	"migrations": [
+		{
+			"new_sqlite_classes": ["LogsMCP"],
+			"tag": "v1"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "LogsMCP",
+				"name": "MCP_OBJECT"
+			},
+			{
+				"class_name": "UserDetails",
+				"name": "USER_DETAILS"
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "DEV_KV"
+		}
+	],
+	"vars": {
+		"ENVIRONMENT": "development",
+		"MCP_SERVER_NAME": "<PLACEHOLDER>",
+		"MCP_SERVER_VERSION": "<PLACEHOLDER>",
+		"CLOUDFLARE_CLIENT_ID": "<PLACEHOLDER>",
+		"CLOUDFLARE_CLIENT_SECRET": "<PLACEHOLDER>"
+	},
+	"dev": {
+		"port": 8976
+	},
+	"workers_dev": false,
+	"preview_urls": false,
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-dev"
+		}
+	],
+	"env": {
+		"staging": {
+			"name": "mcp-cloudflare-logpush-staging",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "logs-staging.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "LogsMCP",
+						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "UserDetails",
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-staging"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "3804747ed31344cca8e4ebecd255e417"
+				}
+			],
+			"vars": {
+				"ENVIRONMENT": "staging",
+				"MCP_SERVER_NAME": "logpush-staging",
+				"MCP_SERVER_VERSION": "1.0.0"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-staging"
+				}
+			]
+		},
+		"production": {
+			"name": "mcp-cloudflare-logpush-production",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "logs.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "LogsMCP",
+						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "UserDetails",
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-production"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "400ff7a67c824f9698f9e5c25bf51a1c"
+				}
+			],
+			"vars": {
+				"ENVIRONMENT": "production",
+				"MCP_SERVER_NAME": "logpush",
+				"MCP_SERVER_VERSION": "1.0.0"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-production"
+				}
+			]
+		}
+	}
+}

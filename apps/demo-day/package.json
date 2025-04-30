@@ -1,0 +1,29 @@
+{
+	"name": "demo-day",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"check:types": "run-tsc",
+		"deploy": "run-wrangler-deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"types": "wrangler types --include-env=false",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "1.10.2",
+		"@repo/mcp-common": "workspace:*",
+		"@repo/mcp-observability": "workspace:*",
+		"@types/node": "22.14.1",
+		"agents": "0.0.67",
+		"zod": "3.24.2"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "0.8.14",
+		"@types/node": "22.14.1",
+		"prettier": "3.5.3",
+		"typescript": "5.5.4",
+		"vitest": "3.0.9",
+		"wrangler": "4.10.0"
+	}
+}

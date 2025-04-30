@@ -1,19 +1,25 @@
 import OAuthProvider from '@cloudflare/workers-oauth-provider'
-import { McpAgent } from 'agents/mcp'
-import { env } from 'cloudflare:workers'
 
+import { createApiHandler } from '@repo/mcp-common/src/api-handler'
 import {
 	createAuthHandlers,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
+import { handleDevMode } from '@repo/mcp-common/src/dev-mode'
+import { getEnv } from '@repo/mcp-common/src/env'
+import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { MetricsTracker } from '@repo/mcp-observability'
 
 import { ContainerManager } from './containerManager'
 import { ContainerMcpAgent } from './containerMcp'
 
-import type { AccountSchema, UserSchema } from '@repo/mcp-common/src/cloudflare-oauth-handler'
+import type { McpAgent } from 'agents/mcp'
+import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
+import type { Env } from './context'
 
 export { ContainerManager, ContainerMcpAgent }
+
+const env = getEnv<Env>()
 
 const metrics = new MetricsTracker(env.MCP_METRICS, {
 	name: env.MCP_SERVER_NAME,
@@ -22,23 +28,17 @@ const metrics = new MetricsTracker(env.MCP_METRICS, {
 
 // Context from the auth process, encrypted & stored in the auth token
 // and provided to the DurableMCP as this.props
-export type Props = {
-	accessToken: string
-	user: UserSchema['result']
-	accounts: AccountSchema['result']
-}
+export type Props = AuthProps
 
 const ContainerScopes = {
+	...RequiredScopes,
 	'account:read': 'See your account info such as account details, analytics, and memberships.',
-	'user:read': 'See your user info such as name, email address, and account memberships.',
 	'workers:write':
 		'See and change Cloudflare Workers data such as zones, KV storage, namespaces, scripts, and routes.',
-	'workers_observability:read': 'See observability logs for your account',
-	offline_access: 'Grants refresh tokens for long-lived access.',
 } as const
 
 export default {
-	fetch: (req: Request, env: Env, ctx: ExecutionContext) => {
+	fetch: async (req: Request, env: Env, ctx: ExecutionContext) => {
 		// @ts-ignore
 		if (env.ENVIRONMENT === 'test') {
 			ctx.props = {
@@ -56,10 +56,13 @@ export default {
 			)
 		}
 
+		if (env.ENVIRONMENT === 'dev' && env.DEV_DISABLE_OAUTH === 'true') {
+			return await handleDevMode(ContainerMcpAgent, req, env, ctx)
+		}
+
 		return new OAuthProvider({
-			apiRoute: '/sse',
-			// @ts-ignore
-			apiHandler: ContainerMcpAgent.mount('/sse', { binding: 'CONTAINER_MCP_AGENT' }),
+			apiRoute: ['/mcp', '/sse'],
+			apiHandler: createApiHandler(ContainerMcpAgent, { binding: 'CONTAINER_MCP_AGENT' }),
 			// @ts-ignore
 			defaultHandler: createAuthHandlers({ scopes: ContainerScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',
@@ -75,6 +78,4 @@ export default {
 			clientRegistrationEndpoint: '/register',
 		}).fetch(req, env, ctx)
 	},
-} /*
-	
-*/
+}

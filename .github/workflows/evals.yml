@@ -22,9 +22,12 @@ jobs:
       - name: Create .dev.vars file
         run: |
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > ./apps/sandbox-container/.dev.vars
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > ./apps/workers-bindings/.dev.vars
+          echo "DEV_CLOUDFLARE_API_TOKEN=${{ secrets.DEV_CLOUDFLARE_API_TOKEN }}" >> ./apps/workers-bindings/.dev.vars
       - name: Verify .dev.vars file
         run: |
           du -h ./apps/sandbox-container/.dev.vars
+          du -h ./apps/workers-bindings/.dev.vars
       - name: Install dependencies
         run: pnpm install
       - name: Run evals

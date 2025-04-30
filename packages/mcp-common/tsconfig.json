@@ -3,6 +3,6 @@
 	"include": ["**/*.ts"],
 	"exclude": ["node_modules", "tsconfig.json"],
 	"compilerOptions": {
-		"types": ["@cloudflare/workers-types/2023-07-01", "@cloudflare/vitest-pool-workers"]
+		"types": ["@cloudflare/vitest-pool-workers"]
 	}
 }

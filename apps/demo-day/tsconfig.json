@@ -1,0 +1,7 @@
+{
+	"extends": "@repo/typescript-config/workers.json",
+	"include": ["src/index.ts"],
+	"compilerOptions": {
+		"types": ["@types/node"]
+	}
+}

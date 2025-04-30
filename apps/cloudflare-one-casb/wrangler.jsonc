@@ -1,0 +1,117 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"migrations": [
+		{
+			"new_sqlite_classes": ["CASBMCP"],
+			"tag": "v1"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"vars": {
+		"MCP_SERVER_NAME": "PLACEHOLDER",
+		"MCP_SERVER_VERSION": "PLACEHOLDER",
+		"CLOUDFLARE_CLIENT_ID": "<PLACEHOLDER>",
+		"CLOUDFLARE_CLIENT_SECRET": "<PLACEHOLDER>"
+	},
+
+	"dev": {
+		"port": 8976
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "CASBMCP",
+				"name": "MCP_OBJECT"
+			},
+			{
+				"class_name": "UserDetails",
+				"name": "USER_DETAILS"
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "DEV_KV"
+		}
+	],
+	"workers_dev": false,
+	"preview_urls": false,
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-dev"
+		}
+	],
+	"env": {
+		"staging": {
+			"name": "mcp-cloudflare-casb-staging",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "casb-staging.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "CASBMCP",
+						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "UserDetails",
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-staging"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "a5f066bbcf134200b6b3565b0802f9a8"
+				}
+			],
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-staging"
+				}
+			]
+		},
+		"production": {
+			"name": "mcp-cloudflare-casb-production",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "casb.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "CASBMCP",
+						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "UserDetails",
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-production"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "fef47746f4384a52bad2c56ff8010aee"
+				}
+			],
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-production"
+				}
+			]
+		}
+	}
+}

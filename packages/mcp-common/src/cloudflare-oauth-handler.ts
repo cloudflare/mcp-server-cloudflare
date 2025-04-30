@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { AuthUser } from '../../mcp-observability/src'
 import { getAuthorizationURL, getAuthToken, refreshAuthToken } from './cloudflare-auth'
 import { McpError } from './mcp-error'
+import { useSentry } from './sentry'
 
 import type {
 	OAuthHelpers,
@@ -13,6 +14,7 @@ import type {
 } from '@cloudflare/workers-oauth-provider'
 import type { Context } from 'hono'
 import type { MetricsTracker } from '../../mcp-observability/src'
+import type { BaseHonoContext } from './sentry'
 
 type AuthContext = {
 	Bindings: {
@@ -20,7 +22,7 @@ type AuthContext = {
 		CLOUDFLARE_CLIENT_ID: string
 		CLOUDFLARE_CLIENT_SECRET: string
 	}
-}
+} & BaseHonoContext
 
 const AuthRequestSchema = z.object({
 	responseType: z.string(),
@@ -61,7 +63,48 @@ const AccountResponseSchema = z.object({
 	),
 })
 
-async function getTokenAndUser(
+export type AuthProps = {
+	accessToken: string
+	user: UserSchema['result']
+	accounts: AccountSchema['result']
+}
+
+export async function getUserAndAccounts(
+	accessToken: string,
+	devModeHeaders?: HeadersInit
+): Promise<{ user: UserSchema['result']; accounts: AccountSchema['result'] }> {
+	const headers = devModeHeaders
+		? devModeHeaders
+		: {
+				Authorization: `Bearer ${accessToken}`,
+			}
+
+	const [userResponse, accountsResponse] = await Promise.all([
+		fetch('https://api.cloudflare.com/client/v4/user', {
+			headers,
+		}),
+		fetch('https://api.cloudflare.com/client/v4/accounts', {
+			headers,
+		}),
+	])
+
+	if (!userResponse.ok) {
+		console.log(await userResponse.text())
+		throw new McpError('Failed to fetch user', 500, { reportToSentry: true })
+	}
+	if (!accountsResponse.ok) {
+		console.log(await accountsResponse.text())
+		throw new McpError('Failed to fetch accounts', 500, { reportToSentry: true })
+	}
+
+	// Fetch the user & accounts info from Cloudflare
+	const { result: user } = UserResponseSchema.parse(await userResponse.json())
+	const { result: accounts } = AccountResponseSchema.parse(await accountsResponse.json())
+
+	return { user, accounts }
+}
+
+async function getTokenAndUserDetails(
 	c: Context<AuthContext>,
 	code: string,
 	code_verifier: string
@@ -79,31 +122,8 @@ async function getTokenAndUser(
 		code,
 		code_verifier,
 	})
-	const [userResponse, accountsResponse] = await Promise.all([
-		fetch('https://api.cloudflare.com/client/v4/user', {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-		}),
-		fetch('https://api.cloudflare.com/client/v4/accounts', {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-		}),
-	])
 
-	if (!userResponse.ok) {
-		console.log(await userResponse.text())
-		throw new McpError('Failed to fetch user', 500)
-	}
-	if (!accountsResponse.ok) {
-		console.log(await accountsResponse.text())
-		throw new McpError('Failed to fetch accounts', 500)
-	}
-
-	// Fetch the user & accounts info from Cloudflare
-	const { result: user } = UserResponseSchema.parse(await userResponse.json())
-	const { result: accounts } = AccountResponseSchema.parse(await accountsResponse.json())
+	const { user, accounts } = await getUserAndAccounts(accessToken)
 
 	return { accessToken, refreshToken, user, accounts }
 }
@@ -153,6 +173,9 @@ export function createAuthHandlers({
 }) {
 	{
 		const app = new Hono<AuthContext>()
+		app.use(useSentry)
+		// TODO: Add useOnError middleware rather than handling errors in each handler
+		// app.onError(useOnError)
 		/**
 		 * OAuth Authorization Endpoint
 		 *
@@ -178,6 +201,7 @@ export function createAuthHandlers({
 
 				return Response.redirect(res.authUrl, 302)
 			} catch (e) {
+				c.var.sentry?.recordError(e)
 				if (e instanceof Error) {
 					metrics.logEvent(
 						new AuthUser({
@@ -211,7 +235,7 @@ export function createAuthHandlers({
 				}
 
 				const [{ accessToken, refreshToken, user, accounts }] = await Promise.all([
-					getTokenAndUser(c, code, oauthReqInfo.codeVerifier),
+					getTokenAndUserDetails(c, code, oauthReqInfo.codeVerifier),
 					c.env.OAUTH_PROVIDER.createClient({
 						clientId: oauthReqInfo.clientId,
 						tokenEndpointAuthMethod: 'none',
@@ -237,7 +261,7 @@ export function createAuthHandlers({
 						label: user.email,
 					},
 					scope: oauthReqInfo.scope,
-					// This will be available on this.props inside MyMCP
+					// This will be available on this.props inside CASBMCP
 					props: {
 						user,
 						accounts,
@@ -254,6 +278,7 @@ export function createAuthHandlers({
 
 				return Response.redirect(redirectTo, 302)
 			} catch (e) {
+				c.var.sentry?.recordError(e)
 				if (e instanceof Error) {
 					console.error(e)
 					metrics.logEvent(

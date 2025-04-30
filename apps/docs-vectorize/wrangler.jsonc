@@ -1,0 +1,117 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"name": "mcp-cloudflare-docs-vectorize-dev",
+	"migrations": [
+		{
+			"new_sqlite_classes": ["CloudflareDocumentationMCP"],
+			"tag": "v1"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "CloudflareDocumentationMCP",
+				"name": "MCP_OBJECT"
+			}
+		]
+	},
+	"ai": {
+		"binding": "AI"
+	},
+	"vectorize": [
+		{
+			"binding": "VECTORIZE",
+			"index_name": "docs-bge-base"
+		}
+	],
+	"vars": {
+		"ENVIRONMENT": "development",
+		"MCP_SERVER_NAME": "PLACEHOLDER",
+		"MCP_SERVER_VERSION": "PLACEHOLDER"
+	},
+	"dev": {
+		"port": 8976
+	},
+	"workers_dev": false,
+	"preview_urls": false,
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-dev"
+		}
+	],
+	"env": {
+		"staging": {
+			"name": "mcp-cloudflare-docs-vectorize-staging",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "docs-staging.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "CloudflareDocumentationMCP",
+						"name": "MCP_OBJECT"
+					}
+				]
+			},
+			"vars": {
+				"ENVIRONMENT": "staging"
+			},
+			"ai": {
+				"binding": "AI"
+			},
+			"vectorize": [
+				{
+					"binding": "VECTORIZE",
+					"index_name": "docs-bge-base"
+				}
+			],
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-staging"
+				}
+			]
+		},
+		"production": {
+			"name": "mcp-cloudflare-docs-vectorize-production",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "docs.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "CloudflareDocumentationMCP",
+						"name": "MCP_OBJECT"
+					}
+				]
+			},
+			"vars": {
+				"ENVIRONMENT": "production"
+			},
+			"ai": {
+				"binding": "AI"
+			},
+			"vectorize": [
+				{
+					"binding": "VECTORIZE",
+					"index_name": "docs-bge-base"
+				}
+			],
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-production"
+				}
+			]
+		}
+	}
+}

@@ -1,0 +1,128 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"name": "mcp-cloudflare-auditlogs-dev",
+	"migrations": [
+		{
+			"new_sqlite_classes": ["AuditlogMCP"],
+			"tag": "v1"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "AuditlogMCP",
+				"name": "MCP_OBJECT"
+			},
+			{
+				"class_name": "UserDetails",
+				"name": "USER_DETAILS"
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "DEV_KV"
+		}
+	],
+	"vars": {
+		"ENVIRONMENT": "development",
+		"MCP_SERVER_NAME": "<PLACEHOLDER>",
+		"MCP_SERVER_VERSION": "<PLACEHOLDER>",
+		"CLOUDFLARE_CLIENT_ID": "<PLACEHOLDER>",
+		"CLOUDFLARE_CLIENT_SECRET": "<PLACEHOLDER>"
+	},
+	"dev": {
+		"port": 8976
+	},
+	"workers_dev": false,
+	"preview_urls": false,
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-dev"
+		}
+	],
+	"env": {
+		"staging": {
+			"name": "mcp-cloudflare-auditlogs-staging",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "auditlogs-staging.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "AuditlogMCP",
+						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "UserDetails",
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-staging"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "bff0ee5812834b8a8cc9bd5575a8f9d8"
+				}
+			],
+			"vars": {
+				"ENVIRONMENT": "staging",
+				"MCP_SERVER_NAME": "auditlogs-staging",
+				"MCP_SERVER_VERSION": "1.0.0"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-staging"
+				}
+			]
+		},
+		"production": {
+			"name": "mcp-cloudflare-auditlogs-production",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "auditlogs.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "AuditlogMCP",
+						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "UserDetails",
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-production"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "76f528c773154012826bfba6d18f42db"
+				}
+			],
+			"vars": {
+				"ENVIRONMENT": "production",
+				"MCP_SERVER_NAME": "auditlogs",
+				"MCP_SERVER_VERSION": "1.0.0"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-production"
+				}
+			]
+		}
+	}
+}

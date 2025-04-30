@@ -55,14 +55,53 @@ export const zFilterCombination = z.enum(['and', 'or', 'AND', 'OR'])
 export const zPrimitiveUnion = z.union([z.string(), z.number(), z.boolean()])
 
 export const zQueryFilter = z.object({
-	key: z.string(),
+	key: z.string().describe(`Filter field name. IMPORTANT:
+
+    • DO NOT guess keys - always use verified keys from either:
+      - Previous query results
+      - The observability_keys response
+
+    • PREFERRED KEYS (faster & always available):
+      - $metadata.service: Worker service name
+			- $metadata.origin: Trigger type (e.g., fetch, scheduled, etc.)
+			- $metadata.trigger: Trigger type (e.g., GET /users, POST /orders, etc.)
+      - $metadata.message: Log message text (present in nearly all logs)
+      - $metadata.error: Error message (when applicable)
+`),
 	operation: zQueryOperation,
-	value: zPrimitiveUnion.optional(),
+	value: zPrimitiveUnion.optional().describe(`Filter comparison value. IMPORTANT:
+
+    • MUST match actual values in your logs
+    • VERIFY using either:
+      - Actual values from previous query results
+      - The '/values' endpoint with your selected key
+
+    • TYPE MATCHING:
+      - Ensure value type (string/number/boolean) matches the field type
+      - String comparisons are case-sensitive unless using specific operations
+
+    • PATTERN USAGE:
+      - For 'contains', use simple wildcard patterns
+      - For 'regex', MUST use ClickHouse regex syntax:
+        - Uses RE2 syntax (not PCRE/JavaScript)
+        - No lookaheads/lookbehinds
+        - Examples: '^5\\d{2}$' for HTTP 5xx codes, '\\bERROR\\b' for word boundary
+        - Escape backslashes with double backslash`),
 	type: z.enum(['string', 'number', 'boolean']),
-})
+}).describe(`
+	## Filtering Best Practices
+- Before applying filters, use the observability_keys and observability_values queries to confirm available filter fields and values.
+- If the query is asking to find something you should check that it exists. I.e. to requests with errors filter for $metadata.error exists.
+	`)
 
 export const zQueryCalculation = z.object({
-	key: z.string().optional(),
+	key: z.string().optional()
+		.describe(`The key to use for the calculation. This key must exist in the logs.
+Use the Keys endpoint to confirm that this key exists
+
+• DO NOT guess keys - always use verified keys from either:
+- Previous query results
+- The observability_keys response`),
 	keyType: z.enum(['string', 'number', 'boolean']).optional(),
 	operator: zQueryOperator,
 	alias: z.string().optional(),
@@ -78,9 +117,7 @@ export const zSearchNeedle = z.object({
 	matchCase: z.boolean().optional(),
 })
 
-const zViews = z
-	.enum(['traces', 'events', 'calculations', 'invocations', 'requests', 'patterns'])
-	.optional()
+const zViews = z.enum(['events', 'calculations', 'invocations'])
 
 export const zAggregateResult = z.object({
 	groups: z.array(z.object({ key: z.string(), value: zPrimitiveUnion })).optional(),
@@ -101,9 +138,7 @@ export const zQueryRunCalculationsV2 = z.array(
 		series: z.array(
 			z.object({
 				time: z.string(),
-				data: z.array(
-					zAggregateResult.merge(z.object({ firstSeen: z.string(), lastSeen: z.string() }))
-				),
+				data: z.array(zAggregateResult),
 			})
 		),
 	})
@@ -115,11 +150,32 @@ export const zStatistics = z.object({
 	bytes_read: z.number(),
 })
 
+export const zTimeframe = z
+	.object({
+		to: z.string(),
+		from: z.string(),
+	})
+	.describe(
+		`Timeframe for your query (ISO-8601 format).
+
+  • Current server time: ${new Date()}
+  • Default: Last hour from current time
+  • Maximum range: Last 7 days
+  • Format: "YYYY-MM-DDTHH:MM:SSZ" (e.g., "2025-04-29T14:30:00Z")
+
+  Examples:
+  - Last 30 minutes: from="2025-04-29T14:00:00Z", to="2025-04-29T14:30:00Z"
+  - Yesterday: from="2025-04-28T00:00:00Z", to="2025-04-29T00:00:00Z"
+
+  Note: Narrower timeframes provide faster responses and more specific results.
+  Omit this parameter entirely to use the default (last hour).`
+	)
+
 const zCloudflareMiniEventDetailsRequest = z.object({
 	url: z.string().optional(),
 	method: z.string().optional(),
 	path: z.string().optional(),
-	search: z.record(z.string()).optional(),
+	search: z.record(z.any()).optional(),
 })
 
 const zCloudflareMiniEventDetailsResponse = z.object({
@@ -248,38 +304,80 @@ export const zReturnedQueryRunEvents = z.object({
 export const zQueryRunRequest = z.object({
 	// TODO: Fix these types
 	queryId: z.string(),
+	view: zViews.optional().default('calculations').describe(`## Examples by View Type
+		### Events View
+		- "Show me all errors for the worker api-proxy in the last 30 minutes"
+		- "Show events from worker auth-service where the path contains /login"
+
+		### Calculation View
+		- "What is the p99 of wall time for worker api-proxy?"
+		- "What's the count of requests by status code for worker cdn-router?"
+
+		### Invocation View
+		- "Find a request to worker api-proxy that resulted in a 500 error"
+		- "List successful requests for the image-resizer worker with status code 200"
+				`),
 	parameters: z.object({
-		datasets: z.array(z.string()).optional(),
+		datasets: z
+			.array(z.string())
+			.optional()
+			.describe('Leave this empty to use the default datasets'),
 		filters: z.array(zQueryFilter).optional(),
 		filterCombination: zFilterCombination.optional(),
 		calculations: z.array(zQueryCalculation).optional(),
-		groupBys: z.array(zQueryGroupBy).optional(),
+		groupBys: z.array(zQueryGroupBy).optional().describe(`Only valid when doing a Calculation`),
 		orderBy: z
 			.object({
-				value: z.string(),
+				value: z.string().describe('This must be the alias of a calculation'),
 				order: z.enum(['asc', 'desc']).optional(),
 			})
-			.optional(),
-		limit: z.number().int().nonnegative().max(100).optional(),
+			.optional()
+			.describe('Order By only workers when a group by is present'),
+		limit: z
+			.number()
+			.int()
+			.nonnegative()
+			.max(100)
+			.optional()
+			.describe(
+				'Use this limit when view is calculation and a group by is present. 10 is a sensible default'
+			),
 		needle: zSearchNeedle.optional(),
 	}),
-	timeframe: z.object({
-		to: z.number(),
-		from: z.number(),
-	}),
-	granularity: z.number().optional(),
-	limit: z.number().max(100).optional().default(50),
-	view: zViews.optional().default('calculations'),
-	dry: z.boolean().optional().default(false),
-	offset: z.string().optional(),
+	timeframe: zTimeframe,
+	granularity: z
+		.number()
+		.optional()
+		.describe(
+			'This is only used when the view is calculations - by leaving it empty workers observability will detect the correct granularity'
+		),
+	limit: z
+		.number()
+		.max(100)
+		.optional()
+		.default(5)
+		.describe(
+			'Use this limit to limit the number of events returned when the view is events. 5 is a sensible default'
+		),
+
+	dry: z.boolean().optional().default(true),
+	offset: z
+		.string()
+		.optional()
+		.describe(
+			'The offset to use for pagination. Use the $metadata.id field to get the next offset.'
+		),
 	offsetBy: z.number().optional(),
-	offsetDirection: z.string().optional(),
+	offsetDirection: z
+		.string()
+		.optional()
+		.describe('The direction to use for pagination. Use "next" or "prev".'),
 })
 
 /**
  * The response from the API
  */
-export type zReturnedQueryRunResult = z.infer<typeof zReturnedQueryRunResult>
+export type ReturnedQueryRunResult = z.infer<typeof zReturnedQueryRunResult>
 export const zReturnedQueryRunResult = z.object({
 	// run: zQueryRunRequest,
 	calculations: zQueryRunCalculationsV2.optional(),
@@ -293,17 +391,19 @@ export const zReturnedQueryRunResult = z.object({
  * Keys Request
  */
 export const zKeysRequest = z.object({
-	timeframe: z
-		.object({
-			to: z.number(),
-			from: z.number(),
-		})
-		.optional(),
-	datasets: z.array(z.string()).default([]),
+	timeframe: zTimeframe,
+	datasets: z
+		.array(z.string())
+		.default([])
+		.describe('Leave this empty to use the default datasets'),
 	filters: z.array(zQueryFilter).default([]),
-	limit: z.number().optional(),
+	limit: z.number().optional().describe(`
+    • ADVANCED USAGE:
+      set limit=1000+ to retrieve comprehensive key options without needing additional filtering`),
 	needle: zSearchNeedle.optional(),
-	keyNeedle: zSearchNeedle.optional(),
+	keyNeedle: zSearchNeedle.optional()
+		.describe(`If the user makes a suggestion for a key, use this to narrow down the list of keys returned.
+		Make sure match case is fals to avoid case sensitivity issues.`),
 })
 
 /**
@@ -322,13 +422,13 @@ export const zKeysResponse = z.array(
  * Values Request
  */
 export const zValuesRequest = z.object({
-	timeframe: z.object({
-		to: z.number(),
-		from: z.number(),
-	}),
+	timeframe: zTimeframe,
 	key: z.string(),
 	type: z.enum(['string', 'boolean', 'number']),
-	datasets: z.array(z.string()),
+	datasets: z
+		.array(z.string())
+		.default([])
+		.describe('Leave this empty to use the default datasets'),
 	filters: z.array(zQueryFilter).default([]),
 	limit: z.number().default(50),
 	needle: zSearchNeedle.optional(),

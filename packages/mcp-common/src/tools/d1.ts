@@ -21,7 +21,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 			per_page: PaginationPerPageParam,
 		},
 		async ({ name, page, per_page }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}
@@ -66,7 +66,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 			primary_location_hint: D1DatabasePrimaryLocationHintParam.nullable().optional(),
 		},
 		async ({ name, primary_location_hint }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}
@@ -104,7 +104,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		'Delete a d1 database in your Cloudflare account',
 		{ database_id: z.string() },
 		async ({ database_id }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}
@@ -139,7 +139,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		'Get a D1 database in your Cloudflare account',
 		{ database_id: z.string() },
 		async ({ database_id }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}
@@ -179,7 +179,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 			params: D1DatabaseQueryParamsParam.nullable(),
 		},
 		async ({ database_id, sql, params }) => {
-			const account_id = agent.getActiveAccountId()
+			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}

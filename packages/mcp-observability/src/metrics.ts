@@ -72,7 +72,7 @@ export class AuthUser extends MetricsEvent {
 
 	toDataPoint(): AnalyticsEngineDataPoint {
 		return {
-			indexes: [MetricsEventIndexIds.SESSION_START],
+			indexes: [MetricsEventIndexIds.AUTH_USER],
 			blobs: this.mapBlobs({
 				blob3: this.authUser.userId,
 				blob4: this.authUser.errorMessage,

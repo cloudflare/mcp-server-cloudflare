@@ -8,14 +8,16 @@
 		"deploy": "wrangler deploy",
 		"deploy:staging": "wrangler deploy --env staging",
 		"deploy:production": "wrangler deploy --env production",
+		"eval:dev": "start-server-and-test --expect 404 eval:server http://localhost:8977 'vitest --testTimeout=60000 --config vitest.config.evals.ts'",
+		"eval:server": "wrangler dev --var ENVIRONMENT:test --var DEV_DISABLE_OAUTH:true --var DEV_CLOUDFLARE_EMAIL:mcp-server-eval-account@workers-for-platforms-dev.cfdata.org --inspector-port 9230",
+		"eval:ci": "start-server-and-test --expect 404 eval:server http://localhost:8977 'vitest run --testTimeout=60000 --config vitest.config.evals.ts'",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
-		"types": "wrangler types",
+		"types": "wrangler types --include-env=false",
 		"test": "vitest"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.8.14",
-		"@cloudflare/workers-types": "4.20250414.0",
 		"@types/node": "22.14.1",
 		"marked": "15.0.7",
 		"typescript": "5.5.4",
@@ -23,13 +25,18 @@
 		"wrangler": "4.10.0"
 	},
 	"dependencies": {
-		"@cloudflare/workers-oauth-provider": "0.0.2",
-		"@modelcontextprotocol/sdk": "1.9.0",
+		"@cloudflare/workers-oauth-provider": "0.0.5",
+		"@modelcontextprotocol/sdk": "1.10.2",
 		"@n8n/json-schema-to-zod": "1.1.0",
+		"@repo/eval-tools": "workspace:*",
 		"@repo/mcp-common": "workspace:*",
 		"@repo/mcp-observability": "workspace:*",
-		"agents": "0.0.62",
+		"agents": "0.0.67",
+		"ai": "4.3.10",
+		"concurrently": "9.1.2",
 		"hono": "4.7.6",
+		"start-server-and-test": "2.0.11",
+		"vitest-evals": "0.1.4",
 		"zod": "3.24.2"
 	}
 }

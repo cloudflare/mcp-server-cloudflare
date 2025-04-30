@@ -6,5 +6,8 @@
 	"type": "module",
 	"directories": {
 		"bin": "bin"
+	},
+	"devDependencies": {
+		"@types/node": "22.14.1"
 	}
 }

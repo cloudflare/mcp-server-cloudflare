@@ -14,12 +14,12 @@ const config = {
 		{
 			label: 'Sentry types that are compatible with toucan-js',
 			dependencies: ['@sentry/types', '@sentry/tracing'],
-			pinVersion: '7.76.0',
+			pinVersion: '8.9.2',
 		},
 		{
 			label: 'toucan-js that is compatible with pinned sentry types',
 			dependencies: ['toucan-js'],
-			pinVersion: '3.3.1',
+			pinVersion: '4.1.1',
 		},
 		{
 			label: 'pin vitest compatible with @cloudflare/vitest-pool-workers',

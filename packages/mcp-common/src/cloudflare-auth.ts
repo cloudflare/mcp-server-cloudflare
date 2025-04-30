@@ -154,7 +154,7 @@ export async function getAuthToken({
 
 	if (!resp.ok) {
 		console.log(await resp.text())
-		throw new McpError('Failed to get OAuth token', 500)
+		throw new McpError('Failed to get OAuth token', 500, { reportToSentry: true })
 	}
 
 	return AuthorizationToken.parse(await resp.json())
@@ -185,7 +185,7 @@ export async function refreshAuthToken({
 	})
 	if (!resp.ok) {
 		console.log(await resp.text())
-		throw new McpError('Failed to get OAuth token', 500)
+		throw new McpError('Failed to get OAuth token', 500, { reportToSentry: true })
 	}
 
 	return AuthorizationToken.parse(await resp.json())
