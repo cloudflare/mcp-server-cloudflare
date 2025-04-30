@@ -10,7 +10,7 @@
 	"name": "mcp-cloudflare-logpush-dev",
 	"migrations": [
 		{
-			"new_sqlite_classes": ["UserDetails", "LogsMCP"],
+			"new_sqlite_classes": ["LogsMCP"],
 			"tag": "v1"
 		}
 	],
@@ -66,13 +66,14 @@
 					},
 					{
 						"class_name": "UserDetails",
-						"name": "USER_DETAILS"
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-staging"
 					}
 				]
 			},
 			"kv_namespaces": [
 				{
-					"binding": "OAUTH_KV_LOGPUSH_STAGING",
+					"binding": "OAUTH_KV",
 					"id": "3804747ed31344cca8e4ebecd255e417"
 				}
 			],
@@ -100,13 +101,14 @@
 					},
 					{
 						"class_name": "UserDetails",
-						"name": "USER_DETAILS"
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-production"
 					}
 				]
 			},
 			"kv_namespaces": [
 				{
-					"binding": "OAUTH_KV_LOGPUSH_PRODUCTION",
+					"binding": "OAUTH_KV",
 					"id": "400ff7a67c824f9698f9e5c25bf51a1c"
 				}
 			],

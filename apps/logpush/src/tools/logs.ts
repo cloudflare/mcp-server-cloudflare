@@ -8,14 +8,14 @@ const zJobIdentifier = z.number().int().min(1).optional().describe('Unique id of
 const zEnabled = z.boolean().optional().describe('Flag that indicates if the job is enabled.')
 const zName = z
 	.string()
-	.regex(/^[a-zA-Z0-9\-\.]*$/)
+	.regex(/^[a-zA-Z0-9\-.]*$/)
 	.max(512)
 	.nullable()
 	.optional()
 	.describe('Optional human readable job name. Not unique.')
 const zDataset = z
 	.string()
-	.regex(/^[a-zA-Z0-9_\-]*$/)
+	.regex(/^[a-zA-Z0-9_-]*$/)
 	.max(256)
 	.nullable()
 	.optional()
@@ -90,7 +90,7 @@ export async function handleGetAccountLogPushJobs(
 	})
 
 	const res = data as z.infer<typeof zLogpushJobResponseCollection>
-	return res.result?.slice(0, 100) || []
+	return (res.result ?? []).slice(0, 100)
 }
 
 /**
@@ -99,7 +99,7 @@ export async function handleGetAccountLogPushJobs(
  * @param accountId Cloudflare account ID
  * @param apiToken Cloudflare API token
  */
-export function registerLogsTools(agent: LogsMCP, devToken: string) {
+export function registerLogsTools(agent: LogsMCP) {
 	// Register the worker logs analysis tool by worker name
 	agent.server.tool(
 		'logpush_jobs_by_account_id',
@@ -125,8 +125,7 @@ export function registerLogsTools(agent: LogsMCP, devToken: string) {
 				}
 			}
 			try {
-				const token = devToken.length > 0 ? devToken : agent.props.accessToken
-				const result = await handleGetAccountLogPushJobs(accountId, token)
+				const result = await handleGetAccountLogPushJobs(accountId, agent.props.accessToken)
 				return {
 					content: [
 						{
