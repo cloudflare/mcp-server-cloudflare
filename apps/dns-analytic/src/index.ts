@@ -48,10 +48,7 @@ export class AnalyticMCP extends McpAgent<Env, State, Props> {
 		activeAccountId: null,
 	}
 
-	constructor(
-		ctx: DurableObjectState,
-		env: Env
-	) {
+	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env)
 	}
 
@@ -115,4 +112,3 @@ export default new OAuthProvider({
 	accessTokenTTL: 3600,
 	clientRegistrationEndpoint: '/register',
 })
-
