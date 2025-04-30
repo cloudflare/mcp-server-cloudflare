@@ -38,6 +38,17 @@ If your client does not yet support remote MCP servers, you will need to set up 
 
 We're continuing to add more functionality to this remote MCP server repo. If you'd like to leave feedback, file a bug or provide a feature request, [please open an issue](https://github.com/cloudflare/mcp-server-cloudflare/issues/new/choose) on this repository
 
+## Troubleshooting
+
+"Claude's response was interrupted ... "
+
+If you see this message, Claude likely hit its context-length limit and stopped mid-reply. This happens most often on servers that trigger many chained tool calls such as the observability server.
+
+To reduce the chance of running in to this issue:
+
+- Try to be specific, keep your queries concise.
+- If a single request calls multiple tools, try to to break it into several smaller tool calls to keep the responses short.
+
 ## Paid Features
 
 Some features may require a paid Cloudflare Workers plan. Ensure your Cloudflare account has the necessary subscription level for the features you intend to use.
