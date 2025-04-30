@@ -87,7 +87,7 @@
 					"binding": "MCP_METRICS",
 					"dataset": "mcp-metrics-staging"
 				}
-			],
+			]
 		},
 		"production": {
 			"name": "mcp-cloudflare-auditlogs-production",
@@ -122,7 +122,7 @@
 					"binding": "MCP_METRICS",
 					"dataset": "mcp-metrics-production"
 				}
-			],
+			]
 		}
 	}
 }

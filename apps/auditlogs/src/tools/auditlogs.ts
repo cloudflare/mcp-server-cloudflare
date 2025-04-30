@@ -253,8 +253,7 @@ export function registerAuditLogTools(agent: AuditlogMCP) {
 				}
 			}
 			try {
-				const token = agent.props.apiToken.length > 0 ? agent.props.apiToken : agent.props.accessToken
-				const result = await handleGetAuditLogs(accountId, token, params)
+				const result = await handleGetAuditLogs(accountId, agent.props.accessToken, params)
 				return {
 					content: [
 						{

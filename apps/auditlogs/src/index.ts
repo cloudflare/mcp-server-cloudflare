@@ -16,7 +16,7 @@ import { registerAccountTools } from '@repo/mcp-common/src/tools/account'
 import { MetricsTracker } from '../../../packages/mcp-observability/src'
 import { registerAuditLogTools } from './tools/auditlogs'
 
-import type { AccountSchema, UserSchema } from '@repo/mcp-common/src/cloudflare-oauth-handler'
+import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './context'
 
 const env = getEnv<Env>()
@@ -30,12 +30,7 @@ const metrics = new MetricsTracker(env.MCP_METRICS, {
 
 // Context from the auth process, encrypted & stored in the auth token
 // and provided to the DurableMCP as this.props
-export type Props = {
-	accessToken: string
-	apiToken: string
-	user: UserSchema['result']
-	accounts: AccountSchema['result']
-}
+type Props = AuthProps
 
 export type State = { activeAccountId: string | null }
 
@@ -65,8 +60,6 @@ export class AuditlogMCP extends McpAgent<Env, State, Props> {
 				version: this.env.MCP_SERVER_VERSION,
 			},
 		})
-		this.props.apiToken = env.CLOUDFLARE_ACCESS_TOKEN
-
 		registerAccountTools(this)
 
 		// Register Cloudflare Audit Log tools
