@@ -11,7 +11,6 @@ If you'd like to iterate and test your MCP server, you can do so in local develo
    ```
    CLOUDFLARE_CLIENT_ID=your_development_cloudflare_client_id
    CLOUDFLARE_CLIENT_SECRET=your_development_cloudflare_client_secret
-   URL_SCANNER_API_TOKEN=your_development_url_scanner_api_token
    ```
 
    If you're an external contributor, you can provide a development API token:
@@ -21,7 +20,6 @@ If you'd like to iterate and test your MCP server, you can do so in local develo
    DEV_CLOUDFLARE_EMAIL=your_cloudflare_email
    # This is your global api token
    DEV_CLOUDFLARE_API_TOKEN=your_development_api_token
-   URL_SCANNER_API_TOKEN=your_development_url_scanner_api_token
    ```
 
 2. Start the local development server:
@@ -40,7 +38,6 @@ Set secrets via Wrangler:
 ```bash
 npx wrangler secret put CLOUDFLARE_CLIENT_ID -e <ENVIRONMENT>
 npx wrangler secret put CLOUDFLARE_CLIENT_SECRET -e <ENVIRONMENT>
-npx wrangler secret put URL_SCANNER_API_TOKEN -e <ENVIRONMENT>
 ```
 
 ## Set up a KV namespace
