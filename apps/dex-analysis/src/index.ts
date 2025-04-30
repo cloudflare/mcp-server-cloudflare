@@ -1,11 +1,12 @@
 import OAuthProvider from '@cloudflare/workers-oauth-provider'
 import { McpAgent } from 'agents/mcp'
 
+import { createApiHandler } from '@repo/mcp-common/src/api-handler'
 import {
 	createAuthHandlers,
-	getUserAndAccounts,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
+import { handleDevMode } from '@repo/mcp-common/src/dev-mode'
 import { getUserDetails, UserDetails } from '@repo/mcp-common/src/durable-objects/user_details'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
@@ -15,7 +16,7 @@ import { MetricsTracker } from '@repo/mcp-observability'
 
 import { registerDEXTools } from './tools/dex'
 
-import type { AccountSchema, UserSchema } from '@repo/mcp-common/src/cloudflare-oauth-handler'
+import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './context'
 
 export { UserDetails }
@@ -29,13 +30,9 @@ const metrics = new MetricsTracker(env.MCP_METRICS, {
 
 // Context from the auth process, encrypted & stored in the auth token
 // and provided to the DurableMCP as this.props
-export type Props = {
-	accessToken: string
-	user: UserSchema['result']
-	accounts: AccountSchema['result']
-}
+type Props = AuthProps
 
-export type State = { activeAccountId: string | null }
+type State = { activeAccountId: string | null }
 
 export class CloudflareDEXMCP extends McpAgent<Env, State, Props> {
 	_server: CloudflareMCPServer | undefined
@@ -97,29 +94,15 @@ const DexScopes = {
 	'dex:read': 'See Cloudflare Cloudflare DEX data for your account',
 } as const
 
-// TODO: Move this in to mcp-common
-async function handleDevMode(req: Request, env: Env, ctx: ExecutionContext) {
-	const { user, accounts } = await getUserAndAccounts(env.DEV_CLOUDFLARE_API_TOKEN, {
-		'X-Auth-Email': env.DEV_CLOUDFLARE_EMAIL,
-		'X-Auth-Key': env.DEV_CLOUDFLARE_API_TOKEN,
-	})
-	ctx.props = {
-		accessToken: env.DEV_CLOUDFLARE_API_TOKEN,
-		user,
-		accounts,
-	} as Props
-	return CloudflareDEXMCP.mount('/sse').fetch(req, env, ctx)
-}
-
 export default {
 	fetch: async (req: Request, env: Env, ctx: ExecutionContext) => {
 		if (env.ENVIRONMENT === 'development' && env.DEV_DISABLE_OAUTH === 'true') {
-			return await handleDevMode(req, env, ctx)
+			return await handleDevMode(CloudflareDEXMCP, req, env, ctx)
 		}
 
 		return new OAuthProvider({
-			apiRoute: '/sse',
-			apiHandler: CloudflareDEXMCP.mount('/sse'),
+			apiRoute: ['/mcp', '/sse'],
+			apiHandler: createApiHandler(CloudflareDEXMCP),
 			// @ts-ignore
 			defaultHandler: createAuthHandlers({ scopes: DexScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',

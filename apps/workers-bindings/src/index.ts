@@ -1,6 +1,7 @@
 import OAuthProvider from '@cloudflare/workers-oauth-provider'
 import { McpAgent } from 'agents/mcp'
 
+import { createApiHandler } from '@repo/mcp-common/src/api-handler'
 import {
 	createAuthHandlers,
 	getUserAndAccounts,
@@ -17,7 +18,7 @@ import { registerR2BucketTools } from '@repo/mcp-common/src/tools/r2_bucket'
 import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker'
 import { MetricsTracker } from '@repo/mcp-observability'
 
-import type { AccountSchema, UserSchema } from '@repo/mcp-common/src/cloudflare-oauth-handler'
+import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './context'
 
 export { UserDetails }
@@ -33,11 +34,7 @@ export type WorkersBindingsMCPState = { activeAccountId: string | null }
 
 // Context from the auth process, encrypted & stored in the auth token
 // and provided to the DurableMCP as this.props
-export type Props = {
-	accessToken: string
-	user: UserSchema['result']
-	accounts: AccountSchema['result']
-}
+type Props = AuthProps
 
 export class WorkersBindingsMCP extends McpAgent<Env, WorkersBindingsMCPState, Props> {
 	_server: CloudflareMCPServer | undefined
@@ -129,8 +126,8 @@ export default {
 		}
 
 		return new OAuthProvider({
-			apiRoute: '/sse',
-			apiHandler: WorkersBindingsMCP.mount('/sse'),
+			apiRoute: ['/mcp', '/sse'],
+			apiHandler: createApiHandler(WorkersBindingsMCP),
 			// @ts-ignore
 			defaultHandler: createAuthHandlers({ scopes: BindingsScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',

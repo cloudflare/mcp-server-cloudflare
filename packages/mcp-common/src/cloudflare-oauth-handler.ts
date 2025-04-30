@@ -63,6 +63,12 @@ const AccountResponseSchema = z.object({
 	),
 })
 
+export type AuthProps = {
+	accessToken: string
+	user: UserSchema['result']
+	accounts: AccountSchema['result']
+}
+
 export async function getUserAndAccounts(
 	accessToken: string,
 	devModeHeaders?: HeadersInit
