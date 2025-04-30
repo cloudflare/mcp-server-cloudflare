@@ -97,6 +97,55 @@ importers:
         specifier: 4.10.0
         version: 4.10.0(@cloudflare/workers-types@4.20250416.0)
 
+  apps/browser-rendering:
+    dependencies:
+      '@cloudflare/workers-oauth-provider':
+        specifier: 0.0.3
+        version: 0.0.3
+      '@hono/zod-validator':
+        specifier: 0.4.3
+        version: 0.4.3(hono@4.7.6)(zod@3.24.2)
+      '@modelcontextprotocol/sdk':
+        specifier: 1.10.2
+        version: 1.10.2
+      '@repo/mcp-common':
+        specifier: workspace:*
+        version: link:../../packages/mcp-common
+      '@repo/mcp-observability':
+        specifier: workspace:*
+        version: link:../../packages/mcp-observability
+      agents:
+        specifier: 0.0.67
+        version: 0.0.67(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+      cloudflare:
+        specifier: 4.2.0
+        version: 4.2.0
+      hono:
+        specifier: 4.7.6
+        version: 4.7.6
+      zod:
+        specifier: 3.24.2
+        version: 3.24.2
+    devDependencies:
+      '@cloudflare/vitest-pool-workers':
+        specifier: 0.8.14
+        version: 0.8.14(@cloudflare/workers-types@4.20250416.0)(@vitest/runner@3.0.9)(@vitest/snapshot@3.0.9)(vitest@3.0.9)
+      '@types/node':
+        specifier: 22.14.1
+        version: 22.14.1
+      prettier:
+        specifier: 3.5.3
+        version: 3.5.3
+      typescript:
+        specifier: 5.5.4
+        version: 5.5.4
+      vitest:
+        specifier: 3.0.9
+        version: 3.0.9(@types/node@22.14.1)(@vitest/ui@3.0.9)(lightningcss@1.29.2)
+      wrangler:
+        specifier: 4.10.0
+        version: 4.10.0(@cloudflare/workers-types@4.20250416.0)
+
   apps/cloudflare-one-casb:
     dependencies:
       '@cloudflare/workers-oauth-provider':
@@ -3003,7 +3052,6 @@ packages:
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
-    deprecated: Use your platform's native DOMException instead
 
   node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
