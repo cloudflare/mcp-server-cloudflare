@@ -1,12 +1,12 @@
-import type { AccountGetParams } from 'cloudflare/resources/accounts/accounts.mjs'
-import type { ReportGetParams } from 'cloudflare/resources/dns/analytics.mjs'
-import type { ZoneGetParams } from 'cloudflare/resources/dns/settings.mjs'
-import type { ZoneListParams } from 'cloudflare/resources/zones/zones.mjs'
 import { z } from 'zod'
 
 import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
 import { getEnv } from '@repo/mcp-common/src/env'
 
+import type { AccountGetParams } from 'cloudflare/resources/accounts/accounts.mjs'
+import type { ReportGetParams } from 'cloudflare/resources/dns/analytics.mjs'
+import type { ZoneGetParams } from 'cloudflare/resources/dns/settings.mjs'
+import type { ZoneListParams } from 'cloudflare/resources/zones/zones.mjs'
 import type { Env } from '../context'
 import type { DNSAnalyticsMCP } from '../index'
 
@@ -29,7 +29,7 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 		},
 		async ({ zone, days }) => {
 			try {
-				const client = getCloudflareClient(env.DEV_CLOUDFLARE_API_TOKEN)
+				const client = getCloudflareClient(agent.props.accessToken)
 				const start_date = getStartDate(days)
 				const params: ReportGetParams = {
 					zone_id: zone,
@@ -77,7 +77,7 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 						],
 					}
 				}
-				const client = getCloudflareClient(env.DEV_CLOUDFLARE_API_TOKEN)
+				const client = getCloudflareClient(agent.props.accessToken)
 				const params: AccountGetParams = {
 					account_id: accountId,
 				}
@@ -113,7 +113,7 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 		},
 		async ({ zone }) => {
 			try {
-				const client = getCloudflareClient(env.DEV_CLOUDFLARE_API_TOKEN)
+				const client = getCloudflareClient(agent.props.accessToken)
 				const params: ZoneGetParams = {
 					zone_id: zone,
 				}
@@ -147,7 +147,7 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 		'List zones under the current active account',
 		async () => {
 			try {
-				const client = getCloudflareClient(env.DEV_CLOUDFLARE_API_TOKEN)
+				const client = getCloudflareClient(agent.props.accessToken)
 				const accountId = await agent.getActiveAccountId()
 				if (!accountId) {
 					return {

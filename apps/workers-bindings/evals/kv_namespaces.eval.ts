@@ -37,7 +37,7 @@ eachModel('$modelName', ({ model }) => {
 		],
 		task: async (input: string) => {
 			const client = await initializeClient(/* Pass necessary mocks/config */)
-			const { promptOutput, toolCalls, fullResult } = await runTask(client, model, input)
+			const { promptOutput, toolCalls } = await runTask(client, model, input)
 
 			const toolCall = toolCalls.find((call) => call.toolName === 'kv_namespaces_list')
 			expect(toolCall, 'Tool kv_namespaces_list was not called').toBeDefined()
@@ -58,7 +58,7 @@ eachModel('$modelName', ({ model }) => {
 		],
 		task: async (input: string) => {
 			const client = await initializeClient(/* Pass necessary mocks/config */)
-			const { promptOutput, toolCalls, fullResult } = await runTask(client, model, input)
+			const { promptOutput, toolCalls } = await runTask(client, model, input)
 
 			const toolCall = toolCalls.find((call) => call.toolName === 'kv_namespace_update')
 			expect(toolCall, 'Tool kv_namespace_update was not called').toBeDefined()
@@ -100,7 +100,7 @@ eachModel('$modelName', ({ model }) => {
 		],
 		task: async (input: string) => {
 			const client = await initializeClient(/* Pass necessary mocks/config */)
-			const { promptOutput, toolCalls, fullResult } = await runTask(client, model, input)
+			const { promptOutput, toolCalls } = await runTask(client, model, input)
 
 			const toolCall = toolCalls.find((call) => call.toolName === 'kv_namespace_delete')
 			expect(toolCall, 'Tool kv_namespace_delete was not called').toBeDefined()

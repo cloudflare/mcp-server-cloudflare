@@ -94,6 +94,8 @@ export class DNSAnalyticsMCP extends McpAgent<Env, State, Props> {
 const AnalyticsScopes = {
 	...RequiredScopes,
 	'account:read': 'See your account info such as account details, analytics, and memberships.',
+	'dns_settings:read': 'See your DNS settings',
+	'dns_analytics:read': 'See your DNS analytics',
 } as const
 
 export default {

@@ -59,7 +59,7 @@ export async function runTask(
 		maxSteps: 10,
 	})
 
-	for await (const part of res.fullStream) {
+	for await (const _ of res.fullStream) {
 	}
 
 	// convert into an LLM readable result so our factuality checker can validate tool calls
