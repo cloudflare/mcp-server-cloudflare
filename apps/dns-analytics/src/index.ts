@@ -16,7 +16,9 @@ import { registerAnalyticTools } from './tools/analytics'
 
 import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './context'
-import { getUserDetails } from '@repo/mcp-common/src/durable-objects/user_details'
+import { getUserDetails, UserDetails } from '@repo/mcp-common/src/durable-objects/user_details'
+
+export { UserDetails }
 
 const env = getEnv<Env>()
 
