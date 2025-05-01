@@ -20,9 +20,9 @@
 		"MCP_SERVER_NAME": "PLACEHOLDER",
 		"MCP_SERVER_VERSION": "PLACEHOLDER",
 		"CLOUDFLARE_CLIENT_ID": "<PLACEHOLDER>",
-		"CLOUDFLARE_CLIENT_SECRET": "<PLACEHOLDER>"
+		"CLOUDFLARE_CLIENT_SECRET": "<PLACEHOLDER>",
+		"ENVIRONMENT": "development"
 	},
-
 	"dev": {
 		"port": 8976
 	},
@@ -81,7 +81,10 @@
 					"binding": "MCP_METRICS",
 					"dataset": "mcp-metrics-staging"
 				}
-			]
+			],
+			"vars": {
+				"ENVIRONMENT": "staging"
+			}
 		},
 		"production": {
 			"name": "mcp-cloudflare-casb-production",
@@ -111,7 +114,10 @@
 					"binding": "MCP_METRICS",
 					"dataset": "mcp-metrics-production"
 				}
-			]
+			],
+			"vars": {
+				"ENVIRONMENT": "production"
+			}
 		}
 	}
 }

@@ -5,7 +5,7 @@
 	"scripts": {
 		"check:lint": "run-eslint-workers",
 		"check:types": "run-tsc",
-		"deploy": "wrangler deploy",
+		"deploy": "run-wrangler-deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
 		"types": "wrangler types --include-env=false",
