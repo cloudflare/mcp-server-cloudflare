@@ -7,10 +7,10 @@
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
-	"name": "mcp-cloudflare-dns-analytic-dev",
+	"name": "mcp-cloudflare-dns-analytics-dev",
 	"migrations": [
 		{
-			"new_sqlite_classes": ["AnalyticMCP"],
+			"new_sqlite_classes": ["DNSAnalyticsMCP"],
 			"tag": "v1"
 		}
 	],
@@ -20,7 +20,7 @@
 	"durable_objects": {
 		"bindings": [
 			{
-				"class_name": "AnalyticMCP",
+				"class_name": "DNSAnalyticsMCP",
 				"name": "MCP_OBJECT"
 			}
 		]

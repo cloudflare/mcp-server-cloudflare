@@ -1,4 +1,4 @@
-# Model Context Protocol (MCP) Server + Cloudflare DNS API Endpoints
+# Model Context Protocol (MCP) Server + Cloudflare DNS Analytics
 
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server based on [MCP Server + Cloudflare OAuth](https://github.com/axiapubsub/mcp-server-cloudflare/tree/main/apps/workers-observability). In addition, this MCP server also introduces the tool functions to access DNS information from Cloudflare API Endpoints.
 
