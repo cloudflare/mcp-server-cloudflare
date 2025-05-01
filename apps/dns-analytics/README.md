@@ -1,93 +1,52 @@
-# Model Context Protocol (MCP) Server + Cloudflare DNS Analytics
+# Cloudflare Radar MCP Server 📡
 
-This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server based on [MCP Server + Cloudflare OAuth](https://github.com/axiapubsub/mcp-server-cloudflare/tree/main/apps/workers-observability). In addition, this MCP server also introduces the tool functions to access DNS information from Cloudflare API Endpoints.
+This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP
+connections, with Cloudflare OAuth built-in.
 
-You can use this as an example for how to integrate MCP server with [Cloudflare API](https://developers.cloudflare.com/api/).
+It integrates tools powered by the [Cloudflare DNS Analytics API](https://developers.cloudflare.com/api/resources/dns/) to provide insights on DNS analytics and optimization.
 
-## Getting Started
+## 🔨 Available Tools
 
-### For Production
+Currently available tools:
 
-- Set secrets via Wrangler
+| **Category**           | **Tool**                  | **Description**                                                                                                                |
+| ---------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **DNS Analytics**      | `dns-report`              | Fetch the DNS Report for a given zone over a given time frame.          |
+| **Account DNS Setting**| `show-account-dns-settings`| Fetch the DNS setting for the current active account.                  |
+| **Zone DNS Setting**   | `show-zone-dns-settings`  | Fetch the DNS setting for a given zone.                                 |
+| **Zone Information**   | `list-zones-under-account`| List zones under the current active account.                            |
 
-```bash
-wrangler secret put CLOUDFLARE_CLIENT_ID
-wrangler secret put CLOUDFLARE_CLIENT_SECRET
-wrangler secret put CLOUDFLARE_API_TOKEN
-```
+This MCP server is still a work in progress, and we plan to add more tools in the future.
 
-#### Set up a KV namespace
+### Prompt Examples
 
-- Create the KV namespace:
-  `wrangler kv:namespace create "OAUTH_KV"`
-- Update the Wrangler file with the KV ID
+- `List zones under my Cloudflare account.`
+- `What are the DNS Settings for my account?`
+- `Show me the zones under my account and fetch DNS Report for them.`
+- `How can I optimize my DNS Setting based on my DNS Report?`
+- `Which of my zones has the highest traffic?`
+- `Read Cloudflare's documentation on managing DNS records and tell me how to optimize my DNS settings.`
+- `Show me DNS Report for https://example.com in the last X days.`
 
-#### Deploy & Test
+## Access the remote MCP server from from any MCP Client
 
-Deploy the MCP server to make it available on your workers.dev domain
-` wrangler deploy`
+If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://dns-analytics.mcp.cloudflare.com`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
 
-Test the remote server using [Inspector](https://modelcontextprotocol.io/docs/tools/inspector):
+If your client does not yet support remote MCP servers, you will need to set up its respective configuration file using [mcp-remote](https://www.npmjs.com/package/mcp-remote) to specify which servers your client can access.
 
-```
-npx @modelcontextprotocol/inspector@latest
-```
+Replace the content with the following configuration:
 
-Enter `https://mcp-cloudflare-staging.<your-subdomain>.workers.dev/sse` and hit connect. Once you go through the authentication flow, you'll see the Tools working:
-
-<img width="640" alt="image" src="https://github.com/user-attachments/assets/7973f392-0a9d-4712-b679-6dd23f824287" />
-
-You now have a remote MCP server deployed!
-
-#### Access the remote MCP server from Claude Desktop
-
-Open Claude Desktop and navigate to Settings -> Developer -> Edit Config. This opens the configuration file that controls which MCP servers Claude can access.
-
-Replace the content with the following configuration. Once you restart Claude Desktop, a browser window will open showing your OAuth login page. Complete the authentication flow to grant Claude access to your MCP server. After you grant access, the tools will become available for you to use.
-
-```
+```json
 {
   "mcpServers": {
     "cloudflare": {
       "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://<your-subdomain>.workers.dev/sse"
-      ]
+      "args": ["mcp-remote", "https://dns-analytics.mcp.cloudflare.com/sse"]
     }
   }
 }
 ```
 
-Once the Tools (under 🔨) show up in the interface, you can ask Claude to use them. For example: "Could you use the math tool to add 23 and 19?". Claude should invoke the tool and show the result generated by the MCP server.
+Once you've set up your configuration file, restart MCP client and a browser window will open showing your OAuth login page. Proceed through the authentication flow to grant the client access to your MCP server. After you grant access, the tools will become available for you to use.
 
-### For Local Development
-
-If you'd like to iterate and test your MCP server, you can do so in local development. This will require you to create another OAuth App and an API Token on Cloudflare:
-
-- Create a `.dev.vars` file in your project root with:
-
-```
-CLOUDFLARE_CLIENT_ID=your_development_cloudflare_client_id
-CLOUDFLARE_CLIENT_SECRET=your_development_cloudflare_client_secret
-CLOUDFLARE_API_TOKEN=your_development_cloudflare_api_token
-```
-
-#### Develop & Test
-
-Run the server locally to make it available at `http://localhost:8976`
-`wrangler dev`
-
-To test the local server, enter `http://localhost:8976/sse` into Inspector and hit connect. Once you follow the prompts, you'll be able to "List Tools".
-
-#### Using Claude and other MCP Clients
-
-When using Claude to connect to your remote MCP server, you may see some error messages. This is because Claude Desktop doesn't yet support remote MCP servers, so it sometimes gets confused. To verify whether the MCP server is connected, hover over the 🔨 icon in the bottom right corner of Claude's interface. You should see your tools available there.
-
-#### Using Cursor and other MCP Clients
-
-To connect Cursor with your MCP server, choose `Type`: "Command" and in the `Command` field, combine the command and args fields into one (e.g. `npx mcp-remote https://<your-worker-name>.<your-subdomain>.workers.dev/sse`).
-
-Note that while Cursor supports HTTP+SSE servers, it doesn't support authentication, so you still need to use `mcp-remote` (and to use a STDIO server, not an HTTP one).
-
-You can connect your MCP server to other MCP clients like Windsurf by opening the client's configuration file, adding the same JSON that was used for the Claude setup, and restarting the MCP client.
+Interested in contributing, and running this server locally? See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
