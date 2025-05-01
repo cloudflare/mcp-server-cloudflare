@@ -13,6 +13,7 @@ The following servers are included in this repository:
 | [**Observability server**](/apps/observability) | Debug and get insight into your application’s logs and analytics             | `https://observability.mcp.cloudflare.com/sse` |
 | [**Radar server**](/apps/radar)                 | Get global Internet traffic insights, trends, URL scans, and other utilities | `https://radar.mcp.cloudflare.com/sse`         |
 | [**Audit Logs server**](/apps/auditlogs)        | Get the history of changes made within your Cloudflare account               | `https://auditlogs.mcp.cloudflare.com/sse`     |
+| [**Logpush server**](/apps/logpush)             | Get health summaries of your Logpush jobs                                    | `https://logs.mcp.cloudflare.com/sse`     |
 
 ## Access the remote MCP server from any MCP client
 
