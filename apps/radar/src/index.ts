@@ -6,9 +6,11 @@ import {
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import { handleDevMode } from '@repo/mcp-common/src/dev-mode'
+import { getUserDetails, UserDetails } from '@repo/mcp-common/src/durable-objects/user_details'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
+import { registerAccountTools } from '@repo/mcp-common/src/tools/account'
 import { MetricsTracker } from '@repo/mcp-observability'
 
 import { registerRadarTools } from './tools/radar'
@@ -19,6 +21,8 @@ import type { Env } from './context'
 
 const env = getEnv<Env>()
 
+export { UserDetails }
+
 const metrics = new MetricsTracker(env.MCP_METRICS, {
 	name: env.MCP_SERVER_NAME,
 	version: env.MCP_SERVER_VERSION,
@@ -27,15 +31,13 @@ const metrics = new MetricsTracker(env.MCP_METRICS, {
 // Context from the auth process, encrypted & stored in the auth token
 // and provided to the DurableMCP as this.props
 type Props = AuthProps
-
-type State = never
+type State = { activeAccountId: string | null }
 
 export class RadarMCP extends McpAgent<Env, State, Props> {
 	_server: CloudflareMCPServer | undefined
 	set server(server: CloudflareMCPServer) {
 		this._server = server
 	}
-
 	get server(): CloudflareMCPServer {
 		if (!this._server) {
 			throw new Error('Tried to access server before it was initialized')
@@ -44,10 +46,7 @@ export class RadarMCP extends McpAgent<Env, State, Props> {
 		return this._server
 	}
 
-	constructor(
-		public ctx: DurableObjectState,
-		public env: Env
-	) {
+	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env)
 	}
 
@@ -61,15 +60,38 @@ export class RadarMCP extends McpAgent<Env, State, Props> {
 			},
 		})
 
+		registerAccountTools(this)
 		registerRadarTools(this)
 		registerUrlScannerTools(this)
+	}
+
+	async getActiveAccountId() {
+		try {
+			// Get UserDetails Durable Object based off the userId and retrieve the activeAccountId from it
+			// we do this so we can persist activeAccountId across sessions
+			const userDetails = getUserDetails(env, this.props.user.id)
+			return await userDetails.getActiveAccountId()
+		} catch (e) {
+			this.server.recordError(e)
+			return null
+		}
+	}
+
+	async setActiveAccountId(accountId: string) {
+		try {
+			const userDetails = getUserDetails(env, this.props.user.id)
+			await userDetails.setActiveAccountId(accountId)
+		} catch (e) {
+			this.server.recordError(e)
+		}
 	}
 }
 
 const RadarScopes = {
 	...RequiredScopes,
-	// TODO 'radar:read': 'Grants access to read Cloudflare Radar data.',
-	// TODO 'url_scanner:write': 'Grants write level access to URL Scanner', // Remove URL_SCANNER_API_TOKEN env var
+	'account:read': 'See your account info such as account details, analytics, and memberships.',
+	'radar:read': 'Grants access to read Cloudflare Radar data.',
+	'url_scanner:write': 'Grants write level access to URL Scanner',
 } as const
 
 export default {

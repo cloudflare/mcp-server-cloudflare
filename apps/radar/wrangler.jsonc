@@ -33,7 +33,6 @@
 	],
 	"vars": {
 		"ENVIRONMENT": "development",
-		"ACCOUNT_ID": "6702657b6aa048cf3081ff3ff3c9c52f",
 		"MCP_SERVER_NAME": "Cloudflare Radar Remote MCP Server - Dev",
 		"MCP_SERVER_VERSION": "1.0.0"
 	},
@@ -58,6 +57,11 @@
 					{
 						"class_name": "RadarMCP",
 						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "UserDetails",
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-staging"
 					}
 				]
 			},
@@ -69,7 +73,6 @@
 			],
 			"vars": {
 				"ENVIRONMENT": "staging",
-				"ACCOUNT_ID": "6702657b6aa048cf3081ff3ff3c9c52f",
 				"MCP_SERVER_NAME": "Cloudflare Radar Remote MCP Server - Staging",
 				"MCP_SERVER_VERSION": "1.0.0"
 			},
@@ -89,6 +92,11 @@
 					{
 						"class_name": "RadarMCP",
 						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "UserDetails",
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-production"
 					}
 				]
 			},
@@ -100,7 +108,6 @@
 			],
 			"vars": {
 				"ENVIRONMENT": "production",
-				"ACCOUNT_ID": "6702657b6aa048cf3081ff3ff3c9c52f",
 				"MCP_SERVER_NAME": "Cloudflare Radar Remote MCP Server",
 				"MCP_SERVER_VERSION": "1.0.0"
 			},
