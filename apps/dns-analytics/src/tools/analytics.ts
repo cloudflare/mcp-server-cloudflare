@@ -72,7 +72,6 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 	agent.server.tool(
 		'show-account-dns-settings',
 		'Show DNS settings for current account',
-		{},
 		async () => {
 			try {
 				console.log('Show Account DNS settings')
@@ -156,7 +155,6 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 	agent.server.tool(
 		'list-zones-under-account',
 		'List zones under the current active account',
-		{},
 		async () => {
 			try {
 				console.log('List zones under the current active account')
