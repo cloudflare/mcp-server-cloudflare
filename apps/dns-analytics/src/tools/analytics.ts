@@ -6,7 +6,6 @@ import { getEnv } from '@repo/mcp-common/src/env'
 import type { AccountGetParams } from 'cloudflare/resources/accounts/accounts.mjs'
 import type { ReportGetParams } from 'cloudflare/resources/dns/analytics.mjs'
 import type { ZoneGetParams } from 'cloudflare/resources/dns/settings.mjs'
-import type { ZoneListParams } from 'cloudflare/resources/zones/zones.mjs'
 import type { Env } from '../context'
 import type { DNSAnalyticsMCP } from '../index'
 
@@ -21,7 +20,7 @@ function getStartDate(days: number) {
 export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 	// Register DNS Report tool
 	agent.server.tool(
-		'dns-report',
+		'dns_report',
 		'Fetch the DNS Report for a given zone since a date',
 		{
 			zone: z.string(),
@@ -62,7 +61,7 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 	)
 	// Register Account DNS Settings display tool
 	agent.server.tool(
-		'show-account-dns-settings',
+		'show_account_dns_settings',
 		'Show DNS settings for current account',
 		async () => {
 			try {
@@ -106,7 +105,7 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 	)
 	// Register Zone DNS Settings display tool
 	agent.server.tool(
-		'show-zone-dns-settings',
+		'show_zone_dns_settings',
 		'Show DNS settings for a zone',
 		{
 			zone: z.string(),
@@ -118,54 +117,6 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 					zone_id: zone,
 				}
 				const result = await client.dns.settings.zone.get(params)
-				return {
-					content: [
-						{
-							type: 'text',
-							text: JSON.stringify({
-								result,
-							}),
-						},
-					],
-				}
-			} catch (error) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: `Error fetching DNS report: ${error instanceof Error && error.message}`,
-						},
-					],
-				}
-			}
-		}
-	)
-
-	// Register Zone DNS Settings display tool
-	agent.server.tool(
-		'list-zones-under-account',
-		'List zones under the current active account',
-		async () => {
-			try {
-				const client = getCloudflareClient(agent.props.accessToken)
-				const accountId = await agent.getActiveAccountId()
-				if (!accountId) {
-					return {
-						content: [
-							{
-								type: 'text',
-								text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-							},
-						],
-					}
-				}
-				const zone_list_account: ZoneListParams.Account = {
-					id: accountId,
-				}
-				const zone_list_params: ZoneListParams = {
-					account: zone_list_account,
-				}
-				const result = await client.zones.list(zone_list_params)
 				return {
 					content: [
 						{

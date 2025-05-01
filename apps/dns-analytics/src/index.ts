@@ -11,6 +11,7 @@ import { getEnv } from '@repo/mcp-common/src/env'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account'
+import { registerZoneTools } from '@repo/mcp-common/src/tools/zone'
 
 import { MetricsTracker } from '../../../packages/mcp-observability/src'
 import { registerAnalyticTools } from './tools/analytics'
@@ -63,8 +64,10 @@ export class DNSAnalyticsMCP extends McpAgent<Env, State, Props> {
 
 		registerAccountTools(this)
 
-		// Register Cloudflare DNS Analytic tools
+		// Register Cloudflare DNS Analytics tools
 		registerAnalyticTools(this)
+
+		registerZoneTools(this)
 	}
 
 	async getActiveAccountId() {
@@ -89,11 +92,10 @@ export class DNSAnalyticsMCP extends McpAgent<Env, State, Props> {
 	}
 }
 
-// TODO: Add scopes for `dns_settings:read` and `dns_analytics:read` when they are ready.
-// Also remove `DEV_CLOUDFLARE_API_TOKEN` env var.
 const AnalyticsScopes = {
 	...RequiredScopes,
 	'account:read': 'See your account info such as account details, analytics, and memberships.',
+	'zone:read': 'See your zones',
 	'dns_settings:read': 'See your DNS settings',
 	'dns_analytics:read': 'See your DNS analytics',
 } as const

@@ -11,10 +11,10 @@ Currently available tools:
 
 | **Category**            | **Tool**                    | **Description**                                                |
 | ----------------------- | --------------------------- | -------------------------------------------------------------- |
-| **DNS Analytics**       | `dns-report`                | Fetch the DNS Report for a given zone over a given time frame. |
-| **Account DNS Setting** | `show-account-dns-settings` | Fetch the DNS setting for the current active account.          |
-| **Zone DNS Setting**    | `show-zone-dns-settings`    | Fetch the DNS setting for a given zone.                        |
-| **Zone Information**    | `list-zones-under-account`  | List zones under the current active account.                   |
+| **Zone Information**    | `zones_list`                | List zones under the current active account.                   |
+| **DNS Analytics**       | `dns_report`                | Fetch the DNS Report for a given zone over a given time frame. |
+| **Account DNS Setting** | `show_account_dns_settings` | Fetch the DNS setting for the current active account.          |
+| **Zone DNS Setting**    | `show_zone_dns_settings`    | Fetch the DNS setting for a given zone.                        |
 
 This MCP server is still a work in progress, and we plan to add more tools in the future.
 
