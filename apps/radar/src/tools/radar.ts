@@ -188,9 +188,7 @@ export function registerRadarTools(agent: RadarMCP) {
 
 	agent.server.tool(
 		'get_domains_ranking',
-		'Get top or trending domains' +
-			'Use arrays to compare multiple filters — the array index determines which series each filter value belongs to.' +
-			'For each filter series, you must provide a corresponding `date`.',
+		'Get top or trending domains',
 		{
 			limit: PaginationLimitParam,
 			date: DateListParam.optional(),
@@ -267,10 +265,7 @@ export function registerRadarTools(agent: RadarMCP) {
 
 	agent.server.tool(
 		'get_http_requests_data',
-		'Retrieve HTTP requests traffic trends. ' +
-			'Use arrays to compare multiple filters — the array index determines which series each filter value belongs to.' +
-			'For each filter series, you must provide a corresponding `dateRange`, or a `dateStart`/`dateEnd` pair. ' +
-			'Analyze the results and generate visualizations when appropriate.',
+		'Retrieve HTTP requests traffic trends.',
 		{
 			dateRange: DateRangeArrayParam.optional(),
 			dateStart: DateStartArrayParam.optional(),
@@ -327,10 +322,7 @@ export function registerRadarTools(agent: RadarMCP) {
 
 	agent.server.tool(
 		'get_l7_attack_data',
-		'Retrieve application layer (L7) attack trends. ' +
-			'Use arrays to compare multiple filters — the array index determines which series each filter value belongs to.' +
-			'For each filter series, you must provide a corresponding `dateRange`, or a `dateStart`/`dateEnd` pair. ' +
-			'Analyze the results and generate visualizations when appropriate.',
+		'Retrieve application layer (L7) attack trends.',
 		{
 			dateRange: DateRangeArrayParam.optional(),
 			dateStart: DateStartArrayParam.optional(),

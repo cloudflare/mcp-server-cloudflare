@@ -13,6 +13,7 @@ import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account'
 import { MetricsTracker } from '@repo/mcp-observability'
 
+import { BASE_INSTRUCTIONS } from './context'
 import { registerRadarTools } from './tools/radar'
 import { registerUrlScannerTools } from './tools/url-scanner'
 
@@ -58,6 +59,7 @@ export class RadarMCP extends McpAgent<Env, State, Props> {
 				name: this.env.MCP_SERVER_NAME,
 				version: this.env.MCP_SERVER_VERSION,
 			},
+			options: { instructions: BASE_INSTRUCTIONS },
 		})
 
 		registerAccountTools(this)
