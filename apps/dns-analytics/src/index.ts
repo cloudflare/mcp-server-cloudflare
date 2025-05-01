@@ -89,6 +89,8 @@ export class DNSAnalyticsMCP extends McpAgent<Env, State, Props> {
 	}
 }
 
+// TODO: Add scopes for `dns_settings:read` and `dns_analytics:read` when they are ready.
+// Also remove `DEV_CLOUDFLARE_API_TOKEN` env var.
 const AnalyticsScopes = {
 	...RequiredScopes,
 	'account:read': 'See your account info such as account details, analytics, and memberships.',
