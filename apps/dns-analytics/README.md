@@ -9,12 +9,12 @@ It integrates tools powered by the [Cloudflare DNS Analytics API](https://develo
 
 Currently available tools:
 
-| **Category**           | **Tool**                  | **Description**                                                                                                                |
-| ---------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **DNS Analytics**      | `dns-report`              | Fetch the DNS Report for a given zone over a given time frame.          |
-| **Account DNS Setting**| `show-account-dns-settings`| Fetch the DNS setting for the current active account.                  |
-| **Zone DNS Setting**   | `show-zone-dns-settings`  | Fetch the DNS setting for a given zone.                                 |
-| **Zone Information**   | `list-zones-under-account`| List zones under the current active account.                            |
+| **Category**            | **Tool**                    | **Description**                                                |
+| ----------------------- | --------------------------- | -------------------------------------------------------------- |
+| **DNS Analytics**       | `dns-report`                | Fetch the DNS Report for a given zone over a given time frame. |
+| **Account DNS Setting** | `show-account-dns-settings` | Fetch the DNS setting for the current active account.          |
+| **Zone DNS Setting**    | `show-zone-dns-settings`    | Fetch the DNS setting for a given zone.                        |
+| **Zone Information**    | `list-zones-under-account`  | List zones under the current active account.                   |
 
 This MCP server is still a work in progress, and we plan to add more tools in the future.
 
@@ -38,12 +38,12 @@ Replace the content with the following configuration:
 
 ```json
 {
-  "mcpServers": {
-    "cloudflare": {
-      "command": "npx",
-      "args": ["mcp-remote", "https://dns-analytics.mcp.cloudflare.com/sse"]
-    }
-  }
+	"mcpServers": {
+		"cloudflare": {
+			"command": "npx",
+			"args": ["mcp-remote", "https://dns-analytics.mcp.cloudflare.com/sse"]
+		}
+	}
 }
 ```
 

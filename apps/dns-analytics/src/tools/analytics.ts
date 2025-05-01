@@ -1,14 +1,14 @@
-import { AccountGetParams } from 'cloudflare/resources/accounts/accounts.mjs'
-import { ReportGetParams } from 'cloudflare/resources/dns/analytics.mjs'
-import { ZoneGetParams } from 'cloudflare/resources/dns/settings.mjs'
-import { ZoneListParams } from 'cloudflare/resources/zones/zones.mjs'
+import type { AccountGetParams } from 'cloudflare/resources/accounts/accounts.mjs'
+import type { ReportGetParams } from 'cloudflare/resources/dns/analytics.mjs'
+import type { ZoneGetParams } from 'cloudflare/resources/dns/settings.mjs'
+import type { ZoneListParams } from 'cloudflare/resources/zones/zones.mjs'
 import { z } from 'zod'
 
 import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
 import { getEnv } from '@repo/mcp-common/src/env'
 
-import type { DNSAnalyticsMCP } from '../index'
 import type { Env } from '../context'
+import type { DNSAnalyticsMCP } from '../index'
 
 const env = getEnv<Env>()
 
