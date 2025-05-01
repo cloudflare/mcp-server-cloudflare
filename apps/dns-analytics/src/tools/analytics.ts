@@ -18,12 +18,6 @@ function getStartDate(days: number) {
 	return start_date.toISOString()
 }
 
-/**
- * Registers the dns analytic tool with the MCP server
- * @param server The MCP server instance
- * @param accountId Cloudflare account ID
- * @param apiToken Cloudflare API token
- */
 export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 	// Register DNS Report tool
 	agent.server.tool(
@@ -35,10 +29,8 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 		},
 		async ({ zone, days }) => {
 			try {
-				console.log('fetching DNS record')
 				const client = getCloudflareClient(env.DEV_CLOUDFLARE_API_TOKEN)
 				const start_date = getStartDate(days)
-				console.log(start_date)
 				const params: ReportGetParams = {
 					zone_id: zone,
 					metrics: 'responseTimeAvg,queryCount,uncachedCount,staleCount',
@@ -74,7 +66,6 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 		'Show DNS settings for current account',
 		async () => {
 			try {
-				console.log('Show Account DNS settings')
 				const accountId = await agent.getActiveAccountId()
 				if (!accountId) {
 					return {
@@ -122,7 +113,6 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 		},
 		async ({ zone }) => {
 			try {
-				console.log('Show Zone DNS settings')
 				const client = getCloudflareClient(env.DEV_CLOUDFLARE_API_TOKEN)
 				const params: ZoneGetParams = {
 					zone_id: zone,
@@ -157,7 +147,6 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 		'List zones under the current active account',
 		async () => {
 			try {
-				console.log('List zones under the current active account')
 				const client = getCloudflareClient(env.DEV_CLOUDFLARE_API_TOKEN)
 				const accountId = await agent.getActiveAccountId()
 				if (!accountId) {

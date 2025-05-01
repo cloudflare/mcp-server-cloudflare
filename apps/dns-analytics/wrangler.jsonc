@@ -10,7 +10,7 @@
 	"name": "mcp-cloudflare-dns-analytics-dev",
 	"migrations": [
 		{
-			"new_sqlite_classes": ["UserDetails", "DNSAnalyticsMCP"],
+			"new_sqlite_classes": ["DNSAnalyticsMCP"],
 			"tag": "v1"
 		}
 	],
@@ -25,7 +25,7 @@
 			},
 			{
 				"class_name": "UserDetails",
-				"name": "USER_DETAILS"
+				"name": "USER_DETAILS",
 			}
 		]
 	},
@@ -66,7 +66,8 @@
 					},
 					{
 						"class_name": "UserDetails",
-						"name": "USER_DETAILS"
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-staging"
 					}
 				]
 			},
@@ -100,7 +101,8 @@
 					},
 					{
 						"class_name": "UserDetails",
-						"name": "USER_DETAILS"
+						"name": "USER_DETAILS",
+						"script_name": "mcp-cloudflare-workers-observability-production"
 					}
 				]
 			},
