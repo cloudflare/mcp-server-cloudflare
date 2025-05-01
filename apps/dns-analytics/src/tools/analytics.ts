@@ -1,4 +1,3 @@
-import { env } from 'cloudflare:workers'
 import { AccountGetParams } from 'cloudflare/resources/accounts/accounts.mjs'
 import { ReportGetParams } from 'cloudflare/resources/dns/analytics.mjs'
 import { ZoneGetParams } from 'cloudflare/resources/dns/settings.mjs'
@@ -6,8 +5,12 @@ import { ZoneListParams } from 'cloudflare/resources/zones/zones.mjs'
 import { z } from 'zod'
 
 import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
+import { getEnv } from '@repo/mcp-common/src/env'
 
-import type { AnalyticMCP } from '../index'
+import type { DNSAnalyticsMCP } from '../index'
+import type { Env } from '../context'
+
+const env = getEnv<Env>()
 
 function getStartDate(days: number) {
 	const today = new Date()
@@ -21,7 +24,7 @@ function getStartDate(days: number) {
  * @param accountId Cloudflare account ID
  * @param apiToken Cloudflare API token
  */
-export function registerAnalyticTools(agent: AnalyticMCP) {
+export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 	// Register DNS Report tool
 	agent.server.tool(
 		'dns-report',
@@ -33,7 +36,7 @@ export function registerAnalyticTools(agent: AnalyticMCP) {
 		async ({ zone, days }) => {
 			try {
 				console.log('fetching DNS record')
-				const client = getCloudflareClient(env.CLOUDFLARE_API_TOKEN)
+				const client = getCloudflareClient(env.DEV_CLOUDFLARE_API_TOKEN)
 				const start_date = getStartDate(days)
 				console.log(start_date)
 				const params: ReportGetParams = {
@@ -73,7 +76,7 @@ export function registerAnalyticTools(agent: AnalyticMCP) {
 		async () => {
 			try {
 				console.log('Show Account DNS settings')
-				const accountId = agent.getActiveAccountId()
+				const accountId = await agent.getActiveAccountId()
 				if (!accountId) {
 					return {
 						content: [
@@ -84,7 +87,7 @@ export function registerAnalyticTools(agent: AnalyticMCP) {
 						],
 					}
 				}
-				const client = getCloudflareClient(env.CLOUDFLARE_API_TOKEN)
+				const client = getCloudflareClient(env.DEV_CLOUDFLARE_API_TOKEN)
 				const params: AccountGetParams = {
 					account_id: accountId,
 				}
@@ -121,7 +124,7 @@ export function registerAnalyticTools(agent: AnalyticMCP) {
 		async ({ zone }) => {
 			try {
 				console.log('Show Zone DNS settings')
-				const client = getCloudflareClient(env.CLOUDFLARE_API_TOKEN)
+				const client = getCloudflareClient(env.DEV_CLOUDFLARE_API_TOKEN)
 				const params: ZoneGetParams = {
 					zone_id: zone,
 				}
@@ -157,8 +160,8 @@ export function registerAnalyticTools(agent: AnalyticMCP) {
 		async () => {
 			try {
 				console.log('List zones under the current active account')
-				const client = getCloudflareClient(env.CLOUDFLARE_API_TOKEN)
-				const accountId = agent.getActiveAccountId()
+				const client = getCloudflareClient(env.DEV_CLOUDFLARE_API_TOKEN)
+				const accountId = await agent.getActiveAccountId()
 				if (!accountId) {
 					return {
 						content: [

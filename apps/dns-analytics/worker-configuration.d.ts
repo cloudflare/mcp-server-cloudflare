@@ -9,8 +9,8 @@ declare namespace Cloudflare {
 		MCP_SERVER_VERSION: "PLACEHOLDER";
 		CLOUDFLARE_CLIENT_ID: "PLACEHOLDER";
 		CLOUDFLARE_CLIENT_SECRET: "PLACEHOLDER";
-        CLOUDFLARE_API_TOKEN: "PLACEHOLDER";
-		MCP_OBJECT: DurableObjectNamespace<import("./src/index").AnalyticMCP>;
+        DEV_CLOUDFLARE_API_TOKEN: "PLACEHOLDER";
+		MCP_OBJECT: DurableObjectNamespace<import("./src/index").DNSAnalyticsMCP>;
 		MCP_METRICS: AnalyticsEngineDataset;
 	}
 }

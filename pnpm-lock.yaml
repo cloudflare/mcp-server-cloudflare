@@ -382,17 +382,17 @@ importers:
         specifier: 4.10.0
         version: 4.10.0(@cloudflare/workers-types@4.20250416.0)
 
-  apps/dns-analytic:
+  apps/dns-analytics:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.2
-        version: 0.0.2
+        specifier: 0.0.5
+        version: 0.0.5
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.9.0
-        version: 1.9.0
+        specifier: 1.10.2
+        version: 1.10.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -400,8 +400,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.62
-        version: 0.0.62(@cloudflare/workers-types@4.20250414.0)
+        specifier: 0.0.67
+        version: 0.0.67(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -414,10 +414,7 @@ importers:
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: 0.8.14
-        version: 0.8.14(@cloudflare/workers-types@4.20250414.0)(@vitest/runner@3.0.9)(@vitest/snapshot@3.0.9)(vitest@3.0.9)
-      '@cloudflare/workers-types':
-        specifier: 4.20250414.0
-        version: 4.20250414.0
+        version: 0.8.14(@cloudflare/workers-types@4.20250416.0)(@vitest/runner@3.0.9)(@vitest/snapshot@3.0.9)(vitest@3.0.9)
       '@types/node':
         specifier: 22.14.1
         version: 22.14.1
@@ -432,7 +429,7 @@ importers:
         version: 3.0.9(@types/node@22.14.1)(@vitest/ui@3.0.9)(lightningcss@1.29.2)
       wrangler:
         specifier: 4.10.0
-        version: 4.10.0(@cloudflare/workers-types@4.20250414.0)
+        version: 4.10.0(@cloudflare/workers-types@4.20250416.0)
 
   apps/docs-autorag:
     dependencies:
