@@ -23,6 +23,7 @@ Currently available tools:
 | **IP Addresses**       | `get_ip_details`                | Provides details about a specific IP address                                                                          |
 | **Internet Services**  | `get_internet_services_ranking` | Gets top Internet services                                                                                            |
 | **Internet Speed**     | `get_internet_speed_data`       | Retrieves summary of bandwidth, latency, jitter, and packet loss, from the previous 90 days of Cloudflare Speed Test. |
+| **Internet Quality**   | `get_internet_quality_data`     | Retrieves a summary or time series of bandwidth, latency, or DNS response time from the Radar Internet Quality Index. |
 | **Layer 3 Attacks**    | `get_l3_attack_data`            | Retrieves L3 attack data, including timeseries, top attacks, and breakdowns by dimensions like `protocol`.            |
 | **Layer 7 Attacks**    | `get_l7_attack_data`            | Retrieves L7 attack data, including timeseries, top attacks, and breakdowns by dimensions like `mitigationProduct`.   |
 | **Traffic Anomalies**  | `get_traffic_anomalies`         | Lists traffic anomalies and outages; filter by AS, location, start date, and end date                                 |

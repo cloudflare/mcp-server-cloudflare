@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
 import { PaginationLimitParam, PaginationOffsetParam } from '@repo/mcp-common/src/types/shared'
 
@@ -19,6 +21,7 @@ import {
 	EmailRoutingDimensionParam,
 	EmailSecurityDimensionParam,
 	HttpDimensionParam,
+	InternetQualityMetricParam,
 	InternetServicesCategoryParam,
 	InternetSpeedDimensionParam,
 	InternetSpeedOrderByParam,
@@ -621,6 +624,51 @@ export function registerRadarTools(agent: RadarMCP) {
 						{
 							type: 'text',
 							text: `Error getting Internet speed data: ${error instanceof Error && error.message}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_internet_quality_data',
+		'Retrieves a summary or time series of bandwidth, latency, or DNS response time percentiles from the Radar Internet Quality Index (IQI).',
+		{
+			dateEnd: DateEndArrayParam.optional(),
+			asn: AsnArrayParam,
+			continent: ContinentArrayParam,
+			location: LocationArrayParam,
+			format: z.enum(['summary', 'timeseriesGroups']),
+			metric: InternetQualityMetricParam,
+		},
+		async ({ dateEnd, asn, location, continent, format, metric }) => {
+			try {
+				const client = getCloudflareClient(agent.props.accessToken)
+				const r = await client.radar.quality.iqi[format]({
+					asn,
+					continent,
+					location,
+					dateEnd,
+					metric,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								result: r,
+							}),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting Internet quality data: ${error instanceof Error && error.message}`,
 						},
 					],
 				}

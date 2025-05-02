@@ -307,3 +307,7 @@ export const InternetSpeedOrderByParam = z
 		'JITTER_LOADED',
 	])
 	.describe('Specifies the metric to order the results by. Only allowed for top locations and ASes')
+
+export const InternetQualityMetricParam = z
+	.enum(['BANDWIDTH', 'DNS', 'LATENCY'])
+	.describe('Specifies which metric to return (bandwidth, latency, or DNS response time).')
