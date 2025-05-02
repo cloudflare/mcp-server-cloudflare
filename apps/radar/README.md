@@ -10,17 +10,19 @@ Internet traffic insights, trends and other utilities.
 
 Currently available tools:
 
-| **Category**           | **Tool**                  | **Description**                                                                                                                |
-| ---------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **HTTP Requests**      | `get_http_requests_data`  | Fetches HTTP request data (timeseries, summaries, and grouped timeseries across dimensions like `deviceType`, `botClass`)      |
-| **L7 Attacks**         | `get_l7_attack_data`      | Fetches L7 attack data (timeseries, summaries, and grouped timeseries across dimensions like `mitigationProduct`, `ipVersion`) |
-| **Autonomous Systems** | `list_autonomous_systems` | Lists ASes; filter by location and sort by population size                                                                     |
-|                        | `get_as_details`          | Retrieves detailed info for a specific ASN                                                                                     |
-| **IP Addresses**       | `get_ip_details`          | Provides details about a specific IP address                                                                                   |
-| **Traffic Anomalies**  | `get_traffic_anomalies`   | Lists traffic anomalies; filter by AS, location, start date, and end date                                                      |
-| **Domains**            | `get_domains_ranking`     | Get top or trending domains                                                                                                    |
-|                        | `get_domain_rank_details` | Get domain rank details                                                                                                        |
-| **URL Scanner**        | `scan_url`                | Scans a URL via [Cloudflare’s URL Scanner](https://developers.cloudflare.com/radar/investigate/url-scanner/)                   |
+| **Category**           | **Tool**                        | **Description**                                                                                                                |
+| ---------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **HTTP Requests**      | `get_http_requests_data`        | Fetches HTTP request data (timeseries, summaries, and grouped timeseries across dimensions like `deviceType`, `botClass`)      |
+| **L7 Attacks**         | `get_l7_attack_data`            | Fetches L7 attack data (timeseries, summaries, and grouped timeseries across dimensions like `mitigationProduct`, `ipVersion`) |
+| **Internet Speed**     | `get_internet_speed_data`       | Retrieve summary of bandwidth, latency, jitter, and packet loss, from the previous 90 days of Cloudflare Speed Test.           |
+| **Autonomous Systems** | `list_autonomous_systems`       | Lists ASes; filter by location and sort by population size                                                                     |
+|                        | `get_as_details`                | Retrieves detailed info for a specific ASN                                                                                     |
+| **IP Addresses**       | `get_ip_details`                | Provides details about a specific IP address                                                                                   |
+| **Traffic Anomalies**  | `get_traffic_anomalies`         | Lists traffic anomalies; filter by AS, location, start date, and end date                                                      |
+| **Domains**            | `get_domains_ranking`           | Get top or trending domains                                                                                                    |
+|                        | `get_domain_rank_details`       | Get domain rank details                                                                                                        |
+| **Internet Services**  | `get_internet_services_ranking` | Get top Internet services                                                                                                      |
+| **URL Scanner**        | `scan_url`                      | Scans a URL via [Cloudflare’s URL Scanner](https://developers.cloudflare.com/radar/investigate/url-scanner/)                   |
 
 This MCP server is still a work in progress, and we plan to add more tools in the future.
 

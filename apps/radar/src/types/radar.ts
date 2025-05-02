@@ -26,6 +26,26 @@ export const DomainRankingTypeParam: z.ZodType<RankingTopParams['rankingType']> 
 	.enum(['POPULAR', 'TRENDING_RISE', 'TRENDING_STEADY'])
 	.describe('The ranking type.')
 
+export const InternetServicesCategoryParam = z
+	.array(
+		z.enum([
+			'Generative AI',
+			'E-commerce',
+			'Cryptocurrency Services',
+			'Email',
+			'Fast Fashion',
+			'Financial Services',
+			'News',
+			'Social Media',
+			'Weather',
+			'Jobs',
+			'Low cost E-commerce',
+			'Messaging',
+			'Metaverse & Gaming',
+		])
+	)
+	.describe('Filters results by Internet service category.')
+
 export const DateParam = z.string().date().describe('Filters results by date.')
 
 export const DateListParam = z.array(DateParam).describe('Filters results by date.')

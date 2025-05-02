@@ -17,6 +17,7 @@ import {
 	DomainParam,
 	DomainRankingTypeParam,
 	HttpDimensionParam,
+	InternetServicesCategoryParam,
 	IpParam,
 	L7AttackDimensionParam,
 	LocationArrayParam,
@@ -179,6 +180,46 @@ export function registerRadarTools(agent: RadarMCP) {
 						{
 							type: 'text',
 							text: `Error getting IP details: ${error instanceof Error && error.message}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_internet_services_ranking',
+		'Get top Internet services',
+		{
+			limit: PaginationLimitParam,
+			date: DateListParam.optional(),
+			serviceCategory: InternetServicesCategoryParam.optional(),
+		},
+		async ({ limit, date, serviceCategory }) => {
+			try {
+				const client = getCloudflareClient(agent.props.accessToken)
+				const r = await client.radar.ranking.internetServices.top({
+					limit,
+					date,
+					serviceCategory,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								result: r,
+							}),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting Internet services ranking: ${error instanceof Error && error.message}`,
 						},
 					],
 				}
@@ -370,6 +411,48 @@ export function registerRadarTools(agent: RadarMCP) {
 						{
 							type: 'text',
 							text: `Error getting L7 attack data: ${error instanceof Error && error.message}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_internet_speed_data',
+		'Retrieve summary of bandwidth, latency, jitter, and packet loss, from the previous 90 days of Cloudflare Speed Test.',
+		{
+			dateEnd: DateEndArrayParam.optional(),
+			asn: AsnArrayParam,
+			continent: ContinentArrayParam,
+			location: LocationArrayParam,
+		},
+		async ({ dateEnd, asn, location, continent }) => {
+			try {
+				const client = getCloudflareClient(agent.props.accessToken)
+				const r = await client.radar.quality.speed.summary({
+					asn,
+					continent,
+					location,
+					dateEnd,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								result: r,
+							}),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting Internet speed data: ${error instanceof Error && error.message}`,
 						},
 					],
 				}
