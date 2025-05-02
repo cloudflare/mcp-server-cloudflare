@@ -28,7 +28,7 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 - `Read Cloudflare's documentation on managing DNS records and tell me how to optimize my DNS settings.`
 - `Show me DNS Report for https://example.com in the last X days.`
 
-## Access the remote MCP server from from any MCP Client
+## Access the remote MCP server from any MCP Client
 
 If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://dns-analytics.mcp.cloudflare.com`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
 

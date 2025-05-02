@@ -139,7 +139,7 @@ export function registerRadarTools(agent: RadarMCP) {
 
 	agent.server.tool(
 		'get_traffic_anomalies',
-		'Get traffic anomalies',
+		'Get traffic anomalies and outages',
 		{
 			limit: PaginationLimitParam,
 			offset: PaginationOffsetParam,

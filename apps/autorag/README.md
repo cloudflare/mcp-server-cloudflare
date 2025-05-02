@@ -24,7 +24,7 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 - `Search for documents in AutoRAG with ID 'rag123' using the query 'cloudflare security'.`
 - `Perform an AI search in AutoRAG with ID 'rag456' for 'best practices for vector stores'.`
 
-## Access the remote MCP server from from any MCP Client
+## Access the remote MCP server from any MCP Client
 
 If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://autorag.mcp.cloudflare.com`) directly within its interface (for example in[Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
 

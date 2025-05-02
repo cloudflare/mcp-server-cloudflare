@@ -26,7 +26,7 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 - `Convert https://example.com to Markdown.`
 - `Take a screenshot of https://example.com.`
 
-## Access the remote MCP server from from any MCP Client
+## Access the remote MCP server from any MCP Client
 
 If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://browser.mcp.cloudflare.com`) directly within its interface (for example in[Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
 

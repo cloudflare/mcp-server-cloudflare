@@ -21,7 +21,7 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 - `Do any of my Logpush jobs in my <insert name> account have errors?`
 - `Can you list all the enabled job failures from today?`
 
-## Access the remote MCP server from from any MCP Client
+## Access the remote MCP server from any MCP Client
 
 If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://logs.mcp.cloudflare.com`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
 

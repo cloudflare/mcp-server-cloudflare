@@ -18,7 +18,7 @@ Currently available tools:
 - `Were there any suspicious changes made to my Cloudflare account yesterday around lunch time?`
 - `When was the last activity that updated a DNS record?`
 
-## Access the remote MCP server from from any MCP Client
+## Access the remote MCP server from any MCP Client
 
 If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://auditlogs.mcp.cloudflare.com/sse`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
 
