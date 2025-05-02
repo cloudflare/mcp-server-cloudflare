@@ -24,7 +24,7 @@ trends, and other related utilities.
 An active account is **only required** for URL Scanner-related tools (e.g., \`scan_url\`).
 
 For tools related to Internet trends and insights, analyze the results and, when appropriate, generate visualizations
-such as XY charts, pie charts, bar charts, or other relevant chart types.
+such as line charts, pie charts, bar charts, stacked area charts, choropleth maps, treemaps, or other relevant chart types.
 
 ### Making comparisons
 
