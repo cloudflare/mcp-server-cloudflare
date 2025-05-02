@@ -6,7 +6,6 @@ import {
 	AsnParam,
 	AsOrderByParam,
 	ContinentArrayParam,
-	DataFormatParam,
 	DateEndArrayParam,
 	DateEndParam,
 	DateListParam,
@@ -14,10 +13,15 @@ import {
 	DateRangeParam,
 	DateStartArrayParam,
 	DateStartParam,
+	DnsDimensionParam,
 	DomainParam,
 	DomainRankingTypeParam,
+	EmailRoutingDimensionParam,
+	EmailSecurityDimensionParam,
 	HttpDimensionParam,
 	InternetServicesCategoryParam,
+	InternetSpeedDimensionParam,
+	InternetSpeedOrderByParam,
 	IpParam,
 	L3AttackDimensionParam,
 	L7AttackDimensionParam,
@@ -25,6 +29,7 @@ import {
 	LocationListParam,
 	LocationParam,
 } from '../types/radar'
+import { resolveAndInvoke } from '../utils'
 
 import type { RadarMCP } from '../index'
 
@@ -306,8 +311,8 @@ export function registerRadarTools(agent: RadarMCP) {
 	)
 
 	agent.server.tool(
-		'get_http_requests_data',
-		'Retrieve HTTP requests traffic trends.',
+		'get_http_data',
+		'Retrieve HTTP traffic trends.',
 		{
 			dateRange: DateRangeArrayParam.optional(),
 			dateStart: DateStartArrayParam.optional(),
@@ -315,22 +320,12 @@ export function registerRadarTools(agent: RadarMCP) {
 			asn: AsnArrayParam,
 			continent: ContinentArrayParam,
 			location: LocationArrayParam,
-			format: DataFormatParam,
 			dimension: HttpDimensionParam,
 		},
-		async ({ dateStart, dateEnd, dateRange, asn, location, continent, format, dimension }) => {
+		async ({ dateStart, dateEnd, dateRange, asn, location, continent, dimension }) => {
 			try {
-				if (format !== 'timeseries' && !dimension) {
-					throw new Error(`The '${format}' format requires a 'dimension' to group the data.`)
-				}
-
 				const client = getCloudflareClient(agent.props.accessToken)
-				const endpoint = (...args: any) =>
-					format === 'timeseries'
-						? client.radar.http[format](...args)
-						: client.radar.http[format][dimension!](...args)
-
-				const r = await endpoint({
+				const r = await resolveAndInvoke(client.radar.http, dimension, {
 					asn,
 					continent,
 					location,
@@ -363,6 +358,53 @@ export function registerRadarTools(agent: RadarMCP) {
 	)
 
 	agent.server.tool(
+		'get_dns_queries_data',
+		'Retrieve trends in DNS queries to the 1.1.1.1 resolver.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			asn: AsnArrayParam,
+			continent: ContinentArrayParam,
+			location: LocationArrayParam,
+			dimension: DnsDimensionParam,
+		},
+		async ({ dateStart, dateEnd, dateRange, asn, location, continent, dimension }) => {
+			try {
+				const client = getCloudflareClient(agent.props.accessToken)
+				const r = await resolveAndInvoke(client.radar.dns, dimension, {
+					asn,
+					continent,
+					location,
+					dateRange,
+					dateStart,
+					dateEnd,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								result: r,
+							}),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting DNS data: ${error instanceof Error && error.message}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
 		'get_l7_attack_data',
 		'Retrieve application layer (L7) attack trends.',
 		{
@@ -372,22 +414,12 @@ export function registerRadarTools(agent: RadarMCP) {
 			asn: AsnArrayParam,
 			continent: ContinentArrayParam,
 			location: LocationArrayParam,
-			format: DataFormatParam,
 			dimension: L7AttackDimensionParam,
 		},
-		async ({ dateStart, dateEnd, dateRange, asn, location, continent, format, dimension }) => {
+		async ({ dateStart, dateEnd, dateRange, asn, location, continent, dimension }) => {
 			try {
-				if (format !== 'timeseries' && !dimension) {
-					throw new Error(`The '${format}' format requires a 'dimension' to group the data.`)
-				}
-
 				const client = getCloudflareClient(agent.props.accessToken)
-				const endpoint = (...args: any) =>
-					format === 'timeseries'
-						? client.radar.attacks.layer7[format](...args)
-						: client.radar.attacks.layer7[format][dimension!](...args)
-
-				const r = await endpoint({
+				const r = await resolveAndInvoke(client.radar.attacks.layer7, dimension, {
 					asn,
 					continent,
 					location,
@@ -429,22 +461,12 @@ export function registerRadarTools(agent: RadarMCP) {
 			asn: AsnArrayParam,
 			continent: ContinentArrayParam,
 			location: LocationArrayParam,
-			format: DataFormatParam,
 			dimension: L3AttackDimensionParam,
 		},
-		async ({ dateStart, dateEnd, dateRange, asn, location, continent, format, dimension }) => {
+		async ({ dateStart, dateEnd, dateRange, asn, location, continent, dimension }) => {
 			try {
-				if (format !== 'timeseries' && !dimension) {
-					throw new Error(`The '${format}' format requires a 'dimension' to group the data.`)
-				}
-
 				const client = getCloudflareClient(agent.props.accessToken)
-				const endpoint = (...args: any) =>
-					format === 'timeseries'
-						? client.radar.attacks.layer3[format](...args)
-						: client.radar.attacks.layer3[format][dimension!](...args)
-
-				const r = await endpoint({
+				const r = await resolveAndInvoke(client.radar.attacks.layer3, dimension, {
 					asn,
 					continent,
 					location,
@@ -477,6 +499,88 @@ export function registerRadarTools(agent: RadarMCP) {
 	)
 
 	agent.server.tool(
+		'get_email_routing_data',
+		'Retrieve Email Routing trends.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			dimension: EmailRoutingDimensionParam,
+		},
+		async ({ dateStart, dateEnd, dateRange, dimension }) => {
+			try {
+				const client = getCloudflareClient(agent.props.accessToken)
+				const r = await resolveAndInvoke(client.radar.email.routing, dimension, {
+					dateRange,
+					dateStart,
+					dateEnd,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								result: r,
+							}),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting Email Routing data: ${error instanceof Error && error.message}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_email_security_data',
+		'Retrieve Email Security trends.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			dimension: EmailSecurityDimensionParam,
+		},
+		async ({ dateStart, dateEnd, dateRange, dimension }) => {
+			try {
+				const client = getCloudflareClient(agent.props.accessToken)
+				const r = await resolveAndInvoke(client.radar.email.security, dimension, {
+					dateRange,
+					dateStart,
+					dateEnd,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								result: r,
+							}),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting Email Security data: ${error instanceof Error && error.message}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
 		'get_internet_speed_data',
 		'Retrieve summary of bandwidth, latency, jitter, and packet loss, from the previous 90 days of Cloudflare Speed Test.',
 		{
@@ -484,11 +588,17 @@ export function registerRadarTools(agent: RadarMCP) {
 			asn: AsnArrayParam,
 			continent: ContinentArrayParam,
 			location: LocationArrayParam,
+			dimension: InternetSpeedDimensionParam,
+			orderBy: InternetSpeedOrderByParam.optional(),
 		},
-		async ({ dateEnd, asn, location, continent }) => {
+		async ({ dateEnd, asn, location, continent, dimension, orderBy }) => {
+			if (orderBy && dimension === 'summary') {
+				throw new Error('Order by is only allowed for top locations and ASes')
+			}
+
 			try {
 				const client = getCloudflareClient(agent.props.accessToken)
-				const r = await client.radar.quality.speed.summary({
+				const r = await resolveAndInvoke(client.radar.quality.speed, dimension, {
 					asn,
 					continent,
 					location,

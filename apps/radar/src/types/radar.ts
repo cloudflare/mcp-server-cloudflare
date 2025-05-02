@@ -152,51 +152,158 @@ export const AsOrderByParam: z.ZodType<ASNListParams['orderBy']> = z
 	.optional()
 	.describe('Optional order by parameter: "ASN" or "POPULATION".')
 
-export const DataFormatParam = z
-	.enum(['timeseries', 'summary', 'timeseriesGroups'])
-	.describe(
-		"Specifies the data format: 'summary' for aggregated results by dimension, 'timeseries' for a time-based view of HTTP requests, or 'timeseriesGroups' to group timeseries data by dimensions."
-	)
-
 export const HttpDimensionParam = z
 	.enum([
-		'deviceType',
-		'httpProtocol',
-		'httpVersion',
-		'botClass',
-		'ipVersion',
-		'tlsVersion',
-		'os',
-		'postQuantum',
+		'timeseries',
+		'summary/deviceType',
+		'summary/httpProtocol',
+		'summary/httpVersion',
+		'summary/botClass',
+		'summary/ipVersion',
+		'summary/tlsVersion',
+		'summary/os',
+		'summary/postQuantum',
+		'top/browser', // TODO replace with "summary/browser" and "summary/browserFamily" once available on the lib
+		'top/browserFamily',
+		'timeseriesGroups/deviceType',
+		'timeseriesGroups/httpProtocol',
+		'timeseriesGroups/httpVersion',
+		'timeseriesGroups/botClass',
+		'timeseriesGroups/ipVersion',
+		'timeseriesGroups/tlsVersion',
+		'timeseriesGroups/os',
+		'timeseriesGroups/postQuantum',
+		'timeseriesGroups/browser',
+		'timeseriesGroups/browserFamily',
+		'top/locations',
+		'top/ases',
 	])
-	.optional()
-	.describe(
-		"Dimension used to group HTTP data. Allowed only when the format is 'summary' or 'timeseriesGroups'."
-	)
+	.describe('Dimension indicating the type and format of HTTP data to retrieve.')
+
+export const DnsDimensionParam = z
+	.enum([
+		'timeseries',
+		'summary/ipVersion',
+		'summary/cacheHit',
+		'summary/dnssec',
+		'summary/dnssecAware',
+		'summary/matchingAnswer',
+		'summary/protocol',
+		'summary/queryType',
+		'summary/responseCode',
+		'summary/responseTTL',
+		'timeseriesGroups/ipVersion',
+		'timeseriesGroups/cacheHit',
+		'timeseriesGroups/dnssecAware',
+		'timeseriesGroups/matchingAnswer',
+		'timeseriesGroups/protocol',
+		'timeseriesGroups/queryType',
+		'timeseriesGroups/responseCode',
+		'timeseriesGroups/responseTTL',
+		'top/locations',
+		'top/ases',
+	])
+	.describe('Dimension indicating the type and format of DNS data to retrieve.')
 
 export const L7AttackDimensionParam = z
 	.enum([
-		'httpMethod',
-		'httpVersion',
-		'ipVersion',
-		'mitigationProduct',
-		'managedRules',
-		// TODO: add 'vertical' and 'industry' once they are in the cloudflare API lib
+		'timeseries',
+		'summary/httpMethod',
+		'summary/httpVersion',
+		'summary/ipVersion',
+		'summary/managedRules',
+		'summary/mitigationProduct',
+		'top/vertical', // TODO replace with "summary/vertical" and "summary/industry" once available on the lib
+		'top/industry',
+		'timeseriesGroups/httpMethod',
+		'timeseriesGroups/httpVersion',
+		'timeseriesGroups/ipVersion',
+		'timeseriesGroups/managedRules',
+		'timeseriesGroups/mitigationProduct',
+		'timeseriesGroups/vertical',
+		'timeseriesGroups/industry',
+		'top/locations/origin',
+		'top/locations/target',
+		'top/ases/origin',
+		'top/attacks',
 	])
-	.optional()
-	.describe(
-		"Dimension used to group L7 attack data. Allowed only when the format is 'summary' or 'timeseriesGroups'."
-	)
+	.describe('Dimension indicating the type and format of L7 attack data to retrieve.')
 
 export const L3AttackDimensionParam = z
 	.enum([
-		'protocol',
-		'ipVersion',
-		'vector',
-		'bitrate',
-		// TODO: add 'vertical' and 'industry' once they are in the cloudflare API lib
+		'timeseries',
+		'summary/protocol',
+		'summary/ipVersion',
+		'summary/vector',
+		'summary/bitrate',
+		'summary/duration',
+		'top/vertical', // TODO replace with "summary/vertical" and "summary/industry" once available on the lib
+		'top/industry',
+		'timeseriesGroups/protocol',
+		'timeseriesGroups/ipVersion',
+		'timeseriesGroups/vector',
+		'timeseriesGroups/bitrate',
+		'timeseriesGroups/duration',
+		'timeseriesGroups/vertical',
+		'timeseriesGroups/industry',
+		'top/locations/origin',
+		'top/locations/target',
+		'top/attacks',
 	])
-	.optional()
-	.describe(
-		"Dimension used to group L7 attack data. Allowed only when the format is 'summary' or 'timeseriesGroups'."
-	)
+	.describe('Dimension indicating the type and format of L3 attack data to retrieve.')
+
+export const EmailRoutingDimensionParam = z
+	.enum([
+		'summary/ipVersion',
+		'summary/encrypted',
+		'summary/arc',
+		'summary/dkim',
+		'summary/dmarc',
+		'summary/spf',
+		'timeseriesGroups/ipVersion',
+		'timeseriesGroups/encrypted',
+		'timeseriesGroups/arc',
+		'timeseriesGroups/dkim',
+		'timeseriesGroups/dmarc',
+		'timeseriesGroups/spf',
+	])
+	.describe('Dimension indicating the type and format of Email Routing data to retrieve.')
+
+export const EmailSecurityDimensionParam = z
+	.enum([
+		'summary/spam',
+		'summary/malicious',
+		'summary/spoof',
+		'summary/threatCategory',
+		'summary/arc',
+		'summary/dkim',
+		'summary/dmarc',
+		'summary/spf',
+		'summary/tlsVersion',
+		'timeseriesGroups/spam',
+		'timeseriesGroups/malicious',
+		'timeseriesGroups/spoof',
+		'timeseriesGroups/threatCategory',
+		'timeseriesGroups/arc',
+		'timeseriesGroups/dkim',
+		'timeseriesGroups/dmarc',
+		'timeseriesGroups/spf',
+		'timeseriesGroups/tlsVersion',
+		'top/tlds',
+	])
+	.describe('Dimension indicating the type and format of Email Security data to retrieve.')
+
+export const InternetSpeedDimensionParam = z
+	.enum(['summary', 'top/locations', 'top/ases'])
+	.describe('Dimension indicating the type and format of Internet speed data to retrieve.')
+
+export const InternetSpeedOrderByParam = z
+	.enum([
+		'BANDWIDTH_DOWNLOAD',
+		'BANDWIDTH_UPLOAD',
+		'LATENCY_IDLE',
+		'LATENCY_LOADED',
+		'JITTER_IDLE',
+		'JITTER_LOADED',
+	])
+	.describe('Specifies the metric to order the results by. Only allowed for top locations and ASes')
