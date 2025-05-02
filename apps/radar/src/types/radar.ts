@@ -187,3 +187,16 @@ export const L7AttackDimensionParam = z
 	.describe(
 		"Dimension used to group L7 attack data. Allowed only when the format is 'summary' or 'timeseriesGroups'."
 	)
+
+export const L3AttackDimensionParam = z
+	.enum([
+		'protocol',
+		'ipVersion',
+		'vector',
+		'bitrate',
+		// TODO: add 'vertical' and 'industry' once they are in the cloudflare API lib
+	])
+	.optional()
+	.describe(
+		"Dimension used to group L7 attack data. Allowed only when the format is 'summary' or 'timeseriesGroups'."
+	)

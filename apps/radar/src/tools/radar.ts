@@ -19,6 +19,7 @@ import {
 	HttpDimensionParam,
 	InternetServicesCategoryParam,
 	IpParam,
+	L3AttackDimensionParam,
 	L7AttackDimensionParam,
 	LocationArrayParam,
 	LocationListParam,
@@ -411,6 +412,63 @@ export function registerRadarTools(agent: RadarMCP) {
 						{
 							type: 'text',
 							text: `Error getting L7 attack data: ${error instanceof Error && error.message}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_l3_attack_data',
+		'Retrieve application layer (L3) attack trends.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			asn: AsnArrayParam,
+			continent: ContinentArrayParam,
+			location: LocationArrayParam,
+			format: DataFormatParam,
+			dimension: L3AttackDimensionParam,
+		},
+		async ({ dateStart, dateEnd, dateRange, asn, location, continent, format, dimension }) => {
+			try {
+				if (format !== 'timeseries' && !dimension) {
+					throw new Error(`The '${format}' format requires a 'dimension' to group the data.`)
+				}
+
+				const client = getCloudflareClient(agent.props.accessToken)
+				const endpoint = (...args: any) =>
+					format === 'timeseries'
+						? client.radar.attacks.layer3[format](...args)
+						: client.radar.attacks.layer3[format][dimension!](...args)
+
+				const r = await endpoint({
+					asn,
+					continent,
+					location,
+					dateRange,
+					dateStart,
+					dateEnd,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								result: r,
+							}),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting L3 attack data: ${error instanceof Error && error.message}`,
 						},
 					],
 				}
