@@ -34,8 +34,7 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 				// Search if there are recent scans for the URL
 				const scans = await client.urlScanner.scans.list({
 					account_id: accountId,
-					size: 1,
-					q: `page.url:${url}`,
+					q: `page.url:"${url}"`,
 				})
 
 				let scanId = scans.results.length > 0 ? scans.results[0]._id : null
