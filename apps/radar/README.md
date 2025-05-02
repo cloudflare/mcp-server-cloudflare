@@ -10,24 +10,25 @@ Internet traffic insights, trends and other utilities.
 
 Currently available tools:
 
-| **Category**           | **Tool**                        | **Description**                                                                                                       |
-| ---------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| **Autonomous Systems** | `list_autonomous_systems`       | Lists ASes; filter by location and sort by population size                                                            |
-|                        | `get_as_details`                | Retrieves detailed info for a specific ASN                                                                            |
-| **Domains**            | `get_domains_ranking`           | Gets top or trending domains                                                                                          |
-|                        | `get_domain_rank_details`       | Gets domain rank details                                                                                              |
-| **DNS**                | `get_dns_data`                  | Retrieves DNS query data to 1.1.1.1, including timeseries, summaries, and breakdowns by dimensions like `queryType`.  |
-| **Email Routing**      | `get_email_routing_data`        | Retrieves Email Routing data, including timeseries, and breakdowns by dimensions like `encrypted`.                    |
-| **Email Security**     | `get_email_security_data`       | Retrieves Email Security data, including timeseries, and breakdowns by dimensions like `threatCategory`.              |
-| **HTTP**               | `get_http_data`                 | Retrieves HTTP request data, including timeseries, and breakdowns by dimensions like `deviceType`.                    |
-| **IP Addresses**       | `get_ip_details`                | Provides details about a specific IP address                                                                          |
-| **Internet Services**  | `get_internet_services_ranking` | Gets top Internet services                                                                                            |
-| **Internet Speed**     | `get_internet_speed_data`       | Retrieves summary of bandwidth, latency, jitter, and packet loss, from the previous 90 days of Cloudflare Speed Test. |
-| **Internet Quality**   | `get_internet_quality_data`     | Retrieves a summary or time series of bandwidth, latency, or DNS response time from the Radar Internet Quality Index. |
-| **Layer 3 Attacks**    | `get_l3_attack_data`            | Retrieves L3 attack data, including timeseries, top attacks, and breakdowns by dimensions like `protocol`.            |
-| **Layer 7 Attacks**    | `get_l7_attack_data`            | Retrieves L7 attack data, including timeseries, top attacks, and breakdowns by dimensions like `mitigationProduct`.   |
-| **Traffic Anomalies**  | `get_traffic_anomalies`         | Lists traffic anomalies and outages; filter by AS, location, start date, and end date                                 |
-| **URL Scanner**        | `scan_url`                      | Scans a URL via [Cloudflare’s URL Scanner](https://developers.cloudflare.com/radar/investigate/url-scanner/)          |
+| **Category**           | **Tool**                        | **Description**                                                                                                      |
+| ---------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **AI**                 | `get_ai_data`                   | Retrieves AI-related data, including traffic from AI user agents, as well as popular models and model tasks          |
+| **Autonomous Systems** | `list_autonomous_systems`       | Lists ASes; filter by location and sort by population size                                                           |
+|                        | `get_as_details`                | Retrieves detailed info for a specific ASN                                                                           |
+| **Domains**            | `get_domains_ranking`           | Gets top or trending domains                                                                                         |
+|                        | `get_domain_rank_details`       | Gets domain rank details                                                                                             |
+| **DNS**                | `get_dns_data`                  | Retrieves DNS query data to 1.1.1.1, including timeseries, summaries, and breakdowns by dimensions like `queryType`  |
+| **Email Routing**      | `get_email_routing_data`        | Retrieves Email Routing data, including timeseries, and breakdowns by dimensions like `encrypted`                    |
+| **Email Security**     | `get_email_security_data`       | Retrieves Email Security data, including timeseries, and breakdowns by dimensions like `threatCategory`              |
+| **HTTP**               | `get_http_data`                 | Retrieves HTTP request data, including timeseries, and breakdowns by dimensions like `deviceType`                    |
+| **IP Addresses**       | `get_ip_details`                | Provides details about a specific IP address                                                                         |
+| **Internet Services**  | `get_internet_services_ranking` | Gets top Internet services                                                                                           |
+| **Internet Quality**   | `get_internet_quality_data`     | Retrieves a summary or time series of bandwidth, latency, or DNS response time from the Radar Internet Quality Index |
+| **Internet Speed**     | `get_internet_speed_data`       | Retrieves summary of bandwidth, latency, jitter, and packet loss, from the previous 90 days of Cloudflare Speed Test |
+| **Layer 3 Attacks**    | `get_l3_attack_data`            | Retrieves L3 attack data, including timeseries, top attacks, and breakdowns by dimensions like `protocol`            |
+| **Layer 7 Attacks**    | `get_l7_attack_data`            | Retrieves L7 attack data, including timeseries, top attacks, and breakdowns by dimensions like `mitigationProduct`   |
+| **Traffic Anomalies**  | `get_traffic_anomalies`         | Lists traffic anomalies and outages; filter by AS, location, start date, and end date                                |
+| **URL Scanner**        | `scan_url`                      | Scans a URL via [Cloudflare’s URL Scanner](https://developers.cloudflare.com/radar/investigate/url-scanner/)         |
 
 This MCP server is still a work in progress, and we plan to add more tools in the future.
 
