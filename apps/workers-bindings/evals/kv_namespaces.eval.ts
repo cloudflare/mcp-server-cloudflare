@@ -29,7 +29,7 @@ eachModel('$modelName', ({ model }) => {
 		},
 		scorers: [checkFactuality],
 		threshold: 1,
-		timeout: 60000, // 60 seconds
+		timeout: 60000,
 	})
 	describeEval('List Cloudflare KV Namespaces', {
 		data: async () => [
@@ -51,7 +51,7 @@ eachModel('$modelName', ({ model }) => {
 		},
 		scorers: [checkFactuality],
 		threshold: 1,
-		timeout: 60000, // 60 seconds
+		timeout: 60000,
 	})
 	describeEval('Rename Cloudflare KV Namespace', {
 		data: async () => [
@@ -74,7 +74,7 @@ eachModel('$modelName', ({ model }) => {
 		},
 		scorers: [checkFactuality],
 		threshold: 1,
-		timeout: 60000, // 60 seconds
+		timeout: 60000,
 	})
 	describeEval('Get Cloudflare KV Namespace Details', {
 		data: async () => [
@@ -96,7 +96,7 @@ eachModel('$modelName', ({ model }) => {
 		},
 		scorers: [checkFactuality],
 		threshold: 1,
-		timeout: 60000, // 60 seconds
+		timeout: 60000,
 	})
 	describeEval('Delete Cloudflare KV Namespace', {
 		data: async () => [
@@ -118,6 +118,6 @@ eachModel('$modelName', ({ model }) => {
 		},
 		scorers: [checkFactuality],
 		threshold: 1,
-		timeout: 60000, // 60 seconds
+		timeout: 60000,
 	})
 })

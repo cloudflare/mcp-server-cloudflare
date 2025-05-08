@@ -15,6 +15,7 @@ import { registerD1Tools } from '@repo/mcp-common/src/tools/d1'
 import { registerHyperdriveTools } from '@repo/mcp-common/src/tools/hyperdrive'
 import { registerKVTools } from '@repo/mcp-common/src/tools/kv_namespace'
 import { registerR2BucketTools } from '@repo/mcp-common/src/tools/r2_bucket'
+import { registerVectorizeTools } from '@repo/mcp-common/src/tools/vectorize'
 import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker'
 import { MetricsTracker } from '@repo/mcp-observability'
 
@@ -74,6 +75,7 @@ export class WorkersBindingsMCP extends McpAgent<Env, WorkersBindingsMCPState, P
 		registerR2BucketTools(this)
 		registerD1Tools(this)
 		registerHyperdriveTools(this)
+		registerVectorizeTools(this)
 	}
 
 	async getActiveAccountId() {
