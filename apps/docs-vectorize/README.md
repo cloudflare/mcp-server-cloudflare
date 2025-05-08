@@ -10,7 +10,7 @@ Currently available tools:
 
 | **Category**          | **Tool**                          | **Description**                      |
 | --------------------- | --------------------------------- | ------------------------------------ |
-| **Workers Analytics** | `search_cloudflare_documentation` | Search the Cloudflare documentation. |
+| **Cloudflare Documentation** | `search_cloudflare_documentation` | Search the Cloudflare documentation. |
 
 ### Prompt Examples
 
