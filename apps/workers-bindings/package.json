@@ -8,7 +8,7 @@
 		"deploy": "wrangler deploy",
 		"deploy:staging": "wrangler deploy --env staging",
 		"deploy:production": "wrangler deploy --env production",
-		"eval:dev": "start-server-and-test --expect 404 eval:server http://localhost:8977 'vitest --testTimeout=60000 --config vitest.config.evals.ts'",
+		"eval:dev": "start-server-and-test --expect 404 eval:server http://localhost:8977 'vitest kv_namespaces.eval.ts --testTimeout=60000 --config vitest.config.evals.ts'",
 		"eval:server": "wrangler dev --var ENVIRONMENT:test --var DEV_DISABLE_OAUTH:true --var DEV_CLOUDFLARE_EMAIL:mcp-server-eval-account@workers-for-platforms-dev.cfdata.org --inspector-port 9230 --port 8977",
 		"eval:ci": "start-server-and-test --expect 404 eval:server http://localhost:8977 'vitest run --testTimeout=60000 --config vitest.config.evals.ts'",
 		"dev": "wrangler dev",

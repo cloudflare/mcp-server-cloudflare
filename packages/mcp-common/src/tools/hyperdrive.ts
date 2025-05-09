@@ -13,7 +13,6 @@ import {
 	HyperdriveListParamPerPageSchema,
 	HyperdriveOriginDatabaseSchema,
 	HyperdriveOriginHostSchema,
-	HyperdriveOriginPasswordSchema,
 	HyperdriveOriginPortSchema,
 	HyperdriveOriginSchemeSchema,
 	HyperdriveOriginUserSchema,
