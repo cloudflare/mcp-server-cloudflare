@@ -38,8 +38,17 @@ function getWorkersAiModel(modelName: AiTextGenerationModels) {
 }
 
 export const eachModel = describe.each([
-	getOpenAiModel('gpt-4o'),
-	getOpenAiModel('gpt-4o-mini'),
+	//getOpenAiModel('gpt-4o'),
+	//getOpenAiModel('gpt-4o-mini'),
+
+	// error 3043 - workers-ai-provider bug
+	getWorkersAiModel("@cf/mistralai/mistral-small-3.1-24b-instruct"),
+
+	// llama 3 is very inconsistent with
+	getWorkersAiModel("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+
+	// Currently llama 4 is having issues with tool calling
+	getWorkersAiModel("@cf/meta/llama-4-scout-17b-16e-instruct"),
 
 	// llama 3 is somewhat inconsistent
 	//getWorkersAiModel("@cf/meta/llama-3.3-70b-instruct-fp8-fast")
