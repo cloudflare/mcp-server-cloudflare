@@ -1,5 +1,11 @@
 # @repo/tools
 
+## 0.32.1
+
+### Patch Changes
+
+- 86c2e4f: Add API token passthrough auth
+
 ## 0.32.0
 
 ### Minor Changes

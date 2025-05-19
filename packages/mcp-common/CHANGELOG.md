@@ -1,5 +1,11 @@
 # @repo/mcp-common
 
+## 0.16.2
+
+### Patch Changes
+
+- 86c2e4f: Add API token passthrough auth
+
 ## 0.16.1
 
 ### Patch Changes
