@@ -1,5 +1,13 @@
 # workers-bindings
 
+## 0.0.3
+
+### Patch Changes
+
+- 3677a18: Remove extraneous log
+- Updated dependencies [3677a18]
+  - @repo/mcp-common@0.16.3
+
 ## 0.0.2
 
 ### Patch Changes

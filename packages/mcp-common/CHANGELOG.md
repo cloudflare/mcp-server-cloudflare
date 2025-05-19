@@ -1,5 +1,11 @@
 # @repo/mcp-common
 
+## 0.16.3
+
+### Patch Changes
+
+- 3677a18: Remove extraneous log
+
 ## 0.16.2
 
 ### Patch Changes
