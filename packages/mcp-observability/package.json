@@ -12,7 +12,7 @@
 		"bin": "bin"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "1.10.2",
+		"@modelcontextprotocol/sdk": "1.12.0",
 		"wrangler": "4.10.0",
 		"zod": "3.24.2"
 	},
