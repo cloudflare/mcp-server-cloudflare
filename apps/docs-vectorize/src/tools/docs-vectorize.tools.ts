@@ -42,6 +42,37 @@ ${result.text}
 			}
 		}
 	)
+
+	// Note: this is a tool instead of a prompt because
+	// prompt support is much less common than tools.
+	agent.server.tool(
+		'migrate_pages_to_workers_guide',
+		`ALWAYS read this guide before migrating Pages projects to Workers.`,
+		{},
+		async () => {
+			const res = await fetch(
+				'https://0b1a9544.preview.developers.cloudflare.com/workers/prompts/pages-to-workers.txt',
+				{
+					cf: { cacheEverything: true, cacheTtl: 3600 },
+				}
+			)
+
+			if (!res.ok) {
+				return {
+					content: [{ type: 'text', text: 'Error: Failed to fetch guide. Please try again.' }],
+				}
+			}
+
+			return {
+				content: [
+					{
+						type: 'text',
+						text: await res.text(),
+					},
+				],
+			}
+		}
+	)
 }
 
 async function queryVectorize(ai: Ai, vectorizeIndex: VectorizeIndex, query: string, topK: number) {
