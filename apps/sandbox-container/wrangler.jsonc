@@ -1,7 +1,7 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "sandbox-container-dev",
-	"main": "server/index.ts",
+	"main": "server/sandbox.server.app.ts",
 	"compatibility_date": "2025-04-03",
 	"compatibility_flags": ["nodejs_compat"],
 	"containers": [

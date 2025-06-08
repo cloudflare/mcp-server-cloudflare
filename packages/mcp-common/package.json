@@ -1,6 +1,6 @@
 {
 	"name": "@repo/mcp-common",
-	"version": "0.16.0",
+	"version": "0.16.3",
 	"private": true,
 	"sideEffects": false,
 	"main": "./src/index.ts",
@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"@cloudflare/workers-oauth-provider": "0.0.5",
+		"@fast-csv/format": "5.0.2",
 		"@hono/zod-validator": "0.4.3",
 		"@modelcontextprotocol/sdk": "1.10.2",
 		"@repo/mcp-observability": "workspace:*",
@@ -26,8 +27,8 @@
 		"@repo/eslint-config": "workspace:*",
 		"@repo/tools": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "22.14.1",
 		"@sentry/types": "8.9.2",
+		"@types/node": "22.14.1",
 		"@vitest/ui": "3.0.9",
 		"vitest": "3.0.9",
 		"wrangler": "4.10.0"

@@ -5,7 +5,7 @@ import { MetricsTracker } from '@repo/mcp-observability'
 
 import { ContainerEvent } from './metrics'
 
-import type { Env } from './context'
+import type { Env } from './sandbox.server.context'
 
 const env = getEnv<Env>()
 export class ContainerManager extends DurableObject<Env> {

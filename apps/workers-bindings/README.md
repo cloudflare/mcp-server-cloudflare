@@ -19,7 +19,8 @@ Currently available tools:
 |                   | `kv_namespace_get`         | Get details of a kv namespace in your Cloudflare account                      |
 |                   | `kv_namespace_update`      | Update the title of a kv namespace in your Cloudflare account                 |
 | **Workers**       | `workers_list`             | List all Workers in your Cloudflare account                                   |
-|                   | `worker_get_worker`        | Get the source code of a Cloudflare Worker                                    |
+|                   | `workers_get_worker`       | Get the details of a Cloudflare Worker                                        |
+|                   | `workers_get_worker_code`  | Get the source code of a Cloudflare Worker                                    |
 | **R2 Buckets**    | `r2_buckets_list`          | List r2 buckets in your Cloudflare account                                    |
 |                   | `r2_bucket_create`         | Create a new r2 bucket in your Cloudflare account                             |
 |                   | `r2_bucket_get`            | Get details about a specific R2 bucket                                        |

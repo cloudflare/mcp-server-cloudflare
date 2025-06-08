@@ -1,32 +1,27 @@
 {
 	"name": "@cloudflare/mcp-server-cloudflare",
 	"version": "1.0.0",
-	"description": "MCP server for interacting with Cloudflare API",
+	"description": "Monorepo for Cloudflare MCP servers",
 	"license": "Apache-2.0",
 	"author": "Cloudflare, Inc. (https://cloudflare.com)",
 	"homepage": "https://github.com/cloudflare/mcp-server-cloudflare",
 	"bugs": "https://github.com/cloudflare/mcp-server-cloudflare/issues",
 	"type": "module",
-	"main": "dist/index.js",
-	"module": "dist/index.js",
-	"types": "dist/index.d.ts",
-	"files": [
-		"dist",
-		"README.md"
-	],
-	"access": "public",
 	"sideEffects": false,
 	"scripts": {
 		"changeset:new": "run-changeset-new",
-		"check:deps": "pnpm exec syncpack lint",
+		"check:deps": "syncpack lint",
 		"check:format": "prettier . --check --cache --ignore-unknown",
 		"check:turbo": "run-turbo check",
 		"types": "run-turbo types",
 		"test:ci": "run-vitest-ci",
 		"test": "vitest run --passWithNoTests",
-		"fix:format": "prettier . --write",
+		"fix:format": "prettier . --write --cache --ignore-unknown",
+		"fix:deps": "run-fix-deps",
 		"test:watch": "vitest",
-		"eval:ci": "run-turbo eval:ci"
+		"eval:ci": "run-turbo eval:ci",
+		"eval:dev": "run-turbo eval:dev",
+		"update-deps": "syncpack update"
 	},
 	"devDependencies": {
 		"@changesets/cli": "2.28.1",

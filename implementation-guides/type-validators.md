@@ -22,7 +22,7 @@ When a tool parameter corresponds directly to a parameter in the Cloudflare Node
 - **Detect SDK Changes:** If the underlying SDK type changes (e.g., type alias renamed, property added/removed/renamed, type changed from `string` to `string | null`), your Zod schema definition will likely cause a TypeScript error during compilation. This immediately flags the need to update the validator and potentially the tool logic, preventing runtime errors caused by SDK misalignment.
 - **Accuracy:** Ensures your validator accurately reflects the type expected by the SDK function you intend to call.
 
-**Example (`hyperdrive.ts`):**
+**Example (`hyperdrive.types.ts`):**
 
 ```typescript
 import { z } from 'zod'
@@ -54,7 +54,7 @@ Define a separate, named Zod schema for **each individual field** that a tool mi
 - **Reusability:** Individual field schemas (like `HyperdriveConfigIdSchema`, `HyperdriveConfigNameSchema`) can be reused across different tools (e.g., `hyperdrive_create`, `hyperdrive_update`, `hyperdrive_get`).
 - **Modularity:** Easier to manage, update, and test individual validation rules.
 
-**Example (`hyperdrive.ts` Structure):**
+**Example (`hyperdrive.types.ts` Structure):**
 
 ```typescript
 // --- Base Field Schemas ---
@@ -102,7 +102,7 @@ Add a clear, concise `.describe('...')` call to **every** Zod schema you define.
 - **LLM Context:** The description is often extracted and provided to the LLM as part of the tool's definition, helping it understand the purpose and constraints of each parameter.
 - **Developer Documentation:** Serves as inline documentation for developers working with the code.
 
-**Example (`hyperdrive.ts`):**
+**Example (`hyperdrive.types.ts`):**
 
 ```typescript
 /** Zod schema for the list page number. */
@@ -133,7 +133,7 @@ Use a consistent naming convention for your validator schemas. A recommended pat
 
 ## Location
 
-Place validators related to a specific service or concept in dedicated files within the `packages/mcp-common/src/types/` directory (e.g., `hyperdrive.ts`, `kv.ts`).
+Place validators related to a specific service or concept in dedicated files within the `packages/mcp-common/src/types/` directory (e.g., `hyperdrive.types.ts`, `kv.ts`).
 
 ## Summary
 

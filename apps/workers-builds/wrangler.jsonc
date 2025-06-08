@@ -1,0 +1,130 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": "src/workers-builds.app.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"name": "mcp-cloudflare-workers-builds-dev",
+	"migrations": [
+		{
+			"new_sqlite_classes": ["UserDetails", "BuildsMCP"],
+			"tag": "v1"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "BuildsMCP",
+				"name": "MCP_OBJECT"
+			},
+			{
+				"class_name": "UserDetails",
+				"name": "USER_DETAILS"
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "DEV_KV"
+		}
+	],
+	"vars": {
+		"ENVIRONMENT": "development",
+		"MCP_SERVER_NAME": "PLACEHOLDER",
+		"MCP_SERVER_VERSION": "PLACEHOLDER",
+		"CLOUDFLARE_CLIENT_ID": "PLACEHOLDER",
+		"CLOUDFLARE_CLIENT_SECRET": "PLACEHOLDER"
+	},
+	"dev": {
+		"port": 8976
+	},
+	"workers_dev": false,
+	"preview_urls": false,
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-dev"
+		}
+	],
+	"env": {
+		"staging": {
+			"name": "mcp-cloudflare-workers-builds-staging",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "builds-staging.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "BuildsMCP",
+						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "UserDetails",
+						"name": "USER_DETAILS"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "a6ad24203a244d248f2fe1acfeb7b3a3"
+				}
+			],
+			"vars": {
+				"ENVIRONMENT": "staging",
+				"GIT_HASH": "OVERRIDEN_DURING_DEPLOYMENT",
+				"SENTRY_DSN": "https://2cc5007c2ad5f33e9be007d4b40208ef@sentry10.cfdata.org/1793",
+				"MCP_SERVER_NAME": "workers-builds-staging",
+				"MCP_SERVER_VERSION": "1.0.0"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-staging"
+				}
+			]
+		},
+		"production": {
+			"name": "mcp-cloudflare-workers-builds-production",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "builds.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "BuildsMCP",
+						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "UserDetails",
+						"name": "USER_DETAILS"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "753f27a19ef94d7dbd49de05588ca890"
+				}
+			],
+			"vars": {
+				"ENVIRONMENT": "production",
+				"GIT_HASH": "OVERRIDEN_DURING_DEPLOYMENT",
+				"SENTRY_DSN": "https://2cc5007c2ad5f33e9be007d4b40208ef@sentry10.cfdata.org/1793",
+				"MCP_SERVER_NAME": "workers-builds",
+				"MCP_SERVER_VERSION": "1.0.0"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-production"
+				}
+			]
+		}
+	}
+}

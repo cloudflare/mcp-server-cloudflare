@@ -1,0 +1,45 @@
+name: Branches
+on:
+  push:
+    branches-ignore: ['main']
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  test:
+    name: Test & Check
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Syncpack lint
+        run: pnpm check:deps
+      - name: Run linter
+        run: pnpm check:turbo
+      - name: Run linter (formatting)
+        run: pnpm check:format
+      - name: Run tests
+        run: pnpm test
+
+  build-workers:
+    name: Build Workers
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      - name: Build Workers
+        run: pnpm turbo deploy -- -e staging --dry-run

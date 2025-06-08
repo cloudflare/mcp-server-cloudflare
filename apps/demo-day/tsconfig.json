@@ -1,6 +1,6 @@
 {
 	"extends": "@repo/typescript-config/workers.json",
-	"include": ["src/index.ts"],
+	"include": ["src/demo-day.app.ts"],
 	"compilerOptions": {
 		"types": ["@types/node"]
 	}

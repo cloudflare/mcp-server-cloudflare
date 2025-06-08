@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+set -eu
+
+script_path="$(realpath "$(dirname "$0")/../src/bin/runx.ts")"
+
+bin_dir="$(realpath "$(dirname "$0")")"
+tsx_path="$(realpath "$bin_dir/../node_modules/.bin/tsx")"
+
+if command -v bun >/dev/null 2>&1; then
+	bun "$script_path" "$@"
+else
+	"$tsx_path" "$script_path" "$@"
+fi

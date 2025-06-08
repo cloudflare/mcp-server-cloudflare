@@ -1,8 +1,8 @@
 import { type MCPClientManager } from 'agents/mcp/client'
-import { jsonSchema, streamText, tool } from 'ai'
+import { generateText, jsonSchema, tool } from 'ai'
 import { z } from 'zod'
 
-import type { LanguageModelV1, StreamTextResult, ToolCallPart, ToolSet } from 'ai'
+import type { GenerateTextResult, LanguageModelV1, ToolCallPart, ToolSet } from 'ai'
 
 export async function runTask(
 	clientManager: MCPClientManager,
@@ -10,7 +10,7 @@ export async function runTask(
 	input: string
 ): Promise<{
 	promptOutput: string
-	fullResult: StreamTextResult<ToolSet, never>
+	fullResult: GenerateTextResult<ToolSet, never>
 	toolCalls: ToolCallPart[]
 }> {
 	const tools = clientManager.listTools()
@@ -43,7 +43,7 @@ export async function runTask(
 		return acc
 	}, {} as ToolSet)
 
-	const res = streamText({
+	const res = await generateText({
 		model,
 		system:
 			"You are an assistant responsible for evaluating the results of calling various tools. Given the user's query, use the tools available to you to answer the question.",
@@ -53,15 +53,10 @@ export async function runTask(
 		maxSteps: 10,
 	})
 
-	// we need to consume the fill stream, so this is empty
-	// eslint-disable-next-line no-empty
-	for await (const _ of res.fullStream) {
-	}
-
 	// convert into an LLM readable result so our factuality checker can validate tool calls
 	let messagesWithTools = ''
 	const toolCalls: ToolCallPart[] = []
-	const response = await res.response
+	const response = res.response
 	const messages = response.messages
 
 	for (const message of messages) {

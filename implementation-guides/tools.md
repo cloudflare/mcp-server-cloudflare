@@ -112,7 +112,7 @@ export function registerMyServiceTools(agent: CloudflareMcpAgent) {
       - **Perform Action:** Interact with the relevant service (Cloudflare SDK, database, vector store, etc.).
       - **Format Response:** Return an object with a `content` property, which is an array of `ContentBlock` objects (usually `type: 'text'` or `type: 'resource'`).
         - For simple success/failure or structured data, `JSON.stringify` the result in a text block.
-        - For richer data like search results, use `EmbeddedResource` (`type: 'resource'`) as seen in `docs.ts`.
+        - For richer data like search results, use `EmbeddedResource` (`type: 'resource'`) as seen in `docs-autorag.tools.ts`.
         - Return clear error messages in the `text` property of a content block upon failure.
 
 ## Best Practices

@@ -1,21 +1,21 @@
 {
 	"name": "containers-mcp",
-	"version": "0.0.1",
+	"version": "0.0.4",
 	"private": true,
 	"type": "module",
 	"scripts": {
 		"check:types": "run-tsc",
 		"check:lint": "run-eslint-workers",
 		"deploy": "wrangler deploy",
-		"dev": "concurrently \"tsx container/index.ts\" \"wrangler dev --var \"ENVIRONMENT:dev\"\"",
+		"dev": "concurrently \"tsx container/sandbox.container.app.ts\" \"wrangler dev --var \"ENVIRONMENT:dev\"\"",
 		"build:container": "docker build --platform linux/amd64 --tag sandbox-container:$(git rev-parse --short HEAD) -f Dockerfile ../../ && wrangler containers push sandbox-container:$(git rev-parse --short HEAD)",
 		"start": "wrangler dev",
-		"start:container": "tsx container/index.ts",
+		"start:container": "tsx container/sandbox.container.app.ts",
 		"postinstall": "mkdir -p workdir",
 		"test": "vitest",
 		"types": "wrangler types --include-env=false",
 		"eval:dev": "start-server-and-test --expect 404 eval:server http://localhost:8976 'vitest --testTimeout=60000 --config vitest.config.evals.ts'",
-		"eval:server": "concurrently \"tsx container/index.ts\" \"wrangler dev --var ENVIRONMENT:test --var DEV_DISABLE_OAUTH:true --var DEV_CLOUDFLARE_EMAIL:mcp-server-eval-account@workers-for-platforms-dev.cfdata.org\"",
+		"eval:server": "concurrently \"tsx container/sandbox.container.app.ts\" \"wrangler dev --var ENVIRONMENT:test --var DEV_DISABLE_OAUTH:true --var DEV_CLOUDFLARE_EMAIL:mcp-server-eval-account@workers-for-platforms-dev.cfdata.org\"",
 		"eval:ci": "start-server-and-test --expect 404 eval:server http://localhost:8976 'vitest run --testTimeout=60000 --config vitest.config.evals.ts'"
 	},
 	"dependencies": {
