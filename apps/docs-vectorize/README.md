@@ -8,9 +8,9 @@ The Cloudflare account this worker is deployed on already has this Vectorize DB 
 
 Currently available tools:
 
-| **Category**          | **Tool**                          | **Description**                      |
-| --------------------- | --------------------------------- | ------------------------------------ |
-| **Workers Analytics** | `search_cloudflare_documentation` | Search the Cloudflare documentation. |
+| **Category**                 | **Tool**                          | **Description**                      |
+| ---------------------------- | --------------------------------- | ------------------------------------ |
+| **Cloudflare Documentation** | `search_cloudflare_documentation` | Search the Cloudflare documentation. |
 
 ### Prompt Examples
 
