@@ -1,5 +1,11 @@
 # docs-vectorize
 
+## 0.2.0
+
+### Minor Changes
+
+- 89bfaf4: feat: add Pages to Workers migration guide to docs-vectorize MCP server
+
 ## 0.1.0
 
 ### Minor Changes
