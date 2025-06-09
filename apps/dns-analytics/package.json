@@ -1,6 +1,6 @@
 {
 	"name": "dns-analytics",
-	"version": "0.0.4",
+	"version": "0.1.0",
 	"private": true,
 	"scripts": {
 		"check:lint": "run-eslint-workers",

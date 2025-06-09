@@ -1,5 +1,20 @@
 # containers-mcp
 
+## 0.1.0
+
+### Minor Changes
+
+- 6cf52a6: Support AOT tokens
+
+### Patch Changes
+
+- 0fc4439: Update agents and modelcontext dependencies
+- Updated dependencies [6cf52a6]
+- Updated dependencies [0fc4439]
+  - @repo/mcp-observability@0.32.0
+  - @repo/eval-tools@0.32.0
+  - @repo/mcp-common@0.17.0
+
 ## 0.0.4
 
 ### Patch Changes
