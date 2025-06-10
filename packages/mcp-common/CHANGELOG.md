@@ -1,5 +1,11 @@
 # @repo/mcp-common
 
+## 0.17.1
+
+### Patch Changes
+
+- 83e2d19: Pass in type user_token in props during oauth flow
+
 ## 0.17.0
 
 ### Minor Changes

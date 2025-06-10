@@ -1,5 +1,12 @@
 # cloudflare-browser-mcp-server
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [83e2d19]
+  - @repo/mcp-common@0.17.1
+
 ## 0.1.0
 
 ### Minor Changes
