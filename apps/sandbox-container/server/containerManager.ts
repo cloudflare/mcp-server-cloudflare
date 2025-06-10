@@ -40,10 +40,11 @@ export class ContainerManager extends DurableObject<Env> {
 
 			// 15m timeout for container lifetime
 			if (now.valueOf() - time.valueOf() > 15 * 60 * 1000) {
+				await this.killContainer(id)
+				// TODO: Figure out why we were running in to invalid durable object id the id does not match this durable object class error
 				const doId = this.env.USER_CONTAINER.idFromString(id)
 				const stub = this.env.USER_CONTAINER.get(doId)
 				await stub.destroyContainer()
-				await this.killContainer(id)
 			}
 		}
 	}

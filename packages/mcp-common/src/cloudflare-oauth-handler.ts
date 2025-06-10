@@ -68,6 +68,7 @@ const UserAuthProps = z.object({
 	accessToken: z.string(),
 	user: UserSchema,
 	accounts: AccountsSchema,
+	refreshToken: z.string().optional(),
 })
 export type AuthProps = z.infer<typeof AuthProps>
 const AuthProps = z.discriminatedUnion('type', [AccountAuthProps, UserAuthProps])
@@ -153,6 +154,15 @@ export async function handleTokenExchangeCallback(
 ): Promise<TokenExchangeCallbackResult | undefined> {
 	// options.props contains the current props
 	if (options.grantType === 'refresh_token') {
+		const props = AuthProps.parse(options.props)
+		if (props.type === 'account_token') {
+			// Refreshing an account_token should not be possible, as we only do this for user tokens
+			throw new McpError('Internal Server Error', 500)
+		}
+		if (!props.refreshToken) {
+			throw new McpError('Missing refreshToken', 500)
+		}
+
 		// handle token refreshes
 		const {
 			access_token: accessToken,
@@ -161,7 +171,7 @@ export async function handleTokenExchangeCallback(
 		} = await refreshAuthToken({
 			client_id: clientId,
 			client_secret: clientSecret,
-			refresh_token: options.props.refreshToken,
+			refresh_token: props.refreshToken,
 		})
 
 		return {
@@ -169,7 +179,7 @@ export async function handleTokenExchangeCallback(
 				...options.props,
 				accessToken,
 				refreshToken,
-			},
+			} satisfies AuthProps,
 			accessTokenTTL: expires_in,
 		}
 	}
@@ -279,13 +289,13 @@ export function createAuthHandlers({
 						label: user.email,
 					},
 					scope: oauthReqInfo.scope,
-					// This will be available on this.props inside CASBMCP
 					props: {
+						type: 'user_token',
 						user,
 						accounts,
 						accessToken,
 						refreshToken,
-					},
+					} satisfies AuthProps,
 				})
 
 				metrics.logEvent(
