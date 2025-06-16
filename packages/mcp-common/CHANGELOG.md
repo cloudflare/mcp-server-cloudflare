@@ -1,5 +1,11 @@
 # @repo/mcp-common
 
+## 0.18.0
+
+### Minor Changes
+
+- f885d07: Add search docs tool to bindings and obs servers
+
 ## 0.17.1
 
 ### Patch Changes

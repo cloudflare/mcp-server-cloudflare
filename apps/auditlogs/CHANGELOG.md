@@ -1,5 +1,12 @@
 # auditlogs
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [f885d07]
+  - @repo/mcp-common@0.18.0
+
 ## 0.1.1
 
 ### Patch Changes
