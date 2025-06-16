@@ -45,6 +45,15 @@
 		"CLOUDFLARE_CLIENT_ID": "<PLACEHOLDER>",
 		"CLOUDFLARE_CLIENT_SECRET": "<PLACEHOLDER>"
 	},
+	"ai": {
+		"binding": "AI"
+	},
+	"vectorize": [
+		{
+			"binding": "VECTORIZE",
+			"index_name": "docs-bge-base"
+		}
+	],
 	"workers_dev": false,
 	"preview_urls": false,
 	"analytics_engine_datasets": [
@@ -75,6 +84,15 @@
 				{
 					"binding": "OAUTH_KV",
 					"id": "4258ce2dee98428db6c9870eb5097f26"
+				}
+			],
+			"ai": {
+				"binding": "AI"
+			},
+			"vectorize": [
+				{
+					"binding": "VECTORIZE",
+					"index_name": "docs-bge-base"
 				}
 			],
 			"vars": {
@@ -117,6 +135,15 @@
 				"MCP_SERVER_NAME": "workers-bindings",
 				"MCP_SERVER_VERSION": "1.0.0"
 			},
+			"ai": {
+				"binding": "AI"
+			},
+			"vectorize": [
+				{
+					"binding": "VECTORIZE",
+					"index_name": "docs-bge-base"
+				}
+			],
 			"analytics_engine_datasets": [
 				{
 					"binding": "MCP_METRICS",

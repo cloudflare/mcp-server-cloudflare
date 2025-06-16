@@ -8,10 +8,12 @@ import {
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import { getUserDetails, UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
 import { getEnv } from '@repo/mcp-common/src/env'
+import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-vectorize.prompts'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account.tools'
 import { registerD1Tools } from '@repo/mcp-common/src/tools/d1.tools'
+import { registerDocsTools } from '@repo/mcp-common/src/tools/docs-vectorize.tools'
 import { registerHyperdriveTools } from '@repo/mcp-common/src/tools/hyperdrive.tools'
 import { registerKVTools } from '@repo/mcp-common/src/tools/kv_namespace.tools'
 import { registerR2BucketTools } from '@repo/mcp-common/src/tools/r2_bucket.tools'
@@ -77,6 +79,10 @@ export class WorkersBindingsMCP extends McpAgent<Env, WorkersBindingsMCPState, P
 		registerR2BucketTools(this)
 		registerD1Tools(this)
 		registerHyperdriveTools(this)
+
+		// Add docs tools
+		registerDocsTools(this, this.env)
+		registerPrompts(this)
 	}
 
 	async getActiveAccountId() {

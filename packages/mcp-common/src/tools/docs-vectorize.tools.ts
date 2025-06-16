@@ -1,6 +1,11 @@
 import { z } from 'zod'
 
-import type { CloudflareDocumentationMCP } from '../docs-vectorize.app'
+import type { CloudflareMcpAgentNoAccount } from '../types/cloudflare-mcp-agent.types'
+
+interface RequiredEnv {
+	AI: Ai
+	VECTORIZE: VectorizeIndex
+}
 
 // Always return 10 results for simplicity, don't make it configurable
 const TOP_K = 10
@@ -9,7 +14,7 @@ const TOP_K = 10
  * Registers the docs search tool with the MCP server
  * @param agent The MCP server instance
  */
-export function registerDocsTools(agent: CloudflareDocumentationMCP) {
+export function registerDocsTools(agent: CloudflareMcpAgentNoAccount, env: RequiredEnv) {
 	agent.server.tool(
 		'search_cloudflare_documentation',
 		`Search the Cloudflare documentation.
@@ -26,7 +31,7 @@ export function registerDocsTools(agent: CloudflareDocumentationMCP) {
 			query: z.string(),
 		},
 		async ({ query }) => {
-			const results = await queryVectorize(agent.env.AI, agent.env.VECTORIZE, query, TOP_K)
+			const results = await queryVectorize(env.AI, env.VECTORIZE, query, TOP_K)
 			const resultsAsXml = results
 				.map((result) => {
 					return `<result>

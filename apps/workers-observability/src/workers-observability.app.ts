@@ -8,10 +8,12 @@ import {
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import { getUserDetails, UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
 import { getEnv } from '@repo/mcp-common/src/env'
+import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-vectorize.prompts'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { initSentryWithUser } from '@repo/mcp-common/src/sentry'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account.tools'
+import { registerDocsTools } from '@repo/mcp-common/src/tools/docs-vectorize.tools'
 import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker.tools'
 
 import { MetricsTracker } from '../../../packages/mcp-observability/src'
@@ -83,6 +85,10 @@ export class ObservabilityMCP extends McpAgent<Env, State, Props> {
 
 		// Register Cloudflare Workers logs tools
 		registerObservabilityTools(this)
+
+		// Add docs tools
+		registerDocsTools(this, this.env)
+		registerPrompts(this)
 	}
 
 	async getActiveAccountId() {

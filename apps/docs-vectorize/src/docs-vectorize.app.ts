@@ -2,10 +2,9 @@ import { McpAgent } from 'agents/mcp'
 
 import { createApiHandler } from '@repo/mcp-common/src/api-handler'
 import { getEnv } from '@repo/mcp-common/src/env'
+import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-vectorize.prompts'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
-
-import { registerPrompts } from './prompts/docs-vectorize.prompts'
-import { registerDocsTools } from './tools/docs-vectorize.tools'
+import { registerDocsTools } from '@repo/mcp-common/src/tools/docs-vectorize.tools'
 
 import type { Env } from './docs-vectorize.context'
 
@@ -33,7 +32,7 @@ export class CloudflareDocumentationMCP extends McpAgent<Env, State, Props> {
 	}
 
 	async init() {
-		registerDocsTools(this)
+		registerDocsTools(this, this.env)
 		registerPrompts(this)
 	}
 }

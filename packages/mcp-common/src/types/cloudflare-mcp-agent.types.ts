@@ -13,8 +13,13 @@ type McpAgentWithoutServer<EnvType = unknown> = Omit<
 	'server'
 >
 
-export interface CloudflareMcpAgent<EnvType = unknown> extends McpAgentWithoutServer<EnvType> {
+export interface CloudflareMcpAgentNoAccount<EnvType = unknown>
+	extends McpAgentWithoutServer<EnvType> {
 	server: CloudflareMCPServer
+}
+
+export interface CloudflareMcpAgent<EnvType = unknown>
+	extends CloudflareMcpAgentNoAccount<EnvType> {
 	setActiveAccountId(accountId: string): Promise<void>
 	getActiveAccountId(): Promise<string | null>
 }

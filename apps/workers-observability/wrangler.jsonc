@@ -35,6 +35,15 @@
 			"id": "DEV_KV"
 		}
 	],
+	"ai": {
+		"binding": "AI"
+	},
+	"vectorize": [
+		{
+			"binding": "VECTORIZE",
+			"index_name": "docs-bge-base"
+		}
+	],
 	"vars": {
 		"ENVIRONMENT": "development",
 		"MCP_SERVER_NAME": "PLACEHOLDER",
@@ -83,6 +92,15 @@
 				"MCP_SERVER_NAME": "workers-observability-staging",
 				"MCP_SERVER_VERSION": "1.0.0"
 			},
+			"ai": {
+				"binding": "AI"
+			},
+			"vectorize": [
+				{
+					"binding": "VECTORIZE",
+					"index_name": "docs-bge-base"
+				}
+			],
 			"analytics_engine_datasets": [
 				{
 					"binding": "MCP_METRICS",
@@ -110,6 +128,15 @@
 				{
 					"binding": "OAUTH_KV",
 					"id": "753f27a19ef94d7dbd49de05588ca890"
+				}
+			],
+			"ai": {
+				"binding": "AI"
+			},
+			"vectorize": [
+				{
+					"binding": "VECTORIZE",
+					"index_name": "docs-bge-base"
 				}
 			],
 			"vars": {

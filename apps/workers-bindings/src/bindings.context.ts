@@ -11,13 +11,14 @@ export interface Env {
 	MCP_OBJECT: DurableObjectNamespace<WorkersBindingsMCP>
 	USER_DETAILS: DurableObjectNamespace<UserDetails>
 	MCP_METRICS: AnalyticsEngineDataset
-	DEV_DISABLE_OAUTH: string
-	DEV_CLOUDFLARE_API_TOKEN: string
-	DEV_CLOUDFLARE_EMAIL: string
 	CLOUDFLARE_API_TOKEN: string
 	OPENAI_API_KEY: string
 	AI_GATEWAY_TOKEN: string
 	CLOUDFLARE_ACCOUNT_ID: string
 	AI_GATEWAY_ID: string
 	AI: Ai
+	VECTORIZE: VectorizeIndex
+	DEV_DISABLE_OAUTH: string
+	DEV_CLOUDFLARE_API_TOKEN: string
+	DEV_CLOUDFLARE_EMAIL: string
 }
