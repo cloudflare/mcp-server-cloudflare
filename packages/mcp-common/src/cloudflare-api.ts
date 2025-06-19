@@ -67,7 +67,8 @@ export async function fetchCloudflareApi<T>({
 
 	// If a schema is provided, validate the response
 	if (responseSchema) {
-		return responseSchema.parse(data)
+		// @ts-ignore
+		return responseSchema.parse({ ...data, messages: [] })
 	}
 
 	return data as T

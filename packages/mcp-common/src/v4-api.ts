@@ -43,7 +43,7 @@ export function V4Schema<TResultType extends z.ZodType, TResultInfoType extends 
 			result_info: resultInfoType.nullable().optional(),
 			success: z.boolean(),
 			errors: V4ErrorSchema,
-			messages: z.array(z.any()),
+			messages: z.array(z.any()).nullable(),
 		})
 	} else {
 		return z.object({

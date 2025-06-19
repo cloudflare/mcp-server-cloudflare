@@ -45,7 +45,7 @@ const buildAssetEndpoint = (assetId?: string) =>
 	assetId ? `/casb/assets/${assetId}` : '/casb/assets'
 const buildAssetCategoryEndpoint = () => '/casb/asset_categories'
 
-const makeApiCall = async <T>({
+export const makeApiCall = async <T>({
 	endpoint,
 	accountId,
 	apiToken,
@@ -70,6 +70,7 @@ const makeApiCall = async <T>({
 				headers: { 'Content-Type': 'application/json' },
 			},
 		})
+
 		return data.result as T
 	} catch (error) {
 		console.error(`API call failed for ${endpoint}:`, error)

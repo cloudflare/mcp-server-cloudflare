@@ -13,12 +13,37 @@ import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account.tools'
 
 import { MetricsTracker } from '../../../packages/mcp-observability/src'
+import { registerFindingsTools } from './tools/findings.tools'
 import { registerIntegrationsTools } from './tools/integrations.tools'
 
 import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './cf1-casb.context'
 
 export { UserDetails }
+
+const BASE_INSTRUCTIONS_CF1_CASB = `
+# Cloudflare One Cloud Access Security Broker (CASB) MCP Agent
+
+The CF1 CASB MCP Agent provides access to CF1 resources that help people understand:
+
+- Assets across all their SaaS apps
+- Security posture misconfigurations (public-facing files)
+
+
+## Some common workflows people may use this for
+- Clients may ask about assets as they think about them: "tell me about frank". The data is segmented around "this integration against google workspace found this user called frank". But "frank" may exist in many apps (Microsoft, Dropbox, etc). A good outcome here would be to provide a vendor-agnostic picture of "frank" and help the client reconcile a trans-vendor inventory view of their assets.
+- Clients may want to dig into a specific asset's security findings. "I found this file customer_data.csv is public-facing. Can we remediate it?" Right now, you are not able to perform the remediation operation but you should have enough tools in place to print out an elegant guide a customer could follow to self-perform the remediation until we get you built to automatically handle that.
+
+
+AVOID auto-selecting accounts - make sure to confirm what account before setting active account ID
+ONLY rely on \`posture_findings_remediation_guide_by_finding_type_id\` to determine remediation plans. do not speculate.
+
+## Tools
+
+- posture_findings_remediation_guide_by_finding_type_id -- the core source of truth on how to fix findings. 
+- asset_categories_ prefixed tools are good for understanding what category IDs we can get to filter.
+- Example: "Tell me about frank" may consist of us looking at every asset_categories_by_type where we filter with 'user' type to see we have a few user categories (microsoft user, google workspace user, etc)
+`
 
 const env = getEnv<Env>()
 
@@ -61,10 +86,14 @@ export class CASBMCP extends McpAgent<Env, State, Props> {
 				name: this.env.MCP_SERVER_NAME,
 				version: this.env.MCP_SERVER_VERSION,
 			},
+			options: {
+				instructions: BASE_INSTRUCTIONS_CF1_CASB,
+			},
 		})
 
 		registerAccountTools(this)
 		registerIntegrationsTools(this)
+		registerFindingsTools(this)
 	}
 
 	async getActiveAccountId() {
