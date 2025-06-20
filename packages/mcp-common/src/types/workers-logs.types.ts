@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { nowISO, parseRelativeTime } from '../utils'
+
 export const numericalOperations = ['eq', 'neq', 'gt', 'gte', 'lt', 'lte'] as const
 
 export const queryOperations = [
@@ -150,26 +152,79 @@ export const zStatistics = z.object({
 	bytes_read: z.number(),
 })
 
-export const zTimeframe = z
+export const zTimeframeAbsolute = z
 	.object({
 		to: z.string(),
 		from: z.string(),
 	})
 	.describe(
-		`Timeframe for your query (ISO-8601 format).
+		`An absolute timeframe for your query (ISO-8601 format).
 
-  • Current server time: ${new Date()}
+  • Current server time: ${nowISO()}
   • Default: Last hour from current time
   • Maximum range: Last 7 days
   • Format: "YYYY-MM-DDTHH:MM:SSZ" (e.g., "2025-04-29T14:30:00Z")
 
   Examples:
-  - Last 30 minutes: from="2025-04-29T14:00:00Z", to="2025-04-29T14:30:00Z"
-  - Yesterday: from="2025-04-28T00:00:00Z", to="2025-04-29T00:00:00Z"
+  - Between April 1st and 5th: from="2025-04-01T00:00:00Z", to="2025-04-05T23:59:59Z"
 
   Note: Narrower timeframes provide faster responses and more specific results.
   Omit this parameter entirely to use the default (last hour).`
 	)
+
+export const zTimeframeRelative = z
+	.object({
+		reference: z.string(),
+		offset: z.string(),
+	})
+	.describe(
+		`Relative timeframe for your query, composed of a reference time and an offset.
+
+  • Current server time: ${nowISO()}
+  • Default: Last hour from current time
+  • Maximum range: Last 7 days
+  • Reference time format: "YYYY-MM-DDTHH:MM:SSZ" (ISO-8601) (e.g., "2025-04-29T14:30:00Z")
+  • Offset format: Must start with a '+' or '-' sign, which indicates whether the offset is in the past or future, followed by one or more time units (e.g., '+5d', '-2h', '+6h20m').
+		Units: s (seconds), m (minutes), h (hours), d (days), w (weeks).
+	• You should not use a future looking offset in combination with the current server time as the reference time, as this will yield no results. (e.g. "the next 20 minutes")
+
+  Examples:
+  - Last 30 minutes: reference="${nowISO()}", offset="-30m"
+  - Yesterday: reference="${nowISO()}", offset="-1d"
+
+  Note: Narrower timeframes provide faster responses and more specific results.
+  Omit this parameter entirely to use the default (last hour).`
+	)
+	.transform((val) => {
+		const referenceTime = new Date(val.reference).getTime() / 1000
+
+		if (isNaN(referenceTime)) {
+			throw new Error(`Invalid reference time: ${val.reference}`)
+		}
+
+		const offsetSeconds = parseRelativeTime(val.offset)
+
+		const from = new Date(Math.min(referenceTime + offsetSeconds, referenceTime) * 1000)
+		const to = new Date(Math.max(referenceTime + offsetSeconds, referenceTime) * 1000)
+
+		return {
+			from: from.toISOString(),
+			to: to.toISOString(),
+		}
+	})
+
+export const zTimeframe = z.union([zTimeframeAbsolute, zTimeframeRelative]).describe(
+	`Timeframe for your query, which can be either absolute or relative.
+
+  • Absolute timeframe: Specify exact start and end times in ISO-8601 format (e.g., "2025-04-29T14:30:00Z").
+  • Relative timeframe: Specify a reference time and an offset (e.g., reference="2025-04-29T14:30:00Z", offset="-30m").
+
+  Examples:
+  - Absolute: from="2025-04-01T00:00:00Z", to="2025-04-05T23:59:59Z"
+  - Relative: reference="2025-04-29T14:30:00Z", offset="-30m"
+
+  Note: Narrower timeframes provide faster responses and more specific results.`
+)
 
 const zCloudflareMiniEventDetailsRequest = z.object({
 	url: z.string().optional(),
