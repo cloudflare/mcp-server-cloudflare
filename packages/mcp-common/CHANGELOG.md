@@ -1,5 +1,11 @@
 # @repo/mcp-common
 
+## 0.19.0
+
+### Minor Changes
+
+- 1833c6d: add relative timeframe support for querying
+
 ## 0.18.0
 
 ### Minor Changes
