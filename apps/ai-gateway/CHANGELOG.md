@@ -1,5 +1,12 @@
 # cloudflare-ai-gateway-mcp-server
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [1833c6d]
+  - @repo/mcp-common@0.19.0
+
 ## 0.1.2
 
 ### Patch Changes
