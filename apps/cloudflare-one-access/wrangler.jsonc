@@ -1,0 +1,55 @@
+/**
+ * Minimal Wrangler configuration for Email Security MCP server.
+ * Update account IDs, routes and vars as appropriate for each environment.
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": "src/access.app.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"migrations": [
+		{
+			"new_sqlite_classes": ["ZeroTrustAccessMCP"],
+			"tag": "v1"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"vars": {
+		"MCP_SERVER_NAME": "PLACEHOLDER",
+		"MCP_SERVER_VERSION": "PLACEHOLDER",
+		"CLOUDFLARE_CLIENT_ID": "<PLACEHOLDER>",
+		"CLOUDFLARE_CLIENT_SECRET": "<PLACEHOLDER>",
+		"ENVIRONMENT": "development"
+	},
+	"dev": {
+		"port": 8984
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "ZeroTrustAccessMCP",
+				"name": "MCP_OBJECT"
+			},
+			{
+				"class_name": "UserDetails",
+				"name": "USER_DETAILS"
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "DEV_KV"
+		}
+	],
+	"workers_dev": false,
+	"preview_urls": false,
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-dev"
+		}
+	]
+}
