@@ -57,8 +57,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -66,8 +66,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -106,8 +106,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -115,8 +115,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -155,8 +155,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -164,8 +164,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -204,8 +204,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -213,8 +213,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -253,14 +253,14 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -296,8 +296,8 @@ importers:
   apps/demo-day:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -308,8 +308,8 @@ importers:
         specifier: 22.14.1
         version: 22.14.1
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       zod:
         specifier: 3.24.2
         version: 3.24.2
@@ -339,8 +339,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -348,8 +348,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -391,8 +391,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -400,8 +400,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -440,8 +440,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -449,8 +449,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -492,8 +492,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -501,8 +501,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -544,8 +544,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -553,8 +553,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -596,8 +596,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -605,8 +605,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -645,8 +645,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -654,8 +654,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -697,8 +697,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@n8n/json-schema-to-zod':
         specifier: 1.1.0
         version: 1.1.0(zod@3.24.2)
@@ -715,8 +715,8 @@ importers:
         specifier: 22.14.1
         version: 22.14.1
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cron-schedule:
         specifier: 5.0.4
         version: 5.0.4
@@ -770,8 +770,8 @@ importers:
         specifier: 0.0.5
         version: 0.0.5
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@n8n/json-schema-to-zod':
         specifier: 1.1.0
         version: 1.1.0(zod@3.24.2)
@@ -785,8 +785,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       ai:
         specifier: 4.3.10
         version: 4.3.10(react@17.0.2)(zod@3.24.2)
@@ -834,8 +834,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -843,8 +843,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -892,8 +892,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -901,8 +901,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -989,8 +989,8 @@ importers:
         specifier: 0.8.14
         version: 0.8.14(@cloudflare/workers-types@4.20250416.0)(@vitest/runner@3.0.9)(@vitest/snapshot@3.0.9)(vitest@3.0.9)
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       ai:
         specifier: 4.3.10
         version: 4.3.10(react@17.0.2)(zod@3.24.2)
@@ -1029,14 +1029,14 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       '@repo/mcp-observability':
         specifier: workspace:*
         version: link:../mcp-observability
       agents:
-        specifier: 0.0.89
-        version: 0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
+        specifier: 0.0.100
+        version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -1081,8 +1081,8 @@ importers:
   packages/mcp-observability:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: 1.11.3
-        version: 1.11.3
+        specifier: 1.13.1
+        version: 1.13.1
       wrangler:
         specifier: 4.10.0
         version: 4.10.0(@cloudflare/workers-types@4.20250416.0)
@@ -1849,8 +1849,8 @@ packages:
   '@manypkg/get-packages@1.1.3':
     resolution: {integrity: sha512-fo+QhuU3qE/2TQMQmbVMqaQ6EWbMhi4ABWP+O4AM1NqPBuy0OrApV5LO6BrrgnhtAHS2NH6RrVk9OL181tTi8A==}
 
-  '@modelcontextprotocol/sdk@1.11.3':
-    resolution: {integrity: sha512-rmOWVRUbUJD7iSvJugjUbFZshTAuJ48MXoZ80Osx1GM0K/H1w7rSEvmw8m6vdWxNASgtaHIhAgre4H/E9GJiYQ==}
+  '@modelcontextprotocol/sdk@1.13.1':
+    resolution: {integrity: sha512-8q6+9aF0yA39/qWT/uaIj6zTpC+Qu07DnN/lb9mjoquCJsAh6l3HyYqc9O3t2j7GilseOQOQimLg7W3By6jqvg==}
     engines: {node: '>=18'}
 
   '@n8n/json-schema-to-zod@1.1.0':
@@ -2205,8 +2205,8 @@ packages:
     resolution: {integrity: sha512-kja8j7PjmncONqaTsB8fQ+wE2mSU2DJ9D4XKoJ5PFWIdRMa6SLSN1ff4mOr4jCbfRSsxR4keIiySJU0N9T5hIQ==}
     engines: {node: '>= 8.0.0'}
 
-  agents@0.0.89:
-    resolution: {integrity: sha512-jbZR2ktM+IXDcQ2WyEjLrequbj/0OxZwXV3uu0+Vg9tEWQKc1pqTI7exZY3JiYEPXk+maIB/FAzKtfHhxG10xQ==}
+  agents@0.0.100:
+    resolution: {integrity: sha512-xI/CJmMlK8Y3aEEXLu95kGC4wZXYTBTCS/XlguEjytSnAnCmNJtJQCnmmFi7oTAGXj753DslqQHjTSftfT/01g==}
     peerDependencies:
       react: '*'
 
@@ -3762,8 +3762,8 @@ packages:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
     engines: {node: '>= 0.8'}
 
-  partyserver@0.0.71:
-    resolution: {integrity: sha512-PJZoX08tyNcNJVXqWJedZ6Jzj8EOFGBA/PJ37KhAnWmTkq6A8SqA4u2ol+zq8zwSfRy9FPvVgABCY0yLpe62Dg==}
+  partyserver@0.0.72:
+    resolution: {integrity: sha512-mYkCQ6Q4KBIy4lFFuA6upmvNeD/FC+CQVTd4V3DYU6nsitKVI3NXxBrNNvmIxJLSwk3JQzYcEOPBkebB7ITVpQ==}
     peerDependencies:
       '@cloudflare/workers-types': ^4.20240729.0
 
@@ -4609,8 +4609,8 @@ packages:
   zod@3.24.2:
     resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
 
-  zod@3.25.34:
-    resolution: {integrity: sha512-lZHvSc2PpWdcfpHlyB33HA9nqP16GpC9IpiG4lYq9jZCJVLZNnWd6Y1cj79bcLSBKTkxepfpjckPv5Y5VOPlwA==}
+  zod@3.25.67:
+    resolution: {integrity: sha512-idA2YXwpCdqUSKRCACDE6ItZD9TZzy3OZMtpfLoh6oPR47lipysRrJfjzMqFxQ3uJuUPyUeWe1r9vLH33xO/Qw==}
 
   zod@4.0.0-beta.20250505T195954:
     resolution: {integrity: sha512-iB8WvxkobVIXMARvQu20fKvbS7mUTiYRpcD8OQV1xjRhxO0EEpYIRJBk6yfBzHAHEdOSDh3SxDITr5Eajr2vtg==}
@@ -4656,12 +4656,12 @@ snapshots:
       secure-json-parse: 2.7.0
       zod: 3.24.2
 
-  '@ai-sdk/provider-utils@2.2.8(zod@3.25.34)':
+  '@ai-sdk/provider-utils@2.2.8(zod@3.25.67)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
       nanoid: 3.3.8
       secure-json-parse: 2.7.0
-      zod: 3.25.34
+      zod: 3.25.67
 
   '@ai-sdk/provider@1.1.3':
     dependencies:
@@ -4677,15 +4677,15 @@ snapshots:
     optionalDependencies:
       zod: 3.24.2
 
-  '@ai-sdk/react@1.2.12(react@17.0.2)(zod@3.25.34)':
+  '@ai-sdk/react@1.2.12(react@17.0.2)(zod@3.25.67)':
     dependencies:
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.34)
-      '@ai-sdk/ui-utils': 1.2.11(zod@3.25.34)
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.67)
+      '@ai-sdk/ui-utils': 1.2.11(zod@3.25.67)
       react: 17.0.2
       swr: 2.3.3(react@17.0.2)
       throttleit: 2.1.0
     optionalDependencies:
-      zod: 3.25.34
+      zod: 3.25.67
 
   '@ai-sdk/react@1.2.9(react@17.0.2)(zod@3.24.2)':
     dependencies:
@@ -4704,12 +4704,12 @@ snapshots:
       zod: 3.24.2
       zod-to-json-schema: 3.24.5(zod@3.24.2)
 
-  '@ai-sdk/ui-utils@1.2.11(zod@3.25.34)':
+  '@ai-sdk/ui-utils@1.2.11(zod@3.25.67)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.34)
-      zod: 3.25.34
-      zod-to-json-schema: 3.24.5(zod@3.25.34)
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.67)
+      zod: 3.25.67
+      zod-to-json-schema: 3.24.5(zod@3.25.67)
 
   '@ai-sdk/ui-utils@1.2.8(zod@3.24.2)':
     dependencies:
@@ -5347,8 +5347,9 @@ snapshots:
       globby: 11.1.0
       read-yaml-file: 1.1.0
 
-  '@modelcontextprotocol/sdk@1.11.3':
+  '@modelcontextprotocol/sdk@1.13.1':
     dependencies:
+      ajv: 6.12.6
       content-type: 1.0.5
       cors: 2.8.5
       cross-spawn: 7.0.6
@@ -5715,16 +5716,16 @@ snapshots:
     dependencies:
       humanize-ms: 1.2.1
 
-  agents@0.0.89(@cloudflare/workers-types@4.20250416.0)(react@17.0.2):
+  agents@0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2):
     dependencies:
-      '@modelcontextprotocol/sdk': 1.11.3
-      ai: 4.3.16(react@17.0.2)(zod@3.25.34)
+      '@modelcontextprotocol/sdk': 1.13.1
+      ai: 4.3.16(react@17.0.2)(zod@3.25.67)
       cron-schedule: 5.0.4
       nanoid: 5.1.5
-      partyserver: 0.0.71(@cloudflare/workers-types@4.20250416.0)
+      partyserver: 0.0.72(@cloudflare/workers-types@4.20250416.0)
       partysocket: 1.1.4
       react: 17.0.2
-      zod: 3.25.34
+      zod: 3.25.67
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
       - supports-color
@@ -5762,15 +5763,15 @@ snapshots:
     optionalDependencies:
       react: 17.0.2
 
-  ai@4.3.16(react@17.0.2)(zod@3.25.34):
+  ai@4.3.16(react@17.0.2)(zod@3.25.67):
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.34)
-      '@ai-sdk/react': 1.2.12(react@17.0.2)(zod@3.25.34)
-      '@ai-sdk/ui-utils': 1.2.11(zod@3.25.34)
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.25.67)
+      '@ai-sdk/react': 1.2.12(react@17.0.2)(zod@3.25.67)
+      '@ai-sdk/ui-utils': 1.2.11(zod@3.25.67)
       '@opentelemetry/api': 1.9.0
       jsondiffpatch: 0.6.0
-      zod: 3.25.34
+      zod: 3.25.67
     optionalDependencies:
       react: 17.0.2
 
@@ -7385,7 +7386,7 @@ snapshots:
 
   parseurl@1.3.3: {}
 
-  partyserver@0.0.71(@cloudflare/workers-types@4.20250416.0):
+  partyserver@0.0.72(@cloudflare/workers-types@4.20250416.0):
     dependencies:
       '@cloudflare/workers-types': 4.20250416.0
       nanoid: 5.1.5
@@ -8374,15 +8375,15 @@ snapshots:
     dependencies:
       zod: 3.24.2
 
-  zod-to-json-schema@3.24.5(zod@3.25.34):
+  zod-to-json-schema@3.24.5(zod@3.25.67):
     dependencies:
-      zod: 3.25.34
+      zod: 3.25.67
 
   zod@3.22.3: {}
 
   zod@3.24.2: {}
 
-  zod@3.25.34: {}
+  zod@3.25.67: {}
 
   zod@4.0.0-beta.20250505T195954:
     dependencies:
