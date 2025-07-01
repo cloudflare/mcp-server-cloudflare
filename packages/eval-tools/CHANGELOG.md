@@ -1,5 +1,11 @@
 # @repo/eval-tools
 
+## 0.32.1
+
+### Patch Changes
+
+- cc6d41f: Update agents deps & modelcontextprotocol
+
 ## 0.32.0
 
 ### Minor Changes

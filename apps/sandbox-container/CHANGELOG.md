@@ -1,5 +1,16 @@
 # containers-mcp
 
+## 0.2.2
+
+### Patch Changes
+
+- cc6d41f: Update agents deps & modelcontextprotocol
+- Updated dependencies [1833c6d]
+- Updated dependencies [cc6d41f]
+  - @repo/mcp-common@0.19.0
+  - @repo/eval-tools@0.32.1
+  - @repo/mcp-observability@0.32.1
+
 ## 0.2.1
 
 ### Patch Changes

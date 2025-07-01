@@ -1,5 +1,11 @@
 # @repo/typescript-config
 
+## 0.3.1
+
+### Patch Changes
+
+- cc6d41f: Update agents deps & modelcontextprotocol
+
 ## 0.3.0
 
 ### Minor Changes

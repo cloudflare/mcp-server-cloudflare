@@ -1,5 +1,15 @@
 # docs-autorag
 
+## 0.1.3
+
+### Patch Changes
+
+- cc6d41f: Update agents deps & modelcontextprotocol
+- Updated dependencies [1833c6d]
+- Updated dependencies [cc6d41f]
+  - @repo/mcp-common@0.19.0
+  - @repo/mcp-observability@0.32.1
+
 ## 0.1.2
 
 ### Patch Changes

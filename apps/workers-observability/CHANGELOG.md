@@ -1,5 +1,15 @@
 # workers-observability
 
+## 0.3.1
+
+### Patch Changes
+
+- cc6d41f: Update agents deps & modelcontextprotocol
+- Updated dependencies [1833c6d]
+- Updated dependencies [cc6d41f]
+  - @repo/mcp-common@0.19.0
+  - @repo/mcp-observability@0.32.1
+
 ## 0.3.0
 
 ### Minor Changes
