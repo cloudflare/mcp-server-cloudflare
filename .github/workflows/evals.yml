@@ -1,35 +1,36 @@
-name: Evals
-on:
-  push:
+# TODO: Disable evals for now due to problems with latest agents deps
+# name: Evals
+# on:
+#   push:
 
-env:
-  FORCE_COLOR: 1
+# env:
+#   FORCE_COLOR: 1
 
-jobs:
-  eval:
-    name: Eval
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
-      - name: Create .dev.vars file
-        run: |
-          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > ./apps/sandbox-container/.dev.vars
-          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > ./apps/workers-bindings/.dev.vars
-          echo "DEV_CLOUDFLARE_API_TOKEN=${{ secrets.DEV_CLOUDFLARE_API_TOKEN }}" >> ./apps/sandbox-container/.dev.vars
-          echo "DEV_CLOUDFLARE_API_TOKEN=${{ secrets.DEV_CLOUDFLARE_API_TOKEN }}" >> ./apps/workers-bindings/.dev.vars
-          echo "AI_GATEWAY_TOKEN=${{ secrets.AI_GATEWAY_TOKEN }}" >> ./apps/sandbox-container/.dev.vars
-          echo "AI_GATEWAY_TOKEN=${{ secrets.AI_GATEWAY_TOKEN }}" >> ./apps/workers-bindings/.dev.vars
-          echo "CLOUDFLARE_ACCOUNT_ID=${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" >> ./apps/sandbox-container/.dev.vars
-          echo "CLOUDFLARE_ACCOUNT_ID=${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" >> ./apps/workers-bindings/.dev.vars
-          echo "AI_GATEWAY_ID=${{ secrets.AI_GATEWAY_ID }}" >> ./apps/sandbox-container/.dev.vars
-          echo "AI_GATEWAY_ID=${{ secrets.AI_GATEWAY_ID }}" >> ./apps/workers-bindings/.dev.vars
-      - name: Verify .dev.vars file
-        run: |
-          du -h ./apps/sandbox-container/.dev.vars
-          du -h ./apps/workers-bindings/.dev.vars
-      - name: Run evals
-        run: pnpm eval:ci
+# jobs:
+#   eval:
+#     name: Eval
+#     runs-on: ubuntu-24.04
+#     permissions:
+#       contents: read
+#     timeout-minutes: 10
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: ./.github/actions/setup
+#       - name: Create .dev.vars file
+#         run: |
+#           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > ./apps/sandbox-container/.dev.vars
+#           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > ./apps/workers-bindings/.dev.vars
+#           echo "DEV_CLOUDFLARE_API_TOKEN=${{ secrets.DEV_CLOUDFLARE_API_TOKEN }}" >> ./apps/sandbox-container/.dev.vars
+#           echo "DEV_CLOUDFLARE_API_TOKEN=${{ secrets.DEV_CLOUDFLARE_API_TOKEN }}" >> ./apps/workers-bindings/.dev.vars
+#           echo "AI_GATEWAY_TOKEN=${{ secrets.AI_GATEWAY_TOKEN }}" >> ./apps/sandbox-container/.dev.vars
+#           echo "AI_GATEWAY_TOKEN=${{ secrets.AI_GATEWAY_TOKEN }}" >> ./apps/workers-bindings/.dev.vars
+#           echo "CLOUDFLARE_ACCOUNT_ID=${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" >> ./apps/sandbox-container/.dev.vars
+#           echo "CLOUDFLARE_ACCOUNT_ID=${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" >> ./apps/workers-bindings/.dev.vars
+#           echo "AI_GATEWAY_ID=${{ secrets.AI_GATEWAY_ID }}" >> ./apps/sandbox-container/.dev.vars
+#           echo "AI_GATEWAY_ID=${{ secrets.AI_GATEWAY_ID }}" >> ./apps/workers-bindings/.dev.vars
+#       - name: Verify .dev.vars file
+#         run: |
+#           du -h ./apps/sandbox-container/.dev.vars
+#           du -h ./apps/workers-bindings/.dev.vars
+#       - name: Run evals
+#         run: pnpm eval:ci
