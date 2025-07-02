@@ -57,8 +57,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -106,8 +106,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -155,8 +155,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -204,8 +204,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -253,8 +253,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -296,17 +296,14 @@ importers:
   apps/demo-day:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
       '@repo/mcp-observability':
         specifier: workspace:*
         version: link:../../packages/mcp-observability
-      '@types/node':
-        specifier: 22.14.1
-        version: 22.14.1
       agents:
         specifier: 0.0.100
         version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
@@ -317,6 +314,9 @@ importers:
       '@cloudflare/vitest-pool-workers':
         specifier: 0.8.14
         version: 0.8.14(@cloudflare/workers-types@4.20250416.0)(@vitest/runner@3.0.9)(@vitest/snapshot@3.0.9)(vitest@3.0.9)
+      '@types/node':
+        specifier: 22.14.1
+        version: 22.14.1
       prettier:
         specifier: 3.5.3
         version: 3.5.3
@@ -339,8 +339,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -391,8 +391,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -440,8 +440,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -492,8 +492,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -544,8 +544,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -596,8 +596,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -645,8 +645,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -697,8 +697,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@n8n/json-schema-to-zod':
         specifier: 1.1.0
         version: 1.1.0(zod@3.24.2)
@@ -711,9 +711,6 @@ importers:
       '@repo/mcp-observability':
         specifier: workspace:*
         version: link:../../packages/mcp-observability
-      '@types/node':
-        specifier: 22.14.1
-        version: 22.14.1
       agents:
         specifier: 0.0.100
         version: 0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)
@@ -748,6 +745,9 @@ importers:
       '@types/mock-fs':
         specifier: 4.13.4
         version: 4.13.4
+      '@types/node':
+        specifier: 22.14.1
+        version: 22.14.1
       ai:
         specifier: 4.3.10
         version: 4.3.10(react@17.0.2)(zod@3.24.2)
@@ -770,8 +770,8 @@ importers:
         specifier: 0.0.5
         version: 0.0.5
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@n8n/json-schema-to-zod':
         specifier: 1.1.0
         version: 1.1.0(zod@3.24.2)
@@ -834,8 +834,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -892,8 +892,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -1029,8 +1029,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       '@repo/mcp-observability':
         specifier: workspace:*
         version: link:../mcp-observability
@@ -1081,8 +1081,8 @@ importers:
   packages/mcp-observability:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: 1.13.1
-        version: 1.13.1
+        specifier: 1.13.3
+        version: 1.13.3
       wrangler:
         specifier: 4.10.0
         version: 4.10.0(@cloudflare/workers-types@4.20250416.0)
@@ -1849,8 +1849,8 @@ packages:
   '@manypkg/get-packages@1.1.3':
     resolution: {integrity: sha512-fo+QhuU3qE/2TQMQmbVMqaQ6EWbMhi4ABWP+O4AM1NqPBuy0OrApV5LO6BrrgnhtAHS2NH6RrVk9OL181tTi8A==}
 
-  '@modelcontextprotocol/sdk@1.13.1':
-    resolution: {integrity: sha512-8q6+9aF0yA39/qWT/uaIj6zTpC+Qu07DnN/lb9mjoquCJsAh6l3HyYqc9O3t2j7GilseOQOQimLg7W3By6jqvg==}
+  '@modelcontextprotocol/sdk@1.13.3':
+    resolution: {integrity: sha512-bGwA78F/U5G2jrnsdRkPY3IwIwZeWUEfb5o764b79lb0rJmMT76TLwKhdNZOWakOQtedYefwIR4emisEMvInKA==}
     engines: {node: '>=18'}
 
   '@n8n/json-schema-to-zod@1.1.0':
@@ -5347,13 +5347,14 @@ snapshots:
       globby: 11.1.0
       read-yaml-file: 1.1.0
 
-  '@modelcontextprotocol/sdk@1.13.1':
+  '@modelcontextprotocol/sdk@1.13.3':
     dependencies:
       ajv: 6.12.6
       content-type: 1.0.5
       cors: 2.8.5
       cross-spawn: 7.0.6
       eventsource: 3.0.6
+      eventsource-parser: 3.0.1
       express: 5.1.0
       express-rate-limit: 7.5.0(express@5.1.0)
       pkce-challenge: 5.0.0
@@ -5718,7 +5719,7 @@ snapshots:
 
   agents@0.0.100(@cloudflare/workers-types@4.20250416.0)(react@17.0.2):
     dependencies:
-      '@modelcontextprotocol/sdk': 1.13.1
+      '@modelcontextprotocol/sdk': 1.13.3
       ai: 4.3.16(react@17.0.2)(zod@3.25.67)
       cron-schedule: 5.0.4
       nanoid: 5.1.5

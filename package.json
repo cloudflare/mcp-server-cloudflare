@@ -2,6 +2,7 @@
 	"name": "@cloudflare/mcp-server-cloudflare",
 	"version": "1.0.0",
 	"description": "Monorepo for Cloudflare MCP servers",
+	"private": true,
 	"license": "Apache-2.0",
 	"author": "Cloudflare, Inc. (https://cloudflare.com)",
 	"homepage": "https://github.com/cloudflare/mcp-server-cloudflare",

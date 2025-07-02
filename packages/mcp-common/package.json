@@ -14,7 +14,7 @@
 		"@cloudflare/workers-oauth-provider": "0.0.5",
 		"@fast-csv/format": "5.0.2",
 		"@hono/zod-validator": "0.4.3",
-		"@modelcontextprotocol/sdk": "1.13.1",
+		"@modelcontextprotocol/sdk": "1.13.3",
 		"@repo/mcp-observability": "workspace:*",
 		"agents": "0.0.100",
 		"cloudflare": "4.2.0",
