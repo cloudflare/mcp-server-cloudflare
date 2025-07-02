@@ -1,5 +1,14 @@
 # containers-mcp
 
+## 0.2.3
+
+### Patch Changes
+
+- 7422e71: Update MCP sdk
+- Updated dependencies [7422e71]
+  - @repo/mcp-observability@0.32.2
+  - @repo/mcp-common@0.19.1
+
 ## 0.2.2
 
 ### Patch Changes

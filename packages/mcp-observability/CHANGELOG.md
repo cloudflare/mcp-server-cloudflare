@@ -1,5 +1,11 @@
 # @repo/mcp-observability
 
+## 0.32.2
+
+### Patch Changes
+
+- 7422e71: Update MCP sdk
+
 ## 0.32.1
 
 ### Patch Changes

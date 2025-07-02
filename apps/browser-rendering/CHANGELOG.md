@@ -1,5 +1,14 @@
 # cloudflare-browser-mcp-server
 
+## 0.1.4
+
+### Patch Changes
+
+- 7422e71: Update MCP sdk
+- Updated dependencies [7422e71]
+  - @repo/mcp-observability@0.32.2
+  - @repo/mcp-common@0.19.1
+
 ## 0.1.3
 
 ### Patch Changes
