@@ -1,5 +1,11 @@
 # dex-analysis
 
+## 0.1.5
+
+### Patch Changes
+
+- 016cb73: Add more DEX tools, including remote captures
+
 ## 0.1.4
 
 ### Patch Changes
