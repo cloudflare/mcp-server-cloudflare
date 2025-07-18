@@ -20,6 +20,8 @@ Currently available tools:
 | **Remote Captures**                  | `dex_list_remote_capture_eligible_devices` | Retrieve a list of devices eligible for remote captures like packet captures or WARP diagnostics.                                                      |
 |                                      | `dex_create_remote_capture`                | Initiate a remote capture on a specific device by id.                                                                                                  |
 |                                      | `dex_list_remote_captures`                 | Retrieve a list of previously created remote captures along with their details and status.                                                             |
+|                                      | `dex_list_remote_warp_diag_contents`       | List the filenames included in a remote WARP diag capture returned by `dex_list_remote_captures`.                                                      |
+|                                      | `dex_explore_remote_warp_diag_output`      | Retreive remote WARP diag file contents by filepath returned by `dex_list_remote_warp_diag_contents`.                                                  |
 | **Fleet Status**                     | `dex_fleet_status_live`                    | View live metrics for your fleet of zero trust devices for up to the past 1 hour.                                                                      |
 |                                      | `dex_fleet_status_over_time`               | View historical metrics for your fleet of zero trust devices over time.                                                                                |
 |                                      | `dex_fleet_status_logs`                    | View historical logs for your fleet of zero trust devices for up to the past 7 days.                                                                   |
@@ -37,6 +39,7 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 - `Capture a WARP diag for user@cloudflare.com and make sure to test all routes`
 - `Which users have toggled off WARP recently?`
 - `Which Cloudflare colo is most used by my users in the EU running DEX application tests?`
+- `Look at the latest WARP diag for user@cloudflare.com and tell me if you see anything notable in dns logs`
 
 ## Access the remote MCP server from any MCP Client
 

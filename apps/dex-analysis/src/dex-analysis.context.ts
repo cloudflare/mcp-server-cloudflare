@@ -1,3 +1,5 @@
+import { WarpDiagReader } from './warp_diag_reader'
+
 import type { UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
 import type { CloudflareDEXMCP } from './dex-analysis.app'
 
@@ -10,6 +12,7 @@ export interface Env {
 	CLOUDFLARE_CLIENT_SECRET: string
 	MCP_OBJECT: DurableObjectNamespace<CloudflareDEXMCP>
 	USER_DETAILS: DurableObjectNamespace<UserDetails>
+	WARP_DIAG_READER: DurableObjectNamespace<WarpDiagReader>
 	MCP_METRICS: AnalyticsEngineDataset
 	DEV_DISABLE_OAUTH: string
 	DEV_CLOUDFLARE_API_TOKEN: string

@@ -19,6 +19,7 @@ import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './dex-analysis.context'
 
 export { UserDetails }
+export { WarpDiagReader } from './warp_diag_reader'
 
 const env = getEnv<Env>()
 
