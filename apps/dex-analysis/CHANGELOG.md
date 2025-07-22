@@ -1,5 +1,11 @@
 # dex-analysis
 
+## 0.1.6
+
+### Patch Changes
+
+- d672471: dex-analysis: add WARP diag analysis tools and reader D.O.
+
 ## 0.1.5
 
 ### Patch Changes
