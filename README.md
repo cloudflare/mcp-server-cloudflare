@@ -4,6 +4,10 @@ Model Context Protocol (MCP) is a [new, standardized protocol](https://modelcont
 
 These MCP servers allow your [MCP Client](https://modelcontextprotocol.io/clients) to read configurations from your account, process information, make suggestions based on data, and even make those suggested changes for you. All of these actions can happen across Cloudflare's many services including application development, security and performance.
 
+<a href="https://glama.ai/mcp/servers/@cloudflare/mcp-server-cloudflare">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@cloudflare/mcp-server-cloudflare/badge" alt="mcp-server-cloudflare MCP server" />
+</a>
+
 The following servers are included in this repository:
 
 | Server Name                                                    | Description                                                                                     | Server URL                                     |
