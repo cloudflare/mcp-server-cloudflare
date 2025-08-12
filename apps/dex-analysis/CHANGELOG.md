@@ -1,5 +1,11 @@
 # dex-analysis
 
+## 0.2.0
+
+### Minor Changes
+
+- 9496e21: Add tool for analyzing WARP-diags for common issues via bonobo
+
 ## 0.1.7
 
 ### Patch Changes
