@@ -1,5 +1,11 @@
 # workers-bindings
 
+## 0.3.3
+
+### Patch Changes
+
+- dffbd36: Use proper wrangler deploy in all servers so we get the name and version
+
 ## 0.3.2
 
 ### Patch Changes

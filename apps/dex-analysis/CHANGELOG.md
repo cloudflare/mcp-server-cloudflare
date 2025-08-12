@@ -1,5 +1,11 @@
 # dex-analysis
 
+## 0.1.7
+
+### Patch Changes
+
+- dffbd36: Improve DEX remote captures tools, separate by type for clarity
+
 ## 0.1.6
 
 ### Patch Changes
