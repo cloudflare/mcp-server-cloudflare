@@ -1,5 +1,11 @@
 # workers-bindings
 
+## 0.4.0
+
+### Minor Changes
+
+- dee0a7b: Updated the model for docs search to embeddinggemma-300m
+
 ## 0.3.4
 
 ### Patch Changes
