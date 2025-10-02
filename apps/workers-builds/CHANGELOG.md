@@ -1,5 +1,14 @@
 # workers-builds
 
+## 0.1.7
+
+### Patch Changes
+
+- 43f493d: Update agent + modelcontextprotocol deps
+- Updated dependencies [43f493d]
+  - @repo/mcp-observability@0.32.3
+  - @repo/mcp-common@0.19.3
+
 ## 0.1.6
 
 ### Patch Changes

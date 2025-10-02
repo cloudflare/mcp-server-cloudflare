@@ -1,5 +1,11 @@
 # @repo/mcp-observability
 
+## 0.32.3
+
+### Patch Changes
+
+- 43f493d: Update agent + modelcontextprotocol deps
+
 ## 0.32.2
 
 ### Patch Changes
