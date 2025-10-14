@@ -76,7 +76,7 @@ Replace the content with the following configuration:
 	"mcpServers": {
 		"cloudflare": {
 			"command": "npx",
-			"args": ["mcp-remote", "https://bindings.mcp.cloudflare.com/sse"]
+			"args": ["mcp-remote", "https://bindings.mcp.cloudflare.com/mcp"]
 		}
 	}
 }

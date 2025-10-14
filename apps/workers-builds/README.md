@@ -39,7 +39,7 @@ Replace the content with the following configuration:
 	"mcpServers": {
 		"cloudflare": {
 			"command": "npx",
-			"args": ["mcp-remote@latest", "https://builds.mcp.cloudflare.com/sse"]
+			"args": ["mcp-remote@latest", "https://builds.mcp.cloudflare.com/mcp"]
 		}
 	}
 }

@@ -20,7 +20,7 @@ Currently available tools:
 
 ## Access the remote MCP server from any MCP Client
 
-If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://auditlogs.mcp.cloudflare.com/sse`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
+If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://auditlogs.mcp.cloudflare.com/mcp`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
 
 If your client does not yet support remote MCP servers, you will need to set up its respective configuration file using [mcp-remote](https://www.npmjs.com/package/mcp-remote) to specify which servers your client can access.
 
@@ -31,7 +31,7 @@ Replace the content with the following configuration:
 	"mcpServers": {
 		"cloudflare": {
 			"command": "npx",
-			"args": ["mcp-remote", "https://auditlogs.mcp.cloudflare.com/sse"]
+			"args": ["mcp-remote", "https://auditlogs.mcp.cloudflare.com/mcp"]
 		}
 	}
 }

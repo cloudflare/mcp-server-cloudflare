@@ -36,7 +36,7 @@ Replace the content with the following configuration:
 	"mcpServers": {
 		"cloudflare": {
 			"command": "npx",
-			"args": ["mcp-remote", "https://autorag.mcp.cloudflare.com/sse"]
+			"args": ["mcp-remote", "https://autorag.mcp.cloudflare.com/mcp"]
 		}
 	}
 }

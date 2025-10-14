@@ -58,7 +58,7 @@ Replace the content with the following configuration:
 	"mcpServers": {
 		"cloudflare": {
 			"command": "npx",
-			"args": ["mcp-remote", "https://radar.mcp.cloudflare.com/sse"]
+			"args": ["mcp-remote", "https://radar.mcp.cloudflare.com/mcp"]
 		}
 	}
 }
