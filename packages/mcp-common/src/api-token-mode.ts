@@ -35,12 +35,10 @@ export async function handleApiTokenMode<
 	// dev mode
 	if (
 		env.DEV_CLOUDFLARE_API_TOKEN &&
-		env.DEV_CLOUDFLARE_EMAIL &&
 		env.DEV_DISABLE_OAUTH === 'true'
 	) {
 		opts = {
-			'X-Auth-Key': env.DEV_CLOUDFLARE_API_TOKEN,
-			'X-Auth-Email': env.DEV_CLOUDFLARE_EMAIL,
+			'Authorization': `Bearer ${env.DEV_CLOUDFLARE_API_TOKEN}`,
 		}
 		token = env.DEV_CLOUDFLARE_API_TOKEN
 		// header mode
@@ -76,5 +74,5 @@ export async function handleApiTokenMode<
 			accounts,
 		} satisfies AuthProps
 	}
-	return agent.mount('/sse').fetch(req, env, ctx)
+	return agent.serve('/mcp').fetch(req, env, ctx)
 }

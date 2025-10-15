@@ -18,7 +18,11 @@
 		}
 	],
 	"observability": {
-		"enabled": true
+		"enabled": true,
+ 		"traces": {
+			"enabled": true,
+			"head_sampling_rate": 0.10
+		}
 	},
 	"durable_objects": {
 		"bindings": [

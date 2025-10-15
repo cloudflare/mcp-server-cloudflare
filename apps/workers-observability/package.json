@@ -21,6 +21,7 @@
 		"agents": "0.2.7",
 		"cloudflare": "4.2.0",
 		"hono": "4.7.6",
+		"workers-tagged-logger": "^0.13.5",
 		"zod": "3.24.2"
 	},
 	"devDependencies": {

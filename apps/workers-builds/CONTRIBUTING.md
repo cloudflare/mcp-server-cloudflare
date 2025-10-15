@@ -17,7 +17,7 @@ If you'd like to iterate and test your MCP server, you can do so in local develo
 
    ```
    DEV_DISABLE_OAUTH=true
-   DEV_CLOUDFLARE_EMAIL=your_cloudflare_email
+   your_cloudflare_email
    # This is your global api token
    DEV_CLOUDFLARE_API_TOKEN=your_development_api_token
    ```

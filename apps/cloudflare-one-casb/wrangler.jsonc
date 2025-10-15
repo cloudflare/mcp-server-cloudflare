@@ -14,7 +14,11 @@
 		}
 	],
 	"observability": {
-		"enabled": true
+		"enabled": true,
+ 		"traces": {
+			"enabled": true,
+			"head_sampling_rate": 0.10
+		}
 	},
 	"vars": {
 		"MCP_SERVER_NAME": "PLACEHOLDER",

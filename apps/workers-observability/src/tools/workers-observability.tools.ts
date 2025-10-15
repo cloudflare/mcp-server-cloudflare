@@ -1,4 +1,5 @@
 import { writeToString } from '@fast-csv/format'
+import { WorkersLogger } from 'workers-tagged-logger'
 
 import {
 	handleWorkerLogsKeys,
@@ -14,6 +15,12 @@ import {
 
 import type { ObservabilityMCP } from '../workers-observability.app'
 
+type Tags = {
+	toolName: string
+	request_id: string
+	source?: string // source is often added automatically
+}
+const logger = new WorkersLogger<Tags>()
 /**
  * Registers the logs analysis tool with the MCP server
  * @param server The MCP server instance
@@ -49,9 +56,15 @@ This tool provides three primary views of your Worker data:
 		{
 			query: zQueryRunRequest,
 		},
-		async ({ query }) => {
+		async ({ query }, req) => {
+			logger.setTags({ userAgent: req.requestInfo.headers['mcp-protocol-version'] })
+			logger.setTags({ mcpSessionId: req.requestInfo.headers['mcp-session-id'] })
+			logger.setTags({ userAgent: req.requestInfo.headers['sec-ch-ua'] })
+			logger.setTags({ toolName: 'query_worker_observability' })
 			const accountId = await agent.getActiveAccountId()
+			logger.setTags({ hasAccount: !!accountId})
 			if (!accountId) {
+				logger.warn("Ran Workers Observability Tool")
 				return {
 					content: [
 						{
@@ -65,6 +78,7 @@ This tool provides three primary views of your Worker data:
 				const props = getProps(agent)
 				const response = await queryWorkersObservability(props.accessToken, accountId, query)
 
+				logger.info("Ran Workers Observability Query")
 				if (query.view === 'calculations') {
 					let data = ''
 					for (const calculation of response?.calculations || []) {
