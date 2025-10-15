@@ -60,9 +60,9 @@ This tool provides three primary views of your Worker data:
 			logger.setTags({ userAgent: req.requestInfo?.headers?.['sec-ch-ua'] })
 			logger.setTags({ toolName: 'query_worker_observability' })
 			const accountId = await agent.getActiveAccountId()
-			logger.setTags({ hasAccount: !!accountId})
+			logger.setTags({ hasAccount: !!accountId })
 			if (!accountId) {
-				logger.warn("Ran Workers Observability Tool")
+				logger.warn('Ran Workers Observability Tool')
 				return {
 					content: [
 						{
@@ -78,7 +78,7 @@ This tool provides three primary views of your Worker data:
 				logger.setTags({ view: query.view })
 				const response = await queryWorkersObservability(props.accessToken, accountId, query)
 
-				logger.info("Ran Workers Observability Query")
+				logger.info('Ran Workers Observability Query')
 				if (query.view === 'calculations') {
 					let data = ''
 					for (const calculation of response?.calculations || []) {

@@ -43,7 +43,7 @@ export async function fetchCloudflareApi<T>({
 		options.headers = {
 			...options.headers,
 			// @ts-expect-error We don't have actual env in this package
-			'Authorization': `Bearer ${env.DEV_CLOUDFLARE_API_TOKEN}`,
+			Authorization: `Bearer ${env.DEV_CLOUDFLARE_API_TOKEN}`,
 		}
 	}
 	const response = await fetch(url, {

@@ -14,9 +14,9 @@
 	],
 	"observability": {
 		"enabled": true,
- 		"traces": {
+		"traces": {
 			"enabled": true,
-			"head_sampling_rate": 0.10
+			"head_sampling_rate": 0.1
 		}
 	},
 	"durable_objects": {

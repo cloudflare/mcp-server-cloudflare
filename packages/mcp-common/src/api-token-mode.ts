@@ -33,12 +33,9 @@ export async function handleApiTokenMode<
 	// Handle global API token case
 	let opts, token
 	// dev mode
-	if (
-		env.DEV_CLOUDFLARE_API_TOKEN &&
-		env.DEV_DISABLE_OAUTH === 'true'
-	) {
+	if (env.DEV_CLOUDFLARE_API_TOKEN && env.DEV_DISABLE_OAUTH === 'true') {
 		opts = {
-			'Authorization': `Bearer ${env.DEV_CLOUDFLARE_API_TOKEN}`,
+			Authorization: `Bearer ${env.DEV_CLOUDFLARE_API_TOKEN}`,
 		}
 		token = env.DEV_CLOUDFLARE_API_TOKEN
 		// header mode
