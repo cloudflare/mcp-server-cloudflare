@@ -57,9 +57,9 @@ This tool provides three primary views of your Worker data:
 			query: zQueryRunRequest,
 		},
 		async ({ query }, req) => {
-			logger.setTags({ userAgent: req.requestInfo.headers['mcp-protocol-version'] })
-			logger.setTags({ mcpSessionId: req.requestInfo.headers['mcp-session-id'] })
-			logger.setTags({ userAgent: req.requestInfo.headers['sec-ch-ua'] })
+			logger.setTags({ userAgent: req.requestInfo?.headers?.['mcp-protocol-version'] })
+			logger.setTags({ mcpSessionId: req.requestInfo?.headers?.['mcp-session-id'] })
+			logger.setTags({ userAgent: req.requestInfo?.headers?.['sec-ch-ua'] })
 			logger.setTags({ toolName: 'query_worker_observability' })
 			const accountId = await agent.getActiveAccountId()
 			logger.setTags({ hasAccount: !!accountId})
@@ -76,6 +76,8 @@ This tool provides three primary views of your Worker data:
 			}
 			try {
 				const props = getProps(agent)
+				logger.setTags({ datasets: query.parameters?.datasets })
+				logger.setTags({ view: query.view })
 				const response = await queryWorkersObservability(props.accessToken, accountId, query)
 
 				logger.info("Ran Workers Observability Query")
