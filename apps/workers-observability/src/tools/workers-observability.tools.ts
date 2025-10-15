@@ -16,9 +16,7 @@ import {
 import type { ObservabilityMCP } from '../workers-observability.app'
 
 type Tags = {
-	toolName: string
-	request_id: string
-	source?: string // source is often added automatically
+	toolName?: string
 }
 const logger = new WorkersLogger<Tags>()
 /**
