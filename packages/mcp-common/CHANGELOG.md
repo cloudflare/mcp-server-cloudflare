@@ -1,5 +1,11 @@
 # @repo/mcp-common
 
+## 0.20.0
+
+### Minor Changes
+
+- f9f0bb6: Be explicit in oauth error messages
+
 ## 0.19.3
 
 ### Patch Changes

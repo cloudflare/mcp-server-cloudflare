@@ -1,5 +1,12 @@
 # containers-mcp
 
+## 0.2.7
+
+### Patch Changes
+
+- Updated dependencies [f9f0bb6]
+  - @repo/mcp-common@0.20.0
+
 ## 0.2.6
 
 ### Patch Changes
