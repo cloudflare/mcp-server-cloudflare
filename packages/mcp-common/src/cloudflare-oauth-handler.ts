@@ -240,7 +240,7 @@ export function createAuthHandlers({
 				}
 				metrics.logEvent(
 					new AuthUser({
-							errorMessage: `Authorize Error: ${message}`,
+						errorMessage: `Authorize Error: ${message}`,
 					})
 				)
 				if (e instanceof McpError) {
@@ -324,7 +324,7 @@ export function createAuthHandlers({
 				}
 				metrics.logEvent(
 					new AuthUser({
-							errorMessage: `Callback Error: ${message}`,
+						errorMessage: `Callback Error: ${message}`,
 					})
 				)
 				if (e instanceof McpError) {
