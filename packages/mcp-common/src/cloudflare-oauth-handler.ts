@@ -230,13 +230,19 @@ export function createAuthHandlers({
 				return Response.redirect(res.authUrl, 302)
 			} catch (e) {
 				c.var.sentry?.recordError(e)
+				let message: string | undefined
 				if (e instanceof Error) {
-					metrics.logEvent(
-						new AuthUser({
-							errorMessage: `Authorize Error: ${e.name}: ${e.message}`,
-						})
-					)
+					message = `${e.name}: ${e.message}`
+				} else if (typeof e === 'string') {
+					message = e
+				} else {
+					message = 'Unknown error'
 				}
+				metrics.logEvent(
+					new AuthUser({
+							errorMessage: `Authorize Error: ${message}`,
+					})
+				)
 				if (e instanceof McpError) {
 					return c.text(e.message, { status: e.code })
 				}
@@ -307,14 +313,20 @@ export function createAuthHandlers({
 				return Response.redirect(redirectTo, 302)
 			} catch (e) {
 				c.var.sentry?.recordError(e)
+				let message: string | undefined
 				if (e instanceof Error) {
 					console.error(e)
-					metrics.logEvent(
-						new AuthUser({
-							errorMessage: `Callback Error: ${e.name}: ${e.message}`,
-						})
-					)
+					message = `${e.name}: ${e.message}`
+				} else if (typeof e === 'string') {
+					message = e
+				} else {
+					message = 'Unknown error'
 				}
+				metrics.logEvent(
+					new AuthUser({
+							errorMessage: `Callback Error: ${message}`,
+					})
+				)
 				if (e instanceof McpError) {
 					return c.text(e.message, { status: e.code })
 				}
