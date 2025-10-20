@@ -25,21 +25,6 @@ type AuthContext = {
 	}
 } & BaseHonoContext
 
-const AuthRequestSchema = z.object({
-	responseType: z.string(),
-	clientId: z.string(),
-	redirectUri: z.string(),
-	scope: z.array(z.string()),
-	state: z.string(),
-	codeChallenge: z.string().optional(),
-	codeChallengeMethod: z.string().optional(),
-})
-
-// AuthRequest but with extra params that we use in our authentication logic
-const AuthRequestSchemaWithExtraParams = AuthRequestSchema.merge(
-	z.object({ codeVerifier: z.string() })
-)
-
 const AuthQuery = z.object({
 	code: z.string().describe('OAuth code from CF dash'),
 	state: z.string().describe('Value of the OAuth state'),
@@ -220,14 +205,23 @@ export function createAuthHandlers({
 				if (!oauthReqInfo.clientId) {
 					return c.text('Invalid request', 400)
 				}
-				const res = await getAuthorizationURL({
+
+				// Generate UUID to prevent CSRF attacks
+				const authRequestId = crypto.randomUUID()
+				const { authUrl, codeVerifier } = await getAuthorizationURL({
 					client_id: c.env.CLOUDFLARE_CLIENT_ID,
 					redirect_uri: new URL('/oauth/callback', c.req.url).href,
-					state: oauthReqInfo,
+					state: authRequestId,
 					scopes,
 				})
 
-				return Response.redirect(res.authUrl, 302)
+				// Store auth request information in KV
+				c.env.OAUTH_PROVIDER.storeAuthRequest(authRequestId, {
+					...oauthReqInfo,
+					codeVerifier,
+				})
+
+				return Response.redirect(authUrl, 302)
 			} catch (e) {
 				c.var.sentry?.recordError(e)
 				let message: string | undefined
@@ -262,9 +256,9 @@ export function createAuthHandlers({
 		app.get(`/oauth/callback`, zValidator('query', AuthQuery), async (c) => {
 			try {
 				const { state, code } = c.req.valid('query')
-				const oauthReqInfo = AuthRequestSchemaWithExtraParams.parse(JSON.parse(atob(state)))
-				// Get the oathReqInfo out of KV
-				if (!oauthReqInfo.clientId) {
+				const oauthReqInfo = await c.env.OAUTH_PROVIDER.getAuthRequest(state)
+
+				if (!oauthReqInfo || !oauthReqInfo.clientId) {
 					throw new McpError('Invalid State', 400)
 				}
 

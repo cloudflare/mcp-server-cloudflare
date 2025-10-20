@@ -11,7 +11,7 @@
 		"test:coverage": "run-vitest-coverage"
 	},
 	"dependencies": {
-		"@cloudflare/workers-oauth-provider": "0.0.5",
+		"@cloudflare/workers-oauth-provider": "0.0.12",
 		"@fast-csv/format": "5.0.2",
 		"@hono/zod-validator": "0.4.3",
 		"@modelcontextprotocol/sdk": "1.18.2",
