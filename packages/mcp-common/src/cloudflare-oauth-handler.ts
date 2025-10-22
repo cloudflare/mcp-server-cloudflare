@@ -1,5 +1,6 @@
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { z } from 'zod'
 
 import { AuthUser } from '../../mcp-observability/src'
@@ -216,12 +217,17 @@ export function createAuthHandlers({
 				})
 
 				// Store auth request information in KV
-				c.env.OAUTH_PROVIDER.storeAuthRequest(authRequestId, {
-					...oauthReqInfo,
-					codeVerifier,
+				c.env.OAUTH_PROVIDER.storeAuthRequest(authRequestId, oauthReqInfo)
+
+				// Store the code verifier in a http-only cookie for session fixation protection
+				setCookie(c, 'cloudflare_pkce_code_verifier', codeVerifier, {
+					path: '/',
+					secure: true,
+					httpOnly: true,
+					sameSite: 'Lax',
 				})
 
-				return Response.redirect(authUrl, 302)
+				return c.redirect(authUrl, 302)
 			} catch (e) {
 				c.var.sentry?.recordError(e)
 				let message: string | undefined
@@ -256,14 +262,24 @@ export function createAuthHandlers({
 		app.get(`/oauth/callback`, zValidator('query', AuthQuery), async (c) => {
 			try {
 				const { state, code } = c.req.valid('query')
+
+				// Read AuthRequest and delete immediately
 				const oauthReqInfo = await c.env.OAUTH_PROVIDER.getAuthRequest(state)
+				await c.env.OAUTH_PROVIDER.deleteAuthRequest(state)
+
+				// Read code verifier from cookie
+				const codeVerifier = getCookie(c, 'cloudflare_pkce_code_verifier')
 
 				if (!oauthReqInfo || !oauthReqInfo.clientId) {
 					throw new McpError('Invalid State', 400)
 				}
 
+				if (!codeVerifier) {
+					throw new McpError('Missing PKCE code verifier', 400)
+				}
+
 				const [{ accessToken, refreshToken, user, accounts }] = await Promise.all([
-					getTokenAndUserDetails(c, code, oauthReqInfo.codeVerifier),
+					getTokenAndUserDetails(c, code, codeVerifier),
 					c.env.OAUTH_PROVIDER.createClient({
 						clientId: oauthReqInfo.clientId,
 						tokenEndpointAuthMethod: 'none',
@@ -304,7 +320,9 @@ export function createAuthHandlers({
 					})
 				)
 
-				return Response.redirect(redirectTo, 302)
+				// Clear the cookie on success
+				deleteCookie(c, 'cloudflare_pkce_code_verifier', { path: '/' })
+				return c.redirect(redirectTo, 302)
 			} catch (e) {
 				c.var.sentry?.recordError(e)
 				let message: string | undefined
@@ -321,6 +339,8 @@ export function createAuthHandlers({
 						errorMessage: `Callback Error: ${message}`,
 					})
 				)
+				// Clear the cookie on error
+				deleteCookie(c, 'cloudflare_pkce_code_verifier', { path: '/' })
 				if (e instanceof McpError) {
 					return c.text(e.message, { status: e.code })
 				}
