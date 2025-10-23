@@ -10,6 +10,7 @@ import { useSentry } from './sentry'
 import { V4Schema } from './v4-api'
 
 import type {
+	AuthRequest,
 	OAuthHelpers,
 	TokenExchangeCallbackOptions,
 	TokenExchangeCallbackResult,
@@ -207,20 +208,20 @@ export function createAuthHandlers({
 					return c.text('Invalid request', 400)
 				}
 
-				// Generate UUID to prevent CSRF attacks
-				const authRequestId = crypto.randomUUID()
+				if (!oauthReqInfo.state) {
+					return c.text('Invalid request, missing state', 400)
+				}
+
 				const { authUrl, codeVerifier } = await getAuthorizationURL({
 					client_id: c.env.CLOUDFLARE_CLIENT_ID,
 					redirect_uri: new URL('/oauth/callback', c.req.url).href,
-					state: authRequestId,
+					state: oauthReqInfo.state,
 					scopes,
 				})
 
-				// Store auth request information in KV
-				c.env.OAUTH_PROVIDER.storeAuthRequest(authRequestId, oauthReqInfo)
-
-				// Store the code verifier in a http-only cookie for session fixation protection
-				setCookie(c, 'cloudflare_pkce_code_verifier', codeVerifier, {
+				// Store the entire auth request and code verifier in a secure, http-only cookie
+				const cookiePayload = JSON.stringify({ ...oauthReqInfo, codeVerifier })
+				setCookie(c, 'cloudflare_oauth_request', cookiePayload, {
 					path: '/',
 					secure: true,
 					httpOnly: true,
@@ -255,27 +256,31 @@ export function createAuthHandlers({
 		 * OAuth Callback Endpoint
 		 *
 		 * This route handles the callback from Cloudflare after user authentication.
-		 * It exchanges the temporary code for an access token, then stores some
-		 * user metadata & the auth token as part of the 'props' on the token passed
+		 * It reads the AuthRequest object from the cookie, validates the state for CSRF protection,
+		 * and then uses the code_verifier to exchange the temporary code for an access token.
+		 * It then stores some user metadata & the auth token as part of the 'props' on the token passed
 		 * down to the client. It ends by redirecting the client back to _its_ callback URL
 		 */
 		app.get(`/oauth/callback`, zValidator('query', AuthQuery), async (c) => {
 			try {
 				const { state, code } = c.req.valid('query')
+				const cookiePayload = getCookie(c, 'cloudflare_oauth_request')
 
-				// Read AuthRequest and delete immediately
-				const oauthReqInfo = await c.env.OAUTH_PROVIDER.getAuthRequest(state)
-				await c.env.OAUTH_PROVIDER.deleteAuthRequest(state)
+				if (!cookiePayload) {
+					throw new McpError('Missing auth request cookie', 400)
+				}
 
-				// Read code verifier from cookie
-				const codeVerifier = getCookie(c, 'cloudflare_pkce_code_verifier')
+				const { codeVerifier, ...oauthReqInfo } = JSON.parse(cookiePayload) as AuthRequest & {
+					codeVerifier: string
+				}
 
-				if (!oauthReqInfo || !oauthReqInfo.clientId) {
+				// Validate the state to prevent CSRF attacks
+				if (!oauthReqInfo.state || oauthReqInfo.state !== state) {
 					throw new McpError('Invalid State', 400)
 				}
 
 				if (!codeVerifier) {
-					throw new McpError('Missing PKCE code verifier', 400)
+					throw new McpError('Missing PKCE code verifier in cookie', 400)
 				}
 
 				const [{ accessToken, refreshToken, user, accounts }] = await Promise.all([
@@ -321,7 +326,7 @@ export function createAuthHandlers({
 				)
 
 				// Clear the cookie on success
-				deleteCookie(c, 'cloudflare_pkce_code_verifier', { path: '/' })
+				deleteCookie(c, 'cloudflare_oauth_request', { path: '/' })
 				return c.redirect(redirectTo, 302)
 			} catch (e) {
 				c.var.sentry?.recordError(e)
@@ -340,7 +345,7 @@ export function createAuthHandlers({
 					})
 				)
 				// Clear the cookie on error
-				deleteCookie(c, 'cloudflare_pkce_code_verifier', { path: '/' })
+				deleteCookie(c, 'cloudflare_oauth_request', { path: '/' })
 				if (e instanceof McpError) {
 					return c.text(e.message, { status: e.code })
 				}
