@@ -4,6 +4,7 @@ import type { WarpDiagReader } from './warp_diag_reader'
 
 export interface Env {
 	OAUTH_KV: KVNamespace
+	MCP_COOKIE_ENCRYPTION_KEY: string
 	ENVIRONMENT: 'development' | 'staging' | 'production'
 	MCP_SERVER_NAME: string
 	MCP_SERVER_VERSION: string

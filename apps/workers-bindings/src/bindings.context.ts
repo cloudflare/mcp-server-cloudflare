@@ -3,6 +3,7 @@ import type { WorkersBindingsMCP } from './bindings.app'
 
 export interface Env {
 	OAUTH_KV: KVNamespace
+	MCP_COOKIE_ENCRYPTION_KEY: string
 	ENVIRONMENT: 'development' | 'staging' | 'production' | 'test'
 	MCP_SERVER_NAME: string
 	MCP_SERVER_VERSION: string
