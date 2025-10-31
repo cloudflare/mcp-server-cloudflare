@@ -51,14 +51,14 @@ importers:
   apps/ai-gateway:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -66,8 +66,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -100,14 +100,14 @@ importers:
   apps/auditlogs:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -115,8 +115,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -149,14 +149,14 @@ importers:
   apps/autorag:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -164,8 +164,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -198,14 +198,14 @@ importers:
   apps/browser-rendering:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -213,8 +213,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -247,20 +247,20 @@ importers:
   apps/cloudflare-one-casb:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -296,8 +296,8 @@ importers:
   apps/demo-day:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -305,8 +305,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       zod:
         specifier: 3.24.2
         version: 3.24.2
@@ -333,14 +333,14 @@ importers:
   apps/dex-analysis:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -348,8 +348,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -388,14 +388,14 @@ importers:
   apps/dns-analytics:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -403,8 +403,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -437,14 +437,14 @@ importers:
   apps/docs-autorag:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -452,8 +452,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -489,14 +489,14 @@ importers:
   apps/docs-vectorize:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -504,8 +504,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -541,14 +541,14 @@ importers:
   apps/graphql:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -556,8 +556,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -593,14 +593,14 @@ importers:
   apps/logpush:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -608,8 +608,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -642,14 +642,14 @@ importers:
   apps/radar:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -657,8 +657,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -691,8 +691,8 @@ importers:
   apps/sandbox-container:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/node-server':
         specifier: 1.13.8
         version: 1.13.8(hono@4.7.6)
@@ -700,8 +700,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@n8n/json-schema-to-zod':
         specifier: 1.1.0
         version: 1.1.0(zod@3.24.2)
@@ -715,8 +715,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cron-schedule:
         specifier: 5.0.4
         version: 5.0.4
@@ -770,11 +770,11 @@ importers:
   apps/workers-bindings:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@n8n/json-schema-to-zod':
         specifier: 1.1.0
         version: 1.1.0(zod@3.24.2)
@@ -788,8 +788,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       ai:
         specifier: 4.3.10
         version: 4.3.10(react@17.0.2)(zod@3.24.2)
@@ -831,14 +831,14 @@ importers:
   apps/workers-builds:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -846,8 +846,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -886,8 +886,8 @@ importers:
   apps/workers-observability:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@fast-csv/format':
         specifier: 5.0.2
         version: 5.0.2
@@ -895,8 +895,8 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -904,8 +904,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -995,8 +995,8 @@ importers:
         specifier: 0.8.14
         version: 0.8.14(@cloudflare/workers-types@4.20250416.0)(@vitest/runner@3.0.9)(@vitest/snapshot@3.0.9)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.0.9)
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       ai:
         specifier: 4.3.10
         version: 4.3.10(react@17.0.2)(zod@3.24.2)
@@ -1026,8 +1026,8 @@ importers:
   packages/mcp-common:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.0.5
-        version: 0.0.5
+        specifier: 0.0.13
+        version: 0.0.13
       '@fast-csv/format':
         specifier: 5.0.2
         version: 5.0.2
@@ -1035,14 +1035,14 @@ importers:
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       '@repo/mcp-observability':
         specifier: workspace:*
         version: link:../mcp-observability
       agents:
-        specifier: 0.2.7
-        version: 0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       cloudflare:
         specifier: 4.2.0
         version: 4.2.0
@@ -1087,8 +1087,8 @@ importers:
   packages/mcp-observability:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: 1.18.2
-        version: 1.18.2
+        specifier: 1.20.2
+        version: 1.20.2
       wrangler:
         specifier: 4.10.0
         version: 4.10.0(@cloudflare/workers-types@4.20250416.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -1158,8 +1158,8 @@ packages:
     peerDependencies:
       zod: ^3.0.0
 
-  '@ai-sdk/gateway@1.0.30':
-    resolution: {integrity: sha512-QdrSUryr/CLcsCISokLHOImcHj1adGXk1yy4B3qipqLhcNc33Kj/O/3crI790Qp85oDx7sc4vm7R4raf9RA/kg==}
+  '@ai-sdk/gateway@2.0.1':
+    resolution: {integrity: sha512-vPVIbnP35ZnayS937XLo85vynR85fpBQWHCdUweq7apzqFOTU2YkUd4V3msebEHbQ2Zro60ZShDDy9SMiyWTqA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1176,6 +1176,12 @@ packages:
     peerDependencies:
       zod: ^3.0.0
 
+  '@ai-sdk/openai@2.0.53':
+    resolution: {integrity: sha512-GIkR3+Fyif516ftXv+YPSPstnAHhcZxNoR2s8uSHhQ1yBT7I7aQYTVwpjAuYoT3GR+TeP50q7onj2/nDRbT2FQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/provider-utils@2.2.7':
     resolution: {integrity: sha512-kM0xS3GWg3aMChh9zfeM+80vEZfXzR3JEUBdycZLtbRZ2TRT8xOj3WodGHPb06sUK5yD7pAXC/P7ctsi2fvUGQ==}
     engines: {node: '>=18'}
@@ -1188,8 +1194,8 @@ packages:
     peerDependencies:
       zod: ^3.23.8
 
-  '@ai-sdk/provider-utils@3.0.10':
-    resolution: {integrity: sha512-T1gZ76gEIwffep6MWI0QNy9jgoybUHE7TRaHB5k54K8mF91ciGFlbtCGxDYhMH3nCRergKwYFIDeFF0hJSIQHQ==}
+  '@ai-sdk/provider-utils@3.0.12':
+    resolution: {integrity: sha512-ZtbdvYxdMoria+2SlNarEk6Hlgyf+zzcznlD55EAl+7VZvJaSg2sqPvwArY7L6TfDEDJsnCq0fdhBSkYo0Xqdg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1338,11 +1344,11 @@ packages:
     resolution: {integrity: sha512-CdTLvIOPiCNuH71pyDu3rA+Q0n65cmAbXnwWH84rKGiFumFzkmHNT8KHTMEchcxN+Kl8I54xGUhJ7l3E7X396Q==}
 
   '@cloudflare/kv-asset-handler@0.4.0':
-    resolution: {integrity: sha512-+tv3z+SPp+gqTIcImN9o0hqE9xyfQjI1XD9pL6NuKjua9B1y7mNYv0S9cP+QEbA4ppVgGZEmKOvHX5G5Ei1CVA==, tarball: https://registry.npmjs.org/@cloudflare/kv-asset-handler/-/kv-asset-handler-0.4.0.tgz}
+    resolution: {integrity: sha512-+tv3z+SPp+gqTIcImN9o0hqE9xyfQjI1XD9pL6NuKjua9B1y7mNYv0S9cP+QEbA4ppVgGZEmKOvHX5G5Ei1CVA==}
     engines: {node: '>=18.0.0'}
 
   '@cloudflare/unenv-preset@2.3.1':
-    resolution: {integrity: sha512-Xq57Qd+ADpt6hibcVBO0uLG9zzRgyRhfCUgBT9s+g3+3Ivg5zDyVgLFy40ES1VdNcu8rPNSivm9A+kGP5IVaPg==, tarball: https://registry.npmjs.org/@cloudflare/unenv-preset/-/unenv-preset-2.3.1.tgz}
+    resolution: {integrity: sha512-Xq57Qd+ADpt6hibcVBO0uLG9zzRgyRhfCUgBT9s+g3+3Ivg5zDyVgLFy40ES1VdNcu8rPNSivm9A+kGP5IVaPg==}
     peerDependencies:
       unenv: 2.0.0-rc.15
       workerd: ^1.20250320.0
@@ -1351,146 +1357,146 @@ packages:
         optional: true
 
   '@cloudflare/vite-plugin@1.1.0':
-    resolution: {integrity: sha512-b265RnBqZE57KBPPwhDWFu8W51RNnl4LkxNgY/GzbXoztc6qDcnMs7IVyPCcCvyXa4ogSQz5MvQ3yB5Ehn5E8A==, tarball: https://registry.npmjs.org/@cloudflare/vite-plugin/-/vite-plugin-1.1.0.tgz}
+    resolution: {integrity: sha512-b265RnBqZE57KBPPwhDWFu8W51RNnl4LkxNgY/GzbXoztc6qDcnMs7IVyPCcCvyXa4ogSQz5MvQ3yB5Ehn5E8A==}
     peerDependencies:
       vite: ^6.1.0
       wrangler: ^3.101.0 || ^4.0.0
 
   '@cloudflare/vitest-pool-workers@0.8.14':
-    resolution: {integrity: sha512-uqUvelQQkU/8JD/mgd9OV3byB6CaHxkw/DzHZ4z2haM9epR9D5mDshw5+AfPu7x/IWZ9zciaDawjM8QW8QrjIA==, tarball: https://registry.npmjs.org/@cloudflare/vitest-pool-workers/-/vitest-pool-workers-0.8.14.tgz}
+    resolution: {integrity: sha512-uqUvelQQkU/8JD/mgd9OV3byB6CaHxkw/DzHZ4z2haM9epR9D5mDshw5+AfPu7x/IWZ9zciaDawjM8QW8QrjIA==}
     peerDependencies:
       '@vitest/runner': 2.0.x - 3.0.x
       '@vitest/snapshot': 2.0.x - 3.0.x
       vitest: 2.0.x - 3.0.x
 
   '@cloudflare/workerd-darwin-64@1.20250408.0':
-    resolution: {integrity: sha512-bxhIwBWxaNItZLXDNOKY2dCv0FHjDiDkfJFpwv4HvtvU5MKcrivZHVmmfDzLW85rqzfcDOmKbZeMPVfiKxdBZw==, tarball: https://registry.npmjs.org/@cloudflare/workerd-darwin-64/-/workerd-darwin-64-1.20250408.0.tgz}
+    resolution: {integrity: sha512-bxhIwBWxaNItZLXDNOKY2dCv0FHjDiDkfJFpwv4HvtvU5MKcrivZHVmmfDzLW85rqzfcDOmKbZeMPVfiKxdBZw==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [darwin]
 
   '@cloudflare/workerd-darwin-64@1.20250409.0':
-    resolution: {integrity: sha512-smA9yq77xsdQ1NMLhFz3JZxMHGd01lg0bE+X3dTFmIUs+hHskJ+HJ/IkMFInkCCeEFlUkoL4yO7ilaU/fin/xA==, tarball: https://registry.npmjs.org/@cloudflare/workerd-darwin-64/-/workerd-darwin-64-1.20250409.0.tgz}
+    resolution: {integrity: sha512-smA9yq77xsdQ1NMLhFz3JZxMHGd01lg0bE+X3dTFmIUs+hHskJ+HJ/IkMFInkCCeEFlUkoL4yO7ilaU/fin/xA==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [darwin]
 
   '@cloudflare/workerd-darwin-64@1.20250428.0':
-    resolution: {integrity: sha512-6nVe9oV4Hdec6ctzMtW80TiDvNTd2oFPi3VsKqSDVaJSJbL+4b6seyJ7G/UEPI+si6JhHBSLV2/9lNXNGLjClA==, tarball: https://registry.npmjs.org/@cloudflare/workerd-darwin-64/-/workerd-darwin-64-1.20250428.0.tgz}
+    resolution: {integrity: sha512-6nVe9oV4Hdec6ctzMtW80TiDvNTd2oFPi3VsKqSDVaJSJbL+4b6seyJ7G/UEPI+si6JhHBSLV2/9lNXNGLjClA==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [darwin]
 
   '@cloudflare/workerd-darwin-64@1.20250507.0':
-    resolution: {integrity: sha512-xC+8hmQuOUUNCVT9DWpLMfxhR4Xs4kI8v7Bkybh4pzGC85moH6fMfCBNaP0YQCNAA/BR56aL/AwfvMVGskTK/A==, tarball: https://registry.npmjs.org/@cloudflare/workerd-darwin-64/-/workerd-darwin-64-1.20250507.0.tgz}
+    resolution: {integrity: sha512-xC+8hmQuOUUNCVT9DWpLMfxhR4Xs4kI8v7Bkybh4pzGC85moH6fMfCBNaP0YQCNAA/BR56aL/AwfvMVGskTK/A==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [darwin]
 
   '@cloudflare/workerd-darwin-arm64@1.20250408.0':
-    resolution: {integrity: sha512-5XZ2Oykr8bSo7zBmERtHh18h5BZYC/6H1YFWVxEj3PtalF3+6SHsO4KZsbGvDml9Pu7sHV277jiZE5eny8Hlyw==, tarball: https://registry.npmjs.org/@cloudflare/workerd-darwin-arm64/-/workerd-darwin-arm64-1.20250408.0.tgz}
+    resolution: {integrity: sha512-5XZ2Oykr8bSo7zBmERtHh18h5BZYC/6H1YFWVxEj3PtalF3+6SHsO4KZsbGvDml9Pu7sHV277jiZE5eny8Hlyw==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [darwin]
 
   '@cloudflare/workerd-darwin-arm64@1.20250409.0':
-    resolution: {integrity: sha512-oLVcf+Y5Qun8JHcy1VcR/YnbA5U2ne0czh3XNhDqdHZFK8+vKeC7MnVPX+kEqQA3+uLcMM1/FsIDU1U4Na0h1g==, tarball: https://registry.npmjs.org/@cloudflare/workerd-darwin-arm64/-/workerd-darwin-arm64-1.20250409.0.tgz}
+    resolution: {integrity: sha512-oLVcf+Y5Qun8JHcy1VcR/YnbA5U2ne0czh3XNhDqdHZFK8+vKeC7MnVPX+kEqQA3+uLcMM1/FsIDU1U4Na0h1g==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [darwin]
 
   '@cloudflare/workerd-darwin-arm64@1.20250428.0':
-    resolution: {integrity: sha512-/TB7bh7SIJ5f+6r4PHsAz7+9Qal/TK1cJuKFkUno1kqGlZbdrMwH0ATYwlWC/nBFeu2FB3NUolsTntEuy23hnQ==, tarball: https://registry.npmjs.org/@cloudflare/workerd-darwin-arm64/-/workerd-darwin-arm64-1.20250428.0.tgz}
+    resolution: {integrity: sha512-/TB7bh7SIJ5f+6r4PHsAz7+9Qal/TK1cJuKFkUno1kqGlZbdrMwH0ATYwlWC/nBFeu2FB3NUolsTntEuy23hnQ==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [darwin]
 
   '@cloudflare/workerd-darwin-arm64@1.20250507.0':
-    resolution: {integrity: sha512-Oynff5H8yM4trfUFaKdkOvPV3jac8mg7QC19ILZluCVgLx/JGEVLEJ7do1Na9rLqV8CK4gmUXPrUMX7uerhQgg==, tarball: https://registry.npmjs.org/@cloudflare/workerd-darwin-arm64/-/workerd-darwin-arm64-1.20250507.0.tgz}
+    resolution: {integrity: sha512-Oynff5H8yM4trfUFaKdkOvPV3jac8mg7QC19ILZluCVgLx/JGEVLEJ7do1Na9rLqV8CK4gmUXPrUMX7uerhQgg==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [darwin]
 
   '@cloudflare/workerd-linux-64@1.20250408.0':
-    resolution: {integrity: sha512-WbgItXWln6G5d7GvYLWcuOzAVwafysZaWunH3UEfsm95wPuRofpYnlDD861gdWJX10IHSVgMStGESUcs7FLerQ==, tarball: https://registry.npmjs.org/@cloudflare/workerd-linux-64/-/workerd-linux-64-1.20250408.0.tgz}
+    resolution: {integrity: sha512-WbgItXWln6G5d7GvYLWcuOzAVwafysZaWunH3UEfsm95wPuRofpYnlDD861gdWJX10IHSVgMStGESUcs7FLerQ==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [linux]
 
   '@cloudflare/workerd-linux-64@1.20250409.0':
-    resolution: {integrity: sha512-D31B4kdC3a0RD5yfpdIa89//kGHbYsYihZmejm1k4S4NHOho3MUDHAEh4aHtafQNXbZdydGHlSyiVYjTdQ9ILQ==, tarball: https://registry.npmjs.org/@cloudflare/workerd-linux-64/-/workerd-linux-64-1.20250409.0.tgz}
+    resolution: {integrity: sha512-D31B4kdC3a0RD5yfpdIa89//kGHbYsYihZmejm1k4S4NHOho3MUDHAEh4aHtafQNXbZdydGHlSyiVYjTdQ9ILQ==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [linux]
 
   '@cloudflare/workerd-linux-64@1.20250428.0':
-    resolution: {integrity: sha512-9eCbj+R3CKqpiXP6DfAA20DxKge+OTj7Hyw3ZewiEhWH9INIHiJwJQYybu4iq9kJEGjnGvxgguLFjSCWm26hgg==, tarball: https://registry.npmjs.org/@cloudflare/workerd-linux-64/-/workerd-linux-64-1.20250428.0.tgz}
+    resolution: {integrity: sha512-9eCbj+R3CKqpiXP6DfAA20DxKge+OTj7Hyw3ZewiEhWH9INIHiJwJQYybu4iq9kJEGjnGvxgguLFjSCWm26hgg==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [linux]
 
   '@cloudflare/workerd-linux-64@1.20250507.0':
-    resolution: {integrity: sha512-/HAA+Zg/R7Q/Smyl835FUFKjotZN1UzN9j/BHBd0xKmKov97QkXAX8gsyGnyKqRReIOinp8x/8+UebTICR7VJw==, tarball: https://registry.npmjs.org/@cloudflare/workerd-linux-64/-/workerd-linux-64-1.20250507.0.tgz}
+    resolution: {integrity: sha512-/HAA+Zg/R7Q/Smyl835FUFKjotZN1UzN9j/BHBd0xKmKov97QkXAX8gsyGnyKqRReIOinp8x/8+UebTICR7VJw==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [linux]
 
   '@cloudflare/workerd-linux-arm64@1.20250408.0':
-    resolution: {integrity: sha512-pAhEywPPvr92SLylnQfZEPgXz+9pOG9G9haAPLpEatncZwYiYd9yiR6HYWhKp2erzCoNrOqKg9IlQwU3z1IDiw==, tarball: https://registry.npmjs.org/@cloudflare/workerd-linux-arm64/-/workerd-linux-arm64-1.20250408.0.tgz}
+    resolution: {integrity: sha512-pAhEywPPvr92SLylnQfZEPgXz+9pOG9G9haAPLpEatncZwYiYd9yiR6HYWhKp2erzCoNrOqKg9IlQwU3z1IDiw==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [linux]
 
   '@cloudflare/workerd-linux-arm64@1.20250409.0':
-    resolution: {integrity: sha512-Sr59P0TREayil5OQ7kcbjuIn6L6OTSRLI91LKu0D8vi1hss2q9FUwBcwxg0+Yd/x+ty/x7IISiAK5QBkAMeITQ==, tarball: https://registry.npmjs.org/@cloudflare/workerd-linux-arm64/-/workerd-linux-arm64-1.20250409.0.tgz}
+    resolution: {integrity: sha512-Sr59P0TREayil5OQ7kcbjuIn6L6OTSRLI91LKu0D8vi1hss2q9FUwBcwxg0+Yd/x+ty/x7IISiAK5QBkAMeITQ==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [linux]
 
   '@cloudflare/workerd-linux-arm64@1.20250428.0':
-    resolution: {integrity: sha512-D9NRBnW46nl1EQsP13qfkYb5lbt4C6nxl38SBKY/NOcZAUoHzNB5K0GaK8LxvpkM7X/97ySojlMfR5jh5DNXYQ==, tarball: https://registry.npmjs.org/@cloudflare/workerd-linux-arm64/-/workerd-linux-arm64-1.20250428.0.tgz}
+    resolution: {integrity: sha512-D9NRBnW46nl1EQsP13qfkYb5lbt4C6nxl38SBKY/NOcZAUoHzNB5K0GaK8LxvpkM7X/97ySojlMfR5jh5DNXYQ==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [linux]
 
   '@cloudflare/workerd-linux-arm64@1.20250507.0':
-    resolution: {integrity: sha512-NMPibSdOYeycU0IrKkgOESFJQy7dEpHvuatZxQxlT+mIQK0INzI3irp2kKxhF99s25kPC4p+xg9bU3ugTrs3VQ==, tarball: https://registry.npmjs.org/@cloudflare/workerd-linux-arm64/-/workerd-linux-arm64-1.20250507.0.tgz}
+    resolution: {integrity: sha512-NMPibSdOYeycU0IrKkgOESFJQy7dEpHvuatZxQxlT+mIQK0INzI3irp2kKxhF99s25kPC4p+xg9bU3ugTrs3VQ==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [linux]
 
   '@cloudflare/workerd-windows-64@1.20250408.0':
-    resolution: {integrity: sha512-nJ3RjMKGae2aF2rZ/CNeBvQPM+W5V1SUK0FYWG/uomyr7uQ2l4IayHna1ODg/OHHTEgIjwom0Mbn58iXb0WOcQ==, tarball: https://registry.npmjs.org/@cloudflare/workerd-windows-64/-/workerd-windows-64-1.20250408.0.tgz}
+    resolution: {integrity: sha512-nJ3RjMKGae2aF2rZ/CNeBvQPM+W5V1SUK0FYWG/uomyr7uQ2l4IayHna1ODg/OHHTEgIjwom0Mbn58iXb0WOcQ==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [win32]
 
   '@cloudflare/workerd-windows-64@1.20250409.0':
-    resolution: {integrity: sha512-dK9I8zBX5rR7MtaaP2AhICQTEw3PVzHcsltN8o46w7JsbYlMvFOj27FfYH5dhs3IahgmIfw2e572QXW2o/dbpg==, tarball: https://registry.npmjs.org/@cloudflare/workerd-windows-64/-/workerd-windows-64-1.20250409.0.tgz}
+    resolution: {integrity: sha512-dK9I8zBX5rR7MtaaP2AhICQTEw3PVzHcsltN8o46w7JsbYlMvFOj27FfYH5dhs3IahgmIfw2e572QXW2o/dbpg==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [win32]
 
   '@cloudflare/workerd-windows-64@1.20250428.0':
-    resolution: {integrity: sha512-RQCRj28eitjKD0tmei6iFOuWqMuHMHdNGEigRmbkmuTlpbWHNAoHikgCzZQ/dkKDdatA76TmcpbyECNf31oaTA==, tarball: https://registry.npmjs.org/@cloudflare/workerd-windows-64/-/workerd-windows-64-1.20250428.0.tgz}
+    resolution: {integrity: sha512-RQCRj28eitjKD0tmei6iFOuWqMuHMHdNGEigRmbkmuTlpbWHNAoHikgCzZQ/dkKDdatA76TmcpbyECNf31oaTA==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [win32]
 
   '@cloudflare/workerd-windows-64@1.20250507.0':
-    resolution: {integrity: sha512-c91fhNP8ufycdIDqjVyKTqeb4ewkbAYXFQbLreMVgh4LLQQPDDEte8wCdmaFy5bIL0M9d85PpdCq51RCzq/FaQ==, tarball: https://registry.npmjs.org/@cloudflare/workerd-windows-64/-/workerd-windows-64-1.20250507.0.tgz}
+    resolution: {integrity: sha512-c91fhNP8ufycdIDqjVyKTqeb4ewkbAYXFQbLreMVgh4LLQQPDDEte8wCdmaFy5bIL0M9d85PpdCq51RCzq/FaQ==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-oauth-provider@0.0.5':
-    resolution: {integrity: sha512-t1x5KAzsubCvb4APnJ93z407X1x7SGj/ga5ziRnwIb/iLy4PMkT/hgd1y5z7Bbsdy5Fy6mywhCP4lym24bX66w==, tarball: https://registry.npmjs.org/@cloudflare/workers-oauth-provider/-/workers-oauth-provider-0.0.5.tgz}
+  '@cloudflare/workers-oauth-provider@0.0.13':
+    resolution: {integrity: sha512-W9n1LHUkbEvJNsoBSVUkKUdMhGXeAfqjRoqhaKP3ky35SJ5IVRSYNV9PYff+7VxbKyX98KJjEpX0PFzLJ8ekRw==}
 
   '@cloudflare/workers-types@4.20250410.0':
-    resolution: {integrity: sha512-Yx9VUi6QpmXtUIhOL+em+V02gue12kmVBVL6RGH5mhFh50M0x9JyOmm6wKwKZUny2uQd+22nuouE2q3z1OrsIQ==, tarball: https://registry.npmjs.org/@cloudflare/workers-types/-/workers-types-4.20250410.0.tgz}
+    resolution: {integrity: sha512-Yx9VUi6QpmXtUIhOL+em+V02gue12kmVBVL6RGH5mhFh50M0x9JyOmm6wKwKZUny2uQd+22nuouE2q3z1OrsIQ==}
 
   '@cloudflare/workers-types@4.20250416.0':
-    resolution: {integrity: sha512-i37TX0Clp+MrPdXMBdvKZM7JghCrWD9GtG7E+8ANOAPmtZjUkZfEy9qq46IG3XlNpagPaWDkY3SgJ3s01gPxCw==, tarball: https://registry.npmjs.org/@cloudflare/workers-types/-/workers-types-4.20250416.0.tgz}
+    resolution: {integrity: sha512-i37TX0Clp+MrPdXMBdvKZM7JghCrWD9GtG7E+8ANOAPmtZjUkZfEy9qq46IG3XlNpagPaWDkY3SgJ3s01gPxCw==}
 
   '@coinbase/wallet-sdk@3.9.3':
     resolution: {integrity: sha512-N/A2DRIf0Y3PHc1XAMvbBUu4zisna6qAdqABMZwBMNEfWrXpAwx16pZGkYCLGE+Rvv1edbcB2LYDRnACNcmCiw==}
@@ -2007,8 +2013,8 @@ packages:
     resolution: {integrity: sha512-w8CVbdkDrVXFJbfBSlDfafDR6BAkpDmv1bC1UJVCoVny5tW2RKAdn9i68Xf7asYT4TnUhl/hN4zfUiKQq9II4g==}
     engines: {node: '>=16.0.0'}
 
-  '@modelcontextprotocol/sdk@1.18.2':
-    resolution: {integrity: sha512-beedclIvFcCnPrYgHsylqiYJVJ/CI47Vyc4tY8no1/Li/O8U4BTlJfy6ZwxkYwx+Mx10nrgwSVrA7VBbhh4slg==}
+  '@modelcontextprotocol/sdk@1.20.2':
+    resolution: {integrity: sha512-6rqTdFt67AAAzln3NOKsXRmv5ZzPkgbfaebKBqUbts7vK1GZudqnrun5a8d3M/h955cam9RHZ6Jb4Y1XhnmFPg==}
     engines: {node: '>=18'}
 
   '@n8n/json-schema-to-zod@1.1.0':
@@ -2654,6 +2660,10 @@ packages:
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
+  '@vercel/oidc@3.0.3':
+    resolution: {integrity: sha512-yNEQvPcVrK9sIe637+I0jD6leluPxzwJKx/Haw6F4H77CdDsszUn5V3o96LPziXkSNE2B83+Z3mjqGKBK/R6Gg==}
+    engines: {node: '>= 20'}
+
   '@vitest/expect@3.0.9':
     resolution: {integrity: sha512-5eCqRItYgIML7NNVgJj6TVCmdzE7ZVgJhruW0ziSQV4V7PvLkDL1bBkBdcTs/VuIz0IxPb5da1IDSqc1TR9eig==}
 
@@ -2871,10 +2881,17 @@ packages:
     resolution: {integrity: sha512-kja8j7PjmncONqaTsB8fQ+wE2mSU2DJ9D4XKoJ5PFWIdRMa6SLSN1ff4mOr4jCbfRSsxR4keIiySJU0N9T5hIQ==}
     engines: {node: '>= 8.0.0'}
 
-  agents@0.2.7:
-    resolution: {integrity: sha512-nv7irZkJG9x9ME7sRy2fRVIUX05TJIAvrod+bycTo01OqQsv5VgZwLMv2It5VSuOC8sly/8VQ5M//9t8Q4ng3Q==}
+  agents@0.2.19:
+    resolution: {integrity: sha512-8icBmJp5A+PUdqQniq4JXZ9ef0ln6ImAVCJVp3oXxDTX/OjVQ25+gckxbIAUKtHbp2y6spK+QgbD2y+jn7hzyw==}
     peerDependencies:
       react: '*'
+      viem: '>=2.0.0'
+      x402: ^0.6.5
+    peerDependenciesMeta:
+      viem:
+        optional: true
+      x402:
+        optional: true
 
   ai-gateway-provider@0.0.6:
     resolution: {integrity: sha512-ArCgDH3C8SZJkk2VXgmFX39h3rnm5wui0ZwsMNwdKfhB0z+OTT4VSP6dpOfHKgtArwaBvcp5wc3WTCMl91A3dQ==}
@@ -2899,8 +2916,8 @@ packages:
       react:
         optional: true
 
-  ai@5.0.57:
-    resolution: {integrity: sha512-g4K881HFl9aGqvnp1Z/gRXYmfjORn5q5pyPIVmMndT+5AjiBRvUVzFZn1rXdzL61cjbMNyjO4NPfEbBE6Z/W3A==}
+  ai@5.0.78:
+    resolution: {integrity: sha512-ec77fmQwJGLduswMrW4AAUGSOiu8dZaIwMmWHHGKsrMUFFS6ugfkTyx0srtuKYHNRRLRC2dT7cPirnUl98VnxA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -6114,7 +6131,8 @@ snapshots:
 
   '@aashutoshrathi/word-wrap@1.2.6': {}
 
-  '@adraffy/ens-normalize@1.11.1': {}
+  '@adraffy/ens-normalize@1.11.1':
+    optional: true
 
   '@ai-sdk/anthropic@1.2.11(zod@3.24.2)':
     dependencies:
@@ -6122,10 +6140,11 @@ snapshots:
       '@ai-sdk/provider-utils': 2.2.8(zod@3.24.2)
       zod: 3.24.2
 
-  '@ai-sdk/gateway@1.0.30(zod@3.25.76)':
+  '@ai-sdk/gateway@2.0.1(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.10(zod@3.25.76)
+      '@ai-sdk/provider-utils': 3.0.12(zod@3.25.76)
+      '@vercel/oidc': 3.0.3
       zod: 3.25.76
 
   '@ai-sdk/google@1.2.17(zod@3.24.2)':
@@ -6139,6 +6158,12 @@ snapshots:
       '@ai-sdk/provider': 1.1.3
       '@ai-sdk/provider-utils': 2.2.7(zod@3.24.2)
       zod: 3.24.2
+
+  '@ai-sdk/openai@2.0.53(zod@3.25.76)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.12(zod@3.25.76)
+      zod: 3.25.76
 
   '@ai-sdk/provider-utils@2.2.7(zod@3.24.2)':
     dependencies:
@@ -6154,7 +6179,7 @@ snapshots:
       secure-json-parse: 2.7.0
       zod: 3.24.2
 
-  '@ai-sdk/provider-utils@3.0.10(zod@3.25.76)':
+  '@ai-sdk/provider-utils@3.0.12(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@standard-schema/spec': 1.0.0
@@ -6281,6 +6306,7 @@ snapshots:
       - use-sync-external-store
       - utf-8-validate
       - zod
+    optional: true
 
   '@changesets/apply-release-plan@7.0.10':
     dependencies:
@@ -6543,9 +6569,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20250507.0':
     optional: true
 
-  '@cloudflare/workers-oauth-provider@0.0.5':
-    dependencies:
-      '@cloudflare/workers-types': 4.20250416.0
+  '@cloudflare/workers-oauth-provider@0.0.13': {}
 
   '@cloudflare/workers-types@4.20250410.0': {}
 
@@ -6564,6 +6588,7 @@ snapshots:
       sha.js: 2.4.12
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@coinbase/wallet-sdk@4.3.6(bufferutil@4.0.9)(react@17.0.2)(typescript@5.5.4)(use-sync-external-store@1.4.0(react@17.0.2))(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -6584,6 +6609,7 @@ snapshots:
       - use-sync-external-store
       - utf-8-validate
       - zod
+    optional: true
 
   '@commander-js/extra-typings@13.1.0(commander@13.1.0)':
     dependencies:
@@ -6596,6 +6622,7 @@ snapshots:
   '@ecies/ciphers@0.2.4(@noble/ciphers@1.3.0)':
     dependencies:
       '@noble/ciphers': 1.3.0
+    optional: true
 
   '@effect/schema@0.75.5(effect@3.13.10)':
     dependencies:
@@ -6709,8 +6736,10 @@ snapshots:
     dependencies:
       '@ethereumjs/util': 8.1.0
       crc-32: 1.2.2
+    optional: true
 
-  '@ethereumjs/rlp@4.0.1': {}
+  '@ethereumjs/rlp@4.0.1':
+    optional: true
 
   '@ethereumjs/tx@4.2.0':
     dependencies:
@@ -6718,12 +6747,14 @@ snapshots:
       '@ethereumjs/rlp': 4.0.1
       '@ethereumjs/util': 8.1.0
       ethereum-cryptography: 2.2.1
+    optional: true
 
   '@ethereumjs/util@8.1.0':
     dependencies:
       '@ethereumjs/rlp': 4.0.1
       ethereum-cryptography: 2.2.1
       micro-ftch: 0.3.1
+    optional: true
 
   '@fast-csv/format@5.0.2':
     dependencies:
@@ -6742,6 +6773,7 @@ snapshots:
       viem: 2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@hapi/hoek@9.3.0': {}
 
@@ -6914,11 +6946,13 @@ snapshots:
 
   '@kamilkisiela/fast-url-parser@1.1.4': {}
 
-  '@lit-labs/ssr-dom-shim@1.4.0': {}
+  '@lit-labs/ssr-dom-shim@1.4.0':
+    optional: true
 
   '@lit/reactive-element@2.1.1':
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.4.0
+    optional: true
 
   '@manypkg/find-root@1.1.0':
     dependencies:
@@ -6943,6 +6977,7 @@ snapshots:
       '@metamask/utils': 5.0.2
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@metamask/json-rpc-engine@7.3.3':
     dependencies:
@@ -6951,6 +6986,7 @@ snapshots:
       '@metamask/utils': 8.5.0
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@metamask/json-rpc-engine@8.0.2':
     dependencies:
@@ -6959,6 +6995,7 @@ snapshots:
       '@metamask/utils': 8.5.0
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@metamask/json-rpc-middleware-stream@7.0.2':
     dependencies:
@@ -6968,15 +7005,18 @@ snapshots:
       readable-stream: 3.6.2
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@metamask/object-multiplex@2.1.0':
     dependencies:
       once: 1.4.0
       readable-stream: 3.6.2
+    optional: true
 
   '@metamask/onboarding@1.0.1':
     dependencies:
       bowser: 2.12.1
+    optional: true
 
   '@metamask/providers@16.1.0':
     dependencies:
@@ -6994,6 +7034,7 @@ snapshots:
       webextension-polyfill: 0.10.0
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@metamask/rpc-errors@6.4.0':
     dependencies:
@@ -7001,6 +7042,7 @@ snapshots:
       fast-safe-stringify: 2.1.1
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@metamask/rpc-errors@7.0.2':
     dependencies:
@@ -7008,14 +7050,18 @@ snapshots:
       fast-safe-stringify: 2.1.1
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
-  '@metamask/safe-event-emitter@2.0.0': {}
+  '@metamask/safe-event-emitter@2.0.0':
+    optional: true
 
-  '@metamask/safe-event-emitter@3.1.2': {}
+  '@metamask/safe-event-emitter@3.1.2':
+    optional: true
 
   '@metamask/sdk-analytics@0.0.5':
     dependencies:
       openapi-fetch: 0.13.8
+    optional: true
 
   '@metamask/sdk-communication-layer@0.33.1(cross-fetch@4.1.0)(eciesjs@0.4.15)(eventemitter2@6.4.9)(readable-stream@3.6.2)(socket.io-client@4.8.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
@@ -7032,10 +7078,12 @@ snapshots:
       uuid: 8.3.2
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@metamask/sdk-install-modal-web@0.32.1':
     dependencies:
       '@paulmillr/qr': 0.2.1
+    optional: true
 
   '@metamask/sdk@0.33.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
     dependencies:
@@ -7064,8 +7112,10 @@ snapshots:
       - encoding
       - supports-color
       - utf-8-validate
+    optional: true
 
-  '@metamask/superstruct@3.2.1': {}
+  '@metamask/superstruct@3.2.1':
+    optional: true
 
   '@metamask/utils@11.8.1':
     dependencies:
@@ -7082,6 +7132,7 @@ snapshots:
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@metamask/utils@5.0.2':
     dependencies:
@@ -7092,6 +7143,7 @@ snapshots:
       superstruct: 1.0.4
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@metamask/utils@8.5.0':
     dependencies:
@@ -7106,6 +7158,7 @@ snapshots:
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@metamask/utils@9.3.0':
     dependencies:
@@ -7120,8 +7173,9 @@ snapshots:
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
-  '@modelcontextprotocol/sdk@1.18.2':
+  '@modelcontextprotocol/sdk@1.20.2':
     dependencies:
       ajv: 6.12.6
       content-type: 1.0.5
@@ -7142,37 +7196,48 @@ snapshots:
     dependencies:
       zod: 3.24.2
 
-  '@noble/ciphers@1.2.1': {}
+  '@noble/ciphers@1.2.1':
+    optional: true
 
-  '@noble/ciphers@1.3.0': {}
+  '@noble/ciphers@1.3.0':
+    optional: true
 
   '@noble/curves@1.4.2':
     dependencies:
       '@noble/hashes': 1.4.0
+    optional: true
 
   '@noble/curves@1.8.0':
     dependencies:
       '@noble/hashes': 1.7.0
+    optional: true
 
   '@noble/curves@1.8.1':
     dependencies:
       '@noble/hashes': 1.7.1
+    optional: true
 
   '@noble/curves@1.9.1':
     dependencies:
       '@noble/hashes': 1.8.0
+    optional: true
 
   '@noble/curves@1.9.7':
     dependencies:
       '@noble/hashes': 1.8.0
+    optional: true
 
-  '@noble/hashes@1.4.0': {}
+  '@noble/hashes@1.4.0':
+    optional: true
 
-  '@noble/hashes@1.7.0': {}
+  '@noble/hashes@1.7.0':
+    optional: true
 
-  '@noble/hashes@1.7.1': {}
+  '@noble/hashes@1.7.1':
+    optional: true
 
-  '@noble/hashes@1.8.0': {}
+  '@noble/hashes@1.8.0':
+    optional: true
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -7190,7 +7255,8 @@ snapshots:
 
   '@opentelemetry/api@1.9.0': {}
 
-  '@paulmillr/qr@0.2.1': {}
+  '@paulmillr/qr@0.2.1':
+    optional: true
 
   '@polka/url@1.0.0-next.28': {}
 
@@ -7204,6 +7270,7 @@ snapshots:
       - typescript
       - utf-8-validate
       - zod
+    optional: true
 
   '@reown/appkit-common@1.7.8(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -7215,6 +7282,7 @@ snapshots:
       - typescript
       - utf-8-validate
       - zod
+    optional: true
 
   '@reown/appkit-controllers@1.7.8(bufferutil@4.0.9)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -7250,6 +7318,7 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@reown/appkit-pay@1.7.8(bufferutil@4.0.9)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -7286,10 +7355,12 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@reown/appkit-polyfills@1.7.8':
     dependencies:
       buffer: 6.0.3
+    optional: true
 
   '@reown/appkit-scaffold-ui@1.7.8(bufferutil@4.0.9)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(valtio@1.13.2(react@17.0.2))(zod@3.24.2)':
     dependencies:
@@ -7327,6 +7398,7 @@ snapshots:
       - utf-8-validate
       - valtio
       - zod
+    optional: true
 
   '@reown/appkit-ui@1.7.8(bufferutil@4.0.9)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -7362,6 +7434,7 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@reown/appkit-utils@1.7.8(bufferutil@4.0.9)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(valtio@1.13.2(react@17.0.2))(zod@3.24.2)':
     dependencies:
@@ -7400,6 +7473,7 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@reown/appkit-wallet@1.7.8(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)':
     dependencies:
@@ -7411,6 +7485,7 @@ snapshots:
       - bufferutil
       - typescript
       - utf-8-validate
+    optional: true
 
   '@reown/appkit@1.7.8(bufferutil@4.0.9)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -7454,6 +7529,7 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@rollup/plugin-replace@6.0.2(rollup@4.35.0)':
     dependencies:
@@ -7538,6 +7614,7 @@ snapshots:
       - typescript
       - utf-8-validate
       - zod
+    optional: true
 
   '@safe-global/safe-apps-sdk@9.1.0(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -7548,45 +7625,55 @@ snapshots:
       - typescript
       - utf-8-validate
       - zod
+    optional: true
 
-  '@safe-global/safe-gateway-typescript-sdk@3.23.1': {}
+  '@safe-global/safe-gateway-typescript-sdk@3.23.1':
+    optional: true
 
-  '@scure/base@1.1.9': {}
+  '@scure/base@1.1.9':
+    optional: true
 
-  '@scure/base@1.2.6': {}
+  '@scure/base@1.2.6':
+    optional: true
 
   '@scure/bip32@1.4.0':
     dependencies:
       '@noble/curves': 1.4.2
       '@noble/hashes': 1.4.0
       '@scure/base': 1.1.9
+    optional: true
 
   '@scure/bip32@1.6.2':
     dependencies:
       '@noble/curves': 1.8.1
       '@noble/hashes': 1.7.1
       '@scure/base': 1.2.6
+    optional: true
 
   '@scure/bip32@1.7.0':
     dependencies:
-      '@noble/curves': 1.9.1
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
+    optional: true
 
   '@scure/bip39@1.3.0':
     dependencies:
       '@noble/hashes': 1.4.0
       '@scure/base': 1.1.9
+    optional: true
 
   '@scure/bip39@1.5.4':
     dependencies:
       '@noble/hashes': 1.7.1
       '@scure/base': 1.2.6
+    optional: true
 
   '@scure/bip39@1.6.0':
     dependencies:
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
+    optional: true
 
   '@sentry/core@8.9.2':
     dependencies:
@@ -7609,20 +7696,24 @@ snapshots:
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
-  '@socket.io/component-emitter@3.1.2': {}
+  '@socket.io/component-emitter@3.1.2':
+    optional: true
 
   '@solana-program/compute-budget@0.8.0(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))':
     dependencies:
       '@solana/kit': 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+    optional: true
 
   '@solana-program/token-2022@0.4.2(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))':
     dependencies:
       '@solana/kit': 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@solana/sysvars': 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)
+    optional: true
 
   '@solana-program/token@0.5.1(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))':
     dependencies:
       '@solana/kit': 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+    optional: true
 
   '@solana/accounts@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7635,6 +7726,7 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/addresses@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7646,16 +7738,19 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/assertions@2.3.0(typescript@5.5.4)':
     dependencies:
       '@solana/errors': 2.3.0(typescript@5.5.4)
       typescript: 5.5.4
+    optional: true
 
   '@solana/codecs-core@2.3.0(typescript@5.5.4)':
     dependencies:
       '@solana/errors': 2.3.0(typescript@5.5.4)
       typescript: 5.5.4
+    optional: true
 
   '@solana/codecs-data-structures@2.3.0(typescript@5.5.4)':
     dependencies:
@@ -7663,12 +7758,14 @@ snapshots:
       '@solana/codecs-numbers': 2.3.0(typescript@5.5.4)
       '@solana/errors': 2.3.0(typescript@5.5.4)
       typescript: 5.5.4
+    optional: true
 
   '@solana/codecs-numbers@2.3.0(typescript@5.5.4)':
     dependencies:
       '@solana/codecs-core': 2.3.0(typescript@5.5.4)
       '@solana/errors': 2.3.0(typescript@5.5.4)
       typescript: 5.5.4
+    optional: true
 
   '@solana/codecs-strings@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7677,6 +7774,7 @@ snapshots:
       '@solana/errors': 2.3.0(typescript@5.5.4)
       fastestsmallesttextencoderdecoder: 1.0.22
       typescript: 5.5.4
+    optional: true
 
   '@solana/codecs@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7688,26 +7786,31 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/errors@2.3.0(typescript@5.5.4)':
     dependencies:
       chalk: 5.4.1
       commander: 14.0.1
       typescript: 5.5.4
+    optional: true
 
   '@solana/fast-stable-stringify@2.3.0(typescript@5.5.4)':
     dependencies:
       typescript: 5.5.4
+    optional: true
 
   '@solana/functional@2.3.0(typescript@5.5.4)':
     dependencies:
       typescript: 5.5.4
+    optional: true
 
   '@solana/instructions@2.3.0(typescript@5.5.4)':
     dependencies:
       '@solana/codecs-core': 2.3.0(typescript@5.5.4)
       '@solana/errors': 2.3.0(typescript@5.5.4)
       typescript: 5.5.4
+    optional: true
 
   '@solana/keys@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7719,6 +7822,7 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
@@ -7744,10 +7848,12 @@ snapshots:
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
       - ws
+    optional: true
 
   '@solana/nominal-types@2.3.0(typescript@5.5.4)':
     dependencies:
       typescript: 5.5.4
+    optional: true
 
   '@solana/options@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7759,6 +7865,7 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/programs@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7767,10 +7874,12 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/promises@2.3.0(typescript@5.5.4)':
     dependencies:
       typescript: 5.5.4
+    optional: true
 
   '@solana/rpc-api@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7788,20 +7897,24 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/rpc-parsed-types@2.3.0(typescript@5.5.4)':
     dependencies:
       typescript: 5.5.4
+    optional: true
 
   '@solana/rpc-spec-types@2.3.0(typescript@5.5.4)':
     dependencies:
       typescript: 5.5.4
+    optional: true
 
   '@solana/rpc-spec@2.3.0(typescript@5.5.4)':
     dependencies:
       '@solana/errors': 2.3.0(typescript@5.5.4)
       '@solana/rpc-spec-types': 2.3.0(typescript@5.5.4)
       typescript: 5.5.4
+    optional: true
 
   '@solana/rpc-subscriptions-api@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7815,6 +7928,7 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/rpc-subscriptions-channel-websocket@2.3.0(typescript@5.5.4)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
@@ -7824,6 +7938,7 @@ snapshots:
       '@solana/subscribable': 2.3.0(typescript@5.5.4)
       typescript: 5.5.4
       ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    optional: true
 
   '@solana/rpc-subscriptions-spec@2.3.0(typescript@5.5.4)':
     dependencies:
@@ -7832,6 +7947,7 @@ snapshots:
       '@solana/rpc-spec-types': 2.3.0(typescript@5.5.4)
       '@solana/subscribable': 2.3.0(typescript@5.5.4)
       typescript: 5.5.4
+    optional: true
 
   '@solana/rpc-subscriptions@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
@@ -7850,6 +7966,7 @@ snapshots:
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
       - ws
+    optional: true
 
   '@solana/rpc-transformers@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7861,6 +7978,7 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/rpc-transport-http@2.3.0(typescript@5.5.4)':
     dependencies:
@@ -7869,6 +7987,7 @@ snapshots:
       '@solana/rpc-spec-types': 2.3.0(typescript@5.5.4)
       typescript: 5.5.4
       undici-types: 7.16.0
+    optional: true
 
   '@solana/rpc-types@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7881,6 +8000,7 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/rpc@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7896,6 +8016,7 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/signers@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7910,11 +8031,13 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/subscribable@2.3.0(typescript@5.5.4)':
     dependencies:
       '@solana/errors': 2.3.0(typescript@5.5.4)
       typescript: 5.5.4
+    optional: true
 
   '@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7925,6 +8048,7 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/transaction-confirmation@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
@@ -7942,6 +8066,7 @@ snapshots:
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
       - ws
+    optional: true
 
   '@solana/transaction-messages@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7957,6 +8082,7 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@solana/transactions@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4)':
     dependencies:
@@ -7975,19 +8101,23 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
+    optional: true
 
   '@standard-schema/spec@1.0.0': {}
 
-  '@tanstack/query-core@5.90.2': {}
+  '@tanstack/query-core@5.90.2':
+    optional: true
 
   '@tanstack/react-query@5.90.2(react@17.0.2)':
     dependencies:
       '@tanstack/query-core': 5.90.2
       react: 17.0.2
+    optional: true
 
   '@types/debug@4.1.12':
     dependencies:
       '@types/ms': 2.1.0
+    optional: true
 
   '@types/diff-match-patch@1.0.36': {}
 
@@ -8044,7 +8174,8 @@ snapshots:
       undici-types: 6.21.0
     optional: true
 
-  '@types/trusted-types@2.0.7': {}
+  '@types/trusted-types@2.0.7':
+    optional: true
 
   '@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)':
     dependencies:
@@ -8128,6 +8259,8 @@ snapshots:
       eslint-visitor-keys: 3.4.3
 
   '@ungap/structured-clone@1.2.0': {}
+
+  '@vercel/oidc@3.0.3': {}
 
   '@vitest/expect@3.0.9':
     dependencies:
@@ -8238,6 +8371,7 @@ snapshots:
       - utf-8-validate
       - wagmi
       - zod
+    optional: true
 
   '@wagmi/core@2.21.2(@tanstack/query-core@5.90.2)(react@17.0.2)(typescript@5.5.4)(use-sync-external-store@1.4.0(react@17.0.2))(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))':
     dependencies:
@@ -8253,6 +8387,7 @@ snapshots:
       - immer
       - react
       - use-sync-external-store
+    optional: true
 
   '@walletconnect/core@2.21.0(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -8297,6 +8432,7 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@walletconnect/core@2.21.1(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -8341,10 +8477,12 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@walletconnect/environment@1.0.1':
     dependencies:
       tslib: 1.14.1
+    optional: true
 
   '@walletconnect/ethereum-provider@2.21.1(bufferutil@4.0.9)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -8386,17 +8524,20 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@walletconnect/events@1.0.1':
     dependencies:
       keyvaluestorage-interface: 1.0.0
       tslib: 1.14.1
+    optional: true
 
   '@walletconnect/heartbeat@1.2.2':
     dependencies:
       '@walletconnect/events': 1.0.1
       '@walletconnect/time': 1.0.2
       events: 3.3.0
+    optional: true
 
   '@walletconnect/jsonrpc-http-connection@1.0.8':
     dependencies:
@@ -8406,23 +8547,27 @@ snapshots:
       events: 3.3.0
     transitivePeerDependencies:
       - encoding
+    optional: true
 
   '@walletconnect/jsonrpc-provider@1.0.14':
     dependencies:
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/safe-json': 1.0.2
       events: 3.3.0
+    optional: true
 
   '@walletconnect/jsonrpc-types@1.0.4':
     dependencies:
       events: 3.3.0
       keyvaluestorage-interface: 1.0.0
+    optional: true
 
   '@walletconnect/jsonrpc-utils@1.0.8':
     dependencies:
       '@walletconnect/environment': 1.0.1
       '@walletconnect/jsonrpc-types': 1.0.4
       tslib: 1.14.1
+    optional: true
 
   '@walletconnect/jsonrpc-ws-connection@1.0.16(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
     dependencies:
@@ -8433,6 +8578,7 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+    optional: true
 
   '@walletconnect/keyvaluestorage@1.1.1':
     dependencies:
@@ -8458,15 +8604,18 @@ snapshots:
       - db0
       - ioredis
       - uploadthing
+    optional: true
 
   '@walletconnect/logger@2.1.2':
     dependencies:
       '@walletconnect/safe-json': 1.0.2
       pino: 7.11.0
+    optional: true
 
   '@walletconnect/relay-api@1.0.11':
     dependencies:
       '@walletconnect/jsonrpc-types': 1.0.4
+    optional: true
 
   '@walletconnect/relay-auth@1.1.0':
     dependencies:
@@ -8475,10 +8624,12 @@ snapshots:
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
       uint8arrays: 3.1.0
+    optional: true
 
   '@walletconnect/safe-json@1.0.2':
     dependencies:
       tslib: 1.14.1
+    optional: true
 
   '@walletconnect/sign-client@2.21.0(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -8515,6 +8666,7 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@walletconnect/sign-client@2.21.1(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -8551,10 +8703,12 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@walletconnect/time@1.0.2':
     dependencies:
       tslib: 1.14.1
+    optional: true
 
   '@walletconnect/types@2.21.0':
     dependencies:
@@ -8584,6 +8738,7 @@ snapshots:
       - db0
       - ioredis
       - uploadthing
+    optional: true
 
   '@walletconnect/types@2.21.1':
     dependencies:
@@ -8613,6 +8768,7 @@ snapshots:
       - db0
       - ioredis
       - uploadthing
+    optional: true
 
   '@walletconnect/universal-provider@2.21.0(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -8653,6 +8809,7 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@walletconnect/universal-provider@2.21.1(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -8693,6 +8850,7 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@walletconnect/utils@2.21.0(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -8737,6 +8895,7 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@walletconnect/utils@2.21.1(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
@@ -8781,15 +8940,18 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   '@walletconnect/window-getters@1.0.1':
     dependencies:
       tslib: 1.14.1
+    optional: true
 
   '@walletconnect/window-metadata@1.0.1':
     dependencies:
       '@walletconnect/window-getters': 1.0.1
       tslib: 1.14.1
+    optional: true
 
   '@whatwg-node/fetch@0.9.23':
     dependencies:
@@ -8809,26 +8971,37 @@ snapshots:
     optionalDependencies:
       typescript: 5.5.4
       zod: 3.24.2
+    optional: true
 
   abitype@1.1.0(typescript@5.5.4)(zod@3.22.4):
     optionalDependencies:
       typescript: 5.5.4
       zod: 3.22.4
+    optional: true
 
   abitype@1.1.0(typescript@5.5.4)(zod@3.24.2):
     optionalDependencies:
       typescript: 5.5.4
       zod: 3.24.2
+    optional: true
+
+  abitype@1.1.1(typescript@5.5.4)(zod@3.22.4):
+    optionalDependencies:
+      typescript: 5.5.4
+      zod: 3.22.4
+    optional: true
 
   abitype@1.1.1(typescript@5.5.4)(zod@3.24.2):
     optionalDependencies:
       typescript: 5.5.4
       zod: 3.24.2
+    optional: true
 
   abitype@1.1.1(typescript@5.5.4)(zod@4.1.12):
     optionalDependencies:
       typescript: 5.5.4
       zod: 4.1.12
+    optional: true
 
   abort-controller@3.0.0:
     dependencies:
@@ -8851,53 +9024,28 @@ snapshots:
     dependencies:
       humanize-ms: 1.2.1
 
-  agents@0.2.7(@cloudflare/workers-types@4.20250416.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)):
+  agents@0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))):
     dependencies:
-      '@modelcontextprotocol/sdk': 1.18.2
-      ai: 5.0.57(zod@3.25.76)
+      '@ai-sdk/openai': 2.0.53(zod@3.25.76)
+      '@modelcontextprotocol/sdk': 1.20.2
+      ai: 5.0.78(zod@3.25.76)
       cron-schedule: 5.0.4
+      json-schema: 0.4.0
       json-schema-to-typescript: 15.0.4
       mimetext: 3.0.27
       nanoid: 5.1.6
       partyserver: 0.0.75(@cloudflare/workers-types@4.20250416.0)
       partysocket: 1.1.6
       react: 17.0.2
-      x402: 0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       zod: 3.25.76
       zod-to-ts: 1.2.0(typescript@5.5.4)(zod@3.25.76)
+    optionalDependencies:
+      viem: 2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)
+      x402: 0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
     transitivePeerDependencies:
-      - '@azure/app-configuration'
-      - '@azure/cosmos'
-      - '@azure/data-tables'
-      - '@azure/identity'
-      - '@azure/keyvault-secrets'
-      - '@azure/storage-blob'
-      - '@capacitor/preferences'
       - '@cloudflare/workers-types'
-      - '@deno/kv'
-      - '@netlify/blobs'
-      - '@planetscale/database'
-      - '@react-native-async-storage/async-storage'
-      - '@solana/sysvars'
-      - '@tanstack/query-core'
-      - '@tanstack/react-query'
-      - '@types/react'
-      - '@upstash/redis'
-      - '@vercel/blob'
-      - '@vercel/functions'
-      - '@vercel/kv'
-      - aws4fetch
-      - bufferutil
-      - db0
-      - encoding
-      - fastestsmallesttextencoderdecoder
-      - immer
-      - ioredis
       - supports-color
       - typescript
-      - uploadthing
-      - utf-8-validate
-      - ws
 
   ai-gateway-provider@0.0.6(react@17.0.2)(zod@3.24.2):
     dependencies:
@@ -8932,11 +9080,11 @@ snapshots:
     optionalDependencies:
       react: 17.0.2
 
-  ai@5.0.57(zod@3.25.76):
+  ai@5.0.78(zod@3.25.76):
     dependencies:
-      '@ai-sdk/gateway': 1.0.30(zod@3.25.76)
+      '@ai-sdk/gateway': 2.0.1(zod@3.25.76)
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.10(zod@3.25.76)
+      '@ai-sdk/provider-utils': 3.0.12(zod@3.25.76)
       '@opentelemetry/api': 1.9.0
       zod: 3.25.76
 
@@ -8961,6 +9109,7 @@ snapshots:
     dependencies:
       normalize-path: 3.0.0
       picomatch: 2.3.1
+    optional: true
 
   arg@5.0.2: {}
 
@@ -9029,10 +9178,12 @@ snapshots:
   async-mutex@0.2.6:
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   asynckit@0.4.0: {}
 
-  atomic-sleep@1.0.0: {}
+  atomic-sleep@1.0.0:
+    optional: true
 
   available-typed-arrays@1.0.7:
     dependencies:
@@ -9048,15 +9199,18 @@ snapshots:
 
   balanced-match@1.0.2: {}
 
-  base-x@5.0.1: {}
+  base-x@5.0.1:
+    optional: true
 
-  base64-js@1.5.1: {}
+  base64-js@1.5.1:
+    optional: true
 
   better-path-resolve@1.0.0:
     dependencies:
       is-windows: 1.0.2
 
-  big.js@6.2.2: {}
+  big.js@6.2.2:
+    optional: true
 
   birpc@0.2.14: {}
 
@@ -9064,7 +9218,8 @@ snapshots:
 
   bluebird@3.7.2: {}
 
-  bn.js@5.2.2: {}
+  bn.js@5.2.2:
+    optional: true
 
   body-parser@2.2.0:
     dependencies:
@@ -9080,7 +9235,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  bowser@2.12.1: {}
+  bowser@2.12.1:
+    optional: true
 
   brace-expansion@1.1.11:
     dependencies:
@@ -9098,15 +9254,18 @@ snapshots:
   bs58@6.0.0:
     dependencies:
       base-x: 5.0.1
+    optional: true
 
   buffer@6.0.3:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
+    optional: true
 
   bufferutil@4.0.9:
     dependencies:
       node-gyp-build: 4.8.4
+    optional: true
 
   busboy@1.6.0:
     dependencies:
@@ -9140,6 +9299,7 @@ snapshots:
       es-define-property: 1.0.1
       get-intrinsic: 1.3.0
       set-function-length: 1.2.2
+    optional: true
 
   call-bound@1.0.4:
     dependencies:
@@ -9148,7 +9308,8 @@ snapshots:
 
   callsites@3.1.0: {}
 
-  camelcase@5.3.1: {}
+  camelcase@5.3.1:
+    optional: true
 
   chai@5.2.0:
     dependencies:
@@ -9178,6 +9339,7 @@ snapshots:
   chokidar@4.0.3:
     dependencies:
       readdirp: 4.1.2
+    optional: true
 
   ci-info@3.9.0: {}
 
@@ -9194,6 +9356,7 @@ snapshots:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 6.2.0
+    optional: true
 
   cliui@8.0.1:
     dependencies:
@@ -9213,7 +9376,8 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  clsx@1.2.1: {}
+  clsx@1.2.1:
+    optional: true
 
   color-convert@2.0.1:
     dependencies:
@@ -9239,7 +9403,8 @@ snapshots:
 
   commander@13.1.0: {}
 
-  commander@14.0.1: {}
+  commander@14.0.1:
+    optional: true
 
   concat-map@0.0.1: {}
 
@@ -9259,7 +9424,8 @@ snapshots:
 
   content-type@1.0.5: {}
 
-  cookie-es@1.2.2: {}
+  cookie-es@1.2.2:
+    optional: true
 
   cookie-signature@1.2.2: {}
 
@@ -9283,7 +9449,8 @@ snapshots:
     optionalDependencies:
       typescript: 5.5.4
 
-  crc-32@1.2.2: {}
+  crc-32@1.2.2:
+    optional: true
 
   cron-schedule@5.0.4: {}
 
@@ -9292,12 +9459,14 @@ snapshots:
       node-fetch: 2.7.0
     transitivePeerDependencies:
       - encoding
+    optional: true
 
   cross-fetch@4.1.0:
     dependencies:
       node-fetch: 2.7.0
     transitivePeerDependencies:
       - encoding
+    optional: true
 
   cross-spawn@7.0.3:
     dependencies:
@@ -9314,6 +9483,7 @@ snapshots:
   crossws@0.3.5:
     dependencies:
       uncrypto: 0.1.3
+    optional: true
 
   data-uri-to-buffer@2.0.2: {}
 
@@ -9338,8 +9508,10 @@ snapshots:
   date-fns@2.30.0:
     dependencies:
       '@babel/runtime': 7.26.10
+    optional: true
 
-  dayjs@1.11.13: {}
+  dayjs@1.11.13:
+    optional: true
 
   debug@3.2.7:
     dependencies:
@@ -9348,6 +9520,7 @@ snapshots:
   debug@4.3.4:
     dependencies:
       ms: 2.1.2
+    optional: true
 
   debug@4.3.5:
     dependencies:
@@ -9357,9 +9530,11 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
-  decamelize@1.2.0: {}
+  decamelize@1.2.0:
+    optional: true
 
-  decode-uri-component@0.2.2: {}
+  decode-uri-component@0.2.2:
+    optional: true
 
   deep-eql@5.0.2: {}
 
@@ -9388,10 +9563,13 @@ snapshots:
   derive-valtio@0.1.0(valtio@1.13.2(react@17.0.2)):
     dependencies:
       valtio: 1.13.2(react@17.0.2)
+    optional: true
 
-  destr@2.0.5: {}
+  destr@2.0.5:
+    optional: true
 
-  detect-browser@5.3.0: {}
+  detect-browser@5.3.0:
+    optional: true
 
   detect-indent@6.1.0: {}
 
@@ -9405,7 +9583,8 @@ snapshots:
 
   diff-match-patch@1.0.5: {}
 
-  dijkstrajs@1.0.3: {}
+  dijkstrajs@1.0.3:
+    optional: true
 
   dir-glob@3.0.1:
     dependencies:
@@ -9435,6 +9614,7 @@ snapshots:
       inherits: 2.0.4
       readable-stream: 3.6.2
       stream-shift: 1.0.3
+    optional: true
 
   eciesjs@0.4.15:
     dependencies:
@@ -9442,6 +9622,7 @@ snapshots:
       '@noble/ciphers': 1.3.0
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
+    optional: true
 
   ee-first@1.1.1: {}
 
@@ -9456,13 +9637,15 @@ snapshots:
 
   empathic@1.1.0: {}
 
-  encode-utf8@1.0.3: {}
+  encode-utf8@1.0.3:
+    optional: true
 
   encodeurl@2.0.0: {}
 
   end-of-stream@1.4.5:
     dependencies:
       once: 1.4.0
+    optional: true
 
   engine.io-client@6.6.3(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     dependencies:
@@ -9475,8 +9658,10 @@ snapshots:
       - bufferutil
       - supports-color
       - utf-8-validate
+    optional: true
 
-  engine.io-parser@5.2.3: {}
+  engine.io-parser@5.2.3:
+    optional: true
 
   enhanced-resolve@5.18.1:
     dependencies:
@@ -9584,7 +9769,8 @@ snapshots:
       is-date-object: 1.0.5
       is-symbol: 1.0.4
 
-  es-toolkit@1.33.0: {}
+  es-toolkit@1.33.0:
+    optional: true
 
   esbuild@0.25.1:
     optionalDependencies:
@@ -9797,6 +9983,7 @@ snapshots:
       pify: 3.0.0
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   eth-json-rpc-filters@6.0.1:
     dependencies:
@@ -9805,15 +9992,18 @@ snapshots:
       eth-query: 2.1.2
       json-rpc-engine: 6.1.0
       pify: 5.0.0
+    optional: true
 
   eth-query@2.1.2:
     dependencies:
       json-rpc-random-id: 1.0.1
       xtend: 4.0.2
+    optional: true
 
   eth-rpc-errors@4.0.3:
     dependencies:
       fast-safe-stringify: 2.1.1
+    optional: true
 
   ethereum-cryptography@2.2.1:
     dependencies:
@@ -9821,6 +10011,7 @@ snapshots:
       '@noble/hashes': 1.4.0
       '@scure/bip32': 1.4.0
       '@scure/bip39': 1.3.0
+    optional: true
 
   event-stream@3.3.4:
     dependencies:
@@ -9836,11 +10027,14 @@ snapshots:
 
   event-target-shim@5.0.1: {}
 
-  eventemitter2@6.4.9: {}
+  eventemitter2@6.4.9:
+    optional: true
 
-  eventemitter3@5.0.1: {}
+  eventemitter3@5.0.1:
+    optional: true
 
-  events@3.3.0: {}
+  events@3.3.0:
+    optional: true
 
   eventsource-parser@3.0.6: {}
 
@@ -9908,6 +10102,7 @@ snapshots:
     dependencies:
       readable-stream: 3.6.2
       webextension-polyfill: 0.10.0
+    optional: true
 
   external-editor@3.1.0:
     dependencies:
@@ -9939,11 +10134,14 @@ snapshots:
     dependencies:
       fast-decode-uri-component: 1.0.1
 
-  fast-redact@3.5.0: {}
+  fast-redact@3.5.0:
+    optional: true
 
-  fast-safe-stringify@2.1.1: {}
+  fast-safe-stringify@2.1.1:
+    optional: true
 
-  fastestsmallesttextencoderdecoder@1.0.22: {}
+  fastestsmallesttextencoderdecoder@1.0.22:
+    optional: true
 
   fastq@1.17.1:
     dependencies:
@@ -9967,7 +10165,8 @@ snapshots:
     dependencies:
       to-regex-range: 5.0.1
 
-  filter-obj@1.1.0: {}
+  filter-obj@1.1.0:
+    optional: true
 
   finalhandler@2.1.0:
     dependencies:
@@ -10009,6 +10208,7 @@ snapshots:
   for-each@0.3.5:
     dependencies:
       is-callable: 1.2.7
+    optional: true
 
   form-data-encoder@1.7.2: {}
 
@@ -10058,7 +10258,8 @@ snapshots:
 
   functions-have-names@1.2.3: {}
 
-  generator-function@2.0.1: {}
+  generator-function@2.0.1:
+    optional: true
 
   get-caller-file@2.0.5: {}
 
@@ -10191,6 +10392,7 @@ snapshots:
       radix3: 1.1.2
       ufo: 1.6.1
       uncrypto: 0.1.3
+    optional: true
 
   has-bigints@1.0.2: {}
 
@@ -10216,7 +10418,8 @@ snapshots:
 
   hono@4.7.6: {}
 
-  hono@4.9.9: {}
+  hono@4.9.9:
+    optional: true
 
   hosted-git-info@8.0.2:
     dependencies:
@@ -10246,11 +10449,14 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
-  idb-keyval@6.2.1: {}
+  idb-keyval@6.2.1:
+    optional: true
 
-  idb-keyval@6.2.2: {}
+  idb-keyval@6.2.2:
+    optional: true
 
-  ieee754@1.2.1: {}
+  ieee754@1.2.1:
+    optional: true
 
   ignore@5.3.1: {}
 
@@ -10287,12 +10493,14 @@ snapshots:
 
   ipaddr.js@1.9.1: {}
 
-  iron-webcrypto@1.2.1: {}
+  iron-webcrypto@1.2.1:
+    optional: true
 
   is-arguments@1.2.0:
     dependencies:
       call-bound: 1.0.4
       has-tostringtag: 1.0.2
+    optional: true
 
   is-array-buffer@3.0.4:
     dependencies:
@@ -10342,6 +10550,7 @@ snapshots:
       get-proto: 1.0.1
       has-tostringtag: 1.0.2
       safe-regex-test: 1.1.0
+    optional: true
 
   is-glob@4.0.3:
     dependencies:
@@ -10372,6 +10581,7 @@ snapshots:
       gopd: 1.2.0
       has-tostringtag: 1.0.2
       hasown: 2.0.2
+    optional: true
 
   is-shared-array-buffer@1.0.3:
     dependencies:
@@ -10398,6 +10608,7 @@ snapshots:
   is-typed-array@1.1.15:
     dependencies:
       which-typed-array: 1.1.19
+    optional: true
 
   is-unicode-supported@1.3.0: {}
 
@@ -10418,10 +10629,12 @@ snapshots:
   isows@1.0.6(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)):
     dependencies:
       ws: 8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    optional: true
 
   isows@1.0.7(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)):
     dependencies:
       ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    optional: true
 
   joi@17.13.3:
     dependencies:
@@ -10454,8 +10667,10 @@ snapshots:
     dependencies:
       '@metamask/safe-event-emitter': 2.0.0
       eth-rpc-errors: 4.0.3
+    optional: true
 
-  json-rpc-random-id@1.0.1: {}
+  json-rpc-random-id@1.0.1:
+    optional: true
 
   json-schema-to-typescript@15.0.4:
     dependencies:
@@ -10503,12 +10718,14 @@ snapshots:
       node-addon-api: 2.0.2
       node-gyp-build: 4.8.4
       readable-stream: 3.6.2
+    optional: true
 
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
 
-  keyvaluestorage-interface@1.0.0: {}
+  keyvaluestorage-interface@1.0.0:
+    optional: true
 
   kleur@3.0.3: {}
 
@@ -10576,16 +10793,19 @@ snapshots:
       '@lit-labs/ssr-dom-shim': 1.4.0
       '@lit/reactive-element': 2.1.1
       lit-html: 3.3.1
+    optional: true
 
   lit-html@3.3.1:
     dependencies:
       '@types/trusted-types': 2.0.7
+    optional: true
 
   lit@3.3.0:
     dependencies:
       '@lit/reactive-element': 2.1.1
       lit-element: 4.2.1
       lit-html: 3.3.1
+    optional: true
 
   locate-path@5.0.0:
     dependencies:
@@ -10644,7 +10864,8 @@ snapshots:
 
   merge2@1.4.1: {}
 
-  micro-ftch@0.3.1: {}
+  micro-ftch@0.3.1:
+    optional: true
 
   micromatch@4.0.8:
     dependencies:
@@ -10742,6 +10963,7 @@ snapshots:
   mipd@0.0.7(typescript@5.5.4):
     optionalDependencies:
       typescript: 5.5.4
+    optional: true
 
   mock-fs@5.5.0: {}
 
@@ -10753,7 +10975,8 @@ snapshots:
 
   ms@2.1.3: {}
 
-  multiformats@9.9.0: {}
+  multiformats@9.9.0:
+    optional: true
 
   mustache@4.2.0: {}
 
@@ -10765,23 +10988,28 @@ snapshots:
 
   negotiator@1.0.0: {}
 
-  node-addon-api@2.0.2: {}
+  node-addon-api@2.0.2:
+    optional: true
 
   node-domexception@1.0.0: {}
 
   node-fetch-native@1.6.6: {}
 
-  node-fetch-native@1.6.7: {}
+  node-fetch-native@1.6.7:
+    optional: true
 
   node-fetch@2.7.0:
     dependencies:
       whatwg-url: 5.0.0
 
-  node-gyp-build@4.8.4: {}
+  node-gyp-build@4.8.4:
+    optional: true
 
-  node-mock-http@1.0.3: {}
+  node-mock-http@1.0.3:
+    optional: true
 
-  normalize-path@3.0.0: {}
+  normalize-path@3.0.0:
+    optional: true
 
   npm-package-arg@12.0.2:
     dependencies:
@@ -10799,6 +11027,7 @@ snapshots:
       end-of-stream: 1.4.5
       once: 1.4.0
       readable-stream: 2.3.8
+    optional: true
 
   object-assign@4.1.1: {}
 
@@ -10839,10 +11068,12 @@ snapshots:
       destr: 2.0.5
       node-fetch-native: 1.6.7
       ufo: 1.6.1
+    optional: true
 
   ohash@2.0.11: {}
 
-  on-exit-leak-free@0.2.0: {}
+  on-exit-leak-free@0.2.0:
+    optional: true
 
   on-finished@2.4.1:
     dependencies:
@@ -10863,8 +11094,10 @@ snapshots:
   openapi-fetch@0.13.8:
     dependencies:
       openapi-typescript-helpers: 0.0.15
+    optional: true
 
-  openapi-typescript-helpers@0.0.15: {}
+  openapi-typescript-helpers@0.0.15:
+    optional: true
 
   optionator@0.9.3:
     dependencies:
@@ -10898,12 +11131,13 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.0.8(typescript@5.5.4)(zod@3.24.2)
+      abitype: 1.1.1(typescript@5.5.4)(zod@3.24.2)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.5.4
     transitivePeerDependencies:
       - zod
+    optional: true
 
   ox@0.6.9(typescript@5.5.4)(zod@3.24.2):
     dependencies:
@@ -10918,6 +11152,7 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - zod
+    optional: true
 
   ox@0.9.6(typescript@5.5.4)(zod@3.22.4):
     dependencies:
@@ -10927,12 +11162,13 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.1.0(typescript@5.5.4)(zod@3.22.4)
+      abitype: 1.1.1(typescript@5.5.4)(zod@3.22.4)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.5.4
     transitivePeerDependencies:
       - zod
+    optional: true
 
   ox@0.9.6(typescript@5.5.4)(zod@3.24.2):
     dependencies:
@@ -10942,12 +11178,13 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.1.0(typescript@5.5.4)(zod@3.24.2)
+      abitype: 1.1.1(typescript@5.5.4)(zod@3.24.2)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.5.4
     transitivePeerDependencies:
       - zod
+    optional: true
 
   ox@0.9.8(typescript@5.5.4)(zod@4.1.12):
     dependencies:
@@ -10963,6 +11200,7 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - zod
+    optional: true
 
   p-filter@2.1.0:
     dependencies:
@@ -11046,18 +11284,22 @@ snapshots:
 
   picomatch@4.0.2: {}
 
-  pify@3.0.0: {}
+  pify@3.0.0:
+    optional: true
 
   pify@4.0.1: {}
 
-  pify@5.0.0: {}
+  pify@5.0.0:
+    optional: true
 
   pino-abstract-transport@0.5.0:
     dependencies:
       duplexify: 4.1.3
       split2: 4.2.0
+    optional: true
 
-  pino-std-serializers@4.0.0: {}
+  pino-std-serializers@4.0.0:
+    optional: true
 
   pino@7.11.0:
     dependencies:
@@ -11072,12 +11314,15 @@ snapshots:
       safe-stable-stringify: 2.5.0
       sonic-boom: 2.8.0
       thread-stream: 0.15.2
+    optional: true
 
   pkce-challenge@5.0.0: {}
 
-  pngjs@5.0.0: {}
+  pngjs@5.0.0:
+    optional: true
 
-  pony-cause@2.1.11: {}
+  pony-cause@2.1.11:
+    optional: true
 
   porto@0.2.19(@tanstack/react-query@5.90.2(react@17.0.2))(@wagmi/core@2.21.2(@tanstack/query-core@5.90.2)(react@17.0.2)(typescript@5.5.4)(use-sync-external-store@1.4.0(react@17.0.2))(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2)))(react@17.0.2)(typescript@5.5.4)(use-sync-external-store@1.4.0(react@17.0.2))(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(wagmi@2.17.5(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)):
     dependencies:
@@ -11098,6 +11343,7 @@ snapshots:
       - '@types/react'
       - immer
       - use-sync-external-store
+    optional: true
 
   possible-typed-array-names@1.0.0: {}
 
@@ -11107,9 +11353,11 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  preact@10.24.2: {}
+  preact@10.24.2:
+    optional: true
 
-  preact@10.27.2: {}
+  preact@10.27.2:
+    optional: true
 
   prelude-ls@1.2.1: {}
 
@@ -11123,7 +11371,8 @@ snapshots:
 
   process-nextick-args@2.0.1: {}
 
-  process-warning@1.0.0: {}
+  process-warning@1.0.0:
+    optional: true
 
   prompts@2.4.2:
     dependencies:
@@ -11135,7 +11384,8 @@ snapshots:
       forwarded: 0.2.0
       ipaddr.js: 1.9.1
 
-  proxy-compare@2.6.0: {}
+  proxy-compare@2.6.0:
+    optional: true
 
   proxy-from-env@1.1.0: {}
 
@@ -11147,6 +11397,7 @@ snapshots:
     dependencies:
       end-of-stream: 1.4.5
       once: 1.4.0
+    optional: true
 
   punycode@2.3.1: {}
 
@@ -11158,6 +11409,7 @@ snapshots:
       encode-utf8: 1.0.3
       pngjs: 5.0.0
       yargs: 15.4.1
+    optional: true
 
   qs@6.14.0:
     dependencies:
@@ -11171,12 +11423,15 @@ snapshots:
       filter-obj: 1.1.0
       split-on-first: 1.1.0
       strict-uri-encode: 2.0.0
+    optional: true
 
   queue-microtask@1.2.3: {}
 
-  quick-format-unescaped@4.0.4: {}
+  quick-format-unescaped@4.0.4:
+    optional: true
 
-  radix3@1.1.2: {}
+  radix3@1.1.2:
+    optional: true
 
   range-parser@1.2.1: {}
 
@@ -11219,10 +11474,13 @@ snapshots:
       inherits: 2.0.4
       string_decoder: 1.1.1
       util-deprecate: 1.0.2
+    optional: true
 
-  readdirp@4.1.2: {}
+  readdirp@4.1.2:
+    optional: true
 
-  real-require@0.1.0: {}
+  real-require@0.1.0:
+    optional: true
 
   regenerator-runtime@0.14.1: {}
 
@@ -11235,7 +11493,8 @@ snapshots:
 
   require-directory@2.1.1: {}
 
-  require-main-filename@2.0.0: {}
+  require-main-filename@2.0.0:
+    optional: true
 
   resolve-from@4.0.0: {}
 
@@ -11325,8 +11584,10 @@ snapshots:
       call-bound: 1.0.4
       es-errors: 1.3.0
       is-regex: 1.2.1
+    optional: true
 
-  safe-stable-stringify@2.5.0: {}
+  safe-stable-stringify@2.5.0:
+    optional: true
 
   safer-buffer@2.1.2: {}
 
@@ -11361,7 +11622,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  set-blocking@2.0.0: {}
+  set-blocking@2.0.0:
+    optional: true
 
   set-function-length@1.2.2:
     dependencies:
@@ -11388,6 +11650,7 @@ snapshots:
       inherits: 2.0.4
       safe-buffer: 5.2.1
       to-buffer: 1.2.2
+    optional: true
 
   sharp@0.33.5:
     dependencies:
@@ -11494,6 +11757,7 @@ snapshots:
       - bufferutil
       - supports-color
       - utf-8-validate
+    optional: true
 
   socket.io-parser@4.2.4:
     dependencies:
@@ -11501,10 +11765,12 @@ snapshots:
       debug: 4.3.5
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   sonic-boom@2.8.0:
     dependencies:
       atomic-sleep: 1.0.0
+    optional: true
 
   source-map-js@1.2.1: {}
 
@@ -11515,9 +11781,11 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  split-on-first@1.1.0: {}
+  split-on-first@1.1.0:
+    optional: true
 
-  split2@4.2.0: {}
+  split2@4.2.0:
+    optional: true
 
   split@0.3.3:
     dependencies:
@@ -11559,11 +11827,13 @@ snapshots:
     dependencies:
       duplexer: 0.1.2
 
-  stream-shift@1.0.3: {}
+  stream-shift@1.0.3:
+    optional: true
 
   streamsearch@1.1.0: {}
 
-  strict-uri-encode@2.0.0: {}
+  strict-uri-encode@2.0.0:
+    optional: true
 
   string-width@4.2.3:
     dependencies:
@@ -11616,7 +11886,8 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
-  superstruct@1.0.4: {}
+  superstruct@1.0.4:
+    optional: true
 
   supports-color@7.2.0:
     dependencies:
@@ -11666,6 +11937,7 @@ snapshots:
   thread-stream@0.15.2:
     dependencies:
       real-require: 0.1.0
+    optional: true
 
   throttleit@2.1.0: {}
 
@@ -11702,6 +11974,7 @@ snapshots:
       isarray: 2.0.5
       safe-buffer: 5.2.1
       typed-array-buffer: 1.0.3
+    optional: true
 
   to-regex-range@5.0.1:
     dependencies:
@@ -11734,7 +12007,8 @@ snapshots:
       minimist: 1.2.8
       strip-bom: 3.0.0
 
-  tslib@1.14.1: {}
+  tslib@1.14.1:
+    optional: true
 
   tslib@2.8.1: {}
 
@@ -11795,6 +12069,7 @@ snapshots:
       call-bound: 1.0.4
       es-errors: 1.3.0
       is-typed-array: 1.1.15
+    optional: true
 
   typed-array-byte-length@1.0.1:
     dependencies:
@@ -11826,11 +12101,13 @@ snapshots:
 
   ufo@1.5.4: {}
 
-  ufo@1.6.1: {}
+  ufo@1.6.1:
+    optional: true
 
   uint8arrays@3.1.0:
     dependencies:
       multiformats: 9.9.0
+    optional: true
 
   unbox-primitive@1.0.2:
     dependencies:
@@ -11839,13 +12116,15 @@ snapshots:
       has-symbols: 1.0.3
       which-boxed-primitive: 1.0.2
 
-  uncrypto@0.1.3: {}
+  uncrypto@0.1.3:
+    optional: true
 
   undici-types@5.26.5: {}
 
   undici-types@6.21.0: {}
 
-  undici-types@7.16.0: {}
+  undici-types@7.16.0:
+    optional: true
 
   undici@5.28.5:
     dependencies:
@@ -11877,6 +12156,7 @@ snapshots:
       ufo: 1.6.1
     optionalDependencies:
       idb-keyval: 6.2.2
+    optional: true
 
   uri-js@4.4.1:
     dependencies:
@@ -11887,10 +12167,12 @@ snapshots:
   use-sync-external-store@1.2.0(react@17.0.2):
     dependencies:
       react: 17.0.2
+    optional: true
 
   use-sync-external-store@1.4.0(react@17.0.2):
     dependencies:
       react: 17.0.2
+    optional: true
 
   use-sync-external-store@1.5.0(react@17.0.2):
     dependencies:
@@ -11899,6 +12181,7 @@ snapshots:
   utf-8-validate@5.0.10:
     dependencies:
       node-gyp-build: 4.8.4
+    optional: true
 
   util-deprecate@1.0.2: {}
 
@@ -11909,10 +12192,13 @@ snapshots:
       is-generator-function: 1.1.2
       is-typed-array: 1.1.15
       which-typed-array: 1.1.19
+    optional: true
 
-  uuid@8.3.2: {}
+  uuid@8.3.2:
+    optional: true
 
-  uuid@9.0.1: {}
+  uuid@9.0.1:
+    optional: true
 
   validate-npm-package-name@6.0.0: {}
 
@@ -11923,6 +12209,7 @@ snapshots:
       use-sync-external-store: 1.2.0(react@17.0.2)
     optionalDependencies:
       react: 17.0.2
+    optional: true
 
   vary@1.1.2: {}
 
@@ -11942,6 +12229,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
       - zod
+    optional: true
 
   viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.22.4):
     dependencies:
@@ -11959,6 +12247,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
       - zod
+    optional: true
 
   viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2):
     dependencies:
@@ -11976,6 +12265,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
       - zod
+    optional: true
 
   vite-node@3.0.9(@types/node@22.14.1)(lightningcss@1.29.2)(tsx@4.19.3):
     dependencies:
@@ -12169,6 +12459,7 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
+    optional: true
 
   wait-on@8.0.3(debug@4.4.0):
     dependencies:
@@ -12182,7 +12473,8 @@ snapshots:
 
   web-streams-polyfill@4.0.0-beta.3: {}
 
-  webextension-polyfill@0.10.0: {}
+  webextension-polyfill@0.10.0:
+    optional: true
 
   webidl-conversions@3.0.1: {}
 
@@ -12199,7 +12491,8 @@ snapshots:
       is-string: 1.0.7
       is-symbol: 1.0.4
 
-  which-module@2.0.1: {}
+  which-module@2.0.1:
+    optional: true
 
   which-typed-array@1.1.15:
     dependencies:
@@ -12218,6 +12511,7 @@ snapshots:
       get-proto: 1.0.1
       gopd: 1.2.0
       has-tostringtag: 1.0.2
+    optional: true
 
   which@2.0.2:
     dependencies:
@@ -12312,6 +12606,7 @@ snapshots:
       ansi-styles: 4.3.0
       string-width: 4.2.3
       strip-ansi: 6.0.1
+    optional: true
 
   wrap-ansi@7.0.0:
     dependencies:
@@ -12325,11 +12620,13 @@ snapshots:
     optionalDependencies:
       bufferutil: 4.0.9
       utf-8-validate: 5.0.10
+    optional: true
 
   ws@8.17.1(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     optionalDependencies:
       bufferutil: 4.0.9
       utf-8-validate: 5.0.10
+    optional: true
 
   ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     optionalDependencies:
@@ -12340,6 +12637,7 @@ snapshots:
     optionalDependencies:
       bufferutil: 4.0.9
       utf-8-validate: 5.0.10
+    optional: true
 
   x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)):
     dependencies:
@@ -12385,12 +12683,16 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - ws
+    optional: true
 
-  xmlhttprequest-ssl@2.1.2: {}
+  xmlhttprequest-ssl@2.1.2:
+    optional: true
 
-  xtend@4.0.2: {}
+  xtend@4.0.2:
+    optional: true
 
-  y18n@4.0.3: {}
+  y18n@4.0.3:
+    optional: true
 
   y18n@5.0.8: {}
 
@@ -12398,6 +12700,7 @@ snapshots:
     dependencies:
       camelcase: 5.3.1
       decamelize: 1.2.0
+    optional: true
 
   yargs-parser@21.1.1: {}
 
@@ -12414,6 +12717,7 @@ snapshots:
       which-module: 2.0.1
       y18n: 4.0.3
       yargs-parser: 18.1.3
+    optional: true
 
   yargs@17.7.2:
     dependencies:
@@ -12444,7 +12748,8 @@ snapshots:
 
   zod@3.22.3: {}
 
-  zod@3.22.4: {}
+  zod@3.22.4:
+    optional: true
 
   zod@3.24.2: {}
 
@@ -12460,15 +12765,18 @@ snapshots:
     optionalDependencies:
       react: 17.0.2
       use-sync-external-store: 1.4.0(react@17.0.2)
+    optional: true
 
   zustand@5.0.3(react@17.0.2)(use-sync-external-store@1.4.0(react@17.0.2)):
     optionalDependencies:
       react: 17.0.2
       use-sync-external-store: 1.4.0(react@17.0.2)
+    optional: true
 
   zustand@5.0.8(react@17.0.2)(use-sync-external-store@1.4.0(react@17.0.2)):
     optionalDependencies:
       react: 17.0.2
       use-sync-external-store: 1.4.0(react@17.0.2)
+    optional: true
 
   zx@8.5.4: {}

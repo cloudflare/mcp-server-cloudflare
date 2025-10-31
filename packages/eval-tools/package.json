@@ -15,7 +15,7 @@
 		"@ai-sdk/google": "1.2.17",
 		"@ai-sdk/openai": "1.3.20",
 		"@cloudflare/vitest-pool-workers": "0.8.14",
-		"agents": "0.2.7",
+		"agents": "0.2.19",
 		"ai": "4.3.10",
 		"ai-gateway-provider": "0.0.6",
 		"workers-ai-provider": "0.3.0",
