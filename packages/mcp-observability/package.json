@@ -1,6 +1,6 @@
 {
 	"name": "@repo/mcp-observability",
-	"version": "0.32.3",
+	"version": "0.32.4",
 	"private": true,
 	"sideEffects": false,
 	"type": "module",

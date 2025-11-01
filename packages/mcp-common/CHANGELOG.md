@@ -1,5 +1,17 @@
 # @repo/mcp-common
 
+## 0.20.0
+
+### Minor Changes
+
+- f9f0bb6: Be explicit in oauth error messages
+
+### Patch Changes
+
+- 847fc1f: Update cloudflare-oauth-handler
+- Updated dependencies [847fc1f]
+  - @repo/mcp-observability@0.32.4
+
 ## 0.19.3
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # containers-mcp
 
+## 0.2.7
+
+### Patch Changes
+
+- 847fc1f: Update cloudflare-oauth-handler
+- Updated dependencies [f9f0bb6]
+- Updated dependencies [847fc1f]
+  - @repo/mcp-common@0.20.0
+  - @repo/mcp-observability@0.32.4
+  - @repo/eval-tools@0.32.4
+
 ## 0.2.6
 
 ### Patch Changes

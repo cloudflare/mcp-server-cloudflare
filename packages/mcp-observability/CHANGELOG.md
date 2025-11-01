@@ -1,5 +1,11 @@
 # @repo/mcp-observability
 
+## 0.32.4
+
+### Patch Changes
+
+- 847fc1f: Update cloudflare-oauth-handler
+
 ## 0.32.3
 
 ### Patch Changes

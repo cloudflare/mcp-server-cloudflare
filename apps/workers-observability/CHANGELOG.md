@@ -1,5 +1,15 @@
 # workers-observability
 
+## 0.4.2
+
+### Patch Changes
+
+- 847fc1f: Update cloudflare-oauth-handler
+- Updated dependencies [f9f0bb6]
+- Updated dependencies [847fc1f]
+  - @repo/mcp-common@0.20.0
+  - @repo/mcp-observability@0.32.4
+
 ## 0.4.1
 
 ### Patch Changes
