@@ -5,9 +5,9 @@ import { getEnv } from '@repo/mcp-common/src/env'
 import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-vectorize.prompts'
 import { initSentry } from '@repo/mcp-common/src/sentry'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
-import { registerDocsTools } from '@repo/mcp-common/src/tools/docs-vectorize.tools'
+import { registerDocsTools } from '@repo/mcp-common/src/tools/docs-ai-search.tools'
 
-import type { Env } from './docs-vectorize.context'
+import type { Env } from './docs-ai-search.context'
 
 const env = getEnv<Env>()
 

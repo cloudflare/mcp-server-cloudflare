@@ -1,4 +1,13 @@
-# docs-vectorize
+# docs-ai-search
+
+## 0.5.0
+
+### Minor Changes
+
+- Changed backend from Vectorize to AI Search for documentation search
+  - Now uses Cloudflare AI Search (AutoRAG) for contextual search of the Cloudflare Developer Documentation
+  - Maintains full backward compatibility - same XML response format and tool interface
+  - Package renamed from `docs-vectorize` to `docs-ai-search` to reflect the new backend
 
 ## 0.4.3
 

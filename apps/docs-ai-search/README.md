@@ -1,8 +1,8 @@
-# Cloudflare Documentation MCP Server (via Vectorize) 🔭
+# Cloudflare Documentation MCP Server (via AI Search) 🔭
 
-This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP connections. It connects to a Vectorize DB (in this case, indexed w/ the Cloudflare docs)
+This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP connections. It uses Cloudflare AI Search (AutoRAG) to provide contextual search of the Cloudflare Developer Documentation.
 
-The Cloudflare account this worker is deployed on already has this Vectorize DB setup and indexed.
+The Cloudflare account this worker is deployed on has an AI Search instance configured with the complete Cloudflare Developer Documentation.
 
 ## 🔨 Available Tools
 
@@ -16,7 +16,7 @@ Currently available tools:
 
 - `Do Cloudflare Workers costs depend on response sizes? I want to serve some images (map tiles) from an R2 bucket and I'm concerned about costs.`
 - `How many indexes are supported in Workers Analytics Engine? Give an example using the Workers binding api.`
-- `Can you give me some information on how to use the Workers AutoRAG binding`
+- `Can you give me some information on how to use the Workers AI Search binding`
 
 ## Access the remote MCP server from any MCP Client
 
