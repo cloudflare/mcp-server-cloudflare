@@ -3,7 +3,12 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 
 import { AuthUser } from '../../mcp-observability/src'
-import { getAuthorizationURL, getAuthToken, refreshAuthToken } from './cloudflare-auth'
+import {
+	generatePKCECodes,
+	getAuthorizationURL,
+	getAuthToken,
+	refreshAuthToken,
+} from './cloudflare-auth'
 import { McpError } from './mcp-error'
 import { useSentry } from './sentry'
 import { V4Schema } from './v4-api'
@@ -44,18 +49,6 @@ const AuthQuery = z.object({
 	code: z.string().describe('OAuth code from CF dash'),
 	state: z.string().describe('Value of the OAuth state'),
 	scope: z.string().describe('OAuth scopes granted'),
-})
-
-// AuthRequest but with extra params that we use in our authentication logic
-const AuthRequestSchemaWithExtraParams = z.object({
-	responseType: z.string(),
-	clientId: z.string(),
-	redirectUri: z.string(),
-	scope: z.array(z.string()),
-	state: z.string(),
-	codeChallenge: z.string().optional(),
-	codeChallengeMethod: z.string().optional(),
-	codeVerifier: z.string(),
 })
 
 type UserSchema = z.infer<typeof UserSchema>
@@ -202,35 +195,36 @@ export async function handleTokenExchangeCallback(
  *
  * Note: We pass the stateToken as a simple string in the URL.
  * The existing getAuthorizationURL function will wrap it with the oauthReqInfo
- * and add the PKCE codeVerifier before base64-encoding.
+ * before base64-encoding.
  * On callback, we extract the stateToken, look up the original oauthReqInfo in KV.
  */
 async function redirectToCloudflare(
 	c: Context<AuthContext>,
 	oauthReqInfo: AuthRequest,
 	stateToken: string,
+	codeChallenge: string,
 	scopes: Record<string, string>,
 	additionalHeaders: Record<string, string> = {}
 ): Promise<Response> {
 	// Create a modified oauthReqInfo that includes our stateToken
-	// getAuthorizationURL will add the codeVerifier and base64 encode everything
 	const stateWithToken: AuthRequest = {
 		...oauthReqInfo,
-		state: stateToken, // Embed our KV state token
+		state: stateToken, // embed our KV state token
 	}
 
-	const authUrl = await getAuthorizationURL({
+	const { authUrl } = await getAuthorizationURL({
 		client_id: c.env.CLOUDFLARE_CLIENT_ID,
 		redirect_uri: new URL('/oauth/callback', c.req.url).href,
 		state: stateWithToken,
 		scopes,
+		codeChallenge,
 	})
 
 	return new Response(null, {
 		status: 302,
 		headers: {
 			...additionalHeaders,
-			Location: authUrl.authUrl,
+			Location: authUrl,
 		},
 	})
 }
@@ -273,10 +267,11 @@ export function createAuthHandlers({
 				)
 			) {
 				// Client already approved - create state and redirect immediately
-				const stateToken = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV)
+				const { codeChallenge, codeVerifier } = await generatePKCECodes()
+				const stateToken = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV, codeVerifier)
 				const { setCookie: sessionCookie } = await bindStateToSession(stateToken)
 
-				return redirectToCloudflare(c, oauthReqInfo, stateToken, scopes, {
+				return redirectToCloudflare(c, oauthReqInfo, stateToken, codeChallenge, scopes, {
 					'Set-Cookie': sessionCookie,
 				})
 			}
@@ -349,11 +344,18 @@ export function createAuthHandlers({
 			const oauthReqInfo = state.oauthReqInfo as AuthRequest
 
 			// Create OAuth state in KV and bind to session
-			const stateToken = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV)
+			const { codeChallenge, codeVerifier } = await generatePKCECodes()
+			const stateToken = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV, codeVerifier)
 			const { setCookie: sessionCookie } = await bindStateToSession(stateToken)
 
 			// Build redirect response
-			const redirectResponse = await redirectToCloudflare(c, oauthReqInfo, stateToken, scopes)
+			const redirectResponse = await redirectToCloudflare(
+				c,
+				oauthReqInfo,
+				stateToken,
+				codeChallenge,
+				scopes
+			)
 
 			// Add both cookies: approved client cookie (if present) and session binding cookie
 			// Note: We must use append() for multiple Set-Cookie headers, not combine with commas
@@ -391,27 +393,21 @@ export function createAuthHandlers({
 	 */
 	app.get(`/oauth/callback`, zValidator('query', AuthQuery), async (c) => {
 		try {
-			const { state: stateParam, code } = c.req.valid('query')
+			const { code } = c.req.valid('query')
 
 			// Validate state using dual validation (KV + session cookie)
-			const { oauthReqInfo, clearCookie } = await validateOAuthState(c.req.raw, c.env.OAUTH_KV)
+			const { oauthReqInfo, codeVerifier, clearCookie } = await validateOAuthState(
+				c.req.raw,
+				c.env.OAUTH_KV
+			)
 
 			if (!oauthReqInfo.clientId) {
 				return new OAuthError('invalid_request', 'Invalid OAuth request info', 400).toResponse()
 			}
 
-			// Parse the state parameter to extract the encoded data
-			const decodedState = AuthRequestSchemaWithExtraParams.parse(JSON.parse(atob(stateParam)))
-
-			// Extract code verifier for PKCE validation
-			const codeVerifier = decodedState.codeVerifier
-			if (!codeVerifier) {
-				return new OAuthError('invalid_request', 'Missing code verifier', 400).toResponse()
-			}
-
 			// Exchange code for tokens and get user details
 			const [{ accessToken, refreshToken, user, accounts }] = await Promise.all([
-				getTokenAndUserDetails(c, code, codeVerifier),
+				getTokenAndUserDetails(c, code, codeVerifier), // use codeVerifier from KV
 				c.env.OAUTH_PROVIDER.createClient({
 					clientId: oauthReqInfo.clientId,
 					tokenEndpointAuthMethod: 'none',

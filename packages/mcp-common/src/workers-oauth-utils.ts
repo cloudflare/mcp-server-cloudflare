@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 import type { AuthRequest, ClientInfo } from '@cloudflare/workers-oauth-provider'
 
 const COOKIE_NAME = '__Host-MCP_APPROVED_CLIENTS'
@@ -616,6 +618,11 @@ export interface ValidateStateResult {
 	oauthReqInfo: AuthRequest
 
 	/**
+	 * The PKCE code verifier retrieved from server-side storage (never transmitted to client)
+	 */
+	codeVerifier: string
+
+	/**
 	 * Set-Cookie header value to clear the state cookie
 	 */
 	clearCookie: string
@@ -629,10 +636,16 @@ export function generateCSRFProtection(): { token: string; setCookie: string } {
 
 export async function createOAuthState(
 	oauthReqInfo: AuthRequest,
-	kv: KVNamespace
+	kv: KVNamespace,
+	codeVerifier: string
 ): Promise<string> {
 	const stateToken = crypto.randomUUID()
-	await kv.put(`oauth:state:${stateToken}`, JSON.stringify(oauthReqInfo), {
+	const stateData = { oauthReqInfo, codeVerifier } satisfies {
+		oauthReqInfo: AuthRequest
+		codeVerifier: string
+	}
+
+	await kv.put(`oauth:state:${stateToken}`, JSON.stringify(stateData), {
 		expirationTtl: 600,
 	})
 	return stateToken
@@ -722,12 +735,33 @@ export async function validateOAuthState(
 		throw new Error('State token does not match session - possible CSRF attack detected')
 	}
 
-	const oauthReqInfo = JSON.parse(storedDataJson) as AuthRequest
+	// Parse and validate stored OAuth state data
+	const StoredOAuthStateSchema = z.object({
+		oauthReqInfo: z
+			.object({
+				clientId: z.string(),
+				scope: z.array(z.string()),
+				state: z.string(),
+				responseType: z.string(),
+				redirectUri: z.string(),
+			})
+			.passthrough(), // preserve any other fields from oauth-provider
+		codeVerifier: z.string().min(1), // Our code verifier for Cloudflare OAuth
+	})
+
+	const parseResult = StoredOAuthStateSchema.safeParse(JSON.parse(storedDataJson))
+	if (!parseResult.success) {
+		throw new Error('Invalid OAuth state data format - PKCE security violation')
+	}
 
 	await kv.delete(`oauth:state:${stateToken}`)
 	const clearCookie = `${consentedStateCookieName}=; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=0`
 
-	return { oauthReqInfo, clearCookie }
+	return {
+		oauthReqInfo: parseResult.data.oauthReqInfo,
+		codeVerifier: parseResult.data.codeVerifier,
+		clearCookie,
+	}
 }
 
 /**
