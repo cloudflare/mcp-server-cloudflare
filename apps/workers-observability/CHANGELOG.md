@@ -1,5 +1,12 @@
 # workers-observability
 
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies [7fc3f18]
+  - @repo/mcp-common@0.20.1
+
 ## 0.4.2
 
 ### Patch Changes
