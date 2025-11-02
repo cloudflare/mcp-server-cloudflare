@@ -1,4 +1,4 @@
-import type { CloudflareDocumentationMCP } from './docs-vectorize.app'
+import type { CloudflareDocumentationMCP } from './docs-ai-search.app'
 
 export interface Env {
 	ENVIRONMENT: 'development' | 'staging' | 'production'
