@@ -6,26 +6,28 @@ interface RequiredEnv {
 	AI: Ai
 }
 
-interface AiSearchResponse {
-	object: string
-	search_query: string
-	data: Array<{
-		file_id: string
-		filename: string
-		score: number
-		attributes: {
-			modified_date: number
-			folder: string
-		}
-		content: Array<{
-			id: string
-			type: string
-			text: string
-		}>
-	}>
-	has_more: boolean
-	next_page: string | null
-}
+// Zod schema for AI Search response validation
+const AiSearchResponseSchema = z.object({
+	object: z.string(),
+	search_query: z.string(),
+	data: z.array(z.object({
+		file_id: z.string(),
+		filename: z.string(),
+		score: z.number(),
+		attributes: z.object({
+			modified_date: z.number().optional(),
+			folder: z.string().optional(),
+		}).catchall(z.any()),
+		content: z.array(z.object({
+			id: z.string(),
+			type: z.string(),
+			text: z.string(),
+		})),
+	})),
+	has_more: z.boolean(),
+	next_page: z.string().nullable(),
+})
+
 
 /**
  * Registers the docs search tool with the MCP server using AI Search
@@ -111,11 +113,14 @@ ${result.text}
 }
 
 async function queryAiSearch(ai: Ai, query: string) {
-	const response = await doWithRetries(() =>
+	const rawResponse = await doWithRetries(() =>
 		ai.autorag("docs-mcp-rag").search({
 			query,
 		})
-	) as AiSearchResponse
+	)
+
+	// Parse and validate the response using Zod
+	const response = AiSearchResponseSchema.parse(rawResponse)
 
 	return response.data.map((item) => ({
 		similarity: item.score,
@@ -155,25 +160,58 @@ function extractTitle(filename: string): string {
 }
 
 /**
+ * Retries an action with exponential backoff, only for retryable errors
  * @template T
  * @param {() => Promise<T>} action
  */
 async function doWithRetries<T>(action: () => Promise<T>) {
-	const NUM_RETRIES = 10
-	const INIT_RETRY_MS = 50
+	const NUM_RETRIES = 5
+	const INIT_RETRY_MS = 100
+	
 	for (let i = 0; i <= NUM_RETRIES; i++) {
 		try {
 			return await action()
 		} catch (e) {
-			// TODO: distinguish between user errors (4xx) and system errors (5xx)
-			console.error(e)
-			if (i === NUM_RETRIES) {
+			// Check if error is retryable (system errors, not user errors)
+			const isRetryable = isRetryableError(e)
+			
+			console.error(`AI Search attempt ${i + 1} failed:`, e)
+			
+			if (!isRetryable || i === NUM_RETRIES) {
 				throw e
 			}
-			// Exponential backoff with full jitter
-			await scheduler.wait(Math.random() * INIT_RETRY_MS * Math.pow(2, i))
+			
+			// Exponential backoff with jitter
+			const delay = Math.random() * INIT_RETRY_MS * Math.pow(2, i)
+			await scheduler.wait(delay)
 		}
 	}
-	// Should never reach here – last loop iteration should return
+	// Should never reach here – last loop iteration should throw
 	throw new Error('An unknown error occurred')
+}
+
+/**
+ * Determines if an error is retryable based on error type and status
+ */
+function isRetryableError(error: unknown): boolean {
+	// Handle HTTP errors from fetch-like responses
+	if (error && typeof error === 'object' && 'status' in error) {
+		const status = (error as { status: number }).status
+		// Retry server errors (5xx) and rate limits (429), not client errors (4xx)
+		return status >= 500 || status === 429
+	}
+	
+	// Handle network errors, timeouts, etc.
+	if (error instanceof Error) {
+		const errorMessage = error.message.toLowerCase()
+		return (
+			errorMessage.includes('timeout') ||
+			errorMessage.includes('network') ||
+			errorMessage.includes('connection') ||
+			errorMessage.includes('fetch')
+		)
+	}
+	
+	// Default to retryable for unknown errors (conservative approach)
+	return true
 }
