@@ -1,5 +1,11 @@
 # docs-vectorize
 
+## 0.5.0
+
+### Minor Changes
+
+- fcbedd1: Moved Docs MCP server to be stateless for /mcp
+
 ## 0.4.3
 
 ### Patch Changes
