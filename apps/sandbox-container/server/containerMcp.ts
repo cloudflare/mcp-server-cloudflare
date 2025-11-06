@@ -165,7 +165,10 @@ export class ContainerMcpAgent extends McpAgent<Env, never, Props> {
 						{
 							type: 'resource',
 							resource: {
-								text: readFile.type === 'text' ? readFile.textOutput : readFile.base64Output,
+								...(readFile.type === 'text' 
+									? { text: readFile.textOutput }
+									: { blob: readFile.base64Output }
+								),
 								uri: `file://${path}`,
 								mimeType: readFile.mimeType,
 							},
