@@ -1,5 +1,11 @@
 # containers-mcp
 
+## 0.2.9
+
+### Patch Changes
+
+- e659dcf: fix: use blob field for binary resources to prevent context overflow (#252)
+
 ## 0.2.8
 
 ### Patch Changes
