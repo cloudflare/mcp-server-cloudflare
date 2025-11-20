@@ -4,11 +4,10 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"main": "src/docs-vectorize.app.ts",
+	"main": "src/docs-ai-search.app.ts",
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
-	"name": "mcp-cloudflare-docs-vectorize-dev",
-	"minify": true,
+	"name": "mcp-cloudflare-docs-ai-search-dev",
 	"migrations": [
 		{
 			"new_sqlite_classes": ["CloudflareDocumentationMCP"],
@@ -33,12 +32,6 @@
 	"ai": {
 		"binding": "AI"
 	},
-	"vectorize": [
-		{
-			"binding": "VECTORIZE",
-			"index_name": "docs-embeddinggemma-v1"
-		}
-	],
 	"vars": {
 		"ENVIRONMENT": "development",
 		"MCP_SERVER_NAME": "PLACEHOLDER",
@@ -59,7 +52,7 @@
 		"staging": {
 			"name": "mcp-cloudflare-docs-vectorize-staging",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
-			// "routes": [{ "pattern": "docs-staging.mcp.cloudflare.com", "custom_domain": true }],
+			"routes": [{ "pattern": "docs-staging.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
 					{
@@ -75,12 +68,6 @@
 			"ai": {
 				"binding": "AI"
 			},
-			"vectorize": [
-				{
-					"binding": "VECTORIZE",
-					"index_name": "docs-embeddinggemma-v1"
-				}
-			],
 			"analytics_engine_datasets": [
 				{
 					"binding": "MCP_METRICS",
@@ -91,7 +78,7 @@
 		"production": {
 			"name": "mcp-cloudflare-docs-vectorize-production",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
-			// "routes": [{ "pattern": "docs.mcp.cloudflare.com", "custom_domain": true }],
+			"routes": [{ "pattern": "docs.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
 					{
@@ -107,12 +94,6 @@
 			"ai": {
 				"binding": "AI"
 			},
-			"vectorize": [
-				{
-					"binding": "VECTORIZE",
-					"index_name": "docs-embeddinggemma-v1"
-				}
-			],
 			"analytics_engine_datasets": [
 				{
 					"binding": "MCP_METRICS",
