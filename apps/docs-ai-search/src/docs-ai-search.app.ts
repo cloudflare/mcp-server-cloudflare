@@ -1,6 +1,5 @@
-import { McpAgent } from 'agents/mcp'
+import { createMcpHandler, McpAgent } from 'agents/mcp'
 
-import { createApiHandler } from '@repo/mcp-common/src/api-handler'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-vectorize.prompts'
 import { initSentry } from '@repo/mcp-common/src/sentry'
@@ -11,12 +10,7 @@ import type { Env } from './docs-ai-search.context'
 
 const env = getEnv<Env>()
 
-// The docs MCP server isn't stateful, so we don't have state/props
-export type Props = never
-
-export type State = never
-
-export class CloudflareDocumentationMCP extends McpAgent<Env, State, Props> {
+export class CloudflareDocumentationMCP extends McpAgent<Env, never, never> {
 	_server: CloudflareMCPServer | undefined
 	set server(server: CloudflareMCPServer) {
 		this._server = server
@@ -25,7 +19,6 @@ export class CloudflareDocumentationMCP extends McpAgent<Env, State, Props> {
 		if (!this._server) {
 			throw new Error('Tried to access server before it was initialized')
 		}
-
 		return this._server
 	}
 
@@ -37,20 +30,47 @@ export class CloudflareDocumentationMCP extends McpAgent<Env, State, Props> {
 	}
 
 	async init() {
-		const sentry = initSentry(env, this.ctx)
-
-		this.server = new CloudflareMCPServer({
-			wae: env.MCP_METRICS,
-			serverInfo: {
-				name: env.MCP_SERVER_NAME,
-				version: env.MCP_SERVER_VERSION,
-			},
-			sentry,
-		})
-
-		registerDocsTools(this, this.env)
-		registerPrompts(this)
+		this.server = createMcpServer(env, this.ctx)
 	}
 }
 
-export default createApiHandler(CloudflareDocumentationMCP)
+const sseHandler = CloudflareDocumentationMCP.serveSSE('/sse')
+
+export default {
+	fetch: async (req: Request, env: Env, ctx: ExecutionContext) => {
+		const url = new URL(req.url)
+		if (url.pathname === '/sse' || url.pathname === '/sse/message') {
+			return sseHandler.fetch(req, env, ctx)
+		}
+		if (url.pathname === '/mcp') {
+			const server = createMcpServer(env, ctx, req)
+			const mcpHandler = createMcpHandler(server)
+			return mcpHandler(req, env, ctx)
+		}
+		return new Response('Not found', { status: 404 })
+	},
+}
+
+function createMcpServer(
+	env: Env,
+	ctx: {
+		waitUntil: ExecutionContext['waitUntil']
+	},
+	req?: Request
+) {
+	const sentry = initSentry(env, ctx, req)
+
+	const server = new CloudflareMCPServer({
+		wae: env.MCP_METRICS,
+		serverInfo: {
+			name: env.MCP_SERVER_NAME,
+			version: env.MCP_SERVER_VERSION,
+		},
+		sentry,
+	})
+
+	registerDocsTools(server, env)
+	registerPrompts(server)
+
+	return server
+}

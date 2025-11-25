@@ -8,6 +8,7 @@
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
 	"name": "mcp-cloudflare-docs-ai-search-dev",
+	"minify": true,
 	"migrations": [
 		{
 			"new_sqlite_classes": ["CloudflareDocumentationMCP"],

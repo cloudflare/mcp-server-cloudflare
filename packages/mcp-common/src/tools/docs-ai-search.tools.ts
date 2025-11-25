@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import type { CloudflareMcpAgentNoAccount } from '../types/cloudflare-mcp-agent.types'
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 
 interface RequiredEnv {
 	AI: Ai
@@ -31,16 +31,16 @@ const AiSearchResponseSchema = z.object({
 
 /**
  * Registers the docs search tool with the MCP server using AI Search
- * @param agent The MCP server instance
+ * @param server The MCP server instance
  */
-export function registerDocsTools(agent: CloudflareMcpAgentNoAccount, env: RequiredEnv) {
-	agent.server.tool(
+export function registerDocsTools(server: McpServer, env: RequiredEnv) {
+	server.tool(
 		'search_cloudflare_documentation',
 		`Search the Cloudflare documentation.
 
 		This tool should be used to answer any question about Cloudflare products or features, including:
 		- Workers, Pages, R2, Images, Stream, D1, Durable Objects, KV, Workflows, Hyperdrive, Queues
-		- AutoRAG, Workers AI, Vectorize, AI Gateway, Browser Rendering
+		- AI Search, Workers AI, Vectorize, AI Gateway, Browser Rendering
 		- Zero Trust, Access, Tunnel, Gateway, Browser Isolation, WARP, DDOS, Magic Transit, Magic WAN
 		- CDN, Cache, DNS, Zaraz, Argo, Rulesets, Terraform, Account and Billing
 
@@ -76,7 +76,7 @@ ${result.text}
 
 	// Note: this is a tool instead of a prompt because
 	// prompt support is much less common than tools.
-	agent.server.tool(
+	server.tool(
 		'migrate_pages_to_workers_guide',
 		`ALWAYS read this guide before migrating Pages projects to Workers.`,
 		{},

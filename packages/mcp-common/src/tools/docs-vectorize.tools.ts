@@ -21,7 +21,7 @@ export function registerDocsTools(server: McpServer, env: RequiredEnv) {
 
 		This tool should be used to answer any question about Cloudflare products or features, including:
 		- Workers, Pages, R2, Images, Stream, D1, Durable Objects, KV, Workflows, Hyperdrive, Queues
-		- AutoRAG, Workers AI, Vectorize, AI Gateway, Browser Rendering
+		- AI Search, Workers AI, Vectorize, AI Gateway, Browser Rendering
 		- Zero Trust, Access, Tunnel, Gateway, Browser Isolation, WARP, DDOS, Magic Transit, Magic WAN
 		- CDN, Cache, DNS, Zaraz, Argo, Rulesets, Terraform, Account and Billing
 
