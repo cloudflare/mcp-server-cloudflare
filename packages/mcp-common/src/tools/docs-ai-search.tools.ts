@@ -10,24 +10,29 @@ interface RequiredEnv {
 const AiSearchResponseSchema = z.object({
 	object: z.string(),
 	search_query: z.string(),
-	data: z.array(z.object({
-		file_id: z.string(),
-		filename: z.string(),
-		score: z.number(),
-		attributes: z.object({
-			modified_date: z.number().optional(),
-			folder: z.string().optional(),
-		}).catchall(z.any()),
-		content: z.array(z.object({
-			id: z.string(),
-			type: z.string(),
-			text: z.string(),
-		})),
-	})),
+	data: z.array(
+		z.object({
+			file_id: z.string(),
+			filename: z.string(),
+			score: z.number(),
+			attributes: z
+				.object({
+					modified_date: z.number().optional(),
+					folder: z.string().optional(),
+				})
+				.catchall(z.any()),
+			content: z.array(
+				z.object({
+					id: z.string(),
+					type: z.string(),
+					text: z.string(),
+				})
+			),
+		})
+	),
 	has_more: z.boolean(),
 	next_page: z.string().nullable(),
 })
-
 
 /**
  * Registers the docs search tool with the MCP server using AI Search
@@ -114,7 +119,7 @@ ${result.text}
 
 async function queryAiSearch(ai: Ai, query: string) {
 	const rawResponse = await doWithRetries(() =>
-		ai.autorag("docs-mcp-rag").search({
+		ai.autorag('docs-mcp-rag').search({
 			query,
 		})
 	)
@@ -127,7 +132,7 @@ async function queryAiSearch(ai: Ai, query: string) {
 		id: item.file_id,
 		url: sourceToUrl(item.filename),
 		title: extractTitle(item.filename),
-		text: item.content.map(c => c.text).join('\n'),
+		text: item.content.map((c) => c.text).join('\n'),
 	}))
 }
 
@@ -136,9 +141,7 @@ function sourceToUrl(filename: string): string {
 	// Example: "workers/configuration/index.md" -> "https://developers.cloudflare.com/workers/configuration/"
 	return (
 		'https://developers.cloudflare.com/' +
-		filename
-			.replace(/index\.mdx?$/, '')
-			.replace(/\.mdx?$/, '')
+		filename.replace(/index\.mdx?$/, '').replace(/\.mdx?$/, '')
 	)
 }
 
@@ -154,9 +157,7 @@ function extractTitle(filename: string): string {
 	}
 
 	// Convert kebab-case or snake_case to title case
-	return lastPart
-		.replace(/[-_]/g, ' ')
-		.replace(/\b\w/g, l => l.toUpperCase())
+	return lastPart.replace(/[-_]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
 }
 
 /**
