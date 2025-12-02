@@ -14,7 +14,7 @@ import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { initSentryWithUser } from '@repo/mcp-common/src/sentry'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account.tools'
-import { registerDocsTools } from '@repo/mcp-common/src/tools/docs-vectorize.tools'
+import { registerDocsTools } from '@repo/mcp-common/src/tools/docs-ai-search.tools'
 import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker.tools'
 
 import { MetricsTracker } from '../../../packages/mcp-observability/src'
