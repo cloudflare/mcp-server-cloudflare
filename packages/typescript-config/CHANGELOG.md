@@ -1,5 +1,11 @@
 # @repo/typescript-config
 
+## 0.3.2
+
+### Patch Changes
+
+- 99e2282: Move docs MCP server to use AI Search
+
 ## 0.3.1
 
 ### Patch Changes

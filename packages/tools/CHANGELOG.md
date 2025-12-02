@@ -1,5 +1,11 @@
 # @repo/tools
 
+## 0.33.2
+
+### Patch Changes
+
+- 99e2282: Move docs MCP server to use AI Search
+
 ## 0.33.1
 
 ### Patch Changes

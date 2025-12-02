@@ -1,5 +1,15 @@
 # workers-bindings
 
+## 0.4.4
+
+### Patch Changes
+
+- 99e2282: Move docs MCP server to use AI Search
+- Updated dependencies [99e2282]
+  - @repo/eval-tools@0.32.5
+  - @repo/mcp-common@0.20.2
+  - @repo/mcp-observability@0.32.5
+
 ## 0.4.3
 
 ### Patch Changes

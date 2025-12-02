@@ -1,5 +1,14 @@
 # cloudflare-autorag-mcp-server
 
+## 0.1.9
+
+### Patch Changes
+
+- 99e2282: Move docs MCP server to use AI Search
+- Updated dependencies [99e2282]
+  - @repo/mcp-common@0.20.2
+  - @repo/mcp-observability@0.32.5
+
 ## 0.1.8
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # containers-mcp
 
+## 0.2.10
+
+### Patch Changes
+
+- 99e2282: Move docs MCP server to use AI Search
+- Updated dependencies [99e2282]
+  - @repo/eval-tools@0.32.5
+  - @repo/mcp-common@0.20.2
+  - @repo/mcp-observability@0.32.5
+
 ## 0.2.9
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @repo/eval-tools
 
+## 0.32.5
+
+### Patch Changes
+
+- 99e2282: Move docs MCP server to use AI Search
+
 ## 0.32.4
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # docs-ai-search
 
+## 0.4.4
+
+### Patch Changes
+
+- 99e2282: Move docs MCP server to use AI Search
+- Updated dependencies [99e2282]
+  - @repo/mcp-common@0.20.2
+  - @repo/mcp-observability@0.32.5
+
 ## 0.5.0
 
 ### Minor Changes
