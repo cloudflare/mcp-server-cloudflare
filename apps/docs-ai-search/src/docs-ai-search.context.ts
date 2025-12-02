@@ -11,5 +11,4 @@ export interface Env {
 	GIT_HASH: string
 	SENTRY_DSN: string
 	AI: Ai
-	VECTORIZE: VectorizeIndex
 }

@@ -9,7 +9,7 @@ import {
 import { getUserDetails, UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { getProps } from '@repo/mcp-common/src/get-props'
-import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-vectorize.prompts'
+import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-ai-search.prompts'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerAccountTools } from '@repo/mcp-common/src/tools/account.tools'
