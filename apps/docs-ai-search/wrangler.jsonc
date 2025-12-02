@@ -51,7 +51,7 @@
 	],
 	"env": {
 		"staging": {
-			"name": "mcp-cloudflare-docs-vectorize-staging",
+			"name": "mcp-cloudflare-docs-ai-search-staging",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "docs-staging.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
@@ -77,7 +77,7 @@
 			]
 		},
 		"production": {
-			"name": "mcp-cloudflare-docs-vectorize-production",
+			"name": "mcp-cloudflare-docs-ai-search-production",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "docs.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {

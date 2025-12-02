@@ -6,7 +6,7 @@
 		"check:lint": "run-eslint-workers",
 		"check:types": "run-tsc",
 		"deploy": "run-wrangler-deploy",
-		"dev": "wrangler dev --experimental-vectorize-bind-to-prod",
+		"dev": "wrangler dev",
 		"start": "npm run dev",
 		"types": "wrangler types --include-env=false",
 		"test": "vitest run"
