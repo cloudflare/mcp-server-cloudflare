@@ -147,12 +147,12 @@ function extractTitle(filename: string): string {
 	// Example: "workers/configuration/index.md" -> "Configuration"
 	const parts = filename.replace(/\.mdx?$/, '').split('/')
 	const lastPart = parts[parts.length - 1]
-	
+
 	if (lastPart === 'index') {
 		// Use the parent directory name if filename is index
 		return parts[parts.length - 2] || 'Documentation'
 	}
-	
+
 	// Convert kebab-case or snake_case to title case
 	return lastPart
 		.replace(/[-_]/g, ' ')
@@ -167,20 +167,20 @@ function extractTitle(filename: string): string {
 async function doWithRetries<T>(action: () => Promise<T>) {
 	const NUM_RETRIES = 5
 	const INIT_RETRY_MS = 100
-	
+
 	for (let i = 0; i <= NUM_RETRIES; i++) {
 		try {
 			return await action()
 		} catch (e) {
 			// Check if error is retryable (system errors, not user errors)
 			const isRetryable = isRetryableError(e)
-			
+
 			console.error(`AI Search attempt ${i + 1} failed:`, e)
-			
+
 			if (!isRetryable || i === NUM_RETRIES) {
 				throw e
 			}
-			
+
 			// Exponential backoff with jitter
 			const delay = Math.random() * INIT_RETRY_MS * Math.pow(2, i)
 			await scheduler.wait(delay)
@@ -200,7 +200,7 @@ function isRetryableError(error: unknown): boolean {
 		// Retry server errors (5xx) and rate limits (429), not client errors (4xx)
 		return status >= 500 || status === 429
 	}
-	
+
 	// Handle network errors, timeouts, etc.
 	if (error instanceof Error) {
 		const errorMessage = error.message.toLowerCase()
@@ -211,7 +211,7 @@ function isRetryableError(error: unknown): boolean {
 			errorMessage.includes('fetch')
 		)
 	}
-	
+
 	// Default to retryable for unknown errors (conservative approach)
 	return true
 }
