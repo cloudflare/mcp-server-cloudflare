@@ -1,0 +1,88 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"name": "mcp-cloudflare-secretstore-dev",
+	"migrations": [
+		{
+			"new_sqlite_classes": ["SecretsStoreMCP"],
+			"tag": "v1"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "SecretsStoreMCP",
+				"name": "MCP_OBJECT"
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "DEV_KV"
+		}
+	],
+	"vars": {
+		"ENVIRONMENT": "development"
+	},
+	"dev": {
+		"port": 8976
+	},
+	"workers_dev": false,
+	"preview_urls": false,
+	"env": {
+		"staging": {
+			"name": "mcp-cloudflare-secretsstore-staging",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "secretsstore-staging.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "SecretsStoreMCP",
+						"name": "MCP_OBJECT"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "3594308849774fd88becee6ea9557b0e"
+				}
+			],
+			"vars": {
+				"ENVIRONMENT": "staging"
+			}
+		},
+		"production": {
+			"name": "mcp-cloudflare-secretsstore-production",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "secretsstore.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "SecretsStoreMCP",
+						"name": "MCP_OBJECT"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "a82b5970b8644cba9409ab363eb38c01"
+				}
+			],
+			"vars": {
+				"ENVIRONMENT": "production"
+			}
+		}
+	}
+}
