@@ -1,0 +1,79 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"migrations": [
+		{
+			"new_sqlite_classes": ["MyMCP"],
+			"tag": "v1"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"dev": {
+		"port": 8976
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "MyMCP",
+				"name": "MCP_OBJECT"
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "DEV_KV"
+		}
+	],
+	"workers_dev": false,
+	"preview_urls": false,
+	"env": {
+		"staging": {
+			"name": "mcp-cloudflare-staging",
+			"account_id": "8995c0f49cdcf57eb54d2c1e52b7d2f3",
+			// enable workers-dev for staging
+			"workers_dev": true,
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "MyMCP",
+						"name": "MCP_OBJECT"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "18e839155d00407095d793dcf7e78f25"
+				}
+			]
+		},
+		"production": {
+			"name": "mcp-cloudflare-production",
+			"account_id": "8995c0f49cdcf57eb54d2c1e52b7d2f3",
+			"routes": ["mcp.cloudflare.com/*"],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "MyMCP",
+						"name": "MCP_OBJECT"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "f9782295993747df90c29c45ca89edb1"
+				}
+			]
+		}
+	}
+}
