@@ -62,6 +62,30 @@ export const BucketListStartAfterParam = z
 	.optional()
 	.describe('Bucket name to start searching after. Buckets are ordered lexicographically.')
 
+// Location hint for bucket creation - suggests geographic region for the bucket
+export const LocationHintSchema = z
+	.enum(['wnam', 'enam', 'weur', 'eeur', 'apac', 'oc'])
+	.optional()
+	.describe(
+		'Geographic location hint: wnam=Western North America, enam=Eastern North America, weur=Western Europe, eeur=Eastern Europe, apac=Asia Pacific, oc=Oceania'
+	)
+
+// Jurisdiction for bucket creation - specifies regulatory jurisdiction
+export const CreateBucketJurisdictionSchema = z
+	.enum(['default', 'eu', 'fedramp'])
+	.optional()
+	.describe(
+		'Jurisdiction for the bucket. Use for data residency requirements.'
+	)
+
+// Storage class for bucket creation - sets default storage class for new objects
+export const CreateBucketStorageClassSchema = z
+	.enum(['Standard', 'InfrequentAccess'])
+	.optional()
+	.describe(
+		'Default storage class for newly uploaded objects. Standard is for frequently accessed data, InfrequentAccess is for data accessed less than once per month (lower storage cost, higher retrieval cost).'
+	)
+
 export const AllowedMethodsEnum: z.ZodType<CORSUpdateParams.Rule['allowed']['methods']> = z.array(
 	z.union([
 		z.literal('GET'),
@@ -74,7 +98,7 @@ export const AllowedMethodsEnum: z.ZodType<CORSUpdateParams.Rule['allowed']['met
 export const JurisdictionEnum: z.ZodType<CORSUpdateParams['jurisdiction']> = z
 	.enum(['default', 'eu', 'fedramp'])
 	.describe(
-		'Use Jurisdictional Restrictions when you need to ensure data is stored and processed within a jurisdiction to meet data residency requirements, including local regulations such as the GDPR or FedRAMP.'
+		'Use Jurisdictional Restrictions when you need to ensure data is stored and processed within a jurisdiction to meet data residency requirements, including local regulations such as the EU or FedRAMP.'
 	)
 
 // CORS ZOD SCHEMAS

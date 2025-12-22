@@ -18,6 +18,7 @@ import { registerDocsTools } from '@repo/mcp-common/src/tools/docs-ai-search.too
 import { registerHyperdriveTools } from '@repo/mcp-common/src/tools/hyperdrive.tools'
 import { registerKVTools } from '@repo/mcp-common/src/tools/kv_namespace.tools'
 import { registerR2BucketTools } from '@repo/mcp-common/src/tools/r2_bucket.tools'
+import { registerR2ObjectTools } from '@repo/mcp-common/src/tools/r2_object.tools'
 import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker.tools'
 import { MetricsTracker } from '@repo/mcp-observability'
 
@@ -79,6 +80,7 @@ export class WorkersBindingsMCP extends McpAgent<Env, WorkersBindingsMCPState, P
 		registerKVTools(this)
 		registerWorkersTools(this)
 		registerR2BucketTools(this)
+		registerR2ObjectTools(this)
 		registerD1Tools(this)
 		registerHyperdriveTools(this)
 
