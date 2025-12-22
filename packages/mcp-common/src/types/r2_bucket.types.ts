@@ -74,9 +74,7 @@ export const LocationHintSchema = z
 export const CreateBucketJurisdictionSchema = z
 	.enum(['default', 'eu', 'fedramp'])
 	.optional()
-	.describe(
-		'Jurisdiction for the bucket. Use for data residency requirements.'
-	)
+	.describe('Jurisdiction for the bucket. Use for data residency requirements.')
 
 // Storage class for bucket creation - sets default storage class for new objects
 export const CreateBucketStorageClassSchema = z

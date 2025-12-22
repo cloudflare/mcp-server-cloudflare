@@ -233,7 +233,10 @@ export async function fetchR2ObjectDelete({
 		throw new Error(`R2 DELETE request failed: ${error}`)
 	}
 
-	const result = (await response.json()) as { success: boolean; errors?: Array<{ code: number; message: string }> }
+	const result = (await response.json()) as {
+		success: boolean
+		errors?: Array<{ code: number; message: string }>
+	}
 
 	if (!result.success) {
 		const errorMessage = result.errors?.[0]?.message ?? 'Unknown error'

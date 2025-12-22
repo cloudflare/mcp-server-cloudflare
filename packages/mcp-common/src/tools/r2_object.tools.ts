@@ -1,15 +1,17 @@
 import mime from 'mime'
+
+import { MISSING_ACCOUNT_ID_RESPONSE } from '../constants'
+import { getProps } from '../get-props'
 import {
 	base64ToUint8Array,
 	fetchR2ObjectDelete,
 	fetchR2ObjectGet,
 	fetchR2ObjectPut,
 } from '../r2-api'
-import { MISSING_ACCOUNT_ID_RESPONSE } from '../constants'
-import { getProps } from '../get-props'
 import { type CloudflareMcpAgent } from '../types/cloudflare-mcp-agent.types'
 import {
 	Base64EncodedSchema,
+	BucketJurisdictionSchema,
 	BucketNameSchema,
 	CacheControlSchema,
 	ContentDispositionSchema,
@@ -17,7 +19,6 @@ import {
 	ContentLanguageSchema,
 	ContentTypeSchema,
 	ExpiresSchema,
-	BucketJurisdictionSchema,
 	MAX_OBJECT_SIZE_BYTES,
 	MAX_UPLOAD_SIZE_BYTES,
 	ObjectContentSchema,
@@ -211,7 +212,8 @@ export function registerR2ObjectTools(agent: CloudflareMcpAgent) {
 				}
 
 				// Check size limit
-				const contentSize = typeof bodyContent === 'string' ? bodyContent.length : bodyContent.byteLength
+				const contentSize =
+					typeof bodyContent === 'string' ? bodyContent.length : bodyContent.byteLength
 				if (contentSize > MAX_UPLOAD_SIZE_BYTES) {
 					return {
 						content: [

@@ -17,7 +17,10 @@ export const BucketJurisdictionSchema = z
 	)
 
 // Object key schemas
-export const ObjectKeySchema = z.string().min(1).describe('The key (path) of the object in the bucket')
+export const ObjectKeySchema = z
+	.string()
+	.min(1)
+	.describe('The key (path) of the object in the bucket')
 
 export const ObjectKeysSchema = z
 	.array(z.string().min(1))
@@ -46,7 +49,10 @@ export const ContentDispositionSchema = z
 	.optional()
 	.describe('Content disposition (e.g., "attachment; filename=example.txt")')
 
-export const ContentLanguageSchema = z.string().optional().describe('Content language (e.g., "en-US")')
+export const ContentLanguageSchema = z
+	.string()
+	.optional()
+	.describe('Content language (e.g., "en-US")')
 
 export const CacheControlSchema = z
 	.string()
@@ -59,7 +65,9 @@ export const ExpiresSchema = z
 	.describe('Expiration date in RFC 2822 or ISO 8601 format')
 
 // Content for upload
-export const ObjectContentSchema = z.string().describe('The content of the object (text or base64-encoded)')
+export const ObjectContentSchema = z
+	.string()
+	.describe('The content of the object (text or base64-encoded)')
 
 export const Base64EncodedSchema = z
 	.boolean()
