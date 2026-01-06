@@ -12,7 +12,31 @@ import {
 	AsnArrayParam,
 	AsnParam,
 	AsOrderByParam,
+	BgpHijackerAsnParam,
+	BgpInvolvedAsnParam,
+	BgpInvolvedCountryParam,
+	BgpLeakAsnParam,
+	BgpMaxConfidenceParam,
+	BgpMinConfidenceParam,
+	BgpPrefixParam,
+	BgpSortByParam,
+	BgpSortOrderParam,
+	BgpVictimAsnParam,
+	BotCategoryParam,
+	BotKindParam,
+	BotNameParam,
+	BotOperatorParam,
+	BotsDimensionParam,
+	BotVerificationStatusParam,
 	ContinentArrayParam,
+	CtCaOwnerParam,
+	CtCaParam,
+	CtDimensionParam,
+	CtDurationParam,
+	CtEntryTypeParam,
+	CtPublicKeyAlgorithmParam,
+	CtTldParam,
+	CtValidationLevelParam,
 	DateEndArrayParam,
 	DateEndParam,
 	DateListParam,
@@ -25,6 +49,7 @@ import {
 	DomainRankingTypeParam,
 	EmailRoutingDimensionParam,
 	EmailSecurityDimensionParam,
+	GeoIdArrayParam,
 	HttpDimensionParam,
 	InternetQualityMetricParam,
 	InternetServicesCategoryParam,
@@ -33,13 +58,70 @@ import {
 	IpParam,
 	L3AttackDimensionParam,
 	L7AttackDimensionParam,
+	LimitPerGroupParam,
 	LocationArrayParam,
 	LocationListParam,
 	LocationParam,
+	NetflowsDimensionParam,
+	NetflowsProductParam,
+	NormalizationParam,
+	OriginArrayParam,
+	OriginDataDimensionParam,
+	OriginMetricParam,
+	OriginNormalizationParam,
+	OriginRegionParam,
+	OriginSlugParam,
 } from '../types/radar'
 import { resolveAndInvoke } from '../utils'
 
 import type { RadarMCP } from '../radar.app'
+
+const RADAR_API_BASE = 'https://api.cloudflare.com/client/v4/radar'
+
+/**
+ * Helper function to make authenticated requests to the Radar API
+ * Used for endpoints not yet available in the Cloudflare SDK
+ */
+async function fetchRadarApi(
+	accessToken: string,
+	endpoint: string,
+	params: Record<string, unknown> = {}
+): Promise<unknown> {
+	const url = new URL(`${RADAR_API_BASE}${endpoint}`)
+
+	for (const [key, value] of Object.entries(params)) {
+		if (value === undefined || value === null) continue
+
+		if (Array.isArray(value)) {
+			for (const item of value) {
+				url.searchParams.append(key, String(item))
+			}
+		} else {
+			url.searchParams.set(key, String(value))
+		}
+	}
+
+	const response = await fetch(url.toString(), {
+		method: 'GET',
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+			'Content-Type': 'application/json',
+		},
+	})
+
+	if (!response.ok) {
+		const errorBody = await response.text()
+		throw new Error(`API request failed (${response.status}): ${errorBody}`)
+	}
+
+	const data = (await response.json()) as { success: boolean; result: unknown; errors?: unknown[] }
+
+	if (!data.success) {
+		throw new Error(`API returned error: ${JSON.stringify(data.errors)}`)
+	}
+
+	return data.result
+}
 
 export function registerRadarTools(agent: RadarMCP) {
 	agent.server.tool(
@@ -335,9 +417,10 @@ export function registerRadarTools(agent: RadarMCP) {
 			asn: AsnArrayParam,
 			continent: ContinentArrayParam,
 			location: LocationArrayParam,
+			geoId: GeoIdArrayParam,
 			dimension: HttpDimensionParam,
 		},
-		async ({ dateStart, dateEnd, dateRange, asn, location, continent, dimension }) => {
+		async ({ dateStart, dateEnd, dateRange, asn, location, continent, geoId, dimension }) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -345,6 +428,7 @@ export function registerRadarTools(agent: RadarMCP) {
 					asn,
 					continent,
 					location,
+					geoId,
 					dateRange,
 					dateStart,
 					dateEnd,
@@ -741,6 +825,565 @@ export function registerRadarTools(agent: RadarMCP) {
 						{
 							type: 'text',
 							text: `Error getting AI data: ${error instanceof Error && error.message}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// BGP Tools
+	// TODO: Replace with SDK when BGP hijacks/leaks endpoints work correctly in cloudflare SDK
+	// ============================================================
+
+	agent.server.tool(
+		'get_bgp_hijacks',
+		'Retrieve BGP hijack events. BGP hijacks occur when an AS announces routes it does not own, potentially redirecting traffic.',
+		{
+			limit: PaginationLimitParam,
+			offset: PaginationOffsetParam,
+			dateRange: DateRangeParam.optional(),
+			dateStart: DateStartParam.optional(),
+			dateEnd: DateEndParam.optional(),
+			hijackerAsn: BgpHijackerAsnParam,
+			victimAsn: BgpVictimAsnParam,
+			involvedAsn: BgpInvolvedAsnParam,
+			involvedCountry: BgpInvolvedCountryParam,
+			prefix: BgpPrefixParam,
+			minConfidence: BgpMinConfidenceParam,
+			maxConfidence: BgpMaxConfidenceParam,
+			sortBy: BgpSortByParam,
+			sortOrder: BgpSortOrderParam,
+		},
+		async ({
+			limit,
+			offset,
+			dateRange,
+			dateStart,
+			dateEnd,
+			hijackerAsn,
+			victimAsn,
+			involvedAsn,
+			involvedCountry,
+			prefix,
+			minConfidence,
+			maxConfidence,
+			sortBy,
+			sortOrder,
+		}) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/hijacks/events', {
+					page: offset ? Math.floor(offset / (limit || 10)) + 1 : 1,
+					per_page: limit,
+					dateRange,
+					dateStart,
+					dateEnd,
+					hijackerAsn,
+					victimAsn,
+					involvedAsn,
+					involvedCountry,
+					prefix,
+					minConfidence,
+					maxConfidence,
+					sortBy,
+					sortOrder,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting BGP hijacks: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_bgp_leaks',
+		'Retrieve BGP route leak events. Route leaks occur when an AS improperly announces routes learned from one peer to another.',
+		{
+			limit: PaginationLimitParam,
+			offset: PaginationOffsetParam,
+			dateRange: DateRangeParam.optional(),
+			dateStart: DateStartParam.optional(),
+			dateEnd: DateEndParam.optional(),
+			leakAsn: BgpLeakAsnParam,
+			involvedAsn: BgpInvolvedAsnParam,
+			involvedCountry: BgpInvolvedCountryParam,
+			sortBy: BgpSortByParam,
+			sortOrder: BgpSortOrderParam,
+		},
+		async ({
+			limit,
+			offset,
+			dateRange,
+			dateStart,
+			dateEnd,
+			leakAsn,
+			involvedAsn,
+			involvedCountry,
+			sortBy,
+			sortOrder,
+		}) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/leaks/events', {
+					page: offset ? Math.floor(offset / (limit || 10)) + 1 : 1,
+					per_page: limit,
+					dateRange,
+					dateStart,
+					dateEnd,
+					leakAsn,
+					involvedAsn,
+					involvedCountry,
+					sortBy,
+					sortOrder,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting BGP leaks: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_bgp_route_stats',
+		'Retrieve BGP routing table statistics including number of routes, origin ASes, and more.',
+		{
+			asn: AsnParam.optional(),
+			location: LocationParam.optional(),
+		},
+		async ({ asn, location }) => {
+			try {
+				const props = getProps(agent)
+				const client = getCloudflareClient(props.accessToken)
+				const r = await client.radar.bgp.routes.stats({
+					asn,
+					location,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({ result: r }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting BGP route stats: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// Bots Tools
+	// TODO: Replace with SDK when bots endpoints are added to cloudflare SDK
+	// ============================================================
+
+	agent.server.tool(
+		'get_bots_data',
+		'Retrieve bot traffic data including trends by bot name, operator, category, and kind. Covers AI crawlers, search engines, monitoring bots, and more.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			asn: AsnArrayParam,
+			continent: ContinentArrayParam,
+			location: LocationArrayParam,
+			bot: BotNameParam,
+			botOperator: BotOperatorParam,
+			botCategory: BotCategoryParam,
+			botKind: BotKindParam,
+			botVerificationStatus: BotVerificationStatusParam,
+			dimension: BotsDimensionParam,
+			limitPerGroup: LimitPerGroupParam,
+		},
+		async ({
+			dateRange,
+			dateStart,
+			dateEnd,
+			asn,
+			continent,
+			location,
+			bot,
+			botOperator,
+			botCategory,
+			botKind,
+			botVerificationStatus,
+			dimension,
+			limitPerGroup,
+		}) => {
+			try {
+				const props = getProps(agent)
+
+				const endpoint = dimension === 'timeseries' ? '/bots/timeseries' : `/bots/${dimension}`
+
+				const result = await fetchRadarApi(props.accessToken, endpoint, {
+					asn,
+					continent,
+					location,
+					dateRange,
+					dateStart,
+					dateEnd,
+					bot,
+					botOperator,
+					botCategory,
+					botKind,
+					botVerificationStatus,
+					limitPerGroup: dimension !== 'timeseries' ? limitPerGroup : undefined,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting bots data: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// Certificate Transparency Tools
+	// TODO: Replace with SDK when CT endpoints are added to cloudflare SDK
+	// ============================================================
+
+	agent.server.tool(
+		'get_certificate_transparency_data',
+		'Retrieve Certificate Transparency (CT) log data. CT provides visibility into SSL/TLS certificates issued for domains, useful for security monitoring.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			ca: CtCaParam,
+			caOwner: CtCaOwnerParam,
+			duration: CtDurationParam,
+			entryType: CtEntryTypeParam,
+			tld: CtTldParam,
+			validationLevel: CtValidationLevelParam,
+			publicKeyAlgorithm: CtPublicKeyAlgorithmParam,
+			dimension: CtDimensionParam,
+			limitPerGroup: LimitPerGroupParam,
+		},
+		async ({
+			dateRange,
+			dateStart,
+			dateEnd,
+			ca,
+			caOwner,
+			duration,
+			entryType,
+			tld,
+			validationLevel,
+			publicKeyAlgorithm,
+			dimension,
+			limitPerGroup,
+		}) => {
+			try {
+				const props = getProps(agent)
+
+				const endpoint = dimension === 'timeseries' ? '/ct/timeseries' : `/ct/${dimension}`
+
+				const result = await fetchRadarApi(props.accessToken, endpoint, {
+					dateRange,
+					dateStart,
+					dateEnd,
+					ca,
+					caOwner,
+					duration,
+					entryType,
+					tld,
+					validationLevel,
+					publicKeyAlgorithm,
+					limitPerGroup: dimension !== 'timeseries' ? limitPerGroup : undefined,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting CT data: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// NetFlows Tools
+	// TODO: Replace with SDK when netflows endpoints support geoId in cloudflare SDK
+	// ============================================================
+
+	agent.server.tool(
+		'get_netflows_data',
+		'Retrieve NetFlows traffic data showing network traffic patterns. Supports filtering by ADM1 (administrative level 1, e.g., states/provinces) via geoId.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			asn: AsnArrayParam,
+			continent: ContinentArrayParam,
+			location: LocationArrayParam,
+			geoId: GeoIdArrayParam,
+			product: NetflowsProductParam,
+			normalization: NormalizationParam,
+			dimension: NetflowsDimensionParam,
+			limitPerGroup: LimitPerGroupParam,
+		},
+		async ({
+			dateRange,
+			dateStart,
+			dateEnd,
+			asn,
+			continent,
+			location,
+			geoId,
+			product,
+			normalization,
+			dimension,
+			limitPerGroup,
+		}) => {
+			try {
+				const props = getProps(agent)
+
+				let endpoint: string
+				if (dimension === 'timeseries') {
+					endpoint = '/netflows/timeseries'
+				} else if (dimension === 'summary') {
+					endpoint = '/netflows/summary'
+				} else {
+					endpoint = `/netflows/${dimension}`
+				}
+
+				const result = await fetchRadarApi(props.accessToken, endpoint, {
+					asn,
+					continent,
+					location,
+					geoId,
+					dateRange,
+					dateStart,
+					dateEnd,
+					product,
+					normalization,
+					limitPerGroup: !['timeseries', 'summary'].includes(dimension) ? limitPerGroup : undefined,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting NetFlows data: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// Cloud Observatory / Origins Tools
+	// TODO: Replace with SDK when origins endpoints are added to cloudflare SDK
+	// ============================================================
+
+	agent.server.tool(
+		'list_origins',
+		'List cloud provider origins (hyperscalers) available in Cloud Observatory. Returns Amazon (AWS), Google (GCP), Microsoft (Azure), and Oracle (OCI) with their available regions.',
+		{
+			limit: PaginationLimitParam,
+			offset: PaginationOffsetParam,
+		},
+		async ({ limit, offset }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/origins', {
+					limit,
+					offset,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error listing origins: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_origin_details',
+		'Get details for a specific cloud provider origin, including all available regions.',
+		{
+			slug: OriginSlugParam,
+		},
+		async ({ slug }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, `/origins/${slug}`)
+
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error getting origin details: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_origins_data',
+		'Retrieve cloud provider (AWS, GCP, Azure, OCI) performance metrics. Supports timeseries, summaries grouped by region/success_rate/percentile, and grouped timeseries.',
+		{
+			dimension: OriginDataDimensionParam,
+			origin: OriginArrayParam,
+			metric: OriginMetricParam,
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			region: OriginRegionParam,
+			limitPerGroup: LimitPerGroupParam,
+			normalization: OriginNormalizationParam,
+		},
+		async ({
+			dimension,
+			origin,
+			metric,
+			dateRange,
+			dateStart,
+			dateEnd,
+			region,
+			limitPerGroup,
+			normalization,
+		}) => {
+			try {
+				const props = getProps(agent)
+
+				let endpoint: string
+				if (dimension === 'timeseries') {
+					endpoint = '/origins/timeseries'
+				} else if (dimension.startsWith('summary/')) {
+					const groupBy = dimension.replace('summary/', '')
+					endpoint = `/origins/summary/${groupBy}`
+				} else {
+					const groupBy = dimension.replace('timeseriesGroups/', '')
+					endpoint = `/origins/timeseries_groups/${groupBy}`
+				}
+
+				const result = await fetchRadarApi(props.accessToken, endpoint, {
+					origin,
+					metric,
+					dateRange,
+					dateStart,
+					dateEnd,
+					region,
+					limitPerGroup: dimension !== 'timeseries' ? limitPerGroup : undefined,
+					normalization: dimension.startsWith('timeseriesGroups/') ? normalization : undefined,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting origins data: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
 				}

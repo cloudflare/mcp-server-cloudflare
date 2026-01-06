@@ -322,3 +322,298 @@ export const InternetSpeedOrderByParam = z
 export const InternetQualityMetricParam = z
 	.enum(['BANDWIDTH', 'DNS', 'LATENCY'])
 	.describe('Specifies which metric to return (bandwidth, latency, or DNS response time).')
+
+// GeoId filter for ADM1 (administrative level 1) filtering
+export const GeoIdArrayParam = z
+	.array(z.string())
+	.optional()
+	.describe(
+		'Filters results by Geolocation (ADM1 - administrative level 1, e.g., states/provinces). ' +
+			'Provide an array of GeoNames IDs. Prefix with `-` to exclude. ' +
+			'Example: ["2267056", "-360689"] includes Lisbon area but excludes another region.'
+	)
+
+// BGP Parameters
+export const BgpHijackerAsnParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Filter by the potential hijacker AS of a BGP hijack event.')
+
+export const BgpVictimAsnParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Filter by the potential victim AS of a BGP hijack event.')
+
+export const BgpInvolvedAsnParam = z
+	.number()
+	.positive()
+	.optional()
+	.describe('Filter by ASN involved (as hijacker or victim) in a BGP event.')
+
+export const BgpInvolvedCountryParam = z
+	.string()
+	.regex(/^[a-zA-Z]{2}$/)
+	.optional()
+	.describe('Filter by country code of the involved AS in a BGP event.')
+
+export const BgpLeakAsnParam = z
+	.number()
+	.positive()
+	.optional()
+	.describe('Filter by the leaking AS of a route leak event.')
+
+export const BgpPrefixParam = z
+	.string()
+	.optional()
+	.describe('Filter by IP prefix (e.g., "1.1.1.0/24").')
+
+export const BgpMinConfidenceParam = z
+	.number()
+	.int()
+	.min(1)
+	.max(10)
+	.optional()
+	.describe('Filter by minimum confidence score (1-4 low, 5-7 mid, 8+ high).')
+
+export const BgpMaxConfidenceParam = z
+	.number()
+	.int()
+	.min(1)
+	.max(10)
+	.optional()
+	.describe('Filter by maximum confidence score (1-4 low, 5-7 mid, 8+ high).')
+
+export const BgpSortByParam = z
+	.enum(['TIME', 'CONFIDENCE', 'ID'])
+	.optional()
+	.describe('Sort results by specified field.')
+
+export const BgpSortOrderParam = z
+	.enum(['ASC', 'DESC'])
+	.optional()
+	.describe('Sort order (ascending or descending).')
+
+// Bots Parameters
+export const BotsDimensionParam = z
+	.enum([
+		'timeseries',
+		'summary/bot',
+		'summary/botKind',
+		'summary/botOperator',
+		'summary/botCategory',
+		'timeseriesGroups/bot',
+		'timeseriesGroups/botKind',
+		'timeseriesGroups/botOperator',
+		'timeseriesGroups/botCategory',
+	])
+	.describe('Dimension indicating the type and format of bot data to retrieve.')
+
+export const BotNameParam = z
+	.array(z.string().max(100))
+	.optional()
+	.describe('Filter results by bot name.')
+
+export const BotOperatorParam = z
+	.array(z.string().max(100))
+	.optional()
+	.describe('Filter results by bot operator (e.g., Google, Microsoft, OpenAI).')
+
+export const BotCategoryParam = z
+	.array(
+		z.enum([
+			'SEARCH_ENGINE_CRAWLER',
+			'SEARCH_ENGINE_OPTIMIZATION',
+			'MONITORING_AND_ANALYTICS',
+			'ADVERTISING_AND_MARKETING',
+			'SOCIAL_MEDIA_MARKETING',
+			'PAGE_PREVIEW',
+			'ACADEMIC_RESEARCH',
+			'SECURITY',
+			'ACCESSIBILITY',
+			'WEBHOOKS',
+			'FEED_FETCHER',
+			'AI_CRAWLER',
+			'AGGREGATOR',
+			'AI_ASSISTANT',
+			'AI_SEARCH',
+			'ARCHIVER',
+		])
+	)
+	.optional()
+	.describe('Filter results by bot category.')
+
+export const BotKindParam = z
+	.array(z.enum(['AGENT', 'BOT']))
+	.optional()
+	.describe('Filter results by bot kind (AGENT or BOT).')
+
+export const BotVerificationStatusParam = z
+	.array(z.enum(['VERIFIED']))
+	.optional()
+	.describe('Filter results by bot verification status.')
+
+// Certificate Transparency Parameters
+export const CtDimensionParam = z
+	.enum([
+		'timeseries',
+		'summary/ca',
+		'summary/caOwner',
+		'summary/duration',
+		'summary/entryType',
+		'summary/expirationStatus',
+		'summary/hasIps',
+		'summary/hasWildcards',
+		'summary/logApi',
+		'summary/publicKeyAlgorithm',
+		'summary/signatureAlgorithm',
+		'summary/validationLevel',
+		'timeseriesGroups/ca',
+		'timeseriesGroups/caOwner',
+		'timeseriesGroups/duration',
+		'timeseriesGroups/entryType',
+		'timeseriesGroups/expirationStatus',
+		'timeseriesGroups/hasIps',
+		'timeseriesGroups/hasWildcards',
+		'timeseriesGroups/logApi',
+		'timeseriesGroups/publicKeyAlgorithm',
+		'timeseriesGroups/signatureAlgorithm',
+		'timeseriesGroups/validationLevel',
+	])
+	.describe(
+		'Dimension indicating the type and format of Certificate Transparency data to retrieve.'
+	)
+
+export const CtCaParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter results by certificate authority.')
+
+export const CtCaOwnerParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter results by certificate authority owner.')
+
+export const CtDurationParam = z
+	.array(
+		z.enum([
+			'LTE_3D',
+			'GT_3D_LTE_7D',
+			'GT_7D_LTE_10D',
+			'GT_10D_LTE_47D',
+			'GT_47D_LTE_100D',
+			'GT_100D_LTE_200D',
+			'GT_200D',
+		])
+	)
+	.optional()
+	.describe('Filter results by certificate duration.')
+
+export const CtEntryTypeParam = z
+	.array(z.enum(['PRECERTIFICATE', 'CERTIFICATE']))
+	.optional()
+	.describe('Filter results by entry type (certificate vs. pre-certificate).')
+
+export const CtTldParam = z
+	.array(z.string().min(2).max(63))
+	.optional()
+	.describe('Filter results by top-level domain (e.g., "com", "org").')
+
+export const CtValidationLevelParam = z
+	.array(z.enum(['DOMAIN', 'ORGANIZATION', 'EXTENDED']))
+	.optional()
+	.describe('Filter results by validation level (DV, OV, EV).')
+
+export const CtPublicKeyAlgorithmParam = z
+	.array(z.enum(['DSA', 'ECDSA', 'RSA']))
+	.optional()
+	.describe('Filter results by public key algorithm.')
+
+// Netflows Parameters
+export const NetflowsDimensionParam = z
+	.enum(['timeseries', 'summary', 'summary/adm1', 'summary/product', 'top/locations', 'top/ases'])
+	.describe('Dimension indicating the type and format of NetFlows data to retrieve.')
+
+export const NetflowsProductParam = z
+	.array(z.enum(['HTTP', 'ALL']))
+	.optional()
+	.describe('Filter results by network traffic product type.')
+
+export const NormalizationParam = z
+	.enum(['RAW_VALUES', 'PERCENTAGE'])
+	.optional()
+	.describe('Normalization method applied to results.')
+
+export const LimitPerGroupParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Limits the number of items per group. Extra items appear grouped under "other".')
+
+// Origins/Cloud Observatory Parameters (used by fetch-based tools)
+export const OriginSlugParam = z
+	.enum(['AMAZON', 'GOOGLE', 'MICROSOFT', 'ORACLE'])
+	.describe(
+		'The cloud provider origin to query. Supported values: AMAZON (AWS), GOOGLE (GCP), MICROSOFT (Azure), ORACLE (OCI).'
+	)
+
+export const OriginArrayParam = z
+	.array(OriginSlugParam)
+	.min(1)
+	.describe('Array of cloud provider origins to query. At least one origin must be specified.')
+
+export const OriginMetricParam = z
+	.enum([
+		'CONNECTION_FAILURES',
+		'REQUESTS',
+		'RESPONSE_HEADER_RECEIVE_DURATION',
+		'TCP_HANDSHAKE_DURATION',
+		'TCP_RTT',
+		'TLS_HANDSHAKE_DURATION',
+	])
+	.describe(
+		'The performance metric to retrieve. Only valid when dimension is timeseries or percentile. ' +
+			'CONNECTION_FAILURES: Number of failed connections. ' +
+			'REQUESTS: Total request count. ' +
+			'RESPONSE_HEADER_RECEIVE_DURATION: Time to receive response headers (ms). ' +
+			'TCP_HANDSHAKE_DURATION: TCP handshake time (ms). ' +
+			'TCP_RTT: TCP round-trip time (ms). ' +
+			'TLS_HANDSHAKE_DURATION: TLS handshake time (ms).'
+	)
+
+export const OriginDataDimensionParam = z
+	.enum([
+		'timeseries',
+		'summary/REGION',
+		'summary/SUCCESS_RATE',
+		'summary/PERCENTILE',
+		'timeseriesGroups/REGION',
+		'timeseriesGroups/SUCCESS_RATE',
+		'timeseriesGroups/PERCENTILE',
+	])
+	.describe(
+		'Dimension indicating the type and format of origins data to retrieve. ' +
+			'timeseries: Raw time series data. Requires setting the metric parameter.' +
+			'summary/*: Aggregated data grouped by dimension. ' +
+			'timeseriesGroups/*: Time series grouped by dimension. ' +
+			'REGION: Group by cloud provider region (e.g., us-east-1). ' +
+			'SUCCESS_RATE: Group by connection success rate. ' +
+			'PERCENTILE: Group by performance percentiles (p50, p90, p99). Requires setting the metric parameter.'
+	)
+
+export const OriginRegionParam = z
+	.array(z.string().max(100))
+	.optional()
+	.describe(
+		'Filters results by cloud provider region. ' +
+			'Example regions: us-east-1, eu-west-1, ap-southeast-1.'
+	)
+
+export const OriginNormalizationParam = z
+	.enum(['PERCENTAGE', 'MIN0_MAX'])
+	.optional()
+	.describe('Normalization method for results.')

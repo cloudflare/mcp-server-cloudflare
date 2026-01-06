@@ -15,7 +15,6 @@ import { registerAccountTools } from '@repo/mcp-common/src/tools/account.tools'
 import { MetricsTracker } from '@repo/mcp-observability'
 
 import { BASE_INSTRUCTIONS } from './radar.context'
-import { registerOriginsTools } from './tools/origins.tools'
 import { registerRadarTools } from './tools/radar.tools'
 import { registerUrlScannerTools } from './tools/url-scanner.tools'
 
@@ -70,7 +69,6 @@ export class RadarMCP extends McpAgent<Env, State, Props> {
 
 		registerAccountTools(this)
 		registerRadarTools(this)
-		registerOriginsTools(this)
 		registerUrlScannerTools(this)
 	}
 

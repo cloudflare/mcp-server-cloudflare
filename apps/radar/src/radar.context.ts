@@ -19,46 +19,48 @@ export interface Env {
 export const BASE_INSTRUCTIONS = /* markdown */ `
 # Cloudflare Radar MCP Server
 
-This server integrates tools powered by the Cloudflare Radar API to provide insights into global Internet traffic,
-trends, and other related utilities.
+This server provides tools powered by the Cloudflare Radar API for global Internet insights.
 
-An active account is **only required** for URL Scanner-related tools (e.g., \`scan_url\`).
+## Authentication
 
-For tools related to Internet trends and insights, analyze the results and, when appropriate, generate visualizations
-such as line charts, pie charts, bar charts, stacked area charts, choropleth maps, treemaps, or other relevant chart types.
+- **URL Scanner** requires an active account (use \`set_active_account\`)
+- All other Radar data tools work without account selection
 
-### Making comparisons
+## Tool Categories
 
-Many tools support **array-based filters** to enable comparisons across multiple criteria.
-In such cases, the array index corresponds to a distinct data series.
-For each data series, provide a corresponding \`dateRange\`, or alternatively a \`dateStart\` and \`dateEnd\` pair.
-Example: To compare HTTP traffic between Portugal and Spain over the last 7 days:
+- **Entities**: Look up ASN, IP, and location details (\`list_autonomous_systems\`, \`get_as_details\`, \`get_ip_details\`)
+- **Traffic**: HTTP and DNS trends (\`get_http_data\`, \`get_dns_queries_data\`)
+- **Attacks**: Layer 3/7 DDoS attack trends (\`get_l3_attack_data\`, \`get_l7_attack_data\`)
+- **Email**: Routing and security trends (\`get_email_routing_data\`, \`get_email_security_data\`)
+- **Quality**: Internet speed and quality metrics (\`get_internet_quality_data\`, \`get_internet_speed_data\`)
+- **Rankings**: Top domains and services (\`get_domains_ranking\`, \`get_internet_services_ranking\`)
+- **AI**: AI bot traffic and Workers AI usage (\`get_ai_data\`)
+- **BGP**: Route hijacks, leaks, and stats (\`get_bgp_hijacks\`, \`get_bgp_leaks\`, \`get_bgp_route_stats\`)
+- **Bots**: Bot traffic by category, operator, kind (\`get_bots_data\`)
+- **Certificate Transparency**: SSL/TLS certificate issuance trends (\`get_certificate_transparency_data\`)
+- **NetFlows**: Network traffic patterns with ADM1 filtering (\`get_netflows_data\`)
+- **Cloud Observatory**: Cloud provider performance - AWS, GCP, Azure, OCI (\`list_origins\`, \`get_origin_details\`, \`get_origins_data\`)
+- **URL Scanner**: Scan and analyze URLs for security threats (\`search_url_scans\`, \`create_url_scan\`, \`get_url_scan\`, \`get_url_scan_screenshot\`, \`get_url_scan_har\`)
+
+## Making Comparisons
+
+Many tools support **array-based filters** for comparisons. Each array index corresponds to a distinct data series.
+Example: Compare HTTP traffic between Portugal and Spain over the last 7 days:
 - \`dateRange: ["7d", "7d"]\`
 - \`location: ["PT", "ES"]\`
 
-This applies to date filters and other filters that support comparison across multiple values.
-If a tool does **not** support array-based filters, you can achieve the same comparison by making multiple separate
-calls to the tool.
+## Geographic Filtering
 
-### Cloud Observatory (Origins)
+- **location**: Filter by country (alpha-2 codes like "US", "PT")
+- **continent**: Filter by continent (alpha-2 codes like "EU", "NA")
+- **geoId**: Filter by ADM1 region (GeoNames IDs for states/provinces) - available for HTTP and NetFlows
 
-The Cloud Observatory tools (\`list_origins\`, \`get_origin_details\`, \`get_origins_timeseries\`, \`get_origins_summary\`,
-\`get_origins_timeseries_groups\`) provide performance insights for major cloud providers (hyperscalers):
-- **AMAZON** (AWS)
-- **GOOGLE** (GCP)
-- **MICROSOFT** (Azure)
-- **ORACLE** (OCI)
+## Visualizations
 
-Available metrics include:
-- \`TCP_RTT\`: TCP round-trip time (latency)
-- \`TCP_HANDSHAKE_DURATION\`: Time to establish TCP connection
-- \`TLS_HANDSHAKE_DURATION\`: Time to complete TLS handshake
-- \`RESPONSE_HEADER_RECEIVE_DURATION\`: Time to first byte (TTFB)
-- \`CONNECTION_FAILURES\`: Failed connection attempts
-- \`REQUESTS\`: Total request volume
-
-You can filter by specific cloud regions (e.g., \`us-east-1\`, \`eu-west-1\`) and group results by:
-- \`REGION\`: Compare performance across cloud regions
-- \`SUCCESS_RATE\`: Analyze connection reliability
-- \`PERCENTILE\`: View p50, p90, p99 latency distributions
+Generate charts when appropriate:
+- **Line charts**: Timeseries data
+- **Bar charts**: Rankings, summaries
+- **Pie charts**: Distributions
+- **Choropleth maps**: Geographic data
+- **Stacked area charts**: Grouped timeseries
 `
