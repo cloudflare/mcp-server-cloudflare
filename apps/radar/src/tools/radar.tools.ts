@@ -9,26 +9,43 @@ import {
 
 import {
 	AiDimensionParam,
+	AnnotationDataSourceParam,
+	AnnotationEventTypeParam,
+	As112DimensionParam,
+	As112ProtocolParam,
+	As112QueryTypeParam,
+	As112ResponseCodeParam,
 	AsnArrayParam,
 	AsnParam,
 	AsOrderByParam,
 	BgpHijackerAsnParam,
+	BgpInvalidOnlyParam,
 	BgpInvolvedAsnParam,
 	BgpInvolvedCountryParam,
 	BgpLeakAsnParam,
+	BgpLongestPrefixMatchParam,
 	BgpMaxConfidenceParam,
 	BgpMinConfidenceParam,
+	BgpOriginParam,
+	BgpPrefixArrayParam,
 	BgpPrefixParam,
+	BgpRpkiStatusParam,
 	BgpSortByParam,
 	BgpSortOrderParam,
+	BgpUpdateTypeParam,
 	BgpVictimAsnParam,
 	BotCategoryParam,
 	BotKindParam,
 	BotNameParam,
 	BotOperatorParam,
+	BotsCrawlersDimensionParam,
+	BotsCrawlersFormatParam,
 	BotsDimensionParam,
 	BotVerificationStatusParam,
 	ContinentArrayParam,
+	CrawlerClientTypeParam,
+	CrawlerIndustryParam,
+	CrawlerVerticalParam,
 	CtCaOwnerParam,
 	CtCaParam,
 	CtDimensionParam,
@@ -50,6 +67,7 @@ import {
 	EmailRoutingDimensionParam,
 	EmailSecurityDimensionParam,
 	GeoIdArrayParam,
+	GeoIdParam,
 	HttpDimensionParam,
 	InternetQualityMetricParam,
 	InternetServicesCategoryParam,
@@ -58,6 +76,9 @@ import {
 	IpParam,
 	L3AttackDimensionParam,
 	L7AttackDimensionParam,
+	LeakedCredentialsBotClassParam,
+	LeakedCredentialsCompromisedParam,
+	LeakedCredentialsDimensionParam,
 	LimitPerGroupParam,
 	LocationArrayParam,
 	LocationListParam,
@@ -71,6 +92,12 @@ import {
 	OriginNormalizationParam,
 	OriginRegionParam,
 	OriginSlugParam,
+	RobotsTxtDimensionParam,
+	RobotsTxtDirectiveParam,
+	RobotsTxtDomainCategoryParam,
+	RobotsTxtPatternParam,
+	RobotsTxtUserAgentCategoryParam,
+	TcpResetsTimeoutsDimensionParam,
 } from '../types/radar'
 import { resolveAndInvoke } from '../utils'
 
@@ -1384,6 +1411,1062 @@ export function registerRadarTools(agent: RadarMCP) {
 						{
 							type: 'text' as const,
 							text: `Error getting origins data: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// Robots.txt Tools
+	// ============================================================
+
+	agent.server.tool(
+		'get_robots_txt_data',
+		'Retrieve robots.txt analysis data. Shows how websites configure crawler access rules, particularly for AI crawlers. Useful for understanding web crawler policies across domains.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			date: DateListParam.optional(),
+			directive: RobotsTxtDirectiveParam,
+			pattern: RobotsTxtPatternParam,
+			domainCategory: RobotsTxtDomainCategoryParam,
+			userAgentCategory: RobotsTxtUserAgentCategoryParam,
+			dimension: RobotsTxtDimensionParam,
+			limitPerGroup: LimitPerGroupParam,
+			limit: PaginationLimitParam,
+		},
+		async ({
+			dateRange,
+			dateStart,
+			dateEnd,
+			date,
+			directive,
+			pattern,
+			domainCategory,
+			userAgentCategory,
+			dimension,
+			limitPerGroup,
+			limit,
+		}) => {
+			try {
+				const props = getProps(agent)
+
+				const endpoint = `/robots_txt/${dimension}`
+
+				const result = await fetchRadarApi(props.accessToken, endpoint, {
+					dateRange,
+					dateStart,
+					dateEnd,
+					date,
+					directive,
+					pattern,
+					domainCategory,
+					userAgentCategory,
+					limitPerGroup,
+					limit,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting robots.txt data: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// Bots Crawlers Tools
+	// ============================================================
+
+	agent.server.tool(
+		'get_bots_crawlers_data',
+		'Retrieve web crawler HTTP request data. Shows crawler traffic patterns by client type, user agent, referrer, and industry. Useful for analyzing crawler behavior and traffic distribution.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			dimension: BotsCrawlersDimensionParam,
+			format: BotsCrawlersFormatParam,
+			botOperator: BotOperatorParam,
+			vertical: CrawlerVerticalParam,
+			industry: CrawlerIndustryParam,
+			clientType: CrawlerClientTypeParam,
+			limitPerGroup: LimitPerGroupParam,
+		},
+		async ({
+			dateRange,
+			dateStart,
+			dateEnd,
+			dimension,
+			format,
+			botOperator,
+			vertical,
+			industry,
+			clientType,
+			limitPerGroup,
+		}) => {
+			try {
+				const props = getProps(agent)
+
+				const endpoint = `/bots/crawlers/${format}/${dimension}`
+
+				const result = await fetchRadarApi(props.accessToken, endpoint, {
+					dateRange,
+					dateStart,
+					dateEnd,
+					botOperator,
+					vertical,
+					industry,
+					clientType,
+					limitPerGroup,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting bots crawlers data: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'list_bots',
+		'List known bots with their details. Includes AI crawlers, search engines, monitoring bots, and more. Filter by category, operator, kind, or verification status.',
+		{
+			limit: PaginationLimitParam,
+			offset: PaginationOffsetParam,
+			botCategory: z
+				.enum([
+					'SEARCH_ENGINE_CRAWLER',
+					'SEARCH_ENGINE_OPTIMIZATION',
+					'MONITORING_AND_ANALYTICS',
+					'ADVERTISING_AND_MARKETING',
+					'SOCIAL_MEDIA_MARKETING',
+					'PAGE_PREVIEW',
+					'ACADEMIC_RESEARCH',
+					'SECURITY',
+					'ACCESSIBILITY',
+					'WEBHOOKS',
+					'FEED_FETCHER',
+					'AI_CRAWLER',
+					'AGGREGATOR',
+					'AI_ASSISTANT',
+					'AI_SEARCH',
+					'ARCHIVER',
+				])
+				.optional()
+				.describe('Filter by bot category.'),
+			botOperator: z.string().optional().describe('Filter by bot operator name.'),
+			kind: z.enum(['AGENT', 'BOT']).optional().describe('Filter by bot kind.'),
+			botVerificationStatus: z
+				.enum(['VERIFIED'])
+				.optional()
+				.describe('Filter by verification status.'),
+		},
+		async ({ limit, offset, botCategory, botOperator, kind, botVerificationStatus }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bots', {
+					limit,
+					offset,
+					botCategory,
+					botOperator,
+					kind,
+					botVerificationStatus,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error listing bots: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_bot_details',
+		'Get detailed information about a specific bot by its slug identifier.',
+		{
+			botSlug: z.string().describe('The bot slug identifier (e.g., "googlebot", "bingbot").'),
+		},
+		async ({ botSlug }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, `/bots/${botSlug}`)
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting bot details: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// Leaked Credential Checks Tools
+	// ============================================================
+
+	agent.server.tool(
+		'get_leaked_credentials_data',
+		'Retrieve trends in HTTP authentication requests and compromised credential detection. Shows distribution by compromised status and bot class.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			asn: AsnArrayParam,
+			continent: ContinentArrayParam,
+			location: LocationArrayParam,
+			botClass: LeakedCredentialsBotClassParam,
+			compromised: LeakedCredentialsCompromisedParam,
+			dimension: LeakedCredentialsDimensionParam,
+		},
+		async ({
+			dateRange,
+			dateStart,
+			dateEnd,
+			asn,
+			continent,
+			location,
+			botClass,
+			compromised,
+			dimension,
+		}) => {
+			try {
+				const props = getProps(agent)
+
+				let endpoint: string
+				if (dimension === 'timeseries') {
+					endpoint = '/leaked_credential_checks/timeseries'
+				} else {
+					endpoint = `/leaked_credential_checks/${dimension}`
+				}
+
+				const result = await fetchRadarApi(props.accessToken, endpoint, {
+					dateRange,
+					dateStart,
+					dateEnd,
+					asn,
+					continent,
+					location,
+					botClass,
+					compromised,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting leaked credentials data: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// AS112 Tools
+	// ============================================================
+
+	agent.server.tool(
+		'get_as112_data',
+		'Retrieve AS112 DNS sink hole data. AS112 handles reverse DNS lookups for private IP addresses (RFC 1918). Useful for analyzing DNS misconfiguration patterns.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			continent: ContinentArrayParam,
+			location: LocationArrayParam,
+			queryType: As112QueryTypeParam,
+			protocol: As112ProtocolParam,
+			responseCode: As112ResponseCodeParam,
+			dimension: As112DimensionParam,
+		},
+		async ({
+			dateRange,
+			dateStart,
+			dateEnd,
+			continent,
+			location,
+			queryType,
+			protocol,
+			responseCode,
+			dimension,
+		}) => {
+			try {
+				const props = getProps(agent)
+
+				let endpoint: string
+				if (dimension === 'timeseries') {
+					endpoint = '/as112/timeseries'
+				} else if (dimension === 'top/locations') {
+					endpoint = '/as112/top/locations'
+				} else {
+					endpoint = `/as112/${dimension}`
+				}
+
+				const result = await fetchRadarApi(props.accessToken, endpoint, {
+					dateRange,
+					dateStart,
+					dateEnd,
+					continent,
+					location,
+					queryType,
+					protocol,
+					responseCode,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting AS112 data: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// Geolocation Tools
+	// ============================================================
+
+	agent.server.tool(
+		'list_geolocations',
+		'List available geolocations (ADM1 - administrative divisions like states/provinces). Use this to find GeoNames IDs for filtering HTTP and NetFlows data by region.',
+		{
+			limit: PaginationLimitParam,
+			offset: PaginationOffsetParam,
+			geoId: z.string().optional().describe('Filter by specific GeoNames ID.'),
+			location: LocationParam.optional(),
+		},
+		async ({ limit, offset, geoId, location }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/geolocations', {
+					limit,
+					offset,
+					geoId,
+					location,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error listing geolocations: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_geolocation_details',
+		'Get details for a specific geolocation by its GeoNames ID.',
+		{
+			geoId: GeoIdParam,
+		},
+		async ({ geoId }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, `/geolocations/${geoId}`)
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting geolocation details: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// TCP Resets/Timeouts Tools
+	// ============================================================
+
+	agent.server.tool(
+		'get_tcp_resets_timeouts_data',
+		'Retrieve TCP connection quality metrics including resets and timeouts. Useful for understanding connection reliability across networks and locations.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			asn: AsnArrayParam,
+			continent: ContinentArrayParam,
+			location: LocationArrayParam,
+			dimension: TcpResetsTimeoutsDimensionParam,
+		},
+		async ({ dateRange, dateStart, dateEnd, asn, continent, location, dimension }) => {
+			try {
+				const props = getProps(agent)
+
+				const endpoint =
+					dimension === 'summary'
+						? '/tcp_resets_timeouts/summary'
+						: '/tcp_resets_timeouts/timeseries_groups'
+
+				const result = await fetchRadarApi(props.accessToken, endpoint, {
+					dateRange,
+					dateStart,
+					dateEnd,
+					asn,
+					continent,
+					location,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting TCP resets/timeouts data: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// Annotations/Outages Tools
+	// ============================================================
+
+	agent.server.tool(
+		'get_annotations',
+		'Retrieve annotations including Internet events, outages, and anomalies from various Cloudflare data sources.',
+		{
+			limit: PaginationLimitParam,
+			offset: PaginationOffsetParam,
+			dateRange: DateRangeParam.optional(),
+			dateStart: DateStartParam.optional(),
+			dateEnd: DateEndParam.optional(),
+			dataSource: AnnotationDataSourceParam,
+			eventType: AnnotationEventTypeParam,
+			asn: AsnParam.optional(),
+			location: LocationParam.optional(),
+		},
+		async ({
+			limit,
+			offset,
+			dateRange,
+			dateStart,
+			dateEnd,
+			dataSource,
+			eventType,
+			asn,
+			location,
+		}) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/annotations', {
+					limit,
+					offset,
+					dateRange,
+					dateStart,
+					dateEnd,
+					dataSource,
+					eventType,
+					asn,
+					location,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting annotations: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_outages',
+		'Retrieve Internet outages and anomalies. Provides information about detected connectivity issues across ASes and locations.',
+		{
+			limit: PaginationLimitParam,
+			offset: PaginationOffsetParam,
+			dateRange: DateRangeParam.optional(),
+			dateStart: DateStartParam.optional(),
+			dateEnd: DateEndParam.optional(),
+			asn: AsnParam.optional(),
+			location: LocationParam.optional(),
+		},
+		async ({ limit, offset, dateRange, dateStart, dateEnd, asn, location }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/annotations/outages', {
+					limit,
+					offset,
+					dateRange,
+					dateStart,
+					dateEnd,
+					asn,
+					location,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting outages: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// Certificate Transparency Authorities & Logs Tools
+	// ============================================================
+
+	agent.server.tool(
+		'list_ct_authorities',
+		'List Certificate Authorities (CAs) tracked in Certificate Transparency logs.',
+		{
+			limit: PaginationLimitParam,
+			offset: PaginationOffsetParam,
+		},
+		async ({ limit, offset }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/ct/authorities', {
+					limit,
+					offset,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error listing CT authorities: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_ct_authority_details',
+		'Get details for a specific Certificate Authority by its slug.',
+		{
+			caSlug: z.string().describe('The Certificate Authority slug identifier.'),
+		},
+		async ({ caSlug }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, `/ct/authorities/${caSlug}`)
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting CT authority details: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'list_ct_logs',
+		'List Certificate Transparency logs.',
+		{
+			limit: PaginationLimitParam,
+			offset: PaginationOffsetParam,
+		},
+		async ({ limit, offset }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/ct/logs', {
+					limit,
+					offset,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error listing CT logs: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_ct_log_details',
+		'Get details for a specific Certificate Transparency log by its slug.',
+		{
+			logSlug: z.string().describe('The Certificate Transparency log slug identifier.'),
+		},
+		async ({ logSlug }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, `/ct/logs/${logSlug}`)
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting CT log details: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// BGP Additional Tools
+	// ============================================================
+
+	agent.server.tool(
+		'get_bgp_timeseries',
+		'Retrieve BGP updates time series data. Shows BGP announcement and withdrawal patterns over time.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			asn: AsnArrayParam,
+			prefix: BgpPrefixArrayParam,
+			updateType: BgpUpdateTypeParam,
+		},
+		async ({ dateRange, dateStart, dateEnd, asn, prefix, updateType }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/timeseries', {
+					dateRange,
+					dateStart,
+					dateEnd,
+					asn,
+					prefix,
+					updateType,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting BGP timeseries: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_bgp_top_ases',
+		'Get top Autonomous Systems by BGP update count.',
+		{
+			limit: PaginationLimitParam,
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			asn: AsnArrayParam,
+			prefix: BgpPrefixArrayParam,
+			updateType: BgpUpdateTypeParam,
+		},
+		async ({ limit, dateRange, dateStart, dateEnd, asn, prefix, updateType }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/top/ases', {
+					limit,
+					dateRange,
+					dateStart,
+					dateEnd,
+					asn,
+					prefix,
+					updateType,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting BGP top ASes: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_bgp_top_prefixes',
+		'Get top IP prefixes by BGP update count.',
+		{
+			limit: PaginationLimitParam,
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			asn: AsnArrayParam,
+			updateType: BgpUpdateTypeParam,
+		},
+		async ({ limit, dateRange, dateStart, dateEnd, asn, updateType }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/top/prefixes', {
+					limit,
+					dateRange,
+					dateStart,
+					dateEnd,
+					asn,
+					updateType,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting BGP top prefixes: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_bgp_moas',
+		'Get Multi-Origin AS (MOAS) prefixes. MOAS occurs when a prefix is announced by multiple ASes, which can indicate hijacking or legitimate anycast.',
+		{
+			origin: BgpOriginParam,
+			prefix: BgpPrefixParam,
+			invalidOnly: BgpInvalidOnlyParam,
+		},
+		async ({ origin, prefix, invalidOnly }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/routes/moas', {
+					origin,
+					prefix,
+					invalid_only: invalidOnly,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting BGP MOAS: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_bgp_pfx2as',
+		'Get prefix-to-ASN mapping. Useful for looking up which AS announces a given IP prefix.',
+		{
+			prefix: BgpPrefixParam,
+			origin: BgpOriginParam,
+			rpkiStatus: BgpRpkiStatusParam,
+			longestPrefixMatch: BgpLongestPrefixMatchParam,
+		},
+		async ({ prefix, origin, rpkiStatus, longestPrefixMatch }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/routes/pfx2as', {
+					prefix,
+					origin,
+					rpkiStatus,
+					longestPrefixMatch,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting BGP pfx2as: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// AS Sets and Relationships Tools
+	// ============================================================
+
+	agent.server.tool(
+		'get_as_set',
+		'Get IRR AS-SETs that an Autonomous System is a member of. AS-SETs are used in routing policies.',
+		{
+			asn: AsnParam,
+		},
+		async ({ asn }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, `/entities/asns/${asn}/as_set`)
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting AS set: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_as_relationships',
+		'Get AS-level relationships for an Autonomous System. Shows peer, upstream, and downstream relationships with other ASes.',
+		{
+			asn: AsnParam,
+			asn2: z
+				.number()
+				.int()
+				.positive()
+				.optional()
+				.describe('Optional second ASN to check specific relationship.'),
+		},
+		async ({ asn, asn2 }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, `/entities/asns/${asn}/rel`, {
+					asn2,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting AS relationships: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
 				}

@@ -617,3 +617,224 @@ export const OriginNormalizationParam = z
 	.enum(['PERCENTAGE', 'MIN0_MAX'])
 	.optional()
 	.describe('Normalization method for results.')
+
+// ============================================================
+// Robots.txt Parameters
+// ============================================================
+
+export const RobotsTxtDimensionParam = z
+	.enum([
+		'summary/user_agent',
+		'timeseries_groups/user_agent',
+		'top/domain_categories',
+		'top/user_agents/directive',
+	])
+	.describe('Dimension indicating the type and format of robots.txt data to retrieve.')
+
+export const RobotsTxtDirectiveParam = z
+	.enum(['ALLOW', 'DISALLOW'])
+	.optional()
+	.describe('Filter by robots.txt directive type (ALLOW or DISALLOW).')
+
+export const RobotsTxtPatternParam = z
+	.enum(['FULLY', 'PARTIALLY'])
+	.optional()
+	.describe('Filter by pattern matching type (FULLY or PARTIALLY matched).')
+
+export const RobotsTxtDomainCategoryParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by domain categories.')
+
+export const RobotsTxtUserAgentCategoryParam = z
+	.enum(['AI'])
+	.optional()
+	.describe('Filter by user agent category (currently only AI is supported).')
+
+// ============================================================
+// Bots Crawlers Parameters
+// ============================================================
+
+export const BotsCrawlersDimensionParam = z
+	.enum(['CLIENT_TYPE', 'USER_AGENT', 'REFERER', 'CRAWL_REFER_RATIO', 'VERTICAL', 'INDUSTRY'])
+	.describe(
+		'Dimension for crawler data. CLIENT_TYPE: crawler type, USER_AGENT: crawler user agent, ' +
+			'REFERER: referrer analysis, CRAWL_REFER_RATIO: crawl to referrer ratio, ' +
+			'VERTICAL: industry vertical, INDUSTRY: industry classification.'
+	)
+
+export const BotsCrawlersFormatParam = z
+	.enum(['summary', 'timeseries_groups'])
+	.describe('Format for crawler data: summary or time series grouped data.')
+
+export const CrawlerVerticalParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by industry vertical.')
+
+export const CrawlerIndustryParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by industry classification.')
+
+export const CrawlerClientTypeParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by client type.')
+
+// ============================================================
+// Leaked Credential Checks Parameters
+// ============================================================
+
+export const LeakedCredentialsDimensionParam = z
+	.enum([
+		'timeseries',
+		'summary/compromised',
+		'summary/bot_class',
+		'timeseries_groups/compromised',
+		'timeseries_groups/bot_class',
+	])
+	.describe('Dimension indicating the type and format of leaked credentials data to retrieve.')
+
+export const LeakedCredentialsBotClassParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by bot class.')
+
+export const LeakedCredentialsCompromisedParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by compromised status.')
+
+// ============================================================
+// AS112 Parameters
+// ============================================================
+
+export const As112DimensionParam = z
+	.enum([
+		'timeseries',
+		'summary/dnssec',
+		'summary/edns',
+		'summary/ip_version',
+		'summary/protocol',
+		'summary/query_type',
+		'summary/response_code',
+		'timeseries_groups/dnssec',
+		'timeseries_groups/edns',
+		'timeseries_groups/ip_version',
+		'timeseries_groups/protocol',
+		'timeseries_groups/query_type',
+		'timeseries_groups/response_code',
+		'top/locations',
+	])
+	.describe(
+		'Dimension indicating the type and format of AS112 data to retrieve. ' +
+			'AS112 is a DNS sink hole for reverse DNS lookups of private IP addresses.'
+	)
+
+export const As112QueryTypeParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by DNS query type.')
+
+export const As112ProtocolParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by DNS protocol (UDP/TCP).')
+
+export const As112ResponseCodeParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by DNS response code.')
+
+// ============================================================
+// TCP Resets/Timeouts Parameters
+// ============================================================
+
+export const TcpResetsTimeoutsDimensionParam = z
+	.enum(['summary', 'timeseries_groups'])
+	.describe('Format for TCP resets/timeouts data: summary or time series grouped data.')
+
+// ============================================================
+// Annotations/Outages Parameters
+// ============================================================
+
+export const AnnotationDataSourceParam = z
+	.enum([
+		'ALL',
+		'AI_BOTS',
+		'AI_GATEWAY',
+		'BGP',
+		'BOTS',
+		'CONNECTION_ANOMALY',
+		'CT',
+		'DNS',
+		'DNS_MAGNITUDE',
+		'DNS_AS112',
+		'DOS',
+		'EMAIL_ROUTING',
+		'EMAIL_SECURITY',
+		'FW',
+		'FW_PG',
+		'HTTP',
+		'HTTP_CONTROL',
+		'HTTP_CRAWLER_REFERER',
+		'HTTP_ORIGINS',
+		'IQI',
+		'LEAKED_CREDENTIALS',
+		'NET',
+		'ROBOTS_TXT',
+		'SPEED',
+		'WORKERS_AI',
+	])
+	.optional()
+	.describe('Filter annotations by data source.')
+
+export const AnnotationEventTypeParam = z
+	.enum(['EVENT', 'GENERAL', 'OUTAGE', 'PARTIAL_PROJECTION', 'PIPELINE', 'TRAFFIC_ANOMALY'])
+	.optional()
+	.describe('Filter annotations by event type.')
+
+// ============================================================
+// BGP Additional Parameters
+// ============================================================
+
+export const BgpUpdateTypeParam = z
+	.array(z.enum(['ANNOUNCEMENT', 'WITHDRAWAL']))
+	.optional()
+	.describe('Filter by BGP update type (ANNOUNCEMENT or WITHDRAWAL).')
+
+export const BgpPrefixArrayParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by IP prefix(es).')
+
+export const BgpRpkiStatusParam = z
+	.enum(['VALID', 'INVALID', 'UNKNOWN'])
+	.optional()
+	.describe('Filter by RPKI validation status.')
+
+export const BgpLongestPrefixMatchParam = z
+	.boolean()
+	.optional()
+	.describe('Whether to use longest prefix match.')
+
+export const BgpOriginParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Filter by origin ASN.')
+
+export const BgpInvalidOnlyParam = z
+	.boolean()
+	.optional()
+	.describe('Only return invalid MOAS prefixes.')
+
+// ============================================================
+// Geolocation Parameters
+// ============================================================
+
+export const GeoIdParam = z
+	.string()
+	.describe('GeoNames ID for the geolocation (e.g., "2267056" for Lisbon).')
