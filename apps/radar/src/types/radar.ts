@@ -402,13 +402,13 @@ export const BotsDimensionParam = z
 	.enum([
 		'timeseries',
 		'summary/bot',
-		'summary/botKind',
-		'summary/botOperator',
-		'summary/botCategory',
+		'summary/bot_kind',
+		'summary/bot_operator',
+		'summary/bot_category',
 		'timeseriesGroups/bot',
-		'timeseriesGroups/botKind',
-		'timeseriesGroups/botOperator',
-		'timeseriesGroups/botCategory',
+		'timeseriesGroups/bot_kind',
+		'timeseriesGroups/bot_operator',
+		'timeseriesGroups/bot_category',
 	])
 	.describe('Dimension indicating the type and format of bot data to retrieve.')
 
