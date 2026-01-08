@@ -460,23 +460,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			try {
 				const props = getProps(agent)
 
-				// Map dimension to API endpoint
-				// timeseries -> /http/timeseries
-				// summary/BOT_CLASS -> /http/summary/BOT_CLASS
-				// timeseriesGroups/DEVICE_TYPE -> /http/timeseries_groups/DEVICE_TYPE
-				// top/locations -> /http/top/locations
-				let endpoint: string
-				if (dimension === 'timeseries') {
-					endpoint = '/http/timeseries'
-				} else if (dimension.startsWith('timeseriesGroups/')) {
-					const dim = dimension.replace('timeseriesGroups/', '')
-					endpoint = `/http/timeseries_groups/${dim}`
-				} else {
-					// summary/* and top/* use the dimension directly
-					endpoint = `/http/${dimension}`
-				}
-
-				const result = await fetchRadarApi(props.accessToken, endpoint, {
+				const result = await fetchRadarApi(props.accessToken, `/http/${dimension}`, {
 					asn,
 					continent,
 					location,
@@ -1176,9 +1160,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			try {
 				const props = getProps(agent)
 
-				const endpoint = dimension === 'timeseries' ? '/ct/timeseries' : `/ct/${dimension}`
-
-				const result = await fetchRadarApi(props.accessToken, endpoint, {
+				const result = await fetchRadarApi(props.accessToken, `/ct/${dimension}`, {
 					dateRange,
 					dateStart,
 					dateEnd,
