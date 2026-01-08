@@ -172,26 +172,31 @@ export const AsOrderByParam: z.ZodType<ASNListParams['orderBy']> = z
 export const HttpDimensionParam = z
 	.enum([
 		'timeseries',
-		'summary/deviceType',
-		'summary/httpProtocol',
-		'summary/httpVersion',
-		'summary/botClass',
-		'summary/ipVersion',
-		'summary/tlsVersion',
+		// Summary dimensions (new unified endpoint)
+		'summary/adm1',
+		'summary/bot_class',
+		'summary/browser',
+		'summary/browser_family',
+		'summary/device_type',
+		'summary/http_protocol',
+		'summary/http_version',
+		'summary/ip_version',
 		'summary/os',
-		'summary/postQuantum',
-		'top/browser', // TODO replace with "summary/browser" and "summary/browserFamily" once available on the lib
-		'top/browserFamily',
-		'timeseriesGroups/deviceType',
-		'timeseriesGroups/httpProtocol',
-		'timeseriesGroups/httpVersion',
-		'timeseriesGroups/botClass',
-		'timeseriesGroups/ipVersion',
-		'timeseriesGroups/tlsVersion',
-		'timeseriesGroups/os',
-		'timeseriesGroups/postQuantum',
+		'summary/post_quantum',
+		'summary/tls_version',
+		// Timeseries groups dimensions (new unified endpoint)
+		'timeseriesGroups/adm1',
+		'timeseriesGroups/bot_class',
 		'timeseriesGroups/browser',
-		'timeseriesGroups/browserFamily',
+		'timeseriesGroups/browser_family',
+		'timeseriesGroups/device_type',
+		'timeseriesGroups/http_protocol',
+		'timeseriesGroups/http_version',
+		'timeseriesGroups/ip_version',
+		'timeseriesGroups/os',
+		'timeseriesGroups/post_quantum',
+		'timeseriesGroups/tls_version',
+		// Top endpoints
 		'top/locations',
 		'top/ases',
 	])
@@ -200,23 +205,29 @@ export const HttpDimensionParam = z
 export const DnsDimensionParam = z
 	.enum([
 		'timeseries',
-		'summary/ipVersion',
-		'summary/cacheHit',
+		'summary/ip_version',
+		'summary/cache_hit',
 		'summary/dnssec',
-		'summary/dnssecAware',
-		'summary/matchingAnswer',
+		'summary/dnssec_aware',
+		'summary/dnssec_e2e',
+		'summary/matching_answer',
 		'summary/protocol',
-		'summary/queryType',
-		'summary/responseCode',
-		'summary/responseTTL',
-		'timeseriesGroups/ipVersion',
-		'timeseriesGroups/cacheHit',
-		'timeseriesGroups/dnssecAware',
-		'timeseriesGroups/matchingAnswer',
+		'summary/query_type',
+		'summary/response_code',
+		'summary/response_ttl',
+		'summary/tld',
+		'summary/tld_dns_magnitude',
+		'timeseriesGroups/ip_version',
+		'timeseriesGroups/cache_hit',
+		'timeseriesGroups/dnssec',
+		'timeseriesGroups/dnssec_aware',
+		'timeseriesGroups/dnssec_e2e',
+		'timeseriesGroups/matching_answer',
 		'timeseriesGroups/protocol',
-		'timeseriesGroups/queryType',
-		'timeseriesGroups/responseCode',
-		'timeseriesGroups/responseTTL',
+		'timeseriesGroups/query_type',
+		'timeseriesGroups/response_code',
+		'timeseriesGroups/response_ttl',
+		'timeseriesGroups/tld',
 		'top/locations',
 		'top/ases',
 	])
@@ -312,12 +323,19 @@ export const EmailSecurityDimensionParam = z
 
 export const AiDimensionParam = z
 	.enum([
-		'bots/summary/userAgent',
-		'bots/timeseriesGroups/userAgent',
+		'bots/timeseries',
+		'bots/summary/user_agent',
+		'bots/summary/crawl_purpose',
+		'bots/summary/industry',
+		'bots/summary/vertical',
+		'bots/timeseries_groups/user_agent',
+		'bots/timeseries_groups/crawl_purpose',
+		'bots/timeseries_groups/industry',
+		'bots/timeseries_groups/vertical',
 		'inference/summary/model',
 		'inference/summary/task',
-		'inference/timeseriesGroups/model',
-		'inference/timeseriesGroups/task',
+		'inference/timeseries_groups/model',
+		'inference/timeseries_groups/task',
 	])
 	.describe('Dimension indicating the type and format of AI data to retrieve.')
 
@@ -866,3 +884,66 @@ export const BgpIpVersionParam = z
 export const GeoIdParam = z
 	.string()
 	.describe('GeoNames ID for the geolocation (e.g., "2267056" for Lisbon).')
+
+// ============================================================
+// TLD Parameters
+// ============================================================
+
+export const TldTypeParam = z
+	.enum(['GENERIC', 'COUNTRY_CODE', 'GENERIC_RESTRICTED', 'INFRASTRUCTURE', 'SPONSORED'])
+	.optional()
+	.describe('Filters results by TLD type.')
+
+export const TldManagerParam = z
+	.string()
+	.max(100)
+	.optional()
+	.describe('Filters results by TLD manager (e.g., "VeriSign Global Registry Services").')
+
+export const TldParam = z
+	.string()
+	.min(2)
+	.max(63)
+	.regex(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/)
+	.describe('Top-level domain (e.g., "com", "org", "net").')
+
+export const TldFilterParam = z
+	.string()
+	.optional()
+	.describe('Filters results by top-level domain. Specify a comma-separated list of TLDs.')
+
+// ============================================================
+// Ranking Timeseries Parameters
+// ============================================================
+
+export const DomainsArrayParam = z
+	.array(
+		z
+			.string()
+			.min(1)
+			.max(253)
+			.regex(/^(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+(?:[A-Za-z]{2,63}))$/)
+	)
+	.optional()
+	.describe('Filters results by domain name. Specify an array of domain names to track.')
+
+export const DomainCategoryArrayParam = z
+	.array(z.string().max(100))
+	.optional()
+	.describe('Filters results by domain category (e.g., "News & Media", "Technology").')
+
+// ============================================================
+// Speed Histogram Parameters
+// ============================================================
+
+export const SpeedHistogramMetricParam = z
+	.enum(['BANDWIDTH', 'LATENCY', 'JITTER'])
+	.optional()
+	.describe('Metrics to be returned in the histogram. Defaults to BANDWIDTH.')
+
+export const BucketSizeParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Specifies the width for every bucket in the histogram.')
