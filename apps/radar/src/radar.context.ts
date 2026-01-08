@@ -44,16 +44,63 @@ This server provides tools powered by the Cloudflare Radar API for global Intern
 
 ## Making Comparisons
 
-Many tools support **array-based filters** for comparisons. Each array index corresponds to a distinct data series.
-Example: Compare HTTP traffic between Portugal and Spain over the last 7 days:
+Many tools support **array-based filters** for comparisons. Filter arrays (location, asn, continent, geoId) map **positionally** to dateRange arrays - each array index corresponds to a distinct data series.
+
+### Cross-Location Comparison (Same Time Period)
+Compare HTTP traffic between Portugal and Spain over the last 7 days:
 - \`dateRange: ["7d", "7d"]\`
 - \`location: ["PT", "ES"]\`
 
-## Geographic Filtering
+Result: \`summary_0\` = Portugal (7d), \`summary_1\` = Spain (7d)
+
+### Time Period Comparison (Same Location)
+Compare Portugal bandwidth this week vs last week:
+- \`dateRange: ["7d", "7dcontrol"]\`
+- \`location: ["PT", "PT"]\`  *(repeat the location for each dateRange)*
+
+Result: \`summary_0\` = PT (current week), \`summary_1\` = PT (previous week)
+
+### IMPORTANT: Positional Mapping Behavior
+Filter arrays must match the length of dateRange for consistent filtering. If you provide fewer filter values than dateRange values, unmatched periods default to worldwide/unfiltered data.
+
+**Correct** (comparing Portugal across time periods):
+- \`dateRange: ["7d", "7dcontrol"], location: ["PT", "PT"]\`
+
+**Incorrect** (control period will be worldwide, not Portugal):
+- \`dateRange: ["7d", "7dcontrol"], location: ["PT"]\`  *(missing second location)*
+
+This positional mapping applies to all filter arrays: **location**, **asn**, **continent**, and **geoId**.
+
+## Geographic Options
 
 - **location**: Filter by country (alpha-2 codes like "US", "PT")
 - **continent**: Filter by continent (alpha-2 codes like "EU", "NA")
+- **asn**: Filter by Autonomous System Number (e.g., "13335" for Cloudflare, "15169" for Google)
 - **geoId**: Filter by ADM1 region (GeoNames IDs for states/provinces) - available for HTTP and NetFlows
+
+## Dimension Types
+
+Many tools use a \`dimension\` parameter to control the response format:
+
+### timeseries
+Returns data points over time with timestamps and values. Best for line charts showing trends.
+\`\`\`
+{ timestamps: ["2026-01-01T12:00:00Z", ...], values: ["0.735", "0.812", ...] }
+\`\`\`
+
+### summary
+Returns aggregated percentages or values grouped by a category. Best for pie/bar charts.
+\`\`\`
+{ Chrome: "31.44%", ChromeMobile: "27.89%", Safari: "12.27%", ... }
+\`\`\`
+
+### timeseriesGroups
+Combines both: time series data broken down by category. Best for stacked area/line charts.
+\`\`\`
+{ timestamps: [...], Chrome: ["28.15", "27.35", ...], Firefox: ["31.01", "31.23", ...] }
+\`\`\`
+
+Use \`summary/*\` dimensions (e.g., \`summary/browser\`) for snapshots and \`timeseriesGroups/*\` (e.g., \`timeseriesGroups/browser\`) for trends over time.
 
 ## Visualizations
 

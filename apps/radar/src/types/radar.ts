@@ -68,7 +68,11 @@ export const DateRangeArrayParam: z.ZodType<HTTPTimeseriesParams['dateRange']> =
 	.describe(
 		'Filters results by date range. ' +
 			'For example, use `7d` and `7dcontrol` to compare this week with the previous week. ' +
-			'Use this parameter or set specific start and end dates (`dateStart` and `dateEnd` parameters).'
+			'Use this parameter or set specific start and end dates (`dateStart` and `dateEnd` parameters). ' +
+			'IMPORTANT: When using multiple dateRange values for comparison, filter array parameters (location, asn, ' +
+			'continent, geoId) map positionally to each dateRange element. For example, with dateRange: ["7d", "7dcontrol"] ' +
+			'and location: ["PT", "PT"], the first period uses PT and the control period also uses PT. If you only provide ' +
+			'location: ["PT"], only the first period is filtered by PT while the control period defaults to worldwide data.'
 	)
 
 export const DateStartParam = z
@@ -124,7 +128,12 @@ export const LocationArrayParam: z.ZodType<HTTPTimeseriesParams['location']> = z
 	.optional()
 	.describe(
 		'Filters results by location. Provide an array of alpha-2 country codes (e.g., "US", "PT"). ' +
-			'Prefix a code with `-` to exclude it (e.g., ["-US", "PT"] excludes the US and includes Portugal).'
+			'Prefix a code with `-` to exclude it (e.g., ["-US", "PT"] excludes the US and includes Portugal). ' +
+			'IMPORTANT: When using multiple dateRange values (e.g., ["7d", "7dcontrol"]), each array element ' +
+			'maps positionally to each dateRange. To compare the same location across time periods, repeat the ' +
+			'location code (e.g., location: ["PT", "PT"] with dateRange: ["7d", "7dcontrol"]). Using a single ' +
+			'location with multiple dateRange values will filter only the first period, with subsequent periods ' +
+			'defaulting to worldwide data.'
 	)
 
 export const ContinentArrayParam: z.ZodType<HTTPTimeseriesParams['continent']> = z
@@ -136,7 +145,11 @@ export const ContinentArrayParam: z.ZodType<HTTPTimeseriesParams['continent']> =
 	.optional()
 	.describe(
 		'Filters results by continent. Provide an array of alpha-2 continent codes (e.g., "EU", "NA"). ' +
-			'Prefix a code with `-` to exclude it (e.g., ["-EU", "NA"] excludes Europe and includes North America).'
+			'Prefix a code with `-` to exclude it (e.g., ["-EU", "NA"] excludes Europe and includes North America). ' +
+			'IMPORTANT: When using multiple dateRange values, each array element maps positionally to each dateRange. ' +
+			'To compare the same continent across time periods, repeat the continent code (e.g., continent: ["EU", "EU"] ' +
+			'with dateRange: ["7d", "7dcontrol"]). Using a single continent with multiple dateRange values will filter ' +
+			'only the first period, with subsequent periods defaulting to worldwide data.'
 	)
 
 export const AsnArrayParam: z.ZodType<HTTPTimeseriesParams['asn']> = z
@@ -144,7 +157,11 @@ export const AsnArrayParam: z.ZodType<HTTPTimeseriesParams['asn']> = z
 	.optional()
 	.describe(
 		'Filters results by ASN. Provide an array of ASN strings. ' +
-			'Prefix with `-` to exclude (e.g., ["-174", "3356"] excludes AS174 and includes AS3356). '
+			'Prefix with `-` to exclude (e.g., ["-174", "3356"] excludes AS174 and includes AS3356). ' +
+			'IMPORTANT: When using multiple dateRange values, each array element maps positionally to each dateRange. ' +
+			'To compare the same ASN across time periods, repeat the ASN (e.g., asn: ["13335", "13335"] with ' +
+			'dateRange: ["7d", "7dcontrol"]). Using a single ASN with multiple dateRange values will filter only ' +
+			'the first period, with subsequent periods defaulting to all ASNs.'
 	)
 
 export const AsOrderByParam: z.ZodType<ASNListParams['orderBy']> = z
@@ -330,7 +347,11 @@ export const GeoIdArrayParam = z
 	.describe(
 		'Filters results by Geolocation (ADM1 - administrative level 1, e.g., states/provinces). ' +
 			'Provide an array of GeoNames IDs. Prefix with `-` to exclude. ' +
-			'Example: ["2267056", "-360689"] includes Lisbon area but excludes another region.'
+			'Example: ["2267056", "-360689"] includes Lisbon area but excludes another region. ' +
+			'IMPORTANT: When using multiple dateRange values, each array element maps positionally to each dateRange. ' +
+			'To compare the same region across time periods, repeat the GeoID (e.g., geoId: ["2267056", "2267056"] ' +
+			'with dateRange: ["7d", "7dcontrol"]). Using a single geoId with multiple dateRange values will filter ' +
+			'only the first period, with subsequent periods defaulting to all regions.'
 	)
 
 // BGP Parameters
