@@ -28,6 +28,8 @@ Currently available tools:
 |                              | `get_bgp_top_prefixes`              | Gets top IP prefixes by BGP update count                                                                             |
 |                              | `get_bgp_moas`                      | Gets Multi-Origin AS (MOAS) prefixes                                                                                 |
 |                              | `get_bgp_pfx2as`                    | Gets prefix-to-ASN mapping                                                                                           |
+|                              | `get_bgp_ip_space_timeseries`       | Retrieves announced IP address space over time (IPv4 /24s and IPv6 /48s) - useful for detecting route withdrawals    |
+|                              | `get_bgp_routes_realtime`           | Gets real-time BGP routes for a prefix using RouteViews and RIPE RIS collectors                                      |
 | **Bots**                     | `get_bots_data`                     | Retrieves bot traffic data by name, operator, category (AI crawlers, search engines, etc.)                           |
 |                              | `list_bots`                         | Lists known bots with details (AI crawlers, search engines, monitoring bots)                                         |
 |                              | `get_bot_details`                   | Gets detailed information about a specific bot by slug                                                               |
@@ -82,6 +84,10 @@ Currently available tools:
 - `Show me recent BGP hijack events.`
 - `Which prefixes have the most BGP updates?`
 - `What AS announces the prefix 1.1.1.0/24?`
+- `Show me IPv6 announced address space for Portugal over the last 30 days.`
+- `Compare IPv4 vs IPv6 BGP address space trends for AS13335.`
+- `Get real-time BGP routes for prefix 1.1.1.0/24.`
+- `Monitor announced IPv6 space changes for a specific country to detect route withdrawals.`
 
 **Security & Attacks**
 

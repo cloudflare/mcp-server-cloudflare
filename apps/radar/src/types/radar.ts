@@ -852,6 +852,13 @@ export const BgpInvalidOnlyParam = z
 	.optional()
 	.describe('Only return invalid MOAS prefixes.')
 
+export const BgpIpVersionParam = z
+	.array(z.enum(['IPv4', 'IPv6']))
+	.optional()
+	.describe(
+		'Filters results by IP version (IPv4 vs. IPv6). Useful for monitoring IPv6 address space specifically.'
+	)
+
 // ============================================================
 // Geolocation Parameters
 // ============================================================

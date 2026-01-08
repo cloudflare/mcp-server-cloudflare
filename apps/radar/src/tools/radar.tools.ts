@@ -22,6 +22,7 @@ import {
 	BgpInvalidOnlyParam,
 	BgpInvolvedAsnParam,
 	BgpInvolvedCountryParam,
+	BgpIpVersionParam,
 	BgpLeakAsnParam,
 	BgpLongestPrefixMatchParam,
 	BgpMaxConfidenceParam,
@@ -2391,6 +2392,84 @@ export function registerRadarTools(agent: RadarMCP) {
 						{
 							type: 'text' as const,
 							text: `Error getting BGP pfx2as: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_bgp_ip_space_timeseries',
+		'Retrieve announced IP address space time series data. Shows the count of announced IPv4 /24s and IPv6 /48s over time. Essential for monitoring BGP route withdrawals, IPv6 address space changes, and detecting significant routing events by ASN or country.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			asn: AsnArrayParam,
+			location: LocationArrayParam,
+			ipVersion: BgpIpVersionParam,
+		},
+		async ({ dateRange, dateStart, dateEnd, asn, location, ipVersion }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/ips/timeseries', {
+					dateRange,
+					dateStart,
+					dateEnd,
+					asn,
+					location,
+					ipVersion,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting BGP IP space timeseries: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_bgp_routes_realtime',
+		'Get real-time BGP routes for a specific IP prefix using public route collectors (RouteViews and RIPE RIS). Shows current routing state including AS paths, RPKI validation status, and visibility across peers. Useful for troubleshooting routing issues and verifying route announcements.',
+		{
+			prefix: BgpPrefixParam,
+		},
+		async ({ prefix }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/routes/realtime', {
+					prefix,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting real-time BGP routes: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
 				}
