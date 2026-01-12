@@ -30,6 +30,7 @@ import {
 	BgpOriginParam,
 	BgpPrefixArrayParam,
 	BgpPrefixParam,
+	BgpRoutesAsesSortByParam,
 	BgpRpkiStatusParam,
 	BgpSortByParam,
 	BgpSortOrderParam,
@@ -107,6 +108,7 @@ import {
 	TldManagerParam,
 	TldParam,
 	TldTypeParam,
+	TrafficAnomalyStatusParam,
 } from '../types/radar'
 import { resolveAndInvoke } from '../utils'
 
@@ -240,22 +242,29 @@ export function registerRadarTools(agent: RadarMCP) {
 
 	agent.server.tool(
 		'get_ip_details',
-		'Get IP address information',
+		'Get IP address information including full ASN details (name, country, population estimates from APNIC).',
 		{
 			ip: IpParam,
 		},
 		async ({ ip }) => {
 			try {
 				const props = getProps(agent)
-				const client = getCloudflareClient(props.accessToken)
-				const r = await client.radar.entities.get({ ip })
+
+				// Fetch both IP details and ASN details in parallel
+				const [ipResult, asnResult] = await Promise.all([
+					fetchRadarApi(props.accessToken, '/entities/ip', { ip }),
+					fetchRadarApi(props.accessToken, '/entities/asns/ip', { ip }),
+				])
 
 				return {
 					content: [
 						{
 							type: 'text',
 							text: JSON.stringify({
-								result: r.ip,
+								result: {
+									ip: ipResult,
+									asn: asnResult,
+								},
 							}),
 						},
 					],
@@ -265,7 +274,7 @@ export function registerRadarTools(agent: RadarMCP) {
 					content: [
 						{
 							type: 'text',
-							text: `Error getting IP details: ${error instanceof Error && error.message}`,
+							text: `Error getting IP details: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
 				}
@@ -315,7 +324,7 @@ export function registerRadarTools(agent: RadarMCP) {
 					content: [
 						{
 							type: 'text',
-							text: `Error getting IP details: ${error instanceof Error && error.message}`,
+							text: `Error getting traffic anomalies: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
 				}
@@ -587,7 +596,7 @@ export function registerRadarTools(agent: RadarMCP) {
 
 	agent.server.tool(
 		'get_l3_attack_data',
-		'Retrieve application layer (L3) attack trends.',
+		'Retrieve network layer (L3/DDoS) attack trends.',
 		{
 			dateRange: DateRangeArrayParam.optional(),
 			dateStart: DateStartArrayParam.optional(),
@@ -741,6 +750,7 @@ export function registerRadarTools(agent: RadarMCP) {
 					continent,
 					location,
 					dateEnd,
+					orderBy,
 				})
 
 				return {
@@ -758,7 +768,7 @@ export function registerRadarTools(agent: RadarMCP) {
 					content: [
 						{
 							type: 'text',
-							text: `Error getting Internet speed data: ${error instanceof Error && error.message}`,
+							text: `Error getting Internet speed data: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
 				}
@@ -2570,7 +2580,7 @@ export function registerRadarTools(agent: RadarMCP) {
 		async ({ limit, offset, tldType, manager, tld }) => {
 			try {
 				const props = getProps(agent)
-				const result = await fetchRadarApi(props.accessToken, '/entities/tlds', {
+				const result = await fetchRadarApi(props.accessToken, '/tlds', {
 					limit,
 					offset,
 					tldType,
@@ -2608,7 +2618,7 @@ export function registerRadarTools(agent: RadarMCP) {
 		async ({ tld }) => {
 			try {
 				const props = getProps(agent)
-				const result = await fetchRadarApi(props.accessToken, `/entities/tlds/${tld}`)
+				const result = await fetchRadarApi(props.accessToken, `/tlds/${tld}`)
 
 				return {
 					content: [
@@ -2722,6 +2732,230 @@ export function registerRadarTools(agent: RadarMCP) {
 						{
 							type: 'text' as const,
 							text: `Error getting speed histogram: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// Internet Services Timeseries Tool
+	// ============================================================
+
+	agent.server.tool(
+		'get_internet_services_timeseries',
+		'Track internet service ranking changes over time. Useful for monitoring how services like ChatGPT, Google, etc. rank over time.',
+		{
+			dateRange: DateRangeArrayParam.optional(),
+			dateStart: DateStartArrayParam.optional(),
+			dateEnd: DateEndArrayParam.optional(),
+			serviceCategory: InternetServicesCategoryParam.optional(),
+			limit: PaginationLimitParam,
+		},
+		async ({ dateRange, dateStart, dateEnd, serviceCategory, limit }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(
+					props.accessToken,
+					'/ranking/internet_services/timeseries_groups',
+					{
+						dateRange,
+						dateStart,
+						dateEnd,
+						serviceCategory,
+						limit,
+					}
+				)
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting internet services timeseries: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// Outages by Location Tool
+	// ============================================================
+
+	agent.server.tool(
+		'get_outages_by_location',
+		'Get outage counts aggregated by location. Useful for identifying which countries have the most Internet outages.',
+		{
+			limit: PaginationLimitParam,
+			dateRange: DateRangeParam.optional(),
+			dateStart: DateStartParam.optional(),
+			dateEnd: DateEndParam.optional(),
+		},
+		async ({ limit, dateRange, dateStart, dateEnd }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/annotations/outages/locations', {
+					limit,
+					dateRange,
+					dateStart,
+					dateEnd,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting outages by location: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// Traffic Anomalies by Location Tool
+	// ============================================================
+
+	agent.server.tool(
+		'get_traffic_anomalies_by_location',
+		'Get traffic anomalies aggregated by location. Shows which countries have the most detected outage signals, automatically detected by Radar.',
+		{
+			limit: PaginationLimitParam,
+			dateRange: DateRangeParam.optional(),
+			dateStart: DateStartParam.optional(),
+			dateEnd: DateEndParam.optional(),
+			status: TrafficAnomalyStatusParam,
+		},
+		async ({ limit, dateRange, dateStart, dateEnd, status }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/traffic_anomalies/locations', {
+					limit,
+					dateRange,
+					dateStart,
+					dateEnd,
+					status,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting traffic anomalies by location: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// BGP Routing Table ASes Tool
+	// ============================================================
+
+	agent.server.tool(
+		'get_bgp_routing_table_ases',
+		'List all ASes in global routing tables with routing statistics (prefix counts, IPv4/IPv6 address count, RPKI validation status). Data comes from public BGP MRT archives.',
+		{
+			limit: PaginationLimitParam,
+			location: LocationParam.optional(),
+			sortBy: BgpRoutesAsesSortByParam,
+			sortOrder: BgpSortOrderParam,
+		},
+		async ({ limit, location, sortBy, sortOrder }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/routes/ases', {
+					limit,
+					location,
+					sortBy,
+					sortOrder,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting BGP routing table ASes: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// BGP Top ASes by Prefixes Tool
+	// ============================================================
+
+	agent.server.tool(
+		'get_bgp_top_ases_by_prefixes',
+		'Get top ASes ordered by announced prefix count. Useful for understanding which networks have the largest routing footprint. Data comes from public BGP MRT archives and updates every 2 hours.',
+		{
+			limit: PaginationLimitParam,
+			country: LocationParam.optional().describe('Filter by country (alpha-2 code).'),
+		},
+		async ({ limit, country }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/top/ases/prefixes', {
+					limit,
+					country,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting BGP top ASes by prefixes: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
 				}

@@ -947,3 +947,23 @@ export const BucketSizeParam = z
 	.positive()
 	.optional()
 	.describe('Specifies the width for every bucket in the histogram.')
+
+// ============================================================
+// BGP Routes ASes Parameters
+// ============================================================
+
+export const BgpRoutesAsesSortByParam = z
+	.enum(['cone', 'pfxs', 'ipv4', 'ipv6', 'rpki_valid', 'rpki_invalid', 'rpki_unknown'])
+	.optional()
+	.describe(
+		'Sort ASes by: cone (customer cone size), pfxs (total prefixes), ipv4/ipv6 (address count), or rpki_* (RPKI validation status).'
+	)
+
+// ============================================================
+// Traffic Anomalies Parameters
+// ============================================================
+
+export const TrafficAnomalyStatusParam = z
+	.enum(['VERIFIED', 'UNVERIFIED'])
+	.optional()
+	.describe('Filter by anomaly verification status.')
