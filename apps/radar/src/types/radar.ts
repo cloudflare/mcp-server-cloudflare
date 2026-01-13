@@ -883,7 +883,31 @@ export const BgpIpVersionParam = z
 
 export const GeoIdParam = z
 	.string()
+	.regex(/^[0-9]+$/, {
+		message: 'Invalid GeoNames ID. Must be a numeric string.',
+	})
 	.describe('GeoNames ID for the geolocation (e.g., "2267056" for Lisbon).')
+
+// ============================================================
+// Slug Parameters (Path Traversal Prevention)
+// ============================================================
+
+export const SlugParam = z
+	.string()
+	.min(1)
+	.max(100)
+	.regex(/^[a-zA-Z0-9]+$/, {
+		message: 'Invalid slug format. Only alphanumeric characters are allowed.',
+	})
+	.describe('A slug identifier containing only alphanumeric characters.')
+
+export const Sha256FingerprintParam = z
+	.string()
+	.toUpperCase()
+	.regex(/^[A-F0-9]{64}$/, {
+		message: 'Invalid SHA256 fingerprint. Must be 64 hexadecimal characters.',
+	})
+	.describe('A SHA256 fingerprint (64 hexadecimal characters).')
 
 // ============================================================
 // TLD Parameters

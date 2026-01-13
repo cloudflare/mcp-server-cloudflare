@@ -102,6 +102,8 @@ import {
 	RobotsTxtDomainCategoryParam,
 	RobotsTxtPatternParam,
 	RobotsTxtUserAgentCategoryParam,
+	Sha256FingerprintParam,
+	SlugParam,
 	SpeedHistogramMetricParam,
 	TcpResetsTimeoutsDimensionParam,
 	TldFilterParam,
@@ -125,6 +127,11 @@ async function fetchRadarApi(
 	endpoint: string,
 	params: Record<string, unknown> = {}
 ): Promise<unknown> {
+	// Defense-in-depth: Reject any path traversal attempts
+	if (endpoint.includes('..') || endpoint.includes('//')) {
+		throw new Error('Invalid endpoint path: path traversal sequences are not allowed')
+	}
+
 	const url = new URL(`${RADAR_API_BASE}${endpoint}`)
 
 	for (const [key, value] of Object.entries(params)) {
@@ -1640,7 +1647,7 @@ export function registerRadarTools(agent: RadarMCP) {
 		'get_bot_details',
 		'Get detailed information about a specific bot by its slug identifier.',
 		{
-			botSlug: z.string().describe('The bot slug identifier (e.g., "googlebot", "bingbot").'),
+			botSlug: SlugParam.describe('The bot slug identifier (e.g., "googlebot", "bingbot").'),
 		},
 		async ({ botSlug }) => {
 			try {
@@ -2095,9 +2102,11 @@ export function registerRadarTools(agent: RadarMCP) {
 
 	agent.server.tool(
 		'get_ct_authority_details',
-		'Get details for a specific Certificate Authority by its slug.',
+		'Get details for a specific Certificate Authority by its SHA256 fingerprint.',
 		{
-			caSlug: z.string().describe('The Certificate Authority slug identifier.'),
+			caSlug: Sha256FingerprintParam.describe(
+				'The Certificate Authority SHA256 fingerprint (64 hexadecimal characters).'
+			),
 		},
 		async ({ caSlug }) => {
 			try {
@@ -2165,7 +2174,7 @@ export function registerRadarTools(agent: RadarMCP) {
 		'get_ct_log_details',
 		'Get details for a specific Certificate Transparency log by its slug.',
 		{
-			logSlug: z.string().describe('The Certificate Transparency log slug identifier.'),
+			logSlug: SlugParam.describe('The Certificate Transparency log slug identifier.'),
 		},
 		async ({ logSlug }) => {
 			try {
