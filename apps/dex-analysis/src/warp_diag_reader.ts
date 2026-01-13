@@ -69,7 +69,7 @@ export class WarpDiagReader extends DurableObject<Env> {
 		const url = new URL(
 			`https://api.cloudflare.com/client/v4/accounts/${accountId}/dex/devices/${deviceId}/commands/downloads/${commandId}.zip`
 		)
-		console.log(`WarpDiagReader fetching `, url)
+
 		let headers = {
 			Authorization: `Bearer ${accessToken}`,
 		}
