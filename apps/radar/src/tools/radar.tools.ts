@@ -127,12 +127,14 @@ async function fetchRadarApi(
 	endpoint: string,
 	params: Record<string, unknown> = {}
 ): Promise<unknown> {
-	// Defense-in-depth: Reject any path traversal attempts
-	if (endpoint.includes('..') || endpoint.includes('//')) {
-		throw new Error('Invalid endpoint path: path traversal sequences are not allowed')
-	}
-
 	const url = new URL(`${RADAR_API_BASE}${endpoint}`)
+
+	// Defense-in-depth: Ensure the resolved path stays within Radar API scope
+	// The URL constructor normalizes the path (resolves '..' and decodes percent-encoding),
+	// so we check the final pathname to prevent path traversal attacks
+	if (!url.pathname.startsWith('/client/v4/radar/')) {
+		throw new Error('Invalid endpoint path: must be within the Radar API scope')
+	}
 
 	for (const [key, value] of Object.entries(params)) {
 		if (value === undefined || value === null) continue
