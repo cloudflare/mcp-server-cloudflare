@@ -131,28 +131,16 @@ export function registerBrowserTools(agent: BrowserMCP) {
 			}
 			try {
 				const props = getProps(agent)
-				// Cf client appears to be broken, so we use the raw API instead.
-				// const client = getCloudflareClient(props.accessToken)
-				// const r = await client.browserRendering.screenshot.create({
-				// 	account_id: accountId,
-				// 	url: params.url,
-				// 	viewport: params.viewport,
-				// })
-
-				const r = await fetch(
-					`https://api.cloudflare.com/client/v4/accounts/${accountId}/browser-rendering/screenshot`,
-					{
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							Authorization: `Bearer ${props.accessToken}`,
-						},
-						body: JSON.stringify({
+				const client = getCloudflareClient(props.accessToken)
+				const r = await client
+					.post(`/accounts/${accountId}/browser-rendering/screenshot`, {
+						body: {
 							url: params.url,
 							viewport: params.viewport,
-						}),
-					}
-				)
+						},
+						__binaryResponse: true,
+					})
+					.asResponse()
 
 				const arrayBuffer = await r.arrayBuffer()
 				const base64Image = Buffer.from(arrayBuffer).toString('base64')
@@ -171,7 +159,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 					content: [
 						{
 							type: 'text',
-							text: `Error getting page in markdown: ${error instanceof Error && error.message}`,
+							text: `Error getting page screenshot: ${error instanceof Error && error.message}`,
 						},
 					],
 				}
