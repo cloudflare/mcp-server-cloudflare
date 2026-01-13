@@ -1,5 +1,11 @@
 # dex-analysis
 
+## 0.3.0
+
+### Minor Changes
+
+- 198c2c2: disallow arbitrary urls in DEX remote commands explore tools
+
 ## 0.2.5
 
 ### Patch Changes
