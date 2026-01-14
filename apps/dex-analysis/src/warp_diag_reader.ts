@@ -1,7 +1,11 @@
 import { DurableObject } from 'cloudflare:workers'
 import JSZip from 'jszip'
 
-import type { Env } from './dex-analysis.context'
+import { getEnv } from '@repo/mcp-common/src/env'
+
+import { type Env } from './dex-analysis.context'
+
+const env = getEnv<Env>()
 
 // Helper for reading large WARP diag zip archives.
 // Holds the contents in memory between requests from the agent for specific files
@@ -12,31 +16,71 @@ export class WarpDiagReader extends DurableObject<Env> {
 	#cache?: { files: string[]; zip: JSZip }
 
 	// List the files in the zip for the agent
-	async list(accessToken: string, url: string) {
-		const { files } = await this.#getZip(accessToken, url)
+	async list({
+		accessToken,
+		accountId,
+		deviceId,
+		commandId,
+	}: {
+		accessToken: string
+		accountId: string
+		deviceId: string
+		commandId: string
+	}) {
+		const { files } = await this.#getZip({ accessToken, accountId, deviceId, commandId })
 		return files
 	}
 
 	// Return the contents of a file by path
-	async read(accessToken: string, url: string, filepath: string) {
-		const { zip } = await this.#getZip(accessToken, url)
+	async read({
+		accessToken,
+		accountId,
+		deviceId,
+		commandId,
+		filepath,
+	}: {
+		accessToken: string
+		accountId: string
+		deviceId: string
+		commandId: string
+		filepath: string
+	}) {
+		const { zip } = await this.#getZip({ accessToken, accountId, deviceId, commandId })
 		const file = zip.file(filepath)
 		const content = await file?.async('text')
 		return content
 	}
 
-	async #getZip(accessToken: string, url: string) {
+	async #getZip({
+		accessToken,
+		accountId,
+		deviceId,
+		commandId,
+	}: {
+		accessToken: string
+		accountId: string
+		deviceId: string
+		commandId: string
+	}) {
 		if (this.#cache) {
 			return this.#cache
 		}
 
-		console.log(`WarpDiagReader fetching `, url)
+		const url = new URL(
+			`https://api.cloudflare.com/client/v4/accounts/${accountId}/dex/devices/${deviceId}/commands/downloads/${commandId}.zip`
+		)
 
-		const res = await fetch(url, {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-		})
+		let headers = {
+			Authorization: `Bearer ${accessToken}`,
+		}
+
+		if (env.DEV_DISABLE_OAUTH) {
+			headers = {
+				Authorization: `Bearer ${env.DEV_CLOUDFLARE_API_TOKEN}`,
+			}
+		}
+
+		const res = await fetch(url, { headers })
 
 		if (res.status !== 200) {
 			throw new Error(`failed to download zip, non-200 status code: ${res.status}`)
@@ -63,14 +107,30 @@ async function hashToken(accessToken: string) {
 	return hashArr.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
-// Create unique name based on accessToken hash and download url. In order to read cached zip from memory
+// Create unique name based on accessToken hash and the download details. In order to read cached zip from memory
 // you need to have the same access token that was used to fetch it.
-async function readerName(accessToken: string, url: string) {
-	return (await hashToken(accessToken)) + url
+async function readerName({
+	accessToken,
+	deviceId,
+	commandId,
+}: {
+	accessToken: string
+	deviceId: string
+	commandId: string
+}) {
+	return (await hashToken(accessToken)) + deviceId + commandId
 }
 
-export async function getReader(env: Env, accessToken: string, download: string) {
-	const name = await readerName(accessToken, download)
+export async function getReader({
+	accessToken,
+	deviceId,
+	commandId,
+}: {
+	accessToken: string
+	deviceId: string
+	commandId: string
+}) {
+	const name = await readerName({ accessToken, deviceId, commandId })
 	const id = env.WARP_DIAG_READER.idFromName(name)
 	return env.WARP_DIAG_READER.get(id)
 }

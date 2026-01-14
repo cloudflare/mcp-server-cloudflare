@@ -1,7 +1,6 @@
 import { z } from 'zod'
 
 import { fetchCloudflareApi } from '@repo/mcp-common/src/cloudflare-api'
-import { getEnv } from '@repo/mcp-common/src/env'
 import { getProps } from '@repo/mcp-common/src/get-props'
 
 import { getReader } from '../warp_diag_reader'
@@ -10,9 +9,6 @@ import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js'
 import type { ZodRawShape, ZodTypeAny } from 'zod'
 import type { CloudflareDEXMCP } from '../dex-analysis.app'
-import type { Env } from '../dex-analysis.context'
-
-const env = getEnv<Env>()
 
 export function registerDEXTools(agent: CloudflareDEXMCP) {
 	registerTool({
@@ -523,12 +519,17 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 	registerTool({
 		name: 'dex_list_remote_warp_diag_contents',
 		description:
-			'Given a WARP diag remote capture download url, returns a list of the files contained in the archive.',
+			'Given a WARP diag remote capture id and device_id, returns a list of the files contained in the archive.',
 		schema: {
-			download: z
+			deviceId: z
 				.string()
 				.describe(
-					'The `filename` url from the dex_list_remote_captures response for successful WARP diag captures.'
+					'The device_id field of the successful WARP-diag remote capture response to list contents of.'
+				),
+			commandId: z
+				.string()
+				.describe(
+					'The id of the successful WARP-diag remote capture response to list contents of.'
 				),
 		},
 		llmContext:
@@ -536,9 +537,14 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 			'Hint: you can call dex_explore_remote_warp_diag_output multiple times in parallel if necessary to take advantage of in-memory caching for best performance.' +
 			'See https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/troubleshooting/warp-logs/ for more info on warp-diags',
 		agent,
-		callback: async ({ accessToken, download }) => {
-			const reader = await getReader(env, accessToken, download)
-			return await reader.list(accessToken, download)
+		callback: async ({ accessToken, deviceId, commandId }) => {
+			const reader = await getReader({ accessToken, deviceId, commandId })
+			const accountId = await agent.getActiveAccountId()
+			if (!accountId) {
+				return new Error(`Failed to get active account id`)
+			}
+
+			return await reader.list({ accessToken, accountId, commandId, deviceId })
 		},
 	})
 
@@ -547,19 +553,21 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		description:
 			'Explore the contents of remote capture WARP diag archive filepaths returned by the dex_list_remote_warp_diag_contents tool for analysis.',
 		schema: {
-			download: z
-				.string()
-				.describe(
-					'The `filename` url from the dex_list_remote_captures response for successful WARP diag captures.'
-				),
+			commandId: z.string().describe('The id of the command results to explore'),
+			deviceId: z.string().describe('The device_id field of command to explore'),
 			filepath: z.string().describe('The file path from the archive to retrieve contents for.'),
 		},
 		llmContext:
 			'To avoid hitting conversation and memory limits, avoid outputting the whole contents of these files to the user unless specifically asked to. Instead prefer to show relevant snippets only.',
 		agent,
-		callback: async ({ accessToken, download, filepath }) => {
-			const reader = await getReader(env, accessToken, download)
-			return await reader.read(accessToken, download, filepath)
+		callback: async ({ accessToken, deviceId, commandId, filepath }) => {
+			const reader = await getReader({ accessToken, deviceId, commandId })
+			const accountId = await agent.getActiveAccountId()
+			if (!accountId) {
+				return new Error(`Failed to get active account id`)
+			}
+
+			return await reader.read({ accessToken, accountId, deviceId, commandId, filepath })
 		},
 	})
 
