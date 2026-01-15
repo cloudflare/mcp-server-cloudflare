@@ -62,3 +62,4 @@ Test the remote server using [Inspector](https://modelcontextprotocol.io/docs/to
 ```bash
 npx @modelcontextprotocol/inspector@latest
 ```
+huan7947
