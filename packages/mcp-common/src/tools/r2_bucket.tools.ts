@@ -8,7 +8,11 @@ import {
 	BucketListNameContainsParam,
 	BucketListStartAfterParam,
 	BucketNameSchema,
+	CreateBucketJurisdictionSchema,
+	CreateBucketStorageClassSchema,
+	LocationHintSchema,
 } from '../types/r2_bucket.types'
+import { BucketJurisdictionSchema } from '../types/r2_object.types'
 import { PaginationPerPageParam } from '../types/shared.types'
 
 export function registerR2BucketTools(agent: CloudflareMcpAgent) {
@@ -71,8 +75,15 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 
 	agent.server.tool(
 		'r2_bucket_create',
-		'Create a new r2 bucket in your Cloudflare account',
-		{ name: BucketNameSchema },
+		`Create a new R2 bucket in your Cloudflare account.
+		You can optionally specify locationHint (geographic region), jurisdiction (regulatory), and storageClass (default storage class for new objects).
+		Note: locationHint cannot be used with jurisdictions.`,
+		{
+			name: BucketNameSchema,
+			locationHint: LocationHintSchema,
+			jurisdiction: CreateBucketJurisdictionSchema,
+			storageClass: CreateBucketStorageClassSchema,
+		},
 		{
 			title: 'Create R2 bucket',
 			annotations: {
@@ -80,17 +91,33 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 				destructiveHint: false,
 			},
 		},
-		async ({ name }) => {
+		async ({ name, locationHint, jurisdiction, storageClass }) => {
 			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
 			}
+
+			// Validate mutual exclusivity - locationHint can be paired with 'default' jurisdiction but not 'eu' or 'fedramp'
+			if (locationHint && jurisdiction && jurisdiction !== 'default') {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error: Cannot specify locationHint with '${jurisdiction}' jurisdiction. locationHint can only be used with 'default' jurisdiction or no jurisdiction specified.`,
+						},
+					],
+				}
+			}
+
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
 				const bucket = await client.r2.buckets.create({
 					account_id,
 					name,
+					locationHint: locationHint ?? undefined,
+					jurisdiction: jurisdiction ?? undefined,
+					storageClass: storageClass ?? undefined,
 				})
 				return {
 					content: [
@@ -116,14 +143,14 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	agent.server.tool(
 		'r2_bucket_get',
 		'Get details about a specific R2 bucket',
-		{ name: BucketNameSchema },
+		{ name: BucketNameSchema, bucketJurisdiction: BucketJurisdictionSchema },
 		{
 			title: 'Get R2 bucket',
 			annotations: {
 				readOnlyHint: true,
 			},
 		},
-		async ({ name }) => {
+		async ({ name, bucketJurisdiction }) => {
 			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
@@ -131,7 +158,10 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
-				const bucket = await client.r2.buckets.get(name, { account_id })
+				const bucket = await client.r2.buckets.get(name, {
+					account_id,
+					jurisdiction: bucketJurisdiction ?? undefined,
+				})
 				return {
 					content: [
 						{
@@ -156,7 +186,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	agent.server.tool(
 		'r2_bucket_delete',
 		'Delete an R2 bucket',
-		{ name: BucketNameSchema },
+		{ name: BucketNameSchema, bucketJurisdiction: BucketJurisdictionSchema },
 		{
 			title: 'Delete R2 bucket',
 			annotations: {
@@ -164,7 +194,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 				destructiveHint: true,
 			},
 		},
-		async ({ name }) => {
+		async ({ name, bucketJurisdiction }) => {
 			const account_id = await agent.getActiveAccountId()
 			if (!account_id) {
 				return MISSING_ACCOUNT_ID_RESPONSE
@@ -172,7 +202,10 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
-				const result = await client.r2.buckets.delete(name, { account_id })
+				const result = await client.r2.buckets.delete(name, {
+					account_id,
+					jurisdiction: bucketJurisdiction ?? undefined,
+				})
 				return {
 					content: [
 						{
