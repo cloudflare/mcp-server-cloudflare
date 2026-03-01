@@ -4,7 +4,7 @@ Model Context Protocol (MCP) is a [new, standardized protocol](https://modelcont
 
 These MCP servers allow your [MCP Client](https://modelcontextprotocol.io/clients) to read configurations from your account, process information, make suggestions based on data, and even make those suggested changes for you. All of these actions can happen across Cloudflare's many services including application development, security and performance.
 
-They support both the `streamble-http` transport via `/mcp` and the `sse` transport (deprecated) via `/sse`.
+They support both the `streamable-http` transport via `/mcp` and the `sse` transport (deprecated) via `/sse`.
 
 The following servers are included in this repository:
 
