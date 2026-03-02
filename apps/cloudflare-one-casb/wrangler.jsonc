@@ -4,7 +4,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"main": "src/index.ts",
+	"main": "src/cf1-casb.app.ts",
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
 	"migrations": [
@@ -14,7 +14,11 @@
 		}
 	],
 	"observability": {
-		"enabled": true
+		"enabled": true,
+		"traces": {
+			"enabled": true,
+			"head_sampling_rate": 0.1
+		}
 	},
 	"vars": {
 		"MCP_SERVER_NAME": "PLACEHOLDER",

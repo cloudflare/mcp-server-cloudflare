@@ -1,13 +1,14 @@
 import { McpAgent } from 'agents/mcp'
 
+import { getProps } from '@repo/mcp-common/src/get-props'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 
 import { ExecParams, FilePathParam, FileWrite } from '../shared/schema'
 import { BASE_INSTRUCTIONS } from './prompts'
 import { stripProtocolFromFilePath } from './utils'
 
-import type { Env } from './context'
-import type { Props, UserContainer } from '.'
+import type { Props, UserContainer } from './sandbox.server.app'
+import type { Env } from './sandbox.server.context'
 
 export class ContainerMcpAgent extends McpAgent<Env, never, Props> {
 	_server: CloudflareMCPServer | undefined
@@ -24,7 +25,12 @@ export class ContainerMcpAgent extends McpAgent<Env, never, Props> {
 	}
 
 	get userContainer(): DurableObjectStub<UserContainer> {
-		const userContainer = this.env.USER_CONTAINER.idFromName(this.props.user.id)
+		const props = getProps(this)
+		// TODO: Support account scoped tokens?
+		if (props.type === 'account_token') {
+			throw new Error('Container server does not currently support account scoped tokens')
+		}
+		const userContainer = this.env.USER_CONTAINER.idFromName(props.user.id)
 		return this.env.USER_CONTAINER.get(userContainer)
 	}
 
@@ -37,9 +43,12 @@ export class ContainerMcpAgent extends McpAgent<Env, never, Props> {
 	}
 
 	async init() {
-		this.props.user.id
+		const props = getProps(this)
+		// TODO: Probably we'll want to track account tokens usage through an account identifier at some point
+		const userId = props.type === 'user_token' ? props.user.id : undefined
+
 		this.server = new CloudflareMCPServer({
-			userId: this.props.user.id,
+			userId,
 			wae: this.env.MCP_METRICS,
 			serverInfo: {
 				name: this.env.MCP_SERVER_NAME,
@@ -50,11 +59,24 @@ export class ContainerMcpAgent extends McpAgent<Env, never, Props> {
 
 		this.server.tool(
 			'container_initialize',
-			`Start or restart the container. 
+			`Start or restart the container.
 			Use this tool to initialize a container before running any python or node.js code that the user requests ro run.`,
-			// @ts-ignore
 			async () => {
-				const userInBlocklist = await this.env.USER_BLOCKLIST.get(this.props.user.id)
+				const props = getProps(this)
+				if (props.type === 'account_token') {
+					return {
+						// TODO: Support account scoped tokens?
+						// we'll need to add support for an account blocklist in that case
+						content: [
+							{
+								type: 'text',
+								text: 'Container server does not currently support account scoped tokens.',
+							},
+						],
+					}
+				}
+
+				const userInBlocklist = await this.env.USER_BLOCKLIST.get(props.user.id)
 				if (userInBlocklist) {
 					return {
 						content: [{ type: 'text', text: 'Blocked from intializing container.' }],
@@ -77,8 +99,8 @@ export class ContainerMcpAgent extends McpAgent<Env, never, Props> {
 		)
 		this.server.tool(
 			'container_exec',
-			`Run a command in a container and return the results from stdout. 
-			If necessary, set a timeout. To debug, stream back standard error. 
+			`Run a command in a container and return the results from stdout.
+			If necessary, set a timeout. To debug, stream back standard error.
 			If you're using python, ALWAYS use python3 alongside pip3`,
 			{ args: ExecParams },
 			async ({ args }) => {
@@ -143,7 +165,9 @@ export class ContainerMcpAgent extends McpAgent<Env, never, Props> {
 						{
 							type: 'resource',
 							resource: {
-								text: readFile.type === 'text' ? readFile.textOutput : readFile.base64Output,
+								...(readFile.type === 'text'
+									? { text: readFile.textOutput }
+									: { blob: readFile.base64Output }),
 								uri: `file://${path}`,
 								mimeType: readFile.mimeType,
 							},

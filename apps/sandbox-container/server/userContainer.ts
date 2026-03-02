@@ -6,7 +6,7 @@ import { getContainerManager } from './containerManager'
 import { fileToBase64 } from './utils'
 
 import type { ExecParams, FileList, FileWrite } from '../shared/schema'
-import type { Env } from './context'
+import type { Env } from './sandbox.server.context'
 
 export class UserContainer extends DurableObject<Env> {
 	constructor(

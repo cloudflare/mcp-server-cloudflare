@@ -19,7 +19,7 @@ interface PKCECodes {
 	codeChallenge: string
 	codeVerifier: string
 }
-async function generatePKCECodes(): Promise<PKCECodes> {
+export async function generatePKCECodes(): Promise<PKCECodes> {
 	const output = new Uint32Array(RECOMMENDED_CODE_VERIFIER_LENGTH)
 	crypto.getRandomValues(output)
 	const codeVerifier = base64urlEncode(
@@ -80,23 +80,22 @@ export async function getAuthorizationURL({
 	redirect_uri,
 	state,
 	scopes,
+	codeChallenge,
 }: {
 	client_id: string
 	redirect_uri: string
 	state: AuthRequest
 	scopes: Record<string, string>
-}): Promise<{ authUrl: string; codeVerifier: string }> {
-	const { codeChallenge, codeVerifier } = await generatePKCECodes()
-
+	codeChallenge: string
+}): Promise<{ authUrl: string }> {
 	return {
 		authUrl: generateAuthUrl({
 			client_id,
 			redirect_uri,
-			state: btoa(JSON.stringify({ ...state, codeVerifier })),
+			state: btoa(JSON.stringify(state)),
 			code_challenge: codeChallenge,
 			scopes,
 		}),
-		codeVerifier: codeVerifier,
 	}
 }
 

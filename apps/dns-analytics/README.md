@@ -41,7 +41,7 @@ Replace the content with the following configuration:
 	"mcpServers": {
 		"cloudflare": {
 			"command": "npx",
-			"args": ["mcp-remote", "https://dns-analytics.mcp.cloudflare.com/sse"]
+			"args": ["mcp-remote", "https://dns-analytics.mcp.cloudflare.com/mcp"]
 		}
 	}
 }

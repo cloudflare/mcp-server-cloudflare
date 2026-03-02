@@ -3,11 +3,28 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 
 import { AuthUser } from '../../mcp-observability/src'
-import { getAuthorizationURL, getAuthToken, refreshAuthToken } from './cloudflare-auth'
+import {
+	generatePKCECodes,
+	getAuthorizationURL,
+	getAuthToken,
+	refreshAuthToken,
+} from './cloudflare-auth'
 import { McpError } from './mcp-error'
 import { useSentry } from './sentry'
+import { V4Schema } from './v4-api'
+import {
+	bindStateToSession,
+	clientIdAlreadyApproved,
+	createOAuthState,
+	generateCSRFProtection,
+	OAuthError,
+	parseRedirectApproval,
+	renderApprovalDialog,
+	validateOAuthState,
+} from './workers-oauth-utils'
 
 import type {
+	AuthRequest,
 	OAuthHelpers,
 	TokenExchangeCallbackOptions,
 	TokenExchangeCallbackResult,
@@ -19,66 +36,59 @@ import type { BaseHonoContext } from './sentry'
 type AuthContext = {
 	Bindings: {
 		OAUTH_PROVIDER: OAuthHelpers
+		OAUTH_KV: KVNamespace
+		MCP_COOKIE_ENCRYPTION_KEY: string
 		CLOUDFLARE_CLIENT_ID: string
 		CLOUDFLARE_CLIENT_SECRET: string
+		MCP_SERVER_NAME?: string
+		MCP_SERVER_DESCRIPTION?: string
 	}
 } & BaseHonoContext
 
-const AuthRequestSchema = z.object({
-	responseType: z.string(),
-	clientId: z.string(),
-	redirectUri: z.string(),
-	scope: z.array(z.string()),
-	state: z.string(),
-	codeChallenge: z.string().optional(),
-	codeChallengeMethod: z.string().optional(),
-})
-
-// AuthRequest but with extra params that we use in our authentication logic
-export const AuthRequestSchemaWithExtraParams = AuthRequestSchema.merge(
-	z.object({ codeVerifier: z.string() })
-)
-
-export const AuthQuery = z.object({
+const AuthQuery = z.object({
 	code: z.string().describe('OAuth code from CF dash'),
 	state: z.string().describe('Value of the OAuth state'),
 	scope: z.string().describe('OAuth scopes granted'),
 })
 
-export type UserSchema = z.infer<typeof UserResponseSchema>
-const UserResponseSchema = z.object({
-	result: z.object({
-		id: z.string(),
-		email: z.string(),
-	}),
+type UserSchema = z.infer<typeof UserSchema>
+const UserSchema = z.object({
+	id: z.string(),
+	email: z.string(),
 })
-
-export type AccountSchema = z.infer<typeof AccountResponseSchema>
-const AccountResponseSchema = z.object({
-	result: z.array(
-		z.object({
-			name: z.string(),
-			id: z.string(),
-		})
-	),
+const AccountSchema = z.object({
+	name: z.string(),
+	id: z.string(),
 })
+type AccountsSchema = z.infer<typeof AccountsSchema>
+const AccountsSchema = z.array(AccountSchema)
 
-export type AuthProps = {
-	accessToken: string
-	user: UserSchema['result']
-	accounts: AccountSchema['result']
-}
+const AccountAuthProps = z.object({
+	type: z.literal('account_token'),
+	accessToken: z.string(),
+	account: AccountSchema,
+})
+const UserAuthProps = z.object({
+	type: z.literal('user_token'),
+	accessToken: z.string(),
+	user: UserSchema,
+	accounts: AccountsSchema,
+	refreshToken: z.string().optional(),
+})
+export type AuthProps = z.infer<typeof AuthProps>
+const AuthProps = z.discriminatedUnion('type', [AccountAuthProps, UserAuthProps])
 
 export async function getUserAndAccounts(
 	accessToken: string,
 	devModeHeaders?: HeadersInit
-): Promise<{ user: UserSchema['result']; accounts: AccountSchema['result'] }> {
+): Promise<{ user: UserSchema | null; accounts: AccountsSchema }> {
 	const headers = devModeHeaders
 		? devModeHeaders
 		: {
 				Authorization: `Bearer ${accessToken}`,
 			}
 
+	// Fetch the user & accounts info from Cloudflare
 	const [userResponse, accountsResponse] = await Promise.all([
 		fetch('https://api.cloudflare.com/client/v4/user', {
 			headers,
@@ -88,22 +98,32 @@ export async function getUserAndAccounts(
 		}),
 	])
 
-	if (!userResponse.ok) {
-		console.log(await userResponse.text())
+	const { result: user } = V4Schema(UserSchema).parse(await userResponse.json())
+	const { result: accounts } = V4Schema(AccountsSchema).parse(await accountsResponse.json())
+	if (!user || !userResponse.ok) {
+		// If accounts is present, then assume that we have an account scoped token
+		if (accounts !== null) {
+			return { user: null, accounts }
+		}
+		console.log(user)
 		throw new McpError('Failed to fetch user', 500, { reportToSentry: true })
 	}
-	if (!accountsResponse.ok) {
-		console.log(await accountsResponse.text())
+	if (!accounts || !accountsResponse.ok) {
+		console.log(accounts)
 		throw new McpError('Failed to fetch accounts', 500, { reportToSentry: true })
 	}
-
-	// Fetch the user & accounts info from Cloudflare
-	const { result: user } = UserResponseSchema.parse(await userResponse.json())
-	const { result: accounts } = AccountResponseSchema.parse(await accountsResponse.json())
 
 	return { user, accounts }
 }
 
+/**
+ * Exchanges an OAuth authorization code for access and refresh tokens, then fetches user and account details.
+ *
+ * @param c - Hono context containing OAuth environment variables (client ID/secret)
+ * @param code - OAuth authorization code received from the authorization server
+ * @param code_verifier - PKCE code verifier used to validate the authorization request
+ * @returns Promise resolving to an object containing access token, refresh token, user profile, and accounts
+ */
 async function getTokenAndUserDetails(
 	c: Context<AuthContext>,
 	code: string,
@@ -111,8 +131,8 @@ async function getTokenAndUserDetails(
 ): Promise<{
 	accessToken: string
 	refreshToken: string
-	user: UserSchema['result']
-	accounts: AccountSchema['result']
+	user: UserSchema
+	accounts: AccountsSchema
 }> {
 	// Exchange the code for an access token
 	const { access_token: accessToken, refresh_token: refreshToken } = await getAuthToken({
@@ -124,6 +144,10 @@ async function getTokenAndUserDetails(
 	})
 
 	const { user, accounts } = await getUserAndAccounts(accessToken)
+	// User cannot be null for OAuth flow
+	if (user === null) {
+		throw new McpError('Failed to fetch user', 500, { reportToSentry: true })
+	}
 
 	return { accessToken, refreshToken, user, accounts }
 }
@@ -135,6 +159,15 @@ export async function handleTokenExchangeCallback(
 ): Promise<TokenExchangeCallbackResult | undefined> {
 	// options.props contains the current props
 	if (options.grantType === 'refresh_token') {
+		const props = AuthProps.parse(options.props)
+		if (props.type === 'account_token') {
+			// Refreshing an account_token should not be possible, as we only do this for user tokens
+			throw new McpError('Internal Server Error', 500)
+		}
+		if (!props.refreshToken) {
+			throw new McpError('Missing refreshToken', 500)
+		}
+
 		// handle token refreshes
 		const {
 			access_token: accessToken,
@@ -143,7 +176,7 @@ export async function handleTokenExchangeCallback(
 		} = await refreshAuthToken({
 			client_id: clientId,
 			client_secret: clientSecret,
-			refresh_token: options.props.refreshToken,
+			refresh_token: props.refreshToken,
 		})
 
 		return {
@@ -151,10 +184,49 @@ export async function handleTokenExchangeCallback(
 				...options.props,
 				accessToken,
 				refreshToken,
-			},
+			} satisfies AuthProps,
 			accessTokenTTL: expires_in,
 		}
 	}
+}
+
+/**
+ * Helper function to redirect to Cloudflare OAuth
+ *
+ * Note: We pass the stateToken as a simple string in the URL.
+ * The existing getAuthorizationURL function will wrap it with the oauthReqInfo
+ * before base64-encoding.
+ * On callback, we extract the stateToken, look up the original oauthReqInfo in KV.
+ */
+async function redirectToCloudflare(
+	c: Context<AuthContext>,
+	oauthReqInfo: AuthRequest,
+	stateToken: string,
+	codeChallenge: string,
+	scopes: Record<string, string>,
+	additionalHeaders: Record<string, string> = {}
+): Promise<Response> {
+	// Create a modified oauthReqInfo that includes our stateToken
+	const stateWithToken: AuthRequest = {
+		...oauthReqInfo,
+		state: stateToken, // embed our KV state token
+	}
+
+	const { authUrl } = await getAuthorizationURL({
+		client_id: c.env.CLOUDFLARE_CLIENT_ID,
+		redirect_uri: new URL('/oauth/callback', c.req.url).href,
+		state: stateWithToken,
+		scopes,
+		codeChallenge,
+	})
+
+	return new Response(null, {
+		status: 302,
+		headers: {
+			...additionalHeaders,
+			Location: authUrl,
+		},
+	})
 }
 
 /**
@@ -171,129 +243,233 @@ export function createAuthHandlers({
 	scopes: Record<string, string>
 	metrics: MetricsTracker
 }) {
-	{
-		const app = new Hono<AuthContext>()
-		app.use(useSentry)
-		// TODO: Add useOnError middleware rather than handling errors in each handler
-		// app.onError(useOnError)
-		/**
-		 * OAuth Authorization Endpoint
-		 *
-		 * This route initiates the Cloudflare OAuth flow when a user wants to log in.
-		 * It creates a random state parameter to prevent CSRF attacks and stores the
-		 * original OAuth request information in KV storage for later retrieval.
-		 * Then it redirects the user to Cloudflare's authorization page with the appropriate
-		 * parameters so the user can authenticate and grant permissions.
-		 */
-		app.get(`/oauth/authorize`, async (c) => {
-			try {
-				const oauthReqInfo = await c.env.OAUTH_PROVIDER.parseAuthRequest(c.req.raw)
-				oauthReqInfo.scope = Object.keys(scopes)
-				if (!oauthReqInfo.clientId) {
-					return c.text('Invalid request', 400)
-				}
-				const res = await getAuthorizationURL({
-					client_id: c.env.CLOUDFLARE_CLIENT_ID,
-					redirect_uri: new URL('/oauth/callback', c.req.url).href,
-					state: oauthReqInfo,
-					scopes,
-				})
+	const app = new Hono<AuthContext>()
+	app.use(useSentry)
 
-				return Response.redirect(res.authUrl, 302)
-			} catch (e) {
-				c.var.sentry?.recordError(e)
-				if (e instanceof Error) {
-					metrics.logEvent(
-						new AuthUser({
-							errorMessage: `Authorize Error: ${e.name}: ${e.message}`,
-						})
-					)
-				}
-				if (e instanceof McpError) {
-					return c.text(e.message, { status: e.code })
-				}
-				console.error(e)
-				return c.text('Internal Error', 500)
+	/**
+	 * GET /oauth/authorize - Show consent dialog or redirect if approved
+	 */
+	app.get(`/oauth/authorize`, async (c) => {
+		try {
+			const oauthReqInfo = await c.env.OAUTH_PROVIDER.parseAuthRequest(c.req.raw)
+			oauthReqInfo.scope = Object.keys(scopes)
+
+			if (!oauthReqInfo.clientId) {
+				return new OAuthError('invalid_request', 'Missing client_id parameter', 400).toResponse()
 			}
-		})
 
-		/**
-		 * OAuth Callback Endpoint
-		 *
-		 * This route handles the callback from Cloudflare after user authentication.
-		 * It exchanges the temporary code for an access token, then stores some
-		 * user metadata & the auth token as part of the 'props' on the token passed
-		 * down to the client. It ends by redirecting the client back to _its_ callback URL
-		 */
-		app.get(`/oauth/callback`, zValidator('query', AuthQuery), async (c) => {
-			try {
-				const { state, code } = c.req.valid('query')
-				const oauthReqInfo = AuthRequestSchemaWithExtraParams.parse(JSON.parse(atob(state)))
-				// Get the oathReqInfo out of KV
-				if (!oauthReqInfo.clientId) {
-					throw new McpError('Invalid State', 400)
-				}
-
-				const [{ accessToken, refreshToken, user, accounts }] = await Promise.all([
-					getTokenAndUserDetails(c, code, oauthReqInfo.codeVerifier),
-					c.env.OAUTH_PROVIDER.createClient({
-						clientId: oauthReqInfo.clientId,
-						tokenEndpointAuthMethod: 'none',
-					}),
-				])
-
-				// TODO: Implement auth restriction in staging
-				// if (
-				// 	!user.email.endsWith("@cloudflare.com") &&
-				// 	!(c.env.PERMITTED_USERS ?? []).includes(user.email)
-				// ) {
-				// 	throw new McpError(
-				// 		`This user ${user.email} is not allowed to access this restricted MCP server`,
-				// 		401,
-				// 	);
-				// }
-
-				// Return back to the MCP client a new token
-				const { redirectTo } = await c.env.OAUTH_PROVIDER.completeAuthorization({
-					request: oauthReqInfo,
-					userId: user.id,
-					metadata: {
-						label: user.email,
-					},
-					scope: oauthReqInfo.scope,
-					// This will be available on this.props inside CASBMCP
-					props: {
-						user,
-						accounts,
-						accessToken,
-						refreshToken,
-					},
-				})
-
-				metrics.logEvent(
-					new AuthUser({
-						userId: user.id,
-					})
+			// Check if client was previously approved (skip consent if so)
+			if (
+				await clientIdAlreadyApproved(
+					c.req.raw,
+					oauthReqInfo.clientId,
+					c.env.MCP_COOKIE_ENCRYPTION_KEY
 				)
+			) {
+				// Client already approved - create state and redirect immediately
+				const { codeChallenge, codeVerifier } = await generatePKCECodes()
+				const stateToken = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV, codeVerifier)
+				const { setCookie: sessionCookie } = await bindStateToSession(stateToken)
 
-				return Response.redirect(redirectTo, 302)
-			} catch (e) {
-				c.var.sentry?.recordError(e)
-				if (e instanceof Error) {
-					console.error(e)
-					metrics.logEvent(
-						new AuthUser({
-							errorMessage: `Callback Error: ${e.name}: ${e.message}`,
-						})
-					)
-				}
-				if (e instanceof McpError) {
-					return c.text(e.message, { status: e.code })
-				}
-				return c.text('Internal Error', 500)
+				return redirectToCloudflare(c, oauthReqInfo, stateToken, codeChallenge, scopes, {
+					'Set-Cookie': sessionCookie,
+				})
 			}
-		})
 
-		return app
-	}
+			// Client not approved - show consent dialog
+			const { token: csrfToken, setCookie: csrfCookie } = generateCSRFProtection()
+
+			// Render approval dialog
+			const response = renderApprovalDialog(c.req.raw, {
+				client: await c.env.OAUTH_PROVIDER.lookupClient(oauthReqInfo.clientId),
+				server: {
+					name: c.env.MCP_SERVER_NAME || 'Cloudflare MCP Server',
+					logo: 'https://images.mcp.cloudflare.com/mcp.svg',
+					description:
+						c.env.MCP_SERVER_DESCRIPTION || 'This server uses Cloudflare for authentication.',
+				},
+				state: {
+					oauthReqInfo,
+				},
+				csrfToken,
+				setCookie: csrfCookie,
+			})
+
+			return response
+		} catch (e) {
+			c.var.sentry?.recordError(e)
+			let message: string | undefined
+			if (e instanceof Error) {
+				message = `${e.name}: ${e.message}`
+			} else if (typeof e === 'string') {
+				message = e
+			} else {
+				message = 'Unknown error'
+			}
+			metrics.logEvent(
+				new AuthUser({
+					errorMessage: `Authorize Error: ${message}`,
+				})
+			)
+			if (e instanceof OAuthError) {
+				return e.toResponse()
+			}
+			if (e instanceof McpError) {
+				return c.text(e.message, { status: e.code })
+			}
+			console.error(e)
+			return c.text('Internal Error', 500)
+		}
+	})
+
+	/**
+	 * POST /oauth/authorize - Handle consent form submission
+	 */
+	app.post(`/oauth/authorize`, async (c) => {
+		try {
+			// Validates CSRF token, extracts state, and generates approved client cookie
+			const { state, headers } = await parseRedirectApproval(
+				c.req.raw,
+				c.env.MCP_COOKIE_ENCRYPTION_KEY
+			)
+
+			if (!state.oauthReqInfo) {
+				return new OAuthError(
+					'invalid_request',
+					'Missing OAuth request info in state',
+					400
+				).toResponse()
+			}
+
+			const oauthReqInfo = state.oauthReqInfo as AuthRequest
+
+			// Create OAuth state in KV and bind to session
+			const { codeChallenge, codeVerifier } = await generatePKCECodes()
+			const stateToken = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV, codeVerifier)
+			const { setCookie: sessionCookie } = await bindStateToSession(stateToken)
+
+			// Build redirect response
+			const redirectResponse = await redirectToCloudflare(
+				c,
+				oauthReqInfo,
+				stateToken,
+				codeChallenge,
+				scopes
+			)
+
+			// Add both cookies: approved client cookie (if present) and session binding cookie
+			// Note: We must use append() for multiple Set-Cookie headers, not combine with commas
+			if (headers['Set-Cookie']) {
+				redirectResponse.headers.append('Set-Cookie', headers['Set-Cookie'])
+			}
+			redirectResponse.headers.append('Set-Cookie', sessionCookie)
+
+			return redirectResponse
+		} catch (e) {
+			c.var.sentry?.recordError(e)
+			let message: string | undefined
+			if (e instanceof Error) {
+				message = `${e.name}: ${e.message}`
+			} else if (typeof e === 'string') {
+				message = e
+			} else {
+				message = 'Unknown error'
+			}
+			metrics.logEvent(
+				new AuthUser({
+					errorMessage: `Authorize POST Error: ${message}`,
+				})
+			)
+			if (e instanceof OAuthError) {
+				return e.toResponse()
+			}
+			console.error(e)
+			return c.text('Internal Error', 500)
+		}
+	})
+
+	/**
+	 * GET /oauth/callback - Handle OAuth callback from Cloudflare
+	 */
+	app.get(`/oauth/callback`, zValidator('query', AuthQuery), async (c) => {
+		try {
+			const { code } = c.req.valid('query')
+
+			// Validate state using dual validation (KV + session cookie)
+			const { oauthReqInfo, codeVerifier, clearCookie } = await validateOAuthState(
+				c.req.raw,
+				c.env.OAUTH_KV
+			)
+
+			if (!oauthReqInfo.clientId) {
+				return new OAuthError('invalid_request', 'Invalid OAuth request info', 400).toResponse()
+			}
+
+			// Exchange code for tokens and get user details
+			const [{ accessToken, refreshToken, user, accounts }] = await Promise.all([
+				getTokenAndUserDetails(c, code, codeVerifier), // use codeVerifier from KV
+				c.env.OAUTH_PROVIDER.createClient({
+					clientId: oauthReqInfo.clientId,
+					tokenEndpointAuthMethod: 'none',
+				}),
+			])
+
+			// Complete authorization and issue token to MCP client
+			const { redirectTo } = await c.env.OAUTH_PROVIDER.completeAuthorization({
+				request: oauthReqInfo,
+				userId: user.id,
+				metadata: {
+					label: user.email,
+				},
+				scope: oauthReqInfo.scope,
+				props: {
+					type: 'user_token',
+					user,
+					accounts,
+					accessToken,
+					refreshToken,
+				} satisfies AuthProps,
+			})
+
+			metrics.logEvent(
+				new AuthUser({
+					userId: user.id,
+				})
+			)
+
+			// Redirect back to MCP client with cleared session cookie
+			return new Response(null, {
+				status: 302,
+				headers: {
+					Location: redirectTo,
+					'Set-Cookie': clearCookie,
+				},
+			})
+		} catch (e) {
+			c.var.sentry?.recordError(e)
+			let message: string | undefined
+			if (e instanceof Error) {
+				console.error(e)
+				message = `${e.name}: ${e.message}`
+			} else if (typeof e === 'string') {
+				message = e
+			} else {
+				message = 'Unknown error'
+			}
+			metrics.logEvent(
+				new AuthUser({
+					errorMessage: `Callback Error: ${message}`,
+				})
+			)
+			if (e instanceof OAuthError) {
+				return e.toResponse()
+			}
+			if (e instanceof McpError) {
+				return c.text(e.message, { status: e.code })
+			}
+			return c.text('Internal Error', 500)
+		}
+	})
+
+	return app
 }

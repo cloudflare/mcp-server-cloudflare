@@ -4,17 +4,25 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"main": "src/index.ts",
+	"main": "src/dex-analysis.app.ts",
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
 	"migrations": [
 		{
 			"new_sqlite_classes": ["CloudflareDEXMCP"],
 			"tag": "v1"
+		},
+		{
+			"new_sqlite_classes": ["WarpDiagReader"],
+			"tag": "v2"
 		}
 	],
 	"observability": {
-		"enabled": true
+		"enabled": true,
+		"traces": {
+			"enabled": true,
+			"head_sampling_rate": 0.1
+		}
 	},
 	"durable_objects": {
 		"bindings": [
@@ -25,6 +33,10 @@
 			{
 				"class_name": "UserDetails",
 				"name": "USER_DETAILS"
+			},
+			{
+				"class_name": "WarpDiagReader",
+				"name": "WARP_DIAG_READER"
 			}
 		]
 	},
@@ -35,7 +47,9 @@
 		}
 	],
 	"vars": {
-		"ENVIRONMENT": "development"
+		"ENVIRONMENT": "development",
+		"MCP_SERVER_NAME": "PLACEHOLDER",
+		"MCP_SERVER_VERSION": "PLACEHOLDER"
 	},
 	"dev": {
 		"port": 8976
@@ -63,6 +77,10 @@
 						"class_name": "UserDetails",
 						"name": "USER_DETAILS",
 						"script_name": "mcp-cloudflare-workers-observability-staging"
+					},
+					{
+						"class_name": "WarpDiagReader",
+						"name": "WARP_DIAG_READER"
 					}
 				]
 			},
@@ -96,6 +114,10 @@
 						"class_name": "UserDetails",
 						"name": "USER_DETAILS",
 						"script_name": "mcp-cloudflare-workers-observability-production"
+					},
+					{
+						"class_name": "WarpDiagReader",
+						"name": "WARP_DIAG_READER"
 					}
 				]
 			},

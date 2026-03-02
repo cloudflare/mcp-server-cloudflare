@@ -4,10 +4,11 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"main": "src/index.ts",
+	"main": "src/docs-vectorize.app.ts",
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
 	"name": "mcp-cloudflare-docs-vectorize-dev",
+	"minify": true,
 	"migrations": [
 		{
 			"new_sqlite_classes": ["CloudflareDocumentationMCP"],
@@ -15,7 +16,11 @@
 		}
 	],
 	"observability": {
-		"enabled": true
+		"enabled": true,
+		"traces": {
+			"enabled": true,
+			"head_sampling_rate": 0.1
+		}
 	},
 	"durable_objects": {
 		"bindings": [
@@ -31,7 +36,7 @@
 	"vectorize": [
 		{
 			"binding": "VECTORIZE",
-			"index_name": "docs-bge-base"
+			"index_name": "docs-embeddinggemma-v1"
 		}
 	],
 	"vars": {
@@ -54,7 +59,7 @@
 		"staging": {
 			"name": "mcp-cloudflare-docs-vectorize-staging",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
-			"routes": [{ "pattern": "docs-staging.mcp.cloudflare.com", "custom_domain": true }],
+			"routes": [{ "pattern": "docs-vectorize-staging.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
 					{
@@ -64,7 +69,8 @@
 				]
 			},
 			"vars": {
-				"ENVIRONMENT": "staging"
+				"ENVIRONMENT": "staging",
+				"SENTRY_DSN": "https://d3ffa014f0daa57b27a174476bc2573f@sentry10.cfdata.org/2090"
 			},
 			"ai": {
 				"binding": "AI"
@@ -72,7 +78,7 @@
 			"vectorize": [
 				{
 					"binding": "VECTORIZE",
-					"index_name": "docs-bge-base"
+					"index_name": "docs-embeddinggemma-v1"
 				}
 			],
 			"analytics_engine_datasets": [
@@ -85,7 +91,7 @@
 		"production": {
 			"name": "mcp-cloudflare-docs-vectorize-production",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
-			"routes": [{ "pattern": "docs.mcp.cloudflare.com", "custom_domain": true }],
+			"routes": [{ "pattern": "docs-vectorize.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
 					{
@@ -95,7 +101,8 @@
 				]
 			},
 			"vars": {
-				"ENVIRONMENT": "production"
+				"ENVIRONMENT": "production",
+				"SENTRY_DSN": "https://d3ffa014f0daa57b27a174476bc2573f@sentry10.cfdata.org/2090"
 			},
 			"ai": {
 				"binding": "AI"
@@ -103,7 +110,7 @@
 			"vectorize": [
 				{
 					"binding": "VECTORIZE",
-					"index_name": "docs-bge-base"
+					"index_name": "docs-embeddinggemma-v1"
 				}
 			],
 			"analytics_engine_datasets": [

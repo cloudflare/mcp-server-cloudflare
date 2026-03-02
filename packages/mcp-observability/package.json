@@ -1,6 +1,6 @@
 {
 	"name": "@repo/mcp-observability",
-	"version": "0.31.1",
+	"version": "0.32.5",
 	"private": true,
 	"sideEffects": false,
 	"type": "module",
@@ -12,7 +12,7 @@
 		"bin": "bin"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "1.10.2",
+		"@modelcontextprotocol/sdk": "1.20.2",
 		"wrangler": "4.10.0",
 		"zod": "3.24.2"
 	},

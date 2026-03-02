@@ -68,7 +68,11 @@ export const DateRangeArrayParam: z.ZodType<HTTPTimeseriesParams['dateRange']> =
 	.describe(
 		'Filters results by date range. ' +
 			'For example, use `7d` and `7dcontrol` to compare this week with the previous week. ' +
-			'Use this parameter or set specific start and end dates (`dateStart` and `dateEnd` parameters).'
+			'Use this parameter or set specific start and end dates (`dateStart` and `dateEnd` parameters). ' +
+			'IMPORTANT: When using multiple dateRange values for comparison, filter array parameters (location, asn, ' +
+			'continent, geoId) map positionally to each dateRange element. For example, with dateRange: ["7d", "7dcontrol"] ' +
+			'and location: ["PT", "PT"], the first period uses PT and the control period also uses PT. If you only provide ' +
+			'location: ["PT"], only the first period is filtered by PT while the control period defaults to worldwide data.'
 	)
 
 export const DateStartParam = z
@@ -124,7 +128,12 @@ export const LocationArrayParam: z.ZodType<HTTPTimeseriesParams['location']> = z
 	.optional()
 	.describe(
 		'Filters results by location. Provide an array of alpha-2 country codes (e.g., "US", "PT"). ' +
-			'Prefix a code with `-` to exclude it (e.g., ["-US", "PT"] excludes the US and includes Portugal).'
+			'Prefix a code with `-` to exclude it (e.g., ["-US", "PT"] excludes the US and includes Portugal). ' +
+			'IMPORTANT: When using multiple dateRange values (e.g., ["7d", "7dcontrol"]), each array element ' +
+			'maps positionally to each dateRange. To compare the same location across time periods, repeat the ' +
+			'location code (e.g., location: ["PT", "PT"] with dateRange: ["7d", "7dcontrol"]). Using a single ' +
+			'location with multiple dateRange values will filter only the first period, with subsequent periods ' +
+			'defaulting to worldwide data.'
 	)
 
 export const ContinentArrayParam: z.ZodType<HTTPTimeseriesParams['continent']> = z
@@ -136,7 +145,11 @@ export const ContinentArrayParam: z.ZodType<HTTPTimeseriesParams['continent']> =
 	.optional()
 	.describe(
 		'Filters results by continent. Provide an array of alpha-2 continent codes (e.g., "EU", "NA"). ' +
-			'Prefix a code with `-` to exclude it (e.g., ["-EU", "NA"] excludes Europe and includes North America).'
+			'Prefix a code with `-` to exclude it (e.g., ["-EU", "NA"] excludes Europe and includes North America). ' +
+			'IMPORTANT: When using multiple dateRange values, each array element maps positionally to each dateRange. ' +
+			'To compare the same continent across time periods, repeat the continent code (e.g., continent: ["EU", "EU"] ' +
+			'with dateRange: ["7d", "7dcontrol"]). Using a single continent with multiple dateRange values will filter ' +
+			'only the first period, with subsequent periods defaulting to worldwide data.'
 	)
 
 export const AsnArrayParam: z.ZodType<HTTPTimeseriesParams['asn']> = z
@@ -144,7 +157,11 @@ export const AsnArrayParam: z.ZodType<HTTPTimeseriesParams['asn']> = z
 	.optional()
 	.describe(
 		'Filters results by ASN. Provide an array of ASN strings. ' +
-			'Prefix with `-` to exclude (e.g., ["-174", "3356"] excludes AS174 and includes AS3356). '
+			'Prefix with `-` to exclude (e.g., ["-174", "3356"] excludes AS174 and includes AS3356). ' +
+			'IMPORTANT: When using multiple dateRange values, each array element maps positionally to each dateRange. ' +
+			'To compare the same ASN across time periods, repeat the ASN (e.g., asn: ["13335", "13335"] with ' +
+			'dateRange: ["7d", "7dcontrol"]). Using a single ASN with multiple dateRange values will filter only ' +
+			'the first period, with subsequent periods defaulting to all ASNs.'
 	)
 
 export const AsOrderByParam: z.ZodType<ASNListParams['orderBy']> = z
@@ -155,26 +172,31 @@ export const AsOrderByParam: z.ZodType<ASNListParams['orderBy']> = z
 export const HttpDimensionParam = z
 	.enum([
 		'timeseries',
-		'summary/deviceType',
-		'summary/httpProtocol',
-		'summary/httpVersion',
-		'summary/botClass',
-		'summary/ipVersion',
-		'summary/tlsVersion',
+		// Summary dimensions (new unified endpoint)
+		'summary/adm1',
+		'summary/bot_class',
+		'summary/browser',
+		'summary/browser_family',
+		'summary/device_type',
+		'summary/http_protocol',
+		'summary/http_version',
+		'summary/ip_version',
 		'summary/os',
-		'summary/postQuantum',
-		'top/browser', // TODO replace with "summary/browser" and "summary/browserFamily" once available on the lib
-		'top/browserFamily',
-		'timeseriesGroups/deviceType',
-		'timeseriesGroups/httpProtocol',
-		'timeseriesGroups/httpVersion',
-		'timeseriesGroups/botClass',
-		'timeseriesGroups/ipVersion',
-		'timeseriesGroups/tlsVersion',
-		'timeseriesGroups/os',
-		'timeseriesGroups/postQuantum',
-		'timeseriesGroups/browser',
-		'timeseriesGroups/browserFamily',
+		'summary/post_quantum',
+		'summary/tls_version',
+		// Timeseries groups dimensions (new unified endpoint)
+		'timeseries_groups/adm1',
+		'timeseries_groups/bot_class',
+		'timeseries_groups/browser',
+		'timeseries_groups/browser_family',
+		'timeseries_groups/device_type',
+		'timeseries_groups/http_protocol',
+		'timeseries_groups/http_version',
+		'timeseries_groups/ip_version',
+		'timeseries_groups/os',
+		'timeseries_groups/post_quantum',
+		'timeseries_groups/tls_version',
+		// Top endpoints
 		'top/locations',
 		'top/ases',
 	])
@@ -183,23 +205,29 @@ export const HttpDimensionParam = z
 export const DnsDimensionParam = z
 	.enum([
 		'timeseries',
-		'summary/ipVersion',
-		'summary/cacheHit',
+		'summary/ip_version',
+		'summary/cache_hit',
 		'summary/dnssec',
-		'summary/dnssecAware',
-		'summary/matchingAnswer',
+		'summary/dnssec_aware',
+		'summary/dnssec_e2e',
+		'summary/matching_answer',
 		'summary/protocol',
-		'summary/queryType',
-		'summary/responseCode',
-		'summary/responseTTL',
-		'timeseriesGroups/ipVersion',
-		'timeseriesGroups/cacheHit',
-		'timeseriesGroups/dnssecAware',
-		'timeseriesGroups/matchingAnswer',
-		'timeseriesGroups/protocol',
-		'timeseriesGroups/queryType',
-		'timeseriesGroups/responseCode',
-		'timeseriesGroups/responseTTL',
+		'summary/query_type',
+		'summary/response_code',
+		'summary/response_ttl',
+		'summary/tld',
+		'summary/tld_dns_magnitude',
+		'timeseries_groups/ip_version',
+		'timeseries_groups/cache_hit',
+		'timeseries_groups/dnssec',
+		'timeseries_groups/dnssec_aware',
+		'timeseries_groups/dnssec_e2e',
+		'timeseries_groups/matching_answer',
+		'timeseries_groups/protocol',
+		'timeseries_groups/query_type',
+		'timeseries_groups/response_code',
+		'timeseries_groups/response_ttl',
+		'timeseries_groups/tld',
 		'top/locations',
 		'top/ases',
 	])
@@ -295,12 +323,19 @@ export const EmailSecurityDimensionParam = z
 
 export const AiDimensionParam = z
 	.enum([
-		'bots/summary/userAgent',
-		'bots/timeseriesGroups/userAgent',
+		'bots/timeseries',
+		'bots/summary/user_agent',
+		'bots/summary/crawl_purpose',
+		'bots/summary/industry',
+		'bots/summary/vertical',
+		'bots/timeseries_groups/user_agent',
+		'bots/timeseries_groups/crawl_purpose',
+		'bots/timeseries_groups/industry',
+		'bots/timeseries_groups/vertical',
 		'inference/summary/model',
 		'inference/summary/task',
-		'inference/timeseriesGroups/model',
-		'inference/timeseriesGroups/task',
+		'inference/timeseries_groups/model',
+		'inference/timeseries_groups/task',
 	])
 	.describe('Dimension indicating the type and format of AI data to retrieve.')
 
@@ -322,3 +357,637 @@ export const InternetSpeedOrderByParam = z
 export const InternetQualityMetricParam = z
 	.enum(['BANDWIDTH', 'DNS', 'LATENCY'])
 	.describe('Specifies which metric to return (bandwidth, latency, or DNS response time).')
+
+// GeoId filter for ADM1 (administrative level 1) filtering
+export const GeoIdArrayParam = z
+	.array(z.string())
+	.optional()
+	.describe(
+		'Filters results by Geolocation (ADM1 - administrative level 1, e.g., states/provinces). ' +
+			'Provide an array of GeoNames IDs. Prefix with `-` to exclude. ' +
+			'Example: ["2267056", "-360689"] includes Lisbon area but excludes another region. ' +
+			'IMPORTANT: When using multiple dateRange values, each array element maps positionally to each dateRange. ' +
+			'To compare the same region across time periods, repeat the GeoID (e.g., geoId: ["2267056", "2267056"] ' +
+			'with dateRange: ["7d", "7dcontrol"]). Using a single geoId with multiple dateRange values will filter ' +
+			'only the first period, with subsequent periods defaulting to all regions.'
+	)
+
+// BGP Parameters
+export const BgpHijackerAsnParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Filter by the potential hijacker AS of a BGP hijack event.')
+
+export const BgpVictimAsnParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Filter by the potential victim AS of a BGP hijack event.')
+
+export const BgpInvolvedAsnParam = z
+	.number()
+	.positive()
+	.optional()
+	.describe('Filter by ASN involved (as hijacker or victim) in a BGP event.')
+
+export const BgpInvolvedCountryParam = z
+	.string()
+	.regex(/^[a-zA-Z]{2}$/)
+	.optional()
+	.describe('Filter by country code of the involved AS in a BGP event.')
+
+export const BgpLeakAsnParam = z
+	.number()
+	.positive()
+	.optional()
+	.describe('Filter by the leaking AS of a route leak event.')
+
+export const BgpPrefixParam = z
+	.string()
+	.optional()
+	.describe('Filter by IP prefix (e.g., "1.1.1.0/24").')
+
+export const BgpMinConfidenceParam = z
+	.number()
+	.int()
+	.min(1)
+	.max(10)
+	.optional()
+	.describe('Filter by minimum confidence score (1-4 low, 5-7 mid, 8+ high).')
+
+export const BgpMaxConfidenceParam = z
+	.number()
+	.int()
+	.min(1)
+	.max(10)
+	.optional()
+	.describe('Filter by maximum confidence score (1-4 low, 5-7 mid, 8+ high).')
+
+export const BgpSortByParam = z
+	.enum(['TIME', 'CONFIDENCE', 'ID'])
+	.optional()
+	.describe('Sort results by specified field.')
+
+export const BgpSortOrderParam = z
+	.enum(['ASC', 'DESC'])
+	.optional()
+	.describe('Sort order (ascending or descending).')
+
+// Bots Parameters
+export const BotsDimensionParam = z
+	.enum([
+		'timeseries',
+		'summary/bot',
+		'summary/bot_kind',
+		'summary/bot_operator',
+		'summary/bot_category',
+		'timeseries_groups/bot',
+		'timeseries_groups/bot_kind',
+		'timeseries_groups/bot_operator',
+		'timeseries_groups/bot_category',
+	])
+	.describe('Dimension indicating the type and format of bot data to retrieve.')
+
+export const BotNameParam = z
+	.array(z.string().max(100))
+	.optional()
+	.describe('Filter results by bot name.')
+
+export const BotOperatorParam = z
+	.array(z.string().max(100))
+	.optional()
+	.describe('Filter results by bot operator (e.g., Google, Microsoft, OpenAI).')
+
+export const BotCategoryParam = z
+	.array(
+		z.enum([
+			'SEARCH_ENGINE_CRAWLER',
+			'SEARCH_ENGINE_OPTIMIZATION',
+			'MONITORING_AND_ANALYTICS',
+			'ADVERTISING_AND_MARKETING',
+			'SOCIAL_MEDIA_MARKETING',
+			'PAGE_PREVIEW',
+			'ACADEMIC_RESEARCH',
+			'SECURITY',
+			'ACCESSIBILITY',
+			'WEBHOOKS',
+			'FEED_FETCHER',
+			'AI_CRAWLER',
+			'AGGREGATOR',
+			'AI_ASSISTANT',
+			'AI_SEARCH',
+			'ARCHIVER',
+		])
+	)
+	.optional()
+	.describe('Filter results by bot category.')
+
+export const BotKindParam = z
+	.array(z.enum(['AGENT', 'BOT']))
+	.optional()
+	.describe('Filter results by bot kind (AGENT or BOT).')
+
+export const BotVerificationStatusParam = z
+	.array(z.enum(['VERIFIED']))
+	.optional()
+	.describe('Filter results by bot verification status.')
+
+// Certificate Transparency Parameters
+export const CtDimensionParam = z
+	.enum([
+		'timeseries',
+		'summary/ca',
+		'summary/ca_owner',
+		'summary/duration',
+		'summary/entry_type',
+		'summary/expiration_status',
+		'summary/has_ips',
+		'summary/has_wildcards',
+		'summary/log_api',
+		'summary/public_key_algorithm',
+		'summary/signature_algorithm',
+		'summary/validation_level',
+		'timeseries_groups/ca',
+		'timeseries_groups/ca_owner',
+		'timeseries_groups/duration',
+		'timeseries_groups/entry_type',
+		'timeseries_groups/expiration_status',
+		'timeseries_groups/has_ips',
+		'timeseries_groups/has_wildcards',
+		'timeseries_groups/log_api',
+		'timeseries_groups/public_key_algorithm',
+		'timeseries_groups/signature_algorithm',
+		'timeseries_groups/validation_level',
+	])
+	.describe(
+		'Dimension indicating the type and format of Certificate Transparency data to retrieve.'
+	)
+
+export const CtCaParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter results by certificate authority.')
+
+export const CtCaOwnerParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter results by certificate authority owner.')
+
+export const CtDurationParam = z
+	.array(
+		z.enum([
+			'LTE_3D',
+			'GT_3D_LTE_7D',
+			'GT_7D_LTE_10D',
+			'GT_10D_LTE_47D',
+			'GT_47D_LTE_100D',
+			'GT_100D_LTE_200D',
+			'GT_200D',
+		])
+	)
+	.optional()
+	.describe('Filter results by certificate duration.')
+
+export const CtEntryTypeParam = z
+	.array(z.enum(['PRECERTIFICATE', 'CERTIFICATE']))
+	.optional()
+	.describe('Filter results by entry type (certificate vs. pre-certificate).')
+
+export const CtTldParam = z
+	.array(z.string().min(2).max(63))
+	.optional()
+	.describe('Filter results by top-level domain (e.g., "com", "org").')
+
+export const CtValidationLevelParam = z
+	.array(z.enum(['DOMAIN', 'ORGANIZATION', 'EXTENDED']))
+	.optional()
+	.describe('Filter results by validation level (DV, OV, EV).')
+
+export const CtPublicKeyAlgorithmParam = z
+	.array(z.enum(['DSA', 'ECDSA', 'RSA']))
+	.optional()
+	.describe('Filter results by public key algorithm.')
+
+// Netflows Parameters
+export const NetflowsDimensionParam = z
+	.enum(['timeseries', 'summary', 'summary/adm1', 'summary/product', 'top/locations', 'top/ases'])
+	.describe('Dimension indicating the type and format of NetFlows data to retrieve.')
+
+export const NetflowsProductParam = z
+	.array(z.enum(['HTTP', 'ALL']))
+	.optional()
+	.describe('Filter results by network traffic product type.')
+
+export const NormalizationParam = z
+	.enum(['RAW_VALUES', 'PERCENTAGE'])
+	.optional()
+	.describe('Normalization method applied to results.')
+
+export const LimitPerGroupParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Limits the number of items per group. Extra items appear grouped under "other".')
+
+// Origins/Cloud Observatory Parameters (used by fetch-based tools)
+export const OriginSlugParam = z
+	.enum(['AMAZON', 'GOOGLE', 'MICROSOFT', 'ORACLE'])
+	.describe(
+		'The cloud provider origin to query. Supported values: AMAZON (AWS), GOOGLE (GCP), MICROSOFT (Azure), ORACLE (OCI).'
+	)
+
+export const OriginArrayParam = z
+	.array(OriginSlugParam)
+	.min(1)
+	.describe('Array of cloud provider origins to query. At least one origin must be specified.')
+
+export const OriginMetricParam = z
+	.enum([
+		'CONNECTION_FAILURES',
+		'REQUESTS',
+		'RESPONSE_HEADER_RECEIVE_DURATION',
+		'TCP_HANDSHAKE_DURATION',
+		'TCP_RTT',
+		'TLS_HANDSHAKE_DURATION',
+	])
+	.describe(
+		'The performance metric to retrieve. Only valid when dimension is timeseries or percentile. ' +
+			'CONNECTION_FAILURES: Number of failed connections. ' +
+			'REQUESTS: Total request count. ' +
+			'RESPONSE_HEADER_RECEIVE_DURATION: Time to receive response headers (ms). ' +
+			'TCP_HANDSHAKE_DURATION: TCP handshake time (ms). ' +
+			'TCP_RTT: TCP round-trip time (ms). ' +
+			'TLS_HANDSHAKE_DURATION: TLS handshake time (ms).'
+	)
+
+export const OriginDataDimensionParam = z
+	.enum([
+		'timeseries',
+		'summary/REGION',
+		'summary/SUCCESS_RATE',
+		'summary/PERCENTILE',
+		'timeseriesGroups/REGION',
+		'timeseriesGroups/SUCCESS_RATE',
+		'timeseriesGroups/PERCENTILE',
+	])
+	.describe(
+		'Dimension indicating the type and format of origins data to retrieve. ' +
+			'timeseries: Raw time series data. Requires setting the metric parameter.' +
+			'summary/*: Aggregated data grouped by dimension. ' +
+			'timeseriesGroups/*: Time series grouped by dimension. ' +
+			'REGION: Group by cloud provider region (e.g., us-east-1). ' +
+			'SUCCESS_RATE: Group by connection success rate. ' +
+			'PERCENTILE: Group by performance percentiles (p50, p90, p99). Requires setting the metric parameter.'
+	)
+
+export const OriginRegionParam = z
+	.array(z.string().max(100))
+	.optional()
+	.describe(
+		'Filters results by cloud provider region. ' +
+			'Example regions: us-east-1, eu-west-1, ap-southeast-1.'
+	)
+
+export const OriginNormalizationParam = z
+	.enum(['PERCENTAGE', 'MIN0_MAX'])
+	.optional()
+	.describe('Normalization method for results.')
+
+// ============================================================
+// Robots.txt Parameters
+// ============================================================
+
+export const RobotsTxtDimensionParam = z
+	.enum([
+		'summary/user_agent',
+		'timeseries_groups/user_agent',
+		'top/domain_categories',
+		'top/user_agents/directive',
+	])
+	.describe('Dimension indicating the type and format of robots.txt data to retrieve.')
+
+export const RobotsTxtDirectiveParam = z
+	.enum(['ALLOW', 'DISALLOW'])
+	.optional()
+	.describe('Filter by robots.txt directive type (ALLOW or DISALLOW).')
+
+export const RobotsTxtPatternParam = z
+	.enum(['FULLY', 'PARTIALLY'])
+	.optional()
+	.describe('Filter by pattern matching type (FULLY or PARTIALLY matched).')
+
+export const RobotsTxtDomainCategoryParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by domain categories.')
+
+export const RobotsTxtUserAgentCategoryParam = z
+	.enum(['AI'])
+	.optional()
+	.describe('Filter by user agent category (currently only AI is supported).')
+
+// ============================================================
+// Bots Crawlers Parameters
+// ============================================================
+
+export const BotsCrawlersDimensionParam = z
+	.enum(['CLIENT_TYPE', 'USER_AGENT', 'REFERER', 'CRAWL_REFER_RATIO', 'VERTICAL', 'INDUSTRY'])
+	.describe(
+		'Dimension for crawler data. CLIENT_TYPE: crawler type, USER_AGENT: crawler user agent, ' +
+			'REFERER: referrer analysis, CRAWL_REFER_RATIO: crawl to referrer ratio, ' +
+			'VERTICAL: industry vertical, INDUSTRY: industry classification.'
+	)
+
+export const BotsCrawlersFormatParam = z
+	.enum(['summary', 'timeseries_groups'])
+	.describe('Format for crawler data: summary or time series grouped data.')
+
+export const CrawlerVerticalParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by industry vertical.')
+
+export const CrawlerIndustryParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by industry classification.')
+
+export const CrawlerClientTypeParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by client type.')
+
+// ============================================================
+// Leaked Credential Checks Parameters
+// ============================================================
+
+export const LeakedCredentialsDimensionParam = z
+	.enum([
+		'timeseries',
+		'summary/compromised',
+		'summary/bot_class',
+		'timeseries_groups/compromised',
+		'timeseries_groups/bot_class',
+	])
+	.describe('Dimension indicating the type and format of leaked credentials data to retrieve.')
+
+export const LeakedCredentialsBotClassParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by bot class.')
+
+export const LeakedCredentialsCompromisedParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by compromised status.')
+
+// ============================================================
+// AS112 Parameters
+// ============================================================
+
+export const As112DimensionParam = z
+	.enum([
+		'timeseries',
+		'summary/dnssec',
+		'summary/edns',
+		'summary/ip_version',
+		'summary/protocol',
+		'summary/query_type',
+		'summary/response_code',
+		'timeseries_groups/dnssec',
+		'timeseries_groups/edns',
+		'timeseries_groups/ip_version',
+		'timeseries_groups/protocol',
+		'timeseries_groups/query_type',
+		'timeseries_groups/response_code',
+		'top/locations',
+	])
+	.describe(
+		'Dimension indicating the type and format of AS112 data to retrieve. ' +
+			'AS112 is a DNS sink hole for reverse DNS lookups of private IP addresses.'
+	)
+
+export const As112QueryTypeParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by DNS query type.')
+
+export const As112ProtocolParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by DNS protocol (UDP/TCP).')
+
+export const As112ResponseCodeParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by DNS response code.')
+
+// ============================================================
+// TCP Resets/Timeouts Parameters
+// ============================================================
+
+export const TcpResetsTimeoutsDimensionParam = z
+	.enum(['summary', 'timeseries_groups'])
+	.describe('Format for TCP resets/timeouts data: summary or time series grouped data.')
+
+// ============================================================
+// Annotations/Outages Parameters
+// ============================================================
+
+export const AnnotationDataSourceParam = z
+	.enum([
+		'ALL',
+		'AI_BOTS',
+		'AI_GATEWAY',
+		'BGP',
+		'BOTS',
+		'CONNECTION_ANOMALY',
+		'CT',
+		'DNS',
+		'DNS_MAGNITUDE',
+		'DNS_AS112',
+		'DOS',
+		'EMAIL_ROUTING',
+		'EMAIL_SECURITY',
+		'FW',
+		'FW_PG',
+		'HTTP',
+		'HTTP_CONTROL',
+		'HTTP_CRAWLER_REFERER',
+		'HTTP_ORIGINS',
+		'IQI',
+		'LEAKED_CREDENTIALS',
+		'NET',
+		'ROBOTS_TXT',
+		'SPEED',
+		'WORKERS_AI',
+	])
+	.optional()
+	.describe('Filter annotations by data source.')
+
+export const AnnotationEventTypeParam = z
+	.enum(['EVENT', 'GENERAL', 'OUTAGE', 'PARTIAL_PROJECTION', 'PIPELINE', 'TRAFFIC_ANOMALY'])
+	.optional()
+	.describe('Filter annotations by event type.')
+
+// ============================================================
+// BGP Additional Parameters
+// ============================================================
+
+export const BgpUpdateTypeParam = z
+	.array(z.enum(['ANNOUNCEMENT', 'WITHDRAWAL']))
+	.optional()
+	.describe('Filter by BGP update type (ANNOUNCEMENT or WITHDRAWAL).')
+
+export const BgpPrefixArrayParam = z
+	.array(z.string())
+	.optional()
+	.describe('Filter by IP prefix(es).')
+
+export const BgpRpkiStatusParam = z
+	.enum(['VALID', 'INVALID', 'UNKNOWN'])
+	.optional()
+	.describe('Filter by RPKI validation status.')
+
+export const BgpLongestPrefixMatchParam = z
+	.boolean()
+	.optional()
+	.describe('Whether to use longest prefix match.')
+
+export const BgpOriginParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Filter by origin ASN.')
+
+export const BgpInvalidOnlyParam = z
+	.boolean()
+	.optional()
+	.describe('Only return invalid MOAS prefixes.')
+
+export const BgpIpVersionParam = z
+	.array(z.enum(['IPv4', 'IPv6']))
+	.optional()
+	.describe(
+		'Filters results by IP version (IPv4 vs. IPv6). Useful for monitoring IPv6 address space specifically.'
+	)
+
+// ============================================================
+// Geolocation Parameters
+// ============================================================
+
+export const GeoIdParam = z
+	.string()
+	.regex(/^[0-9]+$/, {
+		message: 'Invalid GeoNames ID. Must be a numeric string.',
+	})
+	.describe('GeoNames ID for the geolocation (e.g., "2267056" for Lisbon).')
+
+// ============================================================
+// Slug Parameters (Path Traversal Prevention)
+// ============================================================
+
+export const SlugParam = z
+	.string()
+	.min(1)
+	.max(100)
+	.regex(/^[a-zA-Z0-9]+$/, {
+		message: 'Invalid slug format. Only alphanumeric characters are allowed.',
+	})
+	.describe('A slug identifier containing only alphanumeric characters.')
+
+export const Sha256FingerprintParam = z
+	.string()
+	.toUpperCase()
+	.regex(/^[A-F0-9]{64}$/, {
+		message: 'Invalid SHA256 fingerprint. Must be 64 hexadecimal characters.',
+	})
+	.describe('A SHA256 fingerprint (64 hexadecimal characters).')
+
+// ============================================================
+// TLD Parameters
+// ============================================================
+
+export const TldTypeParam = z
+	.enum(['GENERIC', 'COUNTRY_CODE', 'GENERIC_RESTRICTED', 'INFRASTRUCTURE', 'SPONSORED'])
+	.optional()
+	.describe('Filters results by TLD type.')
+
+export const TldManagerParam = z
+	.string()
+	.max(100)
+	.optional()
+	.describe('Filters results by TLD manager (e.g., "VeriSign Global Registry Services").')
+
+export const TldParam = z
+	.string()
+	.min(2)
+	.max(63)
+	.regex(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/)
+	.describe('Top-level domain (e.g., "com", "org", "net").')
+
+export const TldFilterParam = z
+	.string()
+	.optional()
+	.describe('Filters results by top-level domain. Specify a comma-separated list of TLDs.')
+
+// ============================================================
+// Ranking Timeseries Parameters
+// ============================================================
+
+export const DomainsArrayParam = z
+	.array(
+		z
+			.string()
+			.min(1)
+			.max(253)
+			.regex(/^(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+(?:[A-Za-z]{2,63}))$/)
+	)
+	.optional()
+	.describe('Filters results by domain name. Specify an array of domain names to track.')
+
+export const DomainCategoryArrayParam = z
+	.array(z.string().max(100))
+	.optional()
+	.describe('Filters results by domain category (e.g., "News & Media", "Technology").')
+
+// ============================================================
+// Speed Histogram Parameters
+// ============================================================
+
+export const SpeedHistogramMetricParam = z
+	.enum(['BANDWIDTH', 'LATENCY', 'JITTER'])
+	.optional()
+	.describe('Metrics to be returned in the histogram. Defaults to BANDWIDTH.')
+
+export const BucketSizeParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Specifies the width for every bucket in the histogram.')
+
+// ============================================================
+// BGP Routes ASes Parameters
+// ============================================================
+
+export const BgpRoutesAsesSortByParam = z
+	.enum(['cone', 'pfxs', 'ipv4', 'ipv6', 'rpki_valid', 'rpki_invalid', 'rpki_unknown'])
+	.optional()
+	.describe(
+		'Sort ASes by: cone (customer cone size), pfxs (total prefixes), ipv4/ipv6 (address count), or rpki_* (RPKI validation status).'
+	)
+
+// ============================================================
+// Traffic Anomalies Parameters
+// ============================================================
+
+export const TrafficAnomalyStatusParam = z
+	.enum(['VERIFIED', 'UNVERIFIED'])
+	.optional()
+	.describe('Filter by anomaly verification status.')

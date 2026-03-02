@@ -1,31 +1,39 @@
 {
 	"$schema": "https://turbo.build/schema.json",
+	"globalPassThroughEnv": ["FORCE_COLOR", "RUNNER_TEMP"],
 	"tasks": {
 		"deploy": {
 			"cache": false,
-			"passThroughEnv": [
-				"CLOUDFLARE_ACCOUNT_ID",
-				"CLOUDFLARE_API_TOKEN",
-				"CLOUDFLARE_STAGING_API_TOKEN"
-			],
-			"outputs": ["dist"]
+			"env": ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN", "CLOUDFLARE_STAGING_API_TOKEN"],
+			"outputs": ["dist"],
+			"outputLogs": "new-only"
 		},
 		"check": {
-			"dependsOn": ["^check:types", "^check:lint", "check:types", "check:lint"]
+			"dependsOn": ["^check:types", "^check:lint", "check:types", "check:lint"],
+			"outputLogs": "new-only"
 		},
 		"check:types": {
-			"dependsOn": ["^check:types"]
+			"dependsOn": ["^check:types"],
+			"outputLogs": "new-only"
 		},
 		"check:lint": {
-			"dependsOn": ["^check:lint"]
+			"env": ["GITHUB_ACTIONS"],
+			"dependsOn": ["^check:lint"],
+			"outputLogs": "new-only"
 		},
 		"eval:ci": {
-			"dependsOn": ["^eval:ci"]
+			"dependsOn": ["^eval:ci"],
+			"outputLogs": "new-only"
 		},
 		"types": {
-			"dependsOn": ["^types"]
+			"dependsOn": ["^types"],
+			"outputLogs": "new-only"
 		},
-		"//#check:format": {},
-		"//#check:deps": {}
+		"//#check:format": {
+			"outputLogs": "new-only"
+		},
+		"//#check:deps": {
+			"outputLogs": "new-only"
+		}
 	}
 }

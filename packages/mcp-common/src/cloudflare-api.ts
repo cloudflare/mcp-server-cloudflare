@@ -8,9 +8,7 @@ export function getCloudflareClient(apiToken: string) {
 	if (env.DEV_DISABLE_OAUTH) {
 		return new Cloudflare({
 			// @ts-expect-error We don't have actual env in this package, but we know this is defined because the initial Oauth handshake will fail without it
-			apiEmail: env.DEV_CLOUDFLARE_EMAIL,
-			// @ts-expect-error We don't have actual env in this package, but we know this is defined because the initial Oauth handshake will fail without it
-			apiKey: env.DEV_CLOUDFLARE_API_TOKEN,
+			apiToken: env.DEV_CLOUDFLARE_API_TOKEN,
 		})
 	}
 
@@ -45,9 +43,7 @@ export async function fetchCloudflareApi<T>({
 		options.headers = {
 			...options.headers,
 			// @ts-expect-error We don't have actual env in this package
-			'X-Auth-Email': env.DEV_CLOUDFLARE_EMAIL,
-			// @ts-expect-error We don't have actual env in this package
-			'X-Auth-Key': env.DEV_CLOUDFLARE_API_TOKEN,
+			Authorization: `Bearer ${env.DEV_CLOUDFLARE_API_TOKEN}`,
 		}
 	}
 	const response = await fetch(url, {

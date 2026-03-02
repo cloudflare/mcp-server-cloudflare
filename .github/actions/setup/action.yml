@@ -1,0 +1,25 @@
+name: 'Setup Node.js Environment'
+description: 'Install pnpm, Node.js, and project dependencies'
+
+inputs:
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '22'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install pnpm
+      # note: version is inferred from the packageManager field in package.json
+      uses: pnpm/action-setup@v4
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile --child-concurrency=10

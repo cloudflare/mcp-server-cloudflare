@@ -1,0 +1,37 @@
+name: Main
+
+on:
+  push:
+    branches: ['main']
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  deploy-staging:
+    name: Deploy (staging)
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    concurrency: ${{ github.workflow }}-deploy-staging
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      # Run tests & checks before deploying
+      - name: Syncpack lint
+        run: pnpm check:deps
+      - name: Run linter
+        run: pnpm check:turbo
+      - name: Run linter (formatting)
+        run: pnpm check:format
+      - name: Run tests
+        run: pnpm test
+
+      - name: Deploy Workers (staging)
+        run: pnpm turbo deploy -- -e staging
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

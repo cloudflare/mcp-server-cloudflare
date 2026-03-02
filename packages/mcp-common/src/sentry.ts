@@ -54,7 +54,7 @@ export interface BaseHonoContext {
 	}
 }
 
-function initSentry<T extends BaseBindings>(
+export function initSentry<T extends BaseBindings>(
 	env: T,
 	ctx: SentryContext,
 	req?: Request<unknown, CfProperties>

@@ -12,7 +12,7 @@ The Cloudflare account this worker is deployed on already has this Autorag insta
 pnpm run start
 ```
 
-Then connect to the server via remote MCP at `http://localhost:8976/sse`
+Then connect to the server via remote MCP at `http://localhost:8976/mcp`
 
 ## Deploying
 

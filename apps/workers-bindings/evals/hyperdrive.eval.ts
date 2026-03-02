@@ -4,7 +4,7 @@ import { describeEval } from 'vitest-evals'
 import { runTask } from '@repo/eval-tools/src/runTask'
 import { checkFactuality } from '@repo/eval-tools/src/scorers'
 import { eachModel } from '@repo/eval-tools/src/test-models'
-import { HYPERDRIVE_TOOLS } from '@repo/mcp-common/src/tools/hyperdrive'
+import { HYPERDRIVE_TOOLS } from '@repo/mcp-common/src/tools/hyperdrive.tools'
 
 import { initializeClient } from './utils' // Assuming utils.ts will exist here
 

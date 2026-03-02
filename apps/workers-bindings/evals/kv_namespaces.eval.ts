@@ -4,7 +4,7 @@ import { describeEval } from 'vitest-evals'
 import { runTask } from '@repo/eval-tools/src/runTask'
 import { checkFactuality } from '@repo/eval-tools/src/scorers'
 import { eachModel } from '@repo/eval-tools/src/test-models'
-import { KV_NAMESPACE_TOOLS } from '@repo/mcp-common/src/tools/kv_namespace'
+import { KV_NAMESPACE_TOOLS } from '@repo/mcp-common/src/tools/kv_namespace.tools'
 
 import { initializeClient } from './utils' // Assuming utils.ts will exist here
 
@@ -19,7 +19,6 @@ eachModel('$modelName', ({ model }) => {
 		task: async (input: string) => {
 			const client = await initializeClient(/* Pass necessary mocks/config */)
 			const { promptOutput, toolCalls } = await runTask(client, model, input)
-
 			const toolCall = toolCalls.find(
 				(call) => call.toolName === KV_NAMESPACE_TOOLS.kv_namespace_create
 			)
@@ -41,7 +40,6 @@ eachModel('$modelName', ({ model }) => {
 		task: async (input: string) => {
 			const client = await initializeClient(/* Pass necessary mocks/config */)
 			const { promptOutput, toolCalls } = await runTask(client, model, input)
-
 			const toolCall = toolCalls.find(
 				(call) => call.toolName === KV_NAMESPACE_TOOLS.kv_namespaces_list
 			)
@@ -56,15 +54,13 @@ eachModel('$modelName', ({ model }) => {
 	describeEval('Rename Cloudflare KV Namespace', {
 		data: async () => [
 			{
-				input:
-					'Rename my Cloudflare KV Namespace called "my-test-namespace" to "my-new-test-namespace".',
+				input: 'Rename my Cloudflare KV Namespace with ID 1234 to "my-new-test-namespace".',
 				expected: `The ${KV_NAMESPACE_TOOLS.kv_namespace_update} tool should be called to rename the kv namespace.`,
 			},
 		],
 		task: async (input: string) => {
 			const client = await initializeClient(/* Pass necessary mocks/config */)
 			const { promptOutput, toolCalls } = await runTask(client, model, input)
-
 			const toolCall = toolCalls.find(
 				(call) => call.toolName === KV_NAMESPACE_TOOLS.kv_namespace_update
 			)
@@ -79,14 +75,13 @@ eachModel('$modelName', ({ model }) => {
 	describeEval('Get Cloudflare KV Namespace Details', {
 		data: async () => [
 			{
-				input: 'Get details of my Cloudflare KV Namespace called "my-new-test-namespace".',
+				input: 'Get details of my Cloudflare KV Namespace with ID 1234.',
 				expected: `The ${KV_NAMESPACE_TOOLS.kv_namespace_get} tool should be called to retrieve the details of the kv namespace.`,
 			},
 		],
 		task: async (input: string) => {
 			const client = await initializeClient(/* Pass necessary mocks/config */)
 			const { promptOutput, toolCalls } = await runTask(client, model, input)
-
 			const toolCall = toolCalls.find(
 				(call) => call.toolName === KV_NAMESPACE_TOOLS.kv_namespace_get
 			)
@@ -101,14 +96,13 @@ eachModel('$modelName', ({ model }) => {
 	describeEval('Delete Cloudflare KV Namespace', {
 		data: async () => [
 			{
-				input: 'Look up the id of my only KV namespace and delete it.',
+				input: 'Delete the kv namespace with ID 1234.',
 				expected: `The ${KV_NAMESPACE_TOOLS.kv_namespace_delete} tool should be called to delete the kv namespace.`,
 			},
 		],
 		task: async (input: string) => {
 			const client = await initializeClient(/* Pass necessary mocks/config */)
 			const { promptOutput, toolCalls } = await runTask(client, model, input)
-
 			const toolCall = toolCalls.find(
 				(call) => call.toolName === KV_NAMESPACE_TOOLS.kv_namespace_delete
 			)

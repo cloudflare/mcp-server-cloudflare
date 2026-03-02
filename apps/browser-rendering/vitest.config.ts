@@ -1,6 +1,6 @@
 import { defineWorkersConfig } from '@cloudflare/vitest-pool-workers/config'
 
-import type { Env } from './src/context'
+import type { Env } from './src/browser.context'
 
 export interface TestEnv extends Env {
 	CLOUDFLARE_MOCK_ACCOUNT_ID: string

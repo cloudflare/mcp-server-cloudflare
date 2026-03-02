@@ -2,7 +2,7 @@
 
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP connections, with Cloudflare OAuth built-in.
 
-You should use this as a template to build an MCP server for Cloudflare, provided by Cloudflare at `server-name.mcp.cloudflare.com`. It has a basic set of tools `apps/template-start-here/src/tools/logs.ts` — you can modify these to do what you need
+You should use this as a template to build an MCP server for Cloudflare, provided by Cloudflare at `server-name.mcp.cloudflare.com`. It has a basic set of tools `apps/template-start-here/src/tools/logpush.tools.ts` — you can modify these to do what you need
 
 ## Getting Started
 

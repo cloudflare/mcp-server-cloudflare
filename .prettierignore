@@ -5,3 +5,4 @@ vitest.config.ts.timestamp*
 vite.config.ts.timestamp*
 worker-configuration.d.ts
 **/dist/**
+packages/tools/src/test/fixtures/changesets/invalid-json/*.json

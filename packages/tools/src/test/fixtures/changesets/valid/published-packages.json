@@ -1,0 +1,10 @@
+[
+	{
+		"name": "package-a",
+		"version": "1.0.0"
+	},
+	{
+		"name": "package-b",
+		"version": "2.1.3"
+	}
+]
