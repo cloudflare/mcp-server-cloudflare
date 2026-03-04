@@ -578,7 +578,6 @@ export const CtPublicKeyAlgorithmParam = z
 export const NetflowsDimensionParam = z
 	.enum([
 		'timeseries',
-		'summary',
 		'summary/adm1',
 		'summary/as',
 		'summary/location',
