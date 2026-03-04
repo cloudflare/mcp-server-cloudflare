@@ -9,6 +9,7 @@ import {
 
 import {
 	AiDimensionParam,
+	AiNormalizationParam,
 	AnnotationDataSourceParam,
 	AnnotationEventTypeParam,
 	As112DimensionParam,
@@ -18,6 +19,7 @@ import {
 	AsnArrayParam,
 	AsnParam,
 	AsOrderByParam,
+	AttackNormalizationParam,
 	BgpHijackerAsnParam,
 	BgpInvalidOnlyParam,
 	BgpInvolvedAsnParam,
@@ -54,6 +56,7 @@ import {
 	CtDimensionParam,
 	CtDurationParam,
 	CtEntryTypeParam,
+	CtNormalizationParam,
 	CtPublicKeyAlgorithmParam,
 	CtTldParam,
 	CtValidationLevelParam,
@@ -65,6 +68,7 @@ import {
 	DateStartArrayParam,
 	DateStartParam,
 	DnsDimensionParam,
+	DnsNormalizationParam,
 	DomainCategoryArrayParam,
 	DomainParam,
 	DomainRankingTypeParam,
@@ -74,6 +78,7 @@ import {
 	GeoIdArrayParam,
 	GeoIdParam,
 	HttpDimensionParam,
+	HttpNormalizationParam,
 	InternetQualityMetricParam,
 	InternetServicesCategoryParam,
 	InternetSpeedDimensionParam,
@@ -89,8 +94,8 @@ import {
 	LocationListParam,
 	LocationParam,
 	NetflowsDimensionParam,
+	NetflowsNormalizationParam,
 	NetflowsProductParam,
-	NormalizationParam,
 	OriginArrayParam,
 	OriginDataDimensionParam,
 	OriginMetricParam,
@@ -100,6 +105,7 @@ import {
 	RobotsTxtDimensionParam,
 	RobotsTxtDirectiveParam,
 	RobotsTxtDomainCategoryParam,
+	RobotsTxtNormalizationParam,
 	RobotsTxtPatternParam,
 	RobotsTxtUserAgentCategoryParam,
 	Sha256FingerprintParam,
@@ -473,8 +479,19 @@ export function registerRadarTools(agent: RadarMCP) {
 			location: LocationArrayParam,
 			geoId: GeoIdArrayParam,
 			dimension: HttpDimensionParam,
+			normalization: HttpNormalizationParam,
 		},
-		async ({ dateStart, dateEnd, dateRange, asn, location, continent, geoId, dimension }) => {
+		async ({
+			dateStart,
+			dateEnd,
+			dateRange,
+			asn,
+			location,
+			continent,
+			geoId,
+			dimension,
+			normalization,
+		}) => {
 			try {
 				const props = getProps(agent)
 
@@ -486,6 +503,7 @@ export function registerRadarTools(agent: RadarMCP) {
 					dateRange,
 					dateStart,
 					dateEnd,
+					normalization,
 				})
 
 				return {
@@ -520,8 +538,18 @@ export function registerRadarTools(agent: RadarMCP) {
 			continent: ContinentArrayParam,
 			location: LocationArrayParam,
 			dimension: DnsDimensionParam,
+			normalization: DnsNormalizationParam,
 		},
-		async ({ dateStart, dateEnd, dateRange, asn, location, continent, dimension }) => {
+		async ({
+			dateStart,
+			dateEnd,
+			dateRange,
+			asn,
+			location,
+			continent,
+			dimension,
+			normalization,
+		}) => {
 			try {
 				const props = getProps(agent)
 
@@ -532,6 +560,7 @@ export function registerRadarTools(agent: RadarMCP) {
 					dateRange,
 					dateStart,
 					dateEnd,
+					normalization,
 				})
 
 				return {
@@ -566,8 +595,18 @@ export function registerRadarTools(agent: RadarMCP) {
 			continent: ContinentArrayParam,
 			location: LocationArrayParam,
 			dimension: L7AttackDimensionParam,
+			normalization: AttackNormalizationParam,
 		},
-		async ({ dateStart, dateEnd, dateRange, asn, location, continent, dimension }) => {
+		async ({
+			dateStart,
+			dateEnd,
+			dateRange,
+			asn,
+			location,
+			continent,
+			dimension,
+			normalization,
+		}) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -578,6 +617,7 @@ export function registerRadarTools(agent: RadarMCP) {
 					dateRange,
 					dateStart,
 					dateEnd,
+					normalization,
 				})
 
 				return {
@@ -614,8 +654,18 @@ export function registerRadarTools(agent: RadarMCP) {
 			continent: ContinentArrayParam,
 			location: LocationArrayParam,
 			dimension: L3AttackDimensionParam,
+			normalization: AttackNormalizationParam,
 		},
-		async ({ dateStart, dateEnd, dateRange, asn, location, continent, dimension }) => {
+		async ({
+			dateStart,
+			dateEnd,
+			dateRange,
+			asn,
+			location,
+			continent,
+			dimension,
+			normalization,
+		}) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -626,6 +676,7 @@ export function registerRadarTools(agent: RadarMCP) {
 					dateRange,
 					dateStart,
 					dateEnd,
+					normalization,
 				})
 
 				return {
@@ -846,8 +897,18 @@ export function registerRadarTools(agent: RadarMCP) {
 			continent: ContinentArrayParam,
 			location: LocationArrayParam,
 			dimension: AiDimensionParam,
+			normalization: AiNormalizationParam,
 		},
-		async ({ dateRange, dateStart, dateEnd, asn, location, continent, dimension }) => {
+		async ({
+			dateRange,
+			dateStart,
+			dateEnd,
+			asn,
+			location,
+			continent,
+			dimension,
+			normalization,
+		}) => {
 			try {
 				const props = getProps(agent)
 
@@ -858,6 +919,7 @@ export function registerRadarTools(agent: RadarMCP) {
 					dateRange,
 					dateStart,
 					dateEnd,
+					normalization,
 				})
 
 				return {
@@ -1161,6 +1223,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			publicKeyAlgorithm: CtPublicKeyAlgorithmParam,
 			dimension: CtDimensionParam,
 			limitPerGroup: LimitPerGroupParam,
+			normalization: CtNormalizationParam,
 		},
 		async ({
 			dateRange,
@@ -1175,6 +1238,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			publicKeyAlgorithm,
 			dimension,
 			limitPerGroup,
+			normalization,
 		}) => {
 			try {
 				const props = getProps(agent)
@@ -1191,6 +1255,7 @@ export function registerRadarTools(agent: RadarMCP) {
 					validationLevel,
 					publicKeyAlgorithm,
 					limitPerGroup: dimension !== 'timeseries' ? limitPerGroup : undefined,
+					normalization,
 				})
 
 				return {
@@ -1231,7 +1296,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			location: LocationArrayParam,
 			geoId: GeoIdArrayParam,
 			product: NetflowsProductParam,
-			normalization: NormalizationParam,
+			normalization: NetflowsNormalizationParam,
 			dimension: NetflowsDimensionParam,
 			limitPerGroup: LimitPerGroupParam,
 		},
@@ -1457,6 +1522,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			dimension: RobotsTxtDimensionParam,
 			limitPerGroup: LimitPerGroupParam,
 			limit: PaginationLimitParam,
+			normalization: RobotsTxtNormalizationParam,
 		},
 		async ({
 			dateRange,
@@ -1470,6 +1536,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			dimension,
 			limitPerGroup,
 			limit,
+			normalization,
 		}) => {
 			try {
 				const props = getProps(agent)
@@ -1487,6 +1554,7 @@ export function registerRadarTools(agent: RadarMCP) {
 					userAgentCategory,
 					limitPerGroup,
 					limit,
+					normalization,
 				})
 
 				return {
@@ -1679,6 +1747,8 @@ export function registerRadarTools(agent: RadarMCP) {
 
 	// ============================================================
 	// Leaked Credential Checks Tools
+	// TODO: Add normalization (PERCENTAGE_CHANGE, MIN0_MAX) once the radar API
+	// supports it on leaked_credential_checks v2 timeseries_groups.
 	// ============================================================
 
 	agent.server.tool(

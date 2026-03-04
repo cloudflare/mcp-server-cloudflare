@@ -581,10 +581,63 @@ export const NetflowsProductParam = z
 	.optional()
 	.describe('Filter results by network traffic product type.')
 
-export const NormalizationParam = z
-	.enum(['RAW_VALUES', 'PERCENTAGE'])
-	.optional()
-	.describe('Normalization method applied to results.')
+/**
+ * Factory for creating tool-specific normalization parameter schemas.
+ * Derives both the Zod enum values and the description from a single
+ * `dimensionRules` mapping of dimension pattern → accepted values.
+ */
+function normalizationParam(dimensionRules: Record<string, string[]>) {
+	const allValues = [...new Set(Object.values(dimensionRules).flat())] as [string, ...string[]]
+
+	const rulesDesc = Object.entries(dimensionRules)
+		.map(([dim, values]) => `${dim} accepts ${values.join(' or ')}`)
+		.join('; ')
+
+	return z
+		.enum(allValues)
+		.optional()
+		.describe(
+			`Normalization method applied to results. ${rulesDesc}. ` +
+				'See https://developers.cloudflare.com/radar/concepts/normalization/'
+		)
+}
+
+export const HttpNormalizationParam = normalizationParam({
+	timeseries: ['PERCENTAGE_CHANGE', 'MIN0_MAX'],
+	timeseries_groups: ['PERCENTAGE', 'MIN0_MAX'],
+})
+
+// TODO: Add RANK once the radar API supports it on DNS timeseries_groups.
+export const DnsNormalizationParam = normalizationParam({
+	timeseries_groups: ['PERCENTAGE', 'MIN0_MAX'],
+})
+
+export const AttackNormalizationParam = normalizationParam({
+	timeseries: ['PERCENTAGE_CHANGE', 'MIN0_MAX'],
+	timeseriesGroups: ['PERCENTAGE', 'MIN0_MAX'],
+	'top/attacks': ['PERCENTAGE', 'MIN_MAX'],
+})
+
+// TODO: Add 'inference/timeseries_groups': ['PERCENTAGE', 'MIN0_MAX'] once the
+// radar API supports normalization on AI inference timeseries_groups.
+export const AiNormalizationParam = normalizationParam({
+	'bots/timeseries_groups': ['PERCENTAGE', 'MIN0_MAX'],
+})
+
+export const CtNormalizationParam = normalizationParam({
+	timeseries_groups: ['RAW_VALUES', 'PERCENTAGE'],
+	summary: ['RAW_VALUES', 'PERCENTAGE'],
+})
+
+// TODO: Add MIN0_MAX once the radar API supports it on robots_txt timeseries_groups.
+export const RobotsTxtNormalizationParam = normalizationParam({
+	timeseries_groups: ['PERCENTAGE'],
+})
+
+export const NetflowsNormalizationParam = normalizationParam({
+	timeseries: ['PERCENTAGE_CHANGE', 'MIN0_MAX'],
+	timeseries_groups: ['PERCENTAGE', 'MIN0_MAX'],
+})
 
 export const LimitPerGroupParam = z
 	.number()
@@ -652,10 +705,9 @@ export const OriginRegionParam = z
 			'Example regions: us-east-1, eu-west-1, ap-southeast-1.'
 	)
 
-export const OriginNormalizationParam = z
-	.enum(['PERCENTAGE', 'MIN0_MAX'])
-	.optional()
-	.describe('Normalization method for results.')
+export const OriginNormalizationParam = normalizationParam({
+	timeseries_groups: ['PERCENTAGE', 'MIN0_MAX'],
+})
 
 // ============================================================
 // Robots.txt Parameters
