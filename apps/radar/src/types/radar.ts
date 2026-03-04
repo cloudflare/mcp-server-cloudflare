@@ -172,7 +172,7 @@ export const AsOrderByParam: z.ZodType<ASNListParams['orderBy']> = z
 export const HttpDimensionParam = z
 	.enum([
 		'timeseries',
-		// Summary dimensions (new unified endpoint)
+		// Summary dimensions
 		'summary/adm1',
 		'summary/as',
 		'summary/bot_class',
@@ -186,7 +186,7 @@ export const HttpDimensionParam = z
 		'summary/os',
 		'summary/post_quantum',
 		'summary/tls_version',
-		// Timeseries groups dimensions (new unified endpoint)
+		// Timeseries groups dimensions
 		'timeseries_groups/adm1',
 		'timeseries_groups/as',
 		'timeseries_groups/bot_class',
@@ -207,12 +207,12 @@ export const DnsDimensionParam = z
 	.enum([
 		'timeseries',
 		'summary/as',
-		'summary/ip_version',
-		'summary/location',
 		'summary/cache_hit',
 		'summary/dnssec',
 		'summary/dnssec_aware',
 		'summary/dnssec_e2e',
+		'summary/ip_version',
+		'summary/location',
 		'summary/matching_answer',
 		'summary/protocol',
 		'summary/query_type',
@@ -221,12 +221,12 @@ export const DnsDimensionParam = z
 		'summary/tld',
 		'summary/tld_dns_magnitude',
 		'timeseries_groups/as',
-		'timeseries_groups/ip_version',
-		'timeseries_groups/location',
 		'timeseries_groups/cache_hit',
 		'timeseries_groups/dnssec',
 		'timeseries_groups/dnssec_aware',
 		'timeseries_groups/dnssec_e2e',
+		'timeseries_groups/ip_version',
+		'timeseries_groups/location',
 		'timeseries_groups/matching_answer',
 		'timeseries_groups/protocol',
 		'timeseries_groups/query_type',
