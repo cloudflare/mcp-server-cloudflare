@@ -1043,3 +1043,56 @@ export const TrafficAnomalyStatusParam = z
 	.enum(['VERIFIED', 'UNVERIFIED'])
 	.optional()
 	.describe('Filter by anomaly verification status.')
+
+// ============================================================
+// BGP RPKI ASPA Parameters
+// ============================================================
+
+export const AspaCustomerAsnParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Filter by customer ASN (the ASN that authorizes upstream providers).')
+
+export const AspaProviderAsnParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Filter by provider ASN (the authorized upstream provider ASN).')
+
+export const AspaRirParam = z
+	.enum(['AFRINIC', 'APNIC', 'ARIN', 'LACNIC', 'RIPE_NCC'])
+	.optional()
+	.describe('Filter by Regional Internet Registry (RIR).')
+
+export const AspaChangeTypeParam = z
+	.enum(['addition', 'removal', 'modification'])
+	.optional()
+	.describe('Filter by type of ASPA change.')
+
+export const AspaSortByParam = z
+	.enum(['customerAsn', 'providerAsn'])
+	.optional()
+	.describe('Sort ASPA results by specified field.')
+
+export const AspaDateParam = z
+	.string()
+	.optional()
+	.describe('Date for historical ASPA snapshot (ISO 8601 format, e.g. 2024-01-15).')
+
+export const AspaPageParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Page number for paginated ASPA results.')
+
+export const AspaPerPageParam = z
+	.number()
+	.int()
+	.min(1)
+	.max(100)
+	.optional()
+	.describe('Number of results per page for ASPA queries (1-100).')

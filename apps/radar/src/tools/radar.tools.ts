@@ -19,6 +19,14 @@ import {
 	AsnArrayParam,
 	AsnParam,
 	AsOrderByParam,
+	AspaChangeTypeParam,
+	AspaCustomerAsnParam,
+	AspaDateParam,
+	AspaPageParam,
+	AspaPerPageParam,
+	AspaProviderAsnParam,
+	AspaRirParam,
+	AspaSortByParam,
 	AttackNormalizationParam,
 	BgpHijackerAsnParam,
 	BgpInvalidOnlyParam,
@@ -3037,6 +3045,181 @@ export function registerRadarTools(agent: RadarMCP) {
 						{
 							type: 'text' as const,
 							text: `Error getting BGP top ASes by prefixes: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	// ============================================================
+	// BGP RPKI ASPA Tools
+	// ============================================================
+
+	agent.server.tool(
+		'get_bgp_rpki_aspa_snapshot',
+		'Retrieve a snapshot of current or historical RPKI ASPA (Autonomous System Provider Authorization) objects. ASPA objects define which ASNs are authorized upstream providers for a customer ASN, helping prevent route leaks and hijacks.',
+		{
+			customerAsn: AspaCustomerAsnParam,
+			providerAsn: AspaProviderAsnParam,
+			rir: AspaRirParam,
+			location: LocationParam.optional().describe('Filter by country (alpha-2 code).'),
+			date: AspaDateParam,
+			page: AspaPageParam,
+			per_page: AspaPerPageParam,
+			sortBy: AspaSortByParam,
+			sortOrder: BgpSortOrderParam,
+		},
+		async ({
+			customerAsn,
+			providerAsn,
+			rir,
+			location,
+			date,
+			page,
+			per_page,
+			sortBy,
+			sortOrder,
+		}) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/rpki/aspa/snapshot', {
+					customerAsn,
+					providerAsn,
+					rir,
+					location,
+					date,
+					page,
+					per_page,
+					sortBy,
+					sortOrder,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting BGP RPKI ASPA snapshot: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_bgp_rpki_aspa_changes',
+		'Retrieve RPKI ASPA changes over time, including additions, removals, and modifications of ASPA objects.',
+		{
+			customerAsn: AspaCustomerAsnParam,
+			providerAsn: AspaProviderAsnParam,
+			changeType: AspaChangeTypeParam,
+			rir: AspaRirParam,
+			location: LocationParam.optional().describe('Filter by country (alpha-2 code).'),
+			dateRange: DateRangeParam.optional(),
+			dateStart: DateStartParam.optional(),
+			dateEnd: DateEndParam.optional(),
+			sortBy: AspaSortByParam,
+			sortOrder: BgpSortOrderParam,
+			page: AspaPageParam,
+			per_page: AspaPerPageParam,
+		},
+		async ({
+			customerAsn,
+			providerAsn,
+			changeType,
+			rir,
+			location,
+			dateRange,
+			dateStart,
+			dateEnd,
+			sortBy,
+			sortOrder,
+			page,
+			per_page,
+		}) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/rpki/aspa/changes', {
+					customerAsn,
+					providerAsn,
+					changeType,
+					rir,
+					location,
+					dateRange,
+					dateStart,
+					dateEnd,
+					sortBy,
+					sortOrder,
+					page,
+					per_page,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting BGP RPKI ASPA changes: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+				}
+			}
+		}
+	)
+
+	agent.server.tool(
+		'get_bgp_rpki_aspa_timeseries',
+		'Retrieve a timeseries of RPKI ASPA object counts over time.',
+		{
+			rir: AspaRirParam,
+			location: LocationParam.optional().describe('Filter by country (alpha-2 code).'),
+			dateRange: DateRangeParam.optional(),
+			dateStart: DateStartParam.optional(),
+			dateEnd: DateEndParam.optional(),
+		},
+		async ({ rir, location, dateRange, dateStart, dateEnd }) => {
+			try {
+				const props = getProps(agent)
+				const result = await fetchRadarApi(props.accessToken, '/bgp/rpki/aspa/timeseries', {
+					rir,
+					location,
+					dateRange,
+					dateStart,
+					dateEnd,
+				})
+
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: JSON.stringify({ result }),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text' as const,
+							text: `Error getting BGP RPKI ASPA timeseries: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
 				}
