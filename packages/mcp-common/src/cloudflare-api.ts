@@ -1,6 +1,8 @@
 import { Cloudflare } from 'cloudflare'
 import { env } from 'cloudflare:workers'
 
+import { McpError, safeStatusCode } from './mcp-error'
+
 import type { z } from 'zod'
 
 export function getCloudflareClient(apiToken: string) {
@@ -56,7 +58,16 @@ export async function fetchCloudflareApi<T>({
 
 	if (!response.ok) {
 		const error = await response.text()
-		throw new Error(`Cloudflare API request failed: ${error}`)
+		const is5xx = response.status >= 500 && response.status <= 599
+
+		throw new McpError(
+			is5xx ? 'Upstream Cloudflare API unavailable' : 'Cloudflare API request failed',
+			safeStatusCode(is5xx ? 502 : response.status),
+			{
+				reportToSentry: is5xx,
+				internalMessage: `Cloudflare API ${response.status}: ${error}`,
+			}
+		)
 	}
 
 	const data = await response.json()

@@ -551,14 +551,14 @@ export async function parseRedirectApproval(
 	cookieSecret: string
 ): Promise<ParsedApprovalResult> {
 	if (request.method !== 'POST') {
-		throw new Error('Invalid request method. Expected POST.')
+		throw new OAuthError('invalid_request', 'Invalid request method. Expected POST.', 405)
 	}
 
 	const formData = await request.formData()
 
 	const tokenFromForm = formData.get('csrf_token')
 	if (!tokenFromForm || typeof tokenFromForm !== 'string') {
-		throw new Error('Missing CSRF token in form data')
+		throw new OAuthError('invalid_request', 'Missing required form token', 400)
 	}
 
 	const cookieHeader = request.headers.get('Cookie') || ''
@@ -567,17 +567,22 @@ export async function parseRedirectApproval(
 	const tokenFromCookie = csrfCookie ? csrfCookie.substring('__Host-CSRF_TOKEN='.length) : null
 
 	if (!tokenFromCookie || tokenFromForm !== tokenFromCookie) {
-		throw new Error('CSRF token mismatch')
+		throw new OAuthError('access_denied', 'Request validation failed', 403)
 	}
 
 	const encodedState = formData.get('state')
 	if (!encodedState || typeof encodedState !== 'string') {
-		throw new Error('Missing state in form data')
+		throw new OAuthError('invalid_request', 'Missing state in form data', 400)
 	}
 
-	const state = JSON.parse(atob(encodedState))
+	let state: { oauthReqInfo?: AuthRequest }
+	try {
+		state = JSON.parse(atob(encodedState))
+	} catch {
+		throw new OAuthError('invalid_request', 'Invalid state encoding', 400)
+	}
 	if (!state.oauthReqInfo || !state.oauthReqInfo.clientId) {
-		throw new Error('Invalid state data')
+		throw new OAuthError('invalid_request', 'Invalid state data', 400)
 	}
 
 	const existingApprovedClients =
@@ -694,7 +699,7 @@ export async function validateOAuthState(
 	const stateFromQuery = url.searchParams.get('state')
 
 	if (!stateFromQuery) {
-		throw new Error('Missing state parameter')
+		throw new OAuthError('invalid_request', 'Missing state parameter', 400)
 	}
 
 	// Decode the state parameter to extract the embedded stateToken
@@ -703,15 +708,16 @@ export async function validateOAuthState(
 		const decodedState = JSON.parse(atob(stateFromQuery))
 		stateToken = decodedState.state
 		if (!stateToken) {
-			throw new Error('State token not found in decoded state')
+			throw new OAuthError('invalid_request', 'State token not found in decoded state', 400)
 		}
 	} catch (e) {
-		throw new Error('Failed to decode state parameter')
+		if (e instanceof OAuthError) throw e
+		throw new OAuthError('invalid_request', 'Failed to decode state parameter', 400)
 	}
 
 	const storedDataJson = await kv.get(`oauth:state:${stateToken}`)
 	if (!storedDataJson) {
-		throw new Error('Invalid or expired state')
+		throw new OAuthError('invalid_request', 'Invalid or expired state', 400)
 	}
 
 	const cookieHeader = request.headers.get('Cookie') || ''
@@ -722,7 +728,11 @@ export async function validateOAuthState(
 		: null
 
 	if (!consentedStateHash) {
-		throw new Error('Missing session binding cookie - authorization flow must be restarted')
+		throw new OAuthError(
+			'invalid_request',
+			'Authorization session expired, please restart the flow',
+			400
+		)
 	}
 
 	const encoder = new TextEncoder()
@@ -732,7 +742,7 @@ export async function validateOAuthState(
 	const stateHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 
 	if (stateHash !== consentedStateHash) {
-		throw new Error('State token does not match session - possible CSRF attack detected')
+		throw new OAuthError('access_denied', 'Session validation failed', 403)
 	}
 
 	// Parse and validate stored OAuth state data
@@ -751,7 +761,7 @@ export async function validateOAuthState(
 
 	const parseResult = StoredOAuthStateSchema.safeParse(JSON.parse(storedDataJson))
 	if (!parseResult.success) {
-		throw new Error('Invalid OAuth state data format - PKCE security violation')
+		throw new OAuthError('invalid_request', 'Invalid authorization state', 400)
 	}
 
 	await kv.delete(`oauth:state:${stateToken}`)
