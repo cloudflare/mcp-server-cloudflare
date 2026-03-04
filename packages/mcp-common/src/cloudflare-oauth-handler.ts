@@ -9,7 +9,7 @@ import {
 	getAuthToken,
 	refreshAuthToken,
 } from './cloudflare-auth'
-import { McpError } from './mcp-error'
+import { McpError, safeStatusCode } from './mcp-error'
 import { useSentry } from './sentry'
 import { V4Schema } from './v4-api'
 import {
@@ -32,6 +32,24 @@ import type {
 import type { Context } from 'hono'
 import type { MetricsTracker } from '../../mcp-observability/src'
 import type { BaseHonoContext } from './sentry'
+
+/**
+ * Converts an McpError into an OAuth 2.1 spec-compliant JSON error response.
+ *
+ * Maps HTTP status codes to the standard OAuth error codes defined in
+ * https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#section-3.2.4
+ */
+function mcpErrorToOAuthResponse(e: McpError): Response {
+	let oauthCode: string
+	if (e.code >= 500) {
+		oauthCode = 'server_error'
+	} else if (e.code === 401 || e.code === 403) {
+		oauthCode = 'access_denied'
+	} else {
+		oauthCode = 'invalid_request'
+	}
+	return new OAuthError(oauthCode, e.message, e.code >= 500 ? 500 : e.code).toResponse()
+}
 
 type AuthContext = {
 	Bindings: {
@@ -98,19 +116,55 @@ export async function getUserAndAccounts(
 		}),
 	])
 
-	const { result: user } = V4Schema(UserSchema).parse(await userResponse.json())
+	// Check response status before parsing to avoid Zod errors on non-V4 error bodies
+	if (!accountsResponse.ok) {
+		const status = accountsResponse.status
+		const is5xx = status >= 500 && status <= 599
+		throw new McpError(
+			is5xx ? 'Upstream accounts service unavailable' : 'Failed to fetch accounts',
+			safeStatusCode(is5xx ? 502 : status),
+			{
+				reportToSentry: is5xx,
+				internalMessage: `Upstream /accounts returned ${status}`,
+			}
+		)
+	}
+
 	const { result: accounts } = V4Schema(AccountsSchema).parse(await accountsResponse.json())
-	if (!user || !userResponse.ok) {
-		// If accounts is present, then assume that we have an account scoped token
+
+	if (!userResponse.ok) {
+		// If accounts is present, assume we have an account-scoped token
 		if (accounts !== null) {
 			return { user: null, accounts }
 		}
-		console.log(user)
-		throw new McpError('Failed to fetch user', 500, { reportToSentry: true })
+		const status = userResponse.status
+		const is5xx = status >= 500 && status <= 599
+		throw new McpError(
+			is5xx ? 'Upstream user service unavailable' : 'Failed to fetch user',
+			safeStatusCode(is5xx ? 502 : status),
+			{
+				reportToSentry: is5xx,
+				internalMessage: `Upstream /user returned ${status}`,
+			}
+		)
 	}
-	if (!accounts || !accountsResponse.ok) {
-		console.log(accounts)
-		throw new McpError('Failed to fetch accounts', 500, { reportToSentry: true })
+
+	const { result: user } = V4Schema(UserSchema).parse(await userResponse.json())
+	if (!user) {
+		// User parse succeeded but result was null — fall back to accounts if available
+		if (accounts !== null) {
+			return { user: null, accounts }
+		}
+		throw new McpError('Failed to fetch user', 500, {
+			reportToSentry: true,
+			internalMessage: 'Upstream /user returned null result with 200 status',
+		})
+	}
+	if (!accounts) {
+		throw new McpError('Failed to fetch accounts', 500, {
+			reportToSentry: true,
+			internalMessage: 'Upstream /accounts returned null result with 200 status',
+		})
 	}
 
 	return { user, accounts }
@@ -161,23 +215,35 @@ export async function handleTokenExchangeCallback(
 	if (options.grantType === 'refresh_token') {
 		const props = AuthProps.parse(options.props)
 		if (props.type === 'account_token') {
-			// Refreshing an account_token should not be possible, as we only do this for user tokens
-			throw new McpError('Internal Server Error', 500)
+			// Account tokens cannot be refreshed — this is a client error, not a server error
+			throw new OAuthError('invalid_grant', 'Account tokens cannot be refreshed', 400)
 		}
 		if (!props.refreshToken) {
-			throw new McpError('Missing refreshToken', 500)
+			throw new OAuthError('invalid_grant', 'No refresh token available for this grant', 400)
 		}
 
-		// handle token refreshes
-		const {
-			access_token: accessToken,
-			refresh_token: refreshToken,
-			expires_in,
-		} = await refreshAuthToken({
-			client_id: clientId,
-			client_secret: clientSecret,
-			refresh_token: props.refreshToken,
-		})
+		// handle token refreshes — convert upstream McpErrors to OAuth-compliant errors
+		let accessToken: string
+		let refreshToken: string
+		let expires_in: number
+		try {
+			const result = await refreshAuthToken({
+				client_id: clientId,
+				client_secret: clientSecret,
+				refresh_token: props.refreshToken,
+			})
+			accessToken = result.access_token
+			refreshToken = result.refresh_token
+			expires_in = result.expires_in
+		} catch (e) {
+			if (e instanceof McpError) {
+				// Map upstream failures to OAuth error codes:
+				// 5xx upstream → server_error; 4xx upstream → invalid_grant (refresh token rejected)
+				const oauthCode = e.code >= 500 ? 'server_error' : 'invalid_grant'
+				throw new OAuthError(oauthCode, e.message, e.code >= 500 ? 500 : 400)
+			}
+			throw e
+		}
 
 		return {
 			newProps: {
@@ -315,10 +381,10 @@ export function createAuthHandlers({
 				return e.toResponse()
 			}
 			if (e instanceof McpError) {
-				return c.text(e.message, { status: e.code })
+				return mcpErrorToOAuthResponse(e)
 			}
 			console.error(e)
-			return c.text('Internal Error', 500)
+			return new OAuthError('server_error', 'Internal Error', 500).toResponse()
 		}
 	})
 
@@ -383,8 +449,11 @@ export function createAuthHandlers({
 			if (e instanceof OAuthError) {
 				return e.toResponse()
 			}
+			if (e instanceof McpError) {
+				return mcpErrorToOAuthResponse(e)
+			}
 			console.error(e)
-			return c.text('Internal Error', 500)
+			return new OAuthError('server_error', 'Internal Error', 500).toResponse()
 		}
 	})
 
@@ -465,9 +534,9 @@ export function createAuthHandlers({
 				return e.toResponse()
 			}
 			if (e instanceof McpError) {
-				return c.text(e.message, { status: e.code })
+				return mcpErrorToOAuthResponse(e)
 			}
-			return c.text('Internal Error', 500)
+			return new OAuthError('server_error', 'Internal Error', 500).toResponse()
 		}
 	})
 

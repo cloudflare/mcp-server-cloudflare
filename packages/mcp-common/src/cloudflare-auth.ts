@@ -1,8 +1,19 @@
 import { z } from 'zod'
 
-import { McpError } from './mcp-error'
+import { McpError, safeStatusCode } from './mcp-error'
 
 import type { AuthRequest } from '@cloudflare/workers-oauth-provider'
+
+/** Maps known OAuth error codes to safe client-facing messages */
+const SAFE_TOKEN_ERROR_MESSAGES: Record<string, string> = {
+	invalid_grant: 'Authorization grant is invalid, expired, or revoked',
+	invalid_client: 'Client authentication failed',
+	invalid_request: 'Invalid token request',
+	unauthorized_client: 'Client is not authorized for this grant type',
+	unsupported_grant_type: 'Unsupported grant type',
+	invalid_scope: 'Requested scope is invalid',
+	access_denied: 'Access denied',
+}
 
 // Constants
 const PKCE_CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'
@@ -152,8 +163,30 @@ export async function getAuthToken({
 	})
 
 	if (!resp.ok) {
-		console.log(await resp.text())
-		throw new McpError('Failed to get OAuth token', 500, { reportToSentry: true })
+		const body = await resp.text()
+		let upstreamError: { error?: string; error_description?: string } = {}
+		try {
+			upstreamError = JSON.parse(body)
+		} catch (_e) {
+			// upstream may return non-JSON error bodies
+		}
+
+		if (resp.status >= 400 && resp.status < 500) {
+			throw new McpError(
+				SAFE_TOKEN_ERROR_MESSAGES[upstreamError.error || ''] || 'Token exchange failed',
+				safeStatusCode(resp.status),
+				{
+					reportToSentry: false,
+					internalMessage: `Upstream ${resp.status}: ${body}`,
+				}
+			)
+		}
+
+		// Genuine upstream server error
+		throw new McpError('Upstream token service unavailable', 502, {
+			reportToSentry: true,
+			internalMessage: `Upstream ${resp.status}: ${body}`,
+		})
 	}
 
 	return AuthorizationToken.parse(await resp.json())
@@ -183,8 +216,30 @@ export async function refreshAuthToken({
 		},
 	})
 	if (!resp.ok) {
-		console.log(await resp.text())
-		throw new McpError('Failed to get OAuth token', 500, { reportToSentry: true })
+		const body = await resp.text()
+		let upstreamError: { error?: string; error_description?: string } = {}
+		try {
+			upstreamError = JSON.parse(body)
+		} catch (_e) {
+			// upstream may return non-JSON error bodies
+		}
+
+		if (resp.status >= 400 && resp.status < 500) {
+			throw new McpError(
+				SAFE_TOKEN_ERROR_MESSAGES[upstreamError.error || ''] || 'Token refresh failed',
+				safeStatusCode(resp.status),
+				{
+					reportToSentry: false,
+					internalMessage: `Upstream ${resp.status}: ${body}`,
+				}
+			)
+		}
+
+		// Genuine upstream server error
+		throw new McpError('Upstream token service unavailable', 502, {
+			reportToSentry: true,
+			internalMessage: `Upstream ${resp.status}: ${body}`,
+		})
 	}
 
 	return AuthorizationToken.parse(await resp.json())
