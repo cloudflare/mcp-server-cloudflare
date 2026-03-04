@@ -174,6 +174,7 @@ export const HttpDimensionParam = z
 		'timeseries',
 		// Summary dimensions (new unified endpoint)
 		'summary/adm1',
+		'summary/as',
 		'summary/bot_class',
 		'summary/browser',
 		'summary/browser_family',
@@ -181,11 +182,13 @@ export const HttpDimensionParam = z
 		'summary/http_protocol',
 		'summary/http_version',
 		'summary/ip_version',
+		'summary/location',
 		'summary/os',
 		'summary/post_quantum',
 		'summary/tls_version',
 		// Timeseries groups dimensions (new unified endpoint)
 		'timeseries_groups/adm1',
+		'timeseries_groups/as',
 		'timeseries_groups/bot_class',
 		'timeseries_groups/browser',
 		'timeseries_groups/browser_family',
@@ -193,19 +196,19 @@ export const HttpDimensionParam = z
 		'timeseries_groups/http_protocol',
 		'timeseries_groups/http_version',
 		'timeseries_groups/ip_version',
+		'timeseries_groups/location',
 		'timeseries_groups/os',
 		'timeseries_groups/post_quantum',
 		'timeseries_groups/tls_version',
-		// Top endpoints
-		'top/locations',
-		'top/ases',
 	])
 	.describe('Dimension indicating the type and format of HTTP data to retrieve.')
 
 export const DnsDimensionParam = z
 	.enum([
 		'timeseries',
+		'summary/as',
 		'summary/ip_version',
+		'summary/location',
 		'summary/cache_hit',
 		'summary/dnssec',
 		'summary/dnssec_aware',
@@ -217,7 +220,9 @@ export const DnsDimensionParam = z
 		'summary/response_ttl',
 		'summary/tld',
 		'summary/tld_dns_magnitude',
+		'timeseries_groups/as',
 		'timeseries_groups/ip_version',
+		'timeseries_groups/location',
 		'timeseries_groups/cache_hit',
 		'timeseries_groups/dnssec',
 		'timeseries_groups/dnssec_aware',
@@ -228,8 +233,6 @@ export const DnsDimensionParam = z
 		'timeseries_groups/response_code',
 		'timeseries_groups/response_ttl',
 		'timeseries_groups/tld',
-		'top/locations',
-		'top/ases',
 	])
 	.describe('Dimension indicating the type and format of DNS data to retrieve.')
 
@@ -573,7 +576,14 @@ export const CtPublicKeyAlgorithmParam = z
 
 // Netflows Parameters
 export const NetflowsDimensionParam = z
-	.enum(['timeseries', 'summary', 'summary/adm1', 'summary/product', 'top/locations', 'top/ases'])
+	.enum([
+		'timeseries',
+		'summary',
+		'summary/adm1',
+		'summary/as',
+		'summary/location',
+		'summary/product',
+	])
 	.describe('Dimension indicating the type and format of NetFlows data to retrieve.')
 
 export const NetflowsProductParam = z
