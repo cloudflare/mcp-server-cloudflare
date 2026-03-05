@@ -1,6 +1,8 @@
 import { Cloudflare } from 'cloudflare'
 import { env } from 'cloudflare:workers'
 
+import { throwUpstreamApiError } from './mcp-error'
+
 import type { z } from 'zod'
 
 export function getCloudflareClient(apiToken: string) {
@@ -55,8 +57,7 @@ export async function fetchCloudflareApi<T>({
 	})
 
 	if (!response.ok) {
-		const error = await response.text()
-		throw new Error(`Cloudflare API request failed: ${error}`)
+		throwUpstreamApiError(response.status, 'Cloudflare API', await response.text())
 	}
 
 	const data = await response.json()

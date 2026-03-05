@@ -9,7 +9,7 @@ import {
 	getAuthToken,
 	refreshAuthToken,
 } from './cloudflare-auth'
-import { McpError } from './mcp-error'
+import { McpError, safeStatusCode, throwUpstreamApiError } from './mcp-error'
 import { useSentry } from './sentry'
 import { V4Schema } from './v4-api'
 import {
@@ -32,6 +32,26 @@ import type {
 import type { Context } from 'hono'
 import type { MetricsTracker } from '../../mcp-observability/src'
 import type { BaseHonoContext } from './sentry'
+
+/**
+ * Converts an McpError into an OAuth 2.1 spec-compliant JSON error response.
+ *
+ * Maps HTTP status codes to the standard OAuth error codes defined in
+ * https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#section-3.2.4
+ */
+function mcpErrorToOAuthResponse(e: McpError): Response {
+	let oauthCode: string
+	if (e.code >= 500) {
+		oauthCode = 'server_error'
+	} else if (e.code === 429) {
+		oauthCode = 'temporarily_unavailable'
+	} else if (e.code === 401 || e.code === 403) {
+		oauthCode = 'access_denied'
+	} else {
+		oauthCode = 'invalid_request'
+	}
+	return new OAuthError(oauthCode, e.message, e.code >= 500 ? 500 : e.code).toResponse()
+}
 
 type AuthContext = {
 	Bindings: {
@@ -78,6 +98,47 @@ const UserAuthProps = z.object({
 export type AuthProps = z.infer<typeof AuthProps>
 const AuthProps = z.discriminatedUnion('type', [AccountAuthProps, UserAuthProps])
 
+/**
+ * Throws an McpError for combined /user + /accounts failures.
+ * Uses priority-based classification matching cloudflare-mcp patterns.
+ */
+function throwCombinedApiError(userStatus: number, accountsStatus: number): never {
+	const statuses = [userStatus, accountsStatus]
+
+	if (statuses.some((s) => s >= 500)) {
+		throw new McpError('Cloudflare API is temporarily unavailable', 502, {
+			reportToSentry: true,
+			internalMessage: `Upstream user=${userStatus}, accounts=${accountsStatus}`,
+		})
+	}
+
+	if (statuses.includes(429)) {
+		throw new McpError('Rate limited, try again later', 429, {
+			reportToSentry: false,
+			internalMessage: `Upstream user=${userStatus}, accounts=${accountsStatus}`,
+		})
+	}
+
+	if (statuses.includes(401)) {
+		throw new McpError('Access token is invalid or expired', 401, {
+			reportToSentry: false,
+			internalMessage: `Upstream user=${userStatus}, accounts=${accountsStatus}`,
+		})
+	}
+
+	if (statuses.includes(403)) {
+		throw new McpError('Insufficient permissions', 403, {
+			reportToSentry: false,
+			internalMessage: `Upstream user=${userStatus}, accounts=${accountsStatus}`,
+		})
+	}
+
+	throw new McpError('Failed to verify token', safeStatusCode(userStatus), {
+		reportToSentry: false,
+		internalMessage: `Upstream user=${userStatus}, accounts=${accountsStatus}`,
+	})
+}
+
 export async function getUserAndAccounts(
 	accessToken: string,
 	devModeHeaders?: HeadersInit
@@ -88,32 +149,86 @@ export async function getUserAndAccounts(
 				Authorization: `Bearer ${accessToken}`,
 			}
 
-	// Fetch the user & accounts info from Cloudflare
-	const [userResponse, accountsResponse] = await Promise.all([
-		fetch('https://api.cloudflare.com/client/v4/user', {
-			headers,
-		}),
-		fetch('https://api.cloudflare.com/client/v4/accounts', {
-			headers,
-		}),
-	])
+	// Fetch the user & accounts info from Cloudflare in parallel
+	let userResponse: Response
+	let accountsResponse: Response
+	try {
+		;[userResponse, accountsResponse] = await Promise.all([
+			fetch('https://api.cloudflare.com/client/v4/user', { headers }),
+			fetch('https://api.cloudflare.com/client/v4/accounts', { headers }),
+		])
+	} catch (error) {
+		console.error('Cloudflare API request failed', error)
+		throw new McpError('Cloudflare API is temporarily unavailable', 502, {
+			reportToSentry: true,
+			internalMessage: `Network error: ${error instanceof Error ? error.message : String(error)}`,
+		})
+	}
 
-	const { result: user } = V4Schema(UserSchema).parse(await userResponse.json())
-	const { result: accounts } = V4Schema(AccountsSchema).parse(await accountsResponse.json())
-	if (!user || !userResponse.ok) {
-		// If accounts is present, then assume that we have an account scoped token
-		if (accounts !== null) {
-			return { user: null, accounts }
+	// If both endpoints failed, use priority-based error classification
+	if (!userResponse.ok && !accountsResponse.ok) {
+		console.error(
+			`Cloudflare API error: user=${userResponse.status}, accounts=${accountsResponse.status}`
+		)
+		throwCombinedApiError(userResponse.status, accountsResponse.status)
+	}
+
+	// Parse accounts with safeParse for graceful degradation
+	let accounts: AccountsSchema = []
+	if (accountsResponse.ok) {
+		try {
+			const json = await accountsResponse.json()
+			const parsed = V4Schema(AccountsSchema).safeParse(json)
+			if (parsed.success) {
+				accounts = parsed.data.result ?? []
+			} else {
+				console.error('Cloudflare API /accounts payload did not match expected shape', parsed.error)
+			}
+		} catch (error) {
+			console.error('Cloudflare API /accounts response is not valid JSON', error)
 		}
-		console.log(user)
-		throw new McpError('Failed to fetch user', 500, { reportToSentry: true })
-	}
-	if (!accounts || !accountsResponse.ok) {
-		console.log(accounts)
-		throw new McpError('Failed to fetch accounts', 500, { reportToSentry: true })
 	}
 
-	return { user, accounts }
+	// Parse user with safeParse for graceful degradation
+	let user: UserSchema | null = null
+	if (userResponse.ok) {
+		try {
+			const json = await userResponse.json()
+			const parsed = V4Schema(UserSchema).safeParse(json)
+			if (parsed.success) {
+				user = parsed.data.result ?? null
+			} else {
+				console.error('Cloudflare API /user payload did not match expected shape', parsed.error)
+			}
+		} catch (error) {
+			console.error('Cloudflare API /user response is not valid JSON', error)
+		}
+	} else if (accounts.length > 0) {
+		// User endpoint failed but accounts succeeded — account-scoped token
+		return { user: null, accounts }
+	} else {
+		throwUpstreamApiError(userResponse.status, 'Cloudflare API /user')
+	}
+
+	if (user) {
+		return { user, accounts }
+	}
+
+	// Account-scoped token — user is null but accounts are present
+	if (accounts.length > 0) {
+		return { user: null, accounts }
+	}
+
+	// If accounts endpoint failed but user returned 200 with unparseable data,
+	// surface the accounts error rather than a misleading "no user/account" message
+	if (!accountsResponse.ok) {
+		throwUpstreamApiError(accountsResponse.status, 'Cloudflare API /accounts')
+	}
+
+	throw new McpError('Failed to verify token: no user or account information', 401, {
+		reportToSentry: false,
+		internalMessage: `user=${userResponse.status}, accounts=${accountsResponse.status}`,
+	})
 }
 
 /**
@@ -161,23 +276,35 @@ export async function handleTokenExchangeCallback(
 	if (options.grantType === 'refresh_token') {
 		const props = AuthProps.parse(options.props)
 		if (props.type === 'account_token') {
-			// Refreshing an account_token should not be possible, as we only do this for user tokens
-			throw new McpError('Internal Server Error', 500)
+			// Account tokens cannot be refreshed — this is a client error, not a server error
+			throw new OAuthError('invalid_grant', 'Account tokens cannot be refreshed', 400)
 		}
 		if (!props.refreshToken) {
-			throw new McpError('Missing refreshToken', 500)
+			throw new OAuthError('invalid_grant', 'No refresh token available for this grant', 400)
 		}
 
-		// handle token refreshes
-		const {
-			access_token: accessToken,
-			refresh_token: refreshToken,
-			expires_in,
-		} = await refreshAuthToken({
-			client_id: clientId,
-			client_secret: clientSecret,
-			refresh_token: props.refreshToken,
-		})
+		// handle token refreshes — convert upstream McpErrors to OAuth-compliant errors
+		let accessToken: string
+		let refreshToken: string
+		let expires_in: number
+		try {
+			const result = await refreshAuthToken({
+				client_id: clientId,
+				client_secret: clientSecret,
+				refresh_token: props.refreshToken,
+			})
+			accessToken = result.access_token
+			refreshToken = result.refresh_token
+			expires_in = result.expires_in
+		} catch (e) {
+			if (e instanceof McpError) {
+				// Map upstream failures to OAuth error codes:
+				// 5xx upstream → server_error; 4xx upstream → invalid_grant (refresh token rejected)
+				const oauthCode = e.code >= 500 ? 'server_error' : 'invalid_grant'
+				throw new OAuthError(oauthCode, e.message, e.code >= 500 ? 500 : 400)
+			}
+			throw e
+		}
 
 		return {
 			newProps: {
@@ -315,10 +442,10 @@ export function createAuthHandlers({
 				return e.toResponse()
 			}
 			if (e instanceof McpError) {
-				return c.text(e.message, { status: e.code })
+				return mcpErrorToOAuthResponse(e)
 			}
 			console.error(e)
-			return c.text('Internal Error', 500)
+			return new OAuthError('server_error', 'Internal Error', 500).toResponse()
 		}
 	})
 
@@ -383,8 +510,11 @@ export function createAuthHandlers({
 			if (e instanceof OAuthError) {
 				return e.toResponse()
 			}
+			if (e instanceof McpError) {
+				return mcpErrorToOAuthResponse(e)
+			}
 			console.error(e)
-			return c.text('Internal Error', 500)
+			return new OAuthError('server_error', 'Internal Error', 500).toResponse()
 		}
 	})
 
@@ -465,9 +595,9 @@ export function createAuthHandlers({
 				return e.toResponse()
 			}
 			if (e instanceof McpError) {
-				return c.text(e.message, { status: e.code })
+				return mcpErrorToOAuthResponse(e)
 			}
-			return c.text('Internal Error', 500)
+			return new OAuthError('server_error', 'Internal Error', 500).toResponse()
 		}
 	})
 
