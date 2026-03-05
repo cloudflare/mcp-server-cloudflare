@@ -1324,8 +1324,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			try {
 				const props = getProps(agent)
 
-				const endpoint =
-					dimension === 'timeseries' ? '/netflows/timeseries' : `/netflows/${dimension}`
+				const endpoint = `/netflows/${dimension}`
 
 				const result = await fetchRadarApi(props.accessToken, endpoint, {
 					asn,
