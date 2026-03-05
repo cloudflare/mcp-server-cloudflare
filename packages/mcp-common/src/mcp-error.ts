@@ -16,6 +16,25 @@ export function safeStatusCode(status: number): ContentfulStatusCode {
 	return 500
 }
 
+/**
+ * Throws an McpError for an upstream API failure.
+ * 4xx: preserves the status code with reportToSentry=false.
+ * 5xx: maps to 502 Bad Gateway with reportToSentry=true.
+ */
+export function throwUpstreamApiError(status: number, context: string, rawBody?: string): never {
+	const is5xx = status >= 500
+	throw new McpError(
+		is5xx ? `Upstream ${context} unavailable` : `${context} request failed`,
+		safeStatusCode(is5xx ? 502 : status),
+		{
+			reportToSentry: is5xx,
+			internalMessage: rawBody
+				? `${context} ${status}: ${rawBody}`
+				: `${context} returned ${status}`,
+		}
+	)
+}
+
 export class McpError extends Error {
 	public code: ContentfulStatusCode
 	public reportToSentry: boolean

@@ -1,8 +1,9 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { fetchMock } from 'cloudflare:test'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Import the mocked module
 import { refreshAuthToken } from './cloudflare-auth'
-import { handleTokenExchangeCallback } from './cloudflare-oauth-handler'
+import { getUserAndAccounts, handleTokenExchangeCallback } from './cloudflare-oauth-handler'
 import { McpError } from './mcp-error'
 import { OAuthError } from './workers-oauth-utils'
 
@@ -17,6 +18,11 @@ vi.mock('./cloudflare-auth', () => ({
 }))
 
 const mockRefreshAuthToken = vi.mocked(refreshAuthToken)
+
+beforeAll(() => {
+	fetchMock.activate()
+	fetchMock.disableNetConnect()
+})
 
 beforeEach(() => {
 	vi.resetAllMocks()
@@ -204,5 +210,198 @@ describe('handleTokenExchangeCallback', () => {
 			const result = await handleTokenExchangeCallback(options, clientId, clientSecret)
 			expect(result).toBeUndefined()
 		})
+	})
+})
+
+function mockUserResponse(status: number, body?: unknown) {
+	fetchMock
+		.get('https://api.cloudflare.com')
+		.intercept({ path: '/client/v4/user', method: 'GET' })
+		.reply(status, body ? JSON.stringify(body) : '')
+}
+
+function mockAccountsResponse(status: number, body?: unknown) {
+	fetchMock
+		.get('https://api.cloudflare.com')
+		.intercept({ path: '/client/v4/accounts', method: 'GET' })
+		.reply(status, body ? JSON.stringify(body) : '')
+}
+
+const v4User = { success: true, result: { id: 'user-1', email: 'user@example.com' }, errors: [], messages: [] }
+const v4Accounts = { success: true, result: [{ id: 'acc-1', name: 'My Account' }], errors: [], messages: [] }
+
+describe('getUserAndAccounts', () => {
+	it('returns user and accounts on success', async () => {
+		mockUserResponse(200, v4User)
+		mockAccountsResponse(200, v4Accounts)
+
+		const result = await getUserAndAccounts('test-token')
+		expect(result.user).toEqual({ id: 'user-1', email: 'user@example.com' })
+		expect(result.accounts).toEqual([{ id: 'acc-1', name: 'My Account' }])
+	})
+
+	it('returns user=null for account-scoped tokens (user 401, accounts 200)', async () => {
+		mockUserResponse(401, { errors: [{ message: 'Unauthorized' }] })
+		mockAccountsResponse(200, v4Accounts)
+
+		const result = await getUserAndAccounts('test-token')
+		expect(result.user).toBeNull()
+		expect(result.accounts).toEqual([{ id: 'acc-1', name: 'My Account' }])
+	})
+
+	describe('combined failure (both endpoints fail)', () => {
+		it('throws 502 when any endpoint returns 5xx', async () => {
+			mockUserResponse(401)
+			mockAccountsResponse(500)
+
+			try {
+				await getUserAndAccounts('test-token')
+				expect.unreachable()
+			} catch (e) {
+				expect(e).toBeInstanceOf(McpError)
+				const err = e as McpError
+				expect(err.code).toBe(502)
+				expect(err.reportToSentry).toBe(true)
+			}
+		})
+
+		it('throws 429 when rate limited', async () => {
+			mockUserResponse(429)
+			mockAccountsResponse(429)
+
+			try {
+				await getUserAndAccounts('test-token')
+				expect.unreachable()
+			} catch (e) {
+				expect(e).toBeInstanceOf(McpError)
+				const err = e as McpError
+				expect(err.code).toBe(429)
+				expect(err.reportToSentry).toBe(false)
+			}
+		})
+
+		it('throws 401 for expired token', async () => {
+			mockUserResponse(401)
+			mockAccountsResponse(401)
+
+			try {
+				await getUserAndAccounts('test-token')
+				expect.unreachable()
+			} catch (e) {
+				expect(e).toBeInstanceOf(McpError)
+				const err = e as McpError
+				expect(err.code).toBe(401)
+				expect(err.reportToSentry).toBe(false)
+			}
+		})
+
+		it('throws 403 for insufficient permissions', async () => {
+			mockUserResponse(403)
+			mockAccountsResponse(403)
+
+			try {
+				await getUserAndAccounts('test-token')
+				expect.unreachable()
+			} catch (e) {
+				expect(e).toBeInstanceOf(McpError)
+				const err = e as McpError
+				expect(err.code).toBe(403)
+				expect(err.reportToSentry).toBe(false)
+			}
+		})
+	})
+
+	it('throws 401 when no user or account information is returned', async () => {
+		mockUserResponse(200, { success: true, result: null, errors: [], messages: [] })
+		mockAccountsResponse(200, { success: true, result: [], errors: [], messages: [] })
+
+		try {
+			await getUserAndAccounts('test-token')
+			expect.unreachable()
+		} catch (e) {
+			expect(e).toBeInstanceOf(McpError)
+			const err = e as McpError
+			expect(err.code).toBe(401)
+			expect(err.message).toBe('Failed to verify token: no user or account information')
+		}
+	})
+
+	it('gracefully handles malformed JSON in /user response', async () => {
+		fetchMock
+			.get('https://api.cloudflare.com')
+			.intercept({ path: '/client/v4/user', method: 'GET' })
+			.reply(200, 'not json')
+		mockAccountsResponse(200, v4Accounts)
+
+		// Should still return accounts even if user parsing fails
+		const result = await getUserAndAccounts('test-token')
+		expect(result.user).toBeNull()
+		expect(result.accounts).toEqual([{ id: 'acc-1', name: 'My Account' }])
+	})
+
+	describe('mixed-status priority in combined failures', () => {
+		it('prioritizes 5xx over 429 (401+500 → 502)', async () => {
+			mockUserResponse(401)
+			mockAccountsResponse(500)
+
+			try {
+				await getUserAndAccounts('test-token')
+				expect.unreachable()
+			} catch (e) {
+				expect(e).toBeInstanceOf(McpError)
+				const err = e as McpError
+				expect(err.code).toBe(502)
+				expect(err.reportToSentry).toBe(true)
+			}
+		})
+
+		it('prioritizes 429 over 401 (401+429 → 429)', async () => {
+			mockUserResponse(401)
+			mockAccountsResponse(429)
+
+			try {
+				await getUserAndAccounts('test-token')
+				expect.unreachable()
+			} catch (e) {
+				expect(e).toBeInstanceOf(McpError)
+				const err = e as McpError
+				expect(err.code).toBe(429)
+				expect(err.reportToSentry).toBe(false)
+			}
+		})
+
+		it('prioritizes 5xx over 403 (403+500 → 502)', async () => {
+			mockUserResponse(403)
+			mockAccountsResponse(500)
+
+			try {
+				await getUserAndAccounts('test-token')
+				expect.unreachable()
+			} catch (e) {
+				expect(e).toBeInstanceOf(McpError)
+				const err = e as McpError
+				expect(err.code).toBe(502)
+				expect(err.reportToSentry).toBe(true)
+			}
+		})
+	})
+
+	it('surfaces accounts error when user returns 200 with malformed JSON and accounts fails', async () => {
+		fetchMock
+			.get('https://api.cloudflare.com')
+			.intercept({ path: '/client/v4/user', method: 'GET' })
+			.reply(200, 'not json')
+		mockAccountsResponse(403)
+
+		try {
+			await getUserAndAccounts('test-token')
+			expect.unreachable()
+		} catch (e) {
+			expect(e).toBeInstanceOf(McpError)
+			const err = e as McpError
+			// Should surface the accounts 403, not a generic "no user/account" error
+			expect(err.code).toBe(403)
+			expect(err.reportToSentry).toBe(false)
+		}
 	})
 })
