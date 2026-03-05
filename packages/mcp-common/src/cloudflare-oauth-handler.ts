@@ -182,10 +182,7 @@ export async function getUserAndAccounts(
 			if (parsed.success) {
 				accounts = parsed.data.result ?? []
 			} else {
-				console.error(
-					'Cloudflare API /accounts payload did not match expected shape',
-					parsed.error
-				)
+				console.error('Cloudflare API /accounts payload did not match expected shape', parsed.error)
 			}
 		} catch (error) {
 			console.error('Cloudflare API /accounts response is not valid JSON', error)
@@ -201,10 +198,7 @@ export async function getUserAndAccounts(
 			if (parsed.success) {
 				user = parsed.data.result ?? null
 			} else {
-				console.error(
-					'Cloudflare API /user payload did not match expected shape',
-					parsed.error
-				)
+				console.error('Cloudflare API /user payload did not match expected shape', parsed.error)
 			}
 		} catch (error) {
 			console.error('Cloudflare API /user response is not valid JSON', error)

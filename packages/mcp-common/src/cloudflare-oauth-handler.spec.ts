@@ -227,8 +227,18 @@ function mockAccountsResponse(status: number, body?: unknown) {
 		.reply(status, body ? JSON.stringify(body) : '')
 }
 
-const v4User = { success: true, result: { id: 'user-1', email: 'user@example.com' }, errors: [], messages: [] }
-const v4Accounts = { success: true, result: [{ id: 'acc-1', name: 'My Account' }], errors: [], messages: [] }
+const v4User = {
+	success: true,
+	result: { id: 'user-1', email: 'user@example.com' },
+	errors: [],
+	messages: [],
+}
+const v4Accounts = {
+	success: true,
+	result: [{ id: 'acc-1', name: 'My Account' }],
+	errors: [],
+	messages: [],
+}
 
 describe('getUserAndAccounts', () => {
 	it('returns user and accounts on success', async () => {
