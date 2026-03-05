@@ -577,11 +577,15 @@ export const CtPublicKeyAlgorithmParam = z
 // Netflows Parameters
 export const NetflowsDimensionParam = z
 	.enum([
-		'timeseries',
 		'summary/adm1',
 		'summary/as',
 		'summary/location',
 		'summary/product',
+		'timeseries',
+		'timeseries_groups/adm1',
+		'timeseries_groups/as',
+		'timeseries_groups/location',
+		'timeseries_groups/product',
 	])
 	.describe('Dimension indicating the type and format of NetFlows data to retrieve.')
 
