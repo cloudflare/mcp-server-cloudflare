@@ -11,12 +11,13 @@ export default defineWorkersProject({
 			workers: {
 				singleWorker: true,
 				miniflare: {
-					compatibilityDate: '2025-03-10',
+					compatibilityDate: '2026-03-05',
 					compatibilityFlags: ['nodejs_compat'],
 					bindings: {
 						CLOUDFLARE_MOCK_ACCOUNT_ID: 'mock-account-id',
 						CLOUDFLARE_MOCK_API_TOKEN: 'mock-api-token',
-					} satisfies Partial<TestEnv>,
+						DEV_DISABLE_OAUTH: false,
+					},
 				},
 			},
 		},
