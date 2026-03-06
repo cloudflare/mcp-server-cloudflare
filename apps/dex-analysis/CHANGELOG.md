@@ -1,5 +1,11 @@
 # dex-analysis
 
+## 0.4.0
+
+### Minor Changes
+
+- 9c675e9: Stronger validation of DEX tool params
+
 ## 0.3.0
 
 ### Minor Changes
