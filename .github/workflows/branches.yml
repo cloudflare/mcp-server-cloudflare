@@ -16,8 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-        with:
-          node-version: 24
 
       - name: Syncpack lint
         run: pnpm check:deps
