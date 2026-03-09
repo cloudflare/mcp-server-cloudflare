@@ -12,7 +12,6 @@ Currently available tools:
 | **Category**      | **Tool**                   | **Description**                                                               |
 | ----------------- | -------------------------- | ----------------------------------------------------------------------------- |
 | **Account**       | `accounts_list`            | List all accounts in your Cloudflare account                                  |
-|                   | `set_active_account`       | Set active account to be used for tool calls that require accountId           |
 | **KV Namespaces** | `kv_namespaces_list`       | List all of the kv namespaces in your Cloudflare account                      |
 |                   | `kv_namespace_create`      | Create a new kv namespace in your Cloudflare account                          |
 |                   | `kv_namespace_delete`      | Delete a kv namespace in your Cloudflare account                              |
@@ -41,7 +40,7 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 ### Prompt Examples
 
 - `List my Cloudflare accounts.`
-- `Set my active account to 'YOUR_ACCOUNT_ID'.` (Replace YOUR_ACCOUNT_ID with an actual ID)
+- `List my KV namespaces for account 'YOUR_ACCOUNT_ID'.` (Replace YOUR_ACCOUNT_ID with an actual ID)
 - `Show me my KV namespaces.`
 - `Create a new KV namespace called 'my-kv-store'.`
 - `Get the details for KV namespace 'YOUR_NAMESPACE_ID'.` (Replace YOUR_NAMESPACE_ID)

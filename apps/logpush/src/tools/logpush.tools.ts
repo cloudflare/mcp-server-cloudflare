@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import { fetchCloudflareApi } from '@repo/mcp-common/src/cloudflare-api'
 import { getProps } from '@repo/mcp-common/src/get-props'
+import { AccountIdParam, resolveAccountId } from '@repo/mcp-common/src/tools/account.helpers'
 
 import type { LogsMCP } from '../logpush.app'
 
@@ -112,19 +113,13 @@ export function registerLogsTools(agent: LogsMCP) {
 
 		This tool returns at most the first 100 jobs.
 		`,
-		{},
-		async () => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		{
+			account_id: AccountIdParam,
+		},
+		async ({ account_id: account_id_param }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const result = await handleGetAccountLogPushJobs(accountId, props.accessToken)
@@ -149,6 +144,7 @@ export function registerLogsTools(agent: LogsMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}

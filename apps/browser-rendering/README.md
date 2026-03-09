@@ -16,7 +16,7 @@ Currently available tools:
 | `get_url_markdown`     | Fetches the webpage content and converts it into Markdown format.            |
 | `get_url_screenshot`   | Captures a screenshot of the webpage. Optionally, specify the viewport size. |
 
-**Note:** To use these tools, ensure you have an active account set. If not, use `accounts_list` to list your accounts and `set_active_account` to set one as active.
+**Note:** Tools that require an account will accept an optional `account_id` parameter. If you have multiple accounts, use `accounts_list` to find your account IDs.
 
 This MCP server is still a work in progress, and we plan to add more tools in the future.
 

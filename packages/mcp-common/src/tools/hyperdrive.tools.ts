@@ -1,7 +1,7 @@
 import { getCloudflareClient } from '../cloudflare-api'
-import { MISSING_ACCOUNT_ID_RESPONSE } from '../constants'
 import { getProps } from '../get-props'
 import { type CloudflareMcpAgent } from '../types/cloudflare-mcp-agent.types'
+import { AccountIdParam, resolveAccountId } from './account.helpers'
 import {
 	HyperdriveCachingDisabledSchema,
 	HyperdriveCachingMaxAgeSchema,
@@ -43,6 +43,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 			per_page: HyperdriveListParamPerPageSchema.nullable(),
 			order: HyperdriveListParamOrderSchema.nullable(),
 			direction: HyperdriveListParamDirectionSchema.nullable(),
+			account_id: AccountIdParam,
 		},
 		{
 			title: 'List Hyperdrive configs',
@@ -50,11 +51,10 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 				readOnlyHint: true,
 			},
 		},
-		async ({ page, per_page, order, direction }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ page, per_page, order, direction, account_id: account_id_param }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const account_id = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -87,6 +87,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 							text: `Error listing Hyperdrive configs: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -171,6 +172,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 		'Delete a Hyperdrive configuration in your Cloudflare account',
 		{
 			hyperdrive_id: HyperdriveConfigIdSchema,
+			account_id: AccountIdParam,
 		},
 		{
 			title: 'Delete Hyperdrive config',
@@ -179,11 +181,10 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 				destructiveHint: true,
 			},
 		},
-		async ({ hyperdrive_id }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ hyperdrive_id, account_id: account_id_param }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const account_id = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -204,6 +205,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 							text: `Error deleting Hyperdrive config ${hyperdrive_id}: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -217,6 +219,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 		'Get details of a specific Hyperdrive configuration in your Cloudflare account',
 		{
 			hyperdrive_id: HyperdriveConfigIdSchema,
+			account_id: AccountIdParam,
 		},
 		{
 			title: 'Get Hyperdrive config',
@@ -224,11 +227,10 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 				readOnlyHint: true,
 			},
 		},
-		async ({ hyperdrive_id }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ hyperdrive_id, account_id: account_id_param }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const account_id = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -251,6 +253,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 							text: `Error getting Hyperdrive config ${hyperdrive_id}: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -274,6 +277,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 			caching_max_age: HyperdriveCachingMaxAgeSchema.optional().nullable(),
 			caching_stale_while_revalidate:
 				HyperdriveCachingStaleWhileRevalidateSchema.optional().nullable(),
+			account_id: AccountIdParam,
 		},
 		{
 			title: 'Edit Hyperdrive config',
@@ -293,11 +297,11 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 			caching_disabled,
 			caching_max_age,
 			caching_stale_while_revalidate,
+			account_id: account_id_param,
 		}) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const account_id = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const originPatch: Record<string, any> = {}
@@ -350,6 +354,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 							text: `Error editing Hyperdrive config ${hyperdrive_id}: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

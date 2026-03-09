@@ -23,7 +23,7 @@ This server provides tools powered by the Cloudflare Radar API for global Intern
 
 ## Authentication
 
-- **URL Scanner** requires an active account (use \`set_active_account\`)
+- **URL Scanner** requires an `account_id` parameter
 - All other Radar data tools work without account selection
 
 ## Tool Categories
