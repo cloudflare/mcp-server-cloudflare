@@ -39,4 +39,4 @@ Replace the content with the following configuration:
 
 Once you've set up your configuration file, restart MCP client and a browser window will open showing your OAuth login page. Proceed through the authentication flow to grant the client access to your MCP server. After you grant access, the tools will become available for you to use.
 
-Interested in contributing, and running this server locally? See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
+Interested in contributing, and running this server locally? See the [CONTRIBUTING.md](../../CONTRIBUTING.md) in the repo root to get started.

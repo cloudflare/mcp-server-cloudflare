@@ -172,8 +172,9 @@ export const AsOrderByParam: z.ZodType<ASNListParams['orderBy']> = z
 export const HttpDimensionParam = z
 	.enum([
 		'timeseries',
-		// Summary dimensions (new unified endpoint)
+		// Summary dimensions
 		'summary/adm1',
+		'summary/as',
 		'summary/bot_class',
 		'summary/browser',
 		'summary/browser_family',
@@ -181,11 +182,13 @@ export const HttpDimensionParam = z
 		'summary/http_protocol',
 		'summary/http_version',
 		'summary/ip_version',
+		'summary/location',
 		'summary/os',
 		'summary/post_quantum',
 		'summary/tls_version',
-		// Timeseries groups dimensions (new unified endpoint)
+		// Timeseries groups dimensions
 		'timeseries_groups/adm1',
+		'timeseries_groups/as',
 		'timeseries_groups/bot_class',
 		'timeseries_groups/browser',
 		'timeseries_groups/browser_family',
@@ -193,23 +196,23 @@ export const HttpDimensionParam = z
 		'timeseries_groups/http_protocol',
 		'timeseries_groups/http_version',
 		'timeseries_groups/ip_version',
+		'timeseries_groups/location',
 		'timeseries_groups/os',
 		'timeseries_groups/post_quantum',
 		'timeseries_groups/tls_version',
-		// Top endpoints
-		'top/locations',
-		'top/ases',
 	])
 	.describe('Dimension indicating the type and format of HTTP data to retrieve.')
 
 export const DnsDimensionParam = z
 	.enum([
 		'timeseries',
-		'summary/ip_version',
+		'summary/as',
 		'summary/cache_hit',
 		'summary/dnssec',
 		'summary/dnssec_aware',
 		'summary/dnssec_e2e',
+		'summary/ip_version',
+		'summary/location',
 		'summary/matching_answer',
 		'summary/protocol',
 		'summary/query_type',
@@ -217,19 +220,19 @@ export const DnsDimensionParam = z
 		'summary/response_ttl',
 		'summary/tld',
 		'summary/tld_dns_magnitude',
-		'timeseries_groups/ip_version',
+		'timeseries_groups/as',
 		'timeseries_groups/cache_hit',
 		'timeseries_groups/dnssec',
 		'timeseries_groups/dnssec_aware',
 		'timeseries_groups/dnssec_e2e',
+		'timeseries_groups/ip_version',
+		'timeseries_groups/location',
 		'timeseries_groups/matching_answer',
 		'timeseries_groups/protocol',
 		'timeseries_groups/query_type',
 		'timeseries_groups/response_code',
 		'timeseries_groups/response_ttl',
 		'timeseries_groups/tld',
-		'top/locations',
-		'top/ases',
 	])
 	.describe('Dimension indicating the type and format of DNS data to retrieve.')
 
@@ -573,7 +576,17 @@ export const CtPublicKeyAlgorithmParam = z
 
 // Netflows Parameters
 export const NetflowsDimensionParam = z
-	.enum(['timeseries', 'summary', 'summary/adm1', 'summary/product', 'top/locations', 'top/ases'])
+	.enum([
+		'summary/adm1',
+		'summary/as',
+		'summary/location',
+		'summary/product',
+		'timeseries',
+		'timeseries_groups/adm1',
+		'timeseries_groups/as',
+		'timeseries_groups/location',
+		'timeseries_groups/product',
+	])
 	.describe('Dimension indicating the type and format of NetFlows data to retrieve.')
 
 export const NetflowsProductParam = z
@@ -1043,3 +1056,56 @@ export const TrafficAnomalyStatusParam = z
 	.enum(['VERIFIED', 'UNVERIFIED'])
 	.optional()
 	.describe('Filter by anomaly verification status.')
+
+// ============================================================
+// BGP RPKI ASPA Parameters
+// ============================================================
+
+export const AspaCustomerAsnParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Filter by customer ASN (the ASN that authorizes upstream providers).')
+
+export const AspaProviderAsnParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Filter by provider ASN (the authorized upstream provider ASN).')
+
+export const AspaRirParam = z
+	.enum(['AFRINIC', 'APNIC', 'ARIN', 'LACNIC', 'RIPE_NCC'])
+	.optional()
+	.describe('Filter by Regional Internet Registry (RIR).')
+
+export const AspaChangeTypeParam = z
+	.enum(['addition', 'removal', 'modification'])
+	.optional()
+	.describe('Filter by type of ASPA change.')
+
+export const AspaSortByParam = z
+	.enum(['customerAsn', 'providerAsn'])
+	.optional()
+	.describe('Sort ASPA results by specified field.')
+
+export const AspaDateParam = z
+	.string()
+	.optional()
+	.describe('Date for historical ASPA snapshot (ISO 8601 format, e.g. 2024-01-15).')
+
+export const AspaPageParam = z
+	.number()
+	.int()
+	.positive()
+	.optional()
+	.describe('Page number for paginated ASPA results.')
+
+export const AspaPerPageParam = z
+	.number()
+	.int()
+	.min(1)
+	.max(100)
+	.optional()
+	.describe('Number of results per page for ASPA queries (1-100).')

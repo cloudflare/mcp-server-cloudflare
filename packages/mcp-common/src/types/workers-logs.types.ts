@@ -392,7 +392,7 @@ export const zQueryRunRequest = z.object({
 			.number()
 			.int()
 			.nonnegative()
-			.max(100)
+			.max(2000)
 			.optional()
 			.describe(
 				'Use this limit when view is calculation and a group by is present. 10 is a sensible default'
@@ -408,7 +408,7 @@ export const zQueryRunRequest = z.object({
 		),
 	limit: z
 		.number()
-		.max(100)
+		.max(2000)
 		.optional()
 		.default(5)
 		.describe(
