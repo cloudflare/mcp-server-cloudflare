@@ -1,3 +1,4 @@
+import { GrantType } from '@cloudflare/workers-oauth-provider'
 import { fetchMock } from 'cloudflare:test'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -33,11 +34,12 @@ afterEach(() => {
 
 function makeRefreshOptions(propsOverride: Record<string, unknown>): TokenExchangeCallbackOptions {
 	return {
-		grantType: 'refresh_token',
+		grantType: GrantType.REFRESH_TOKEN,
 		props: propsOverride,
 		clientId: 'test',
 		userId: 'test-user',
 		scope: [],
+		requestedScope: [],
 	}
 }
 
@@ -253,11 +255,12 @@ describe('handleTokenExchangeCallback', () => {
 	describe('non-refresh grant types', () => {
 		it('returns undefined for authorization_code grant type', async () => {
 			const options: TokenExchangeCallbackOptions = {
-				grantType: 'authorization_code',
+				grantType: GrantType.AUTHORIZATION_CODE,
 				props: {},
 				clientId: 'test',
 				userId: 'test-user',
 				scope: [],
+				requestedScope: [],
 			}
 
 			const result = await handleTokenExchangeCallback(options, clientId, clientSecret)

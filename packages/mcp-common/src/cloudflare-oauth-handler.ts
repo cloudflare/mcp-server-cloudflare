@@ -1,3 +1,4 @@
+import { GrantType } from '@cloudflare/workers-oauth-provider'
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
@@ -272,7 +273,7 @@ export async function handleTokenExchangeCallback(
 	clientSecret: string
 ): Promise<TokenExchangeCallbackResult | undefined> {
 	// options.props contains the current props
-	if (options.grantType === 'refresh_token') {
+	if (options.grantType === GrantType.REFRESH_TOKEN) {
 		const props = AuthProps.parse(options.props)
 		if (props.type === 'account_token') {
 			// Account tokens cannot be refreshed — this is a client error, not a server error
