@@ -3,8 +3,8 @@
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP
 connections, with Cloudflare OAuth built-in.
 
-It integrates tools powered by the [Cloudflare AI Gateway API](https://developers.cloudflare.com/ai-gateway/) to provide global
-Internet traffic insights, trends and other utilities.
+It integrates tools powered by the [Cloudflare AI Gateway API](https://developers.cloudflare.com/ai-gateway/) to search
+your AI Gateway logs, inspect prompts and responses, and get details about gateway usage.
 
 ## 🔨 Available Tools
 

@@ -15,7 +15,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		name: 'dex_test_statistics',
 		description: 'Analyze Cloudflare DEX Test Results by quartile given a Test ID',
 		schema: {
-			testId: z.string().describe('The DEX Test ID to analyze details of.'),
+			testId: testIdParam.describe('The DEX Test ID to analyze details of.'),
 			from: timeStartParam,
 			to: timeEndParam,
 		},
@@ -44,7 +44,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		schema: { page: pageParam },
 		callback: async ({ accountId, accessToken, page }) => {
 			return await fetchCloudflareApi({
-				endpoint: `/dex/tests/overview?page=${page}&per_page=50`,
+				endpoint: `/dex/tests/overview?${new URLSearchParams({ page: String(page), per_page: '50' })}`,
 				accountId,
 				apiToken: accessToken,
 				options: {
@@ -61,17 +61,13 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		name: 'dex_http_test_details',
 		description: 'Retrieve detailed time series results for an HTTP DEX test by id.',
 		schema: {
-			testId: z.string().describe('The HTTP DEX Test ID to get details for.'),
-			deviceId: z
-				.string()
+			testId: testIdParam.describe('The HTTP DEX Test ID to get details for.'),
+			deviceId: deviceIdParam
 				.optional()
 				.describe(
 					"Optionally limit results to specific device(s). Can't be used in conjunction with the colo parameter."
 				),
-			colo: z
-				.string()
-				.optional()
-				.describe('Optionally limit results to a specific Cloudflare colo.'),
+			colo: coloParam.optional(),
 			from: timeStartParam,
 			to: timeEndParam,
 			interval: aggregationIntervalParam,
@@ -96,17 +92,13 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		name: 'dex_traceroute_test_details',
 		description: 'Retrieve detailed time series results for a Traceroute DEX test by id.',
 		schema: {
-			testId: z.string().describe('The traceroute DEX Test ID to get details for.'),
-			deviceId: z
-				.string()
+			testId: testIdParam.describe('The traceroute DEX Test ID to get details for.'),
+			deviceId: deviceIdParam
 				.optional()
 				.describe(
 					"Optionally limit results to specific device(s). Can't be used in conjunction with the colo parameter."
 				),
-			colo: z
-				.string()
-				.optional()
-				.describe('Optionally limit results to a specific Cloudflare colo.'),
+			colo: coloParam.optional(),
 			timeStart: timeStartParam,
 			timeEnd: timeEndParam,
 			interval: aggregationIntervalParam,
@@ -132,8 +124,8 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		description:
 			'Retrieve aggregate network path data for a Traceroute DEX test by id. Use the dex_traceroute_test_result_network_path tool to further explore individual test runs hop-by-hop.',
 		schema: {
-			testId: z.string().describe('The traceroute DEX Test ID to get network path details for.'),
-			deviceId: z.string().describe('The ID of the device to get network path details for.'),
+			testId: testIdParam.describe('The traceroute DEX Test ID to get network path details for.'),
+			deviceId: deviceIdParam.describe('The ID of the device to get network path details for.'),
 			from: timeStartParam,
 			to: timeEndParam,
 			interval: aggregationIntervalParam,
@@ -161,6 +153,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		schema: {
 			testResultId: z
 				.string()
+				.uuid()
 				.describe('The traceroute DEX Test Result ID to get network path details for.'),
 		},
 		agent,
@@ -211,8 +204,8 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 			'Create a remote packet capture (PCAP) for a device. This is a resource intensive and privacy-sensitive operation on a real user device.' +
 			'Always ask for confirmation from the user that the targeted email and device are correct before executing a capture',
 		schema: {
-			device_id: z.string().describe('The device ID to target.'),
-			user_email: z.string().describe('The email of the user associated with the device.'),
+			device_id: z.string().uuid().describe('The device ID to target.'),
+			user_email: z.string().email().describe('The email of the user associated with the device.'),
 			'max-file-size-mb': z
 				.number()
 				.min(1)
@@ -269,8 +262,8 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 			'Create a remote Warp Diagnostic (WARP-diag) for a device. This is a resource intensive and privacy-sensitive operation on a real user device.' +
 			'Always ask for confirmation from the user that the targeted email and device are correct before executing a capture',
 		schema: {
-			device_id: z.string().describe('The device ID to target.'),
-			user_email: z.string().describe('The email of the user associated with the device.'),
+			device_id: z.string().uuid().describe('The device ID to target.'),
+			user_email: z.string().email().describe('The email of the user associated with the device.'),
 			'test-all-routes': z
 				.boolean()
 				.default(true)
@@ -317,7 +310,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		agent,
 		callback: async ({ accountId, accessToken, page }) => {
 			return await fetchCloudflareApi({
-				endpoint: `/dex/commands?page=${page}&per_page=50`,
+				endpoint: `/dex/commands?${new URLSearchParams({ page: String(page), per_page: `50` })}`,
 				accountId,
 				apiToken: accessToken,
 				options: {
@@ -343,10 +336,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 				.describe(
 					'Number of minutes before current time to use as cutoff for device states to include.'
 				),
-			colo: z
-				.string()
-				.optional()
-				.describe('Optionally filter results to a specific Cloudflare colo.'),
+			colo: coloParam.optional(),
 		},
 		agent,
 		callback: async ({ accountId, accessToken, ...params }) => {
@@ -372,11 +362,10 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 			from: timeStartParam,
 			to: timeEndParam,
 			interval: aggregationIntervalParam,
-			colo: z
-				.string()
+			colo: coloParam
 				.optional()
 				.describe('Filter results to WARP devices connected to a specific colo.'),
-			device_id: z.string().optional().describe('Filter results to a specific device.'),
+			device_id: z.string().uuid().optional().describe('Filter results to a specific device.'),
 		},
 		agent,
 		callback: async ({ accountId, accessToken, ...params }) => {
@@ -407,11 +396,8 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 			source: z
 				.enum(['last_seen', 'hourly', 'raw'])
 				.describe('Specifies the granularity of results.'),
-			colo: z
-				.string()
-				.optional()
-				.describe('Filter results to WARP devices connected to a specific colo.'),
-			device_id: z.string().optional().describe('Filter results to a specific device.'),
+			colo: coloParam.optional(),
+			device_id: z.string().uuid().optional().describe('Filter results to a specific device.'),
 			mode: z.string().optional().describe('Filter results to devices with a specific WARP mode.'),
 			platform: z
 				.string()
@@ -521,13 +507,12 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		description:
 			'Given a WARP diag remote capture id and device_id, returns a list of the files contained in the archive.',
 		schema: {
-			deviceId: z
-				.string()
-				.describe(
-					'The device_id field of the successful WARP-diag remote capture response to list contents of.'
-				),
+			deviceId: deviceIdParam.describe(
+				'The device_id field of the successful WARP-diag remote capture response to list contents of.'
+			),
 			commandId: z
 				.string()
+				.uuid()
 				.describe(
 					'The id of the successful WARP-diag remote capture response to list contents of.'
 				),
@@ -553,8 +538,8 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		description:
 			'Explore the contents of remote capture WARP diag archive filepaths returned by the dex_list_remote_warp_diag_contents tool for analysis.',
 		schema: {
-			commandId: z.string().describe('The id of the command results to explore'),
-			deviceId: z.string().describe('The device_id field of command to explore'),
+			commandId: z.string().uuid().describe('The id of the command results to explore'),
+			deviceId: deviceIdParam.describe('The device_id field of command to explore'),
 			filepath: z.string().describe('The file path from the archive to retrieve contents for.'),
 		},
 		llmContext:
@@ -578,6 +563,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		schema: {
 			command_id: z
 				.string()
+				.uuid()
 				.describe('The command_id of the successful WARP-diag remote capture to analyze.'),
 		},
 		llmContext:
@@ -679,3 +665,9 @@ const aggregationIntervalParam = z
 	.describe('The time interval to group results by.')
 
 const pageParam = z.number().min(1).describe('The page of results to retrieve.')
+const coloParam = z
+	.string()
+	.regex(/^[A-Z]{3}$/, '3-letter colo codes only')
+	.describe('Optionally filter results to a specific Cloudflare colo.')
+const deviceIdParam = z.string().uuid()
+const testIdParam = z.string().uuid()

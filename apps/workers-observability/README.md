@@ -3,8 +3,8 @@
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP
 connections, with Cloudflare OAuth built-in.
 
-It integrates tools powered by [Workers Observability](https://developers.cloudflare.com/workers/observability/) to provide global
-Internet traffic insights, trends and other utilities.
+It integrates tools powered by [Workers Observability](https://developers.cloudflare.com/workers/observability/) to debug
+and get insight into your Workers' logs and analytics.
 
 ## 🔨 Available Tools
 

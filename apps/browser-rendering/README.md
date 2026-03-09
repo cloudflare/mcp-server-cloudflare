@@ -3,8 +3,8 @@
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP
 connections, with Cloudflare OAuth built-in.
 
-It integrates tools powered by the [Cloudflare Browser Rendering API](https://developers.cloudflare.com/browser-rendering/) to provide global
-Internet traffic insights, trends and other utilities.
+It integrates tools powered by the [Cloudflare Browser Rendering API](https://developers.cloudflare.com/browser-rendering/) to fetch
+web pages, convert them to markdown, and take screenshots.
 
 ## 🔨 Available Tools
 
