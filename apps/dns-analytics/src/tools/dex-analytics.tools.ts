@@ -54,6 +54,7 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 							text: `Error fetching DNS report: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -94,6 +95,7 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 							text: `Error fetching DNS report: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -131,6 +133,7 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 							text: `Error fetching DNS report: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

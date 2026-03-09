@@ -138,6 +138,7 @@ export function registerBuildsTools(agent: BuildsMCP) {
 							text: `Error: listing builds failed: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -206,6 +207,7 @@ export function registerBuildsTools(agent: BuildsMCP) {
 							text: `Error: getting build failed: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -252,6 +254,7 @@ export function registerBuildsTools(agent: BuildsMCP) {
 							text: `Error: getting build logs failed: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

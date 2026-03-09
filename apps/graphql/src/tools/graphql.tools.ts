@@ -570,6 +570,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -656,6 +657,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -785,6 +787,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -934,6 +937,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -1023,6 +1027,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -1078,6 +1083,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}

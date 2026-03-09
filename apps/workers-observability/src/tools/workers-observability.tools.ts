@@ -186,6 +186,7 @@ This tool provides three primary views of your Worker data:
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -234,6 +235,7 @@ This tool provides three primary views of your Worker data:
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -276,6 +278,7 @@ This tool provides three primary views of your Worker data:
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}

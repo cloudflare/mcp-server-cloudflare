@@ -73,6 +73,7 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 							text: `Error listing KV namespaces: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -119,6 +120,7 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 							text: `Error creating KV namespace: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -165,6 +167,7 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 							text: `Error deleting KV namespace: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -217,6 +220,7 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 							text: `Error getting KV namespace: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -267,6 +271,7 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 							text: `Error updating KV namespace: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

@@ -44,6 +44,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 							text: `Error getting page html: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -87,6 +88,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 							text: `Error getting page in markdown: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -142,6 +144,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 							text: `Error getting page screenshot: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

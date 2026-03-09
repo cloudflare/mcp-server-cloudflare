@@ -64,6 +64,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 							text: `Error listing R2 buckets: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -107,6 +108,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 							text: `Error creating KV namespace: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -146,6 +148,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 							text: `Error getting R2 bucket: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -186,6 +189,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 							text: `Error deleting R2 bucket: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

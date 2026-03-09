@@ -144,6 +144,7 @@ export function registerLogsTools(agent: LogsMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}

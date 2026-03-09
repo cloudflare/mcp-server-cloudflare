@@ -85,6 +85,7 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 							text: `Error listing workers: ${e instanceof Error && e.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -151,6 +152,7 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 							text: `Error retrieving worker script: ${e instanceof Error && e.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -197,6 +199,7 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 							text: `Error retrieving worker script: ${e instanceof Error && e.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

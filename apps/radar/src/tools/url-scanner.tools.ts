@@ -81,6 +81,7 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 							text: `Error searching scans: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -143,6 +144,7 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 							text: `Error creating scan: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -206,6 +208,7 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 							text: `Error getting scan: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -263,6 +266,7 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 							text: `Error getting screenshot: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -315,6 +319,7 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 							text: `Error getting HAR: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

@@ -48,6 +48,7 @@ export function registerAIGatewayTools(agent: AIGatewayMCP) {
 							text: `Error listing gateways: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -86,6 +87,7 @@ export function registerAIGatewayTools(agent: AIGatewayMCP) {
 						text: `Error listing logs: ${error instanceof Error && error.message}`,
 					},
 				],
+				isError: true,
 			}
 		}
 	})
@@ -128,6 +130,7 @@ export function registerAIGatewayTools(agent: AIGatewayMCP) {
 							text: `Error getting log: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -171,6 +174,7 @@ export function registerAIGatewayTools(agent: AIGatewayMCP) {
 							text: `Error getting log request body: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -214,6 +218,7 @@ export function registerAIGatewayTools(agent: AIGatewayMCP) {
 							text: `Error getting log response body: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

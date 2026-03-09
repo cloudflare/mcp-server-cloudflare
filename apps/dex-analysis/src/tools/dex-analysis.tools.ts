@@ -631,6 +631,7 @@ const registerTool = <T extends ZodRawShape, U = unknown>({
 						}),
 					},
 				],
+				isError: true,
 			}
 		}
 	}) as ToolCallback<T>)

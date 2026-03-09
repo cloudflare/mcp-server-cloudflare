@@ -75,6 +75,7 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 							text: `Error listing zones: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -125,6 +126,7 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 							text: `Error fetching zone details: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

@@ -40,6 +40,7 @@ export const withAccountCheck = <T extends Record<string, any>>(
 						}),
 					},
 				],
+				isError: true,
 			}
 		}
 	}

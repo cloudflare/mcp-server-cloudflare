@@ -267,6 +267,7 @@ export function registerAuditLogTools(agent: AuditlogMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}

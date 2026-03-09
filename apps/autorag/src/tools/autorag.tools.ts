@@ -60,6 +60,7 @@ export function registerAutoRAGTools(agent: AutoRAGMCP) {
 							text: `Error listing rags: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -118,6 +119,7 @@ export function registerAutoRAGTools(agent: AutoRAGMCP) {
 							text: `Error searching rag: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -164,6 +166,7 @@ export function registerAutoRAGTools(agent: AutoRAGMCP) {
 							text: `Error searching rag: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

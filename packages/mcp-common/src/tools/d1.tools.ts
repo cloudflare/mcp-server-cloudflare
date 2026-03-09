@@ -61,6 +61,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 							text: `Error listing D1 databases: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -110,6 +111,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 							text: `Error creating D1 database: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -152,6 +154,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 							text: `Error deleting D1 database: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -194,6 +197,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 							text: `Error getting D1 database: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -243,6 +247,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 							text: `Error querying D1 database: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

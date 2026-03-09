@@ -87,6 +87,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 							text: `Error listing Hyperdrive configs: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -204,6 +205,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 							text: `Error deleting Hyperdrive config ${hyperdrive_id}: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -251,6 +253,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 							text: `Error getting Hyperdrive config ${hyperdrive_id}: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -351,6 +354,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 							text: `Error editing Hyperdrive config ${hyperdrive_id}: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
