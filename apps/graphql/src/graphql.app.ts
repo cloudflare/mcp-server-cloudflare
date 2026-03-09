@@ -129,7 +129,7 @@ export default {
 				'/mcp': GraphQLMCP.serve('/mcp'),
 				'/sse': GraphQLMCP.serveSSE('/sse'),
 			},
-						defaultHandler: createAuthHandlers({ scopes: GraphQLScopes, metrics }),
+			defaultHandler: createAuthHandlers({ scopes: GraphQLScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',
 			tokenEndpoint: '/token',
 			tokenExchangeCallback: (options) =>

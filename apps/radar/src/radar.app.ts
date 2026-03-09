@@ -122,7 +122,7 @@ export default {
 				'/mcp': RadarMCP.serve('/mcp'),
 				'/sse': RadarMCP.serveSSE('/sse'),
 			},
-						defaultHandler: createAuthHandlers({ scopes: RadarScopes, metrics }),
+			defaultHandler: createAuthHandlers({ scopes: RadarScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',
 			tokenEndpoint: '/token',
 			tokenExchangeCallback: (options) =>

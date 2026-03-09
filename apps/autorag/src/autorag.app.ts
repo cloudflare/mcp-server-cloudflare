@@ -119,7 +119,7 @@ export default {
 				'/mcp': AutoRAGMCP.serve('/mcp'),
 				'/sse': AutoRAGMCP.serveSSE('/sse'),
 			},
-						defaultHandler: createAuthHandlers({ scopes: LogPushScopes, metrics }),
+			defaultHandler: createAuthHandlers({ scopes: LogPushScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',
 			tokenEndpoint: '/token',
 			tokenExchangeCallback: (options) =>

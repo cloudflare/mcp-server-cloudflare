@@ -119,7 +119,7 @@ export default {
 				'/mcp': AuditlogMCP.serve('/mcp'),
 				'/sse': AuditlogMCP.serveSSE('/sse'),
 			},
-						defaultHandler: createAuthHandlers({ scopes: AuditlogScopes, metrics }),
+			defaultHandler: createAuthHandlers({ scopes: AuditlogScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',
 			tokenEndpoint: '/token',
 			tokenExchangeCallback: (options) =>
