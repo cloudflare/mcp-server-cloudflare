@@ -126,8 +126,7 @@ export default {
 				'/mcp': DNSAnalyticsMCP.serve('/mcp'),
 				'/sse': DNSAnalyticsMCP.serveSSE('/sse'),
 			},
-			// @ts-ignore
-			defaultHandler: createAuthHandlers({ scopes: AnalyticsScopes, metrics }),
+						defaultHandler: createAuthHandlers({ scopes: AnalyticsScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',
 			tokenEndpoint: '/token',
 			tokenExchangeCallback: (options) =>

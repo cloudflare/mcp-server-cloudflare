@@ -121,8 +121,7 @@ export default {
 				'/mcp': CloudflareDEXMCP.serve('/mcp'),
 				'/sse': CloudflareDEXMCP.serveSSE('/sse'),
 			},
-			// @ts-ignore
-			defaultHandler: createAuthHandlers({ scopes: DexScopes, metrics }),
+						defaultHandler: createAuthHandlers({ scopes: DexScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',
 			tokenEndpoint: '/token',
 			tokenExchangeCallback: (options) =>

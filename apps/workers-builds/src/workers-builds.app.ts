@@ -185,7 +185,6 @@ export default {
 				'/mcp': BuildsMCP.serve('/mcp'),
 				'/sse': BuildsMCP.serveSSE('/sse'),
 			},
-			// @ts-expect-error
 			defaultHandler: createAuthHandlers({ scopes: BuildsScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',
 			tokenEndpoint: '/token',

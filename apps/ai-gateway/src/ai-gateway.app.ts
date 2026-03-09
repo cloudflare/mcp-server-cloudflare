@@ -119,8 +119,7 @@ export default {
 				'/mcp': AIGatewayMCP.serve('/mcp'),
 				'/sse': AIGatewayMCP.serveSSE('/sse'),
 			},
-			// @ts-ignore
-			defaultHandler: createAuthHandlers({ scopes: AIGatewayScopes, metrics }),
+						defaultHandler: createAuthHandlers({ scopes: AIGatewayScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',
 			tokenEndpoint: '/token',
 			tokenExchangeCallback: (options) =>

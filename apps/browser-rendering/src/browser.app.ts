@@ -119,8 +119,7 @@ export default {
 				'/mcp': BrowserMCP.serve('/mcp'),
 				'/sse': BrowserMCP.serveSSE('/sse'),
 			},
-			// @ts-ignore
-			defaultHandler: createAuthHandlers({ scopes: BrowserScopes, metrics }),
+						defaultHandler: createAuthHandlers({ scopes: BrowserScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',
 			tokenEndpoint: '/token',
 			tokenExchangeCallback: (options) =>

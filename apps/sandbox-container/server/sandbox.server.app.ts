@@ -44,8 +44,7 @@ export default {
 		return new OAuthProvider({
 			apiRoute: ['/mcp', '/sse'],
 			apiHandler: createApiHandler(ContainerMcpAgent),
-			// @ts-ignore
-			defaultHandler: createAuthHandlers({ scopes: ContainerScopes, metrics }),
+						defaultHandler: createAuthHandlers({ scopes: ContainerScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',
 			tokenEndpoint: '/token',
 			tokenExchangeCallback: (options) =>

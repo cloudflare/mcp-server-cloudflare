@@ -142,8 +142,7 @@ export default {
 				'/mcp': ObservabilityMCP.serve('/mcp'),
 				'/sse': ObservabilityMCP.serveSSE('/sse'),
 			},
-			// @ts-ignore
-			defaultHandler: createAuthHandlers({ scopes: ObservabilityScopes, metrics }),
+						defaultHandler: createAuthHandlers({ scopes: ObservabilityScopes, metrics }),
 			authorizeEndpoint: '/oauth/authorize',
 			tokenEndpoint: '/token',
 			tokenExchangeCallback: (options) =>
