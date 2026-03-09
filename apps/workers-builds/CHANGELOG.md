@@ -1,5 +1,12 @@
 # workers-builds
 
+## 0.1.11
+
+### Patch Changes
+
+- Updated dependencies [01a172e]
+  - @repo/mcp-common@0.20.3
+
 ## 0.1.10
 
 ### Patch Changes

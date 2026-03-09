@@ -1,5 +1,12 @@
 # docs-ai-search
 
+## 0.4.5
+
+### Patch Changes
+
+- Updated dependencies [01a172e]
+  - @repo/mcp-common@0.20.3
+
 ## 0.4.4
 
 ### Patch Changes

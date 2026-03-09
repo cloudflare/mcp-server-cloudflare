@@ -1,5 +1,12 @@
 # graphql-mcp-server
 
+## 0.1.10
+
+### Patch Changes
+
+- Updated dependencies [01a172e]
+  - @repo/mcp-common@0.20.3
+
 ## 0.1.9
 
 ### Patch Changes

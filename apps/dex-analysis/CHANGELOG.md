@@ -1,5 +1,16 @@
 # dex-analysis
 
+## 0.4.0
+
+### Minor Changes
+
+- 9c675e9: Stronger validation of DEX tool params
+
+### Patch Changes
+
+- Updated dependencies [01a172e]
+  - @repo/mcp-common@0.20.3
+
 ## 0.3.0
 
 ### Minor Changes

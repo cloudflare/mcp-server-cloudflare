@@ -1,5 +1,11 @@
 # @repo/mcp-common
 
+## 0.20.3
+
+### Patch Changes
+
+- 01a172e: Classify upstream 4xx errors correctly instead of returning 500, and set reportToSentry flag to avoid alerting on expected client errors
+
 ## 0.20.2
 
 ### Patch Changes
