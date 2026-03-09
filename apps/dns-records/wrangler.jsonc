@@ -1,0 +1,56 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": "src/dns-records.app.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"name": "mcp-cloudflare-dns-records-dev",
+	"migrations": [
+		{
+			"new_sqlite_classes": ["DNSRecordsMCP"],
+			"tag": "v1"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "DNSRecordsMCP",
+				"name": "MCP_OBJECT"
+			},
+			{
+				"class_name": "UserDetails",
+				"name": "USER_DETAILS"
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "DEV_KV"
+		}
+	],
+	"vars": {
+		"ENVIRONMENT": "development",
+		"MCP_SERVER_NAME": "PLACEHOLDER",
+		"MCP_SERVER_VERSION": "PLACEHOLDER",
+		"CLOUDFLARE_CLIENT_ID": "PLACEHOLDER",
+		"CLOUDFLARE_CLIENT_SECRET": "PLACEHOLDER"
+	},
+	"dev": {
+		"port": 8977
+	},
+	"workers_dev": false,
+	"preview_urls": false,
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-dev"
+		}
+	]
+}
