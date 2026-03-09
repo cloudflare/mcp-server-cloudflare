@@ -13,14 +13,9 @@ jobs:
     permissions:
       contents: read
     timeout-minutes: 10
-    strategy:
-      matrix:
-        node-version: [20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-        with:
-          node-version: ${{ matrix.node-version }}
 
       - name: Syncpack lint
         run: pnpm check:deps
