@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
+import { AccountIdParam, resolveAccountId } from './account.helpers'
 import { getCloudflareClient } from '../cloudflare-api'
-import { MISSING_ACCOUNT_ID_RESPONSE } from '../constants'
 import { getProps } from '../get-props'
 import { type CloudflareMcpAgent } from '../types/cloudflare-mcp-agent.types'
 import {
@@ -17,6 +17,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		'd1_databases_list',
 		'List all of the D1 databases in your Cloudflare account',
 		{
+			account_id: AccountIdParam,
 			name: D1DatabaseNameParam.nullable().optional(),
 			page: PaginationPageParam,
 			per_page: PaginationPerPageParam,
@@ -27,11 +28,10 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 				readOnlyHint: true,
 			},
 		},
-		async ({ name, page, per_page }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ account_id: account_id_param, name, page, per_page }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const account_id = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -70,6 +70,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		'd1_database_create',
 		'Create a new D1 database in your Cloudflare account',
 		{
+			account_id: AccountIdParam,
 			name: D1DatabaseNameParam,
 			primary_location_hint: D1DatabasePrimaryLocationHintParam.nullable().optional(),
 		},
@@ -80,11 +81,10 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 				destructiveHint: false,
 			},
 		},
-		async ({ name, primary_location_hint }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ account_id: account_id_param, name, primary_location_hint }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const account_id = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -118,7 +118,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 	agent.server.tool(
 		'd1_database_delete',
 		'Delete a d1 database in your Cloudflare account',
-		{ database_id: z.string() },
+		{ account_id: AccountIdParam, database_id: z.string() },
 		{
 			title: 'Delete D1 database',
 			annotations: {
@@ -126,11 +126,10 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 				destructiveHint: true,
 			},
 		},
-		async ({ database_id }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ account_id: account_id_param, database_id }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const account_id = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -161,18 +160,17 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 	agent.server.tool(
 		'd1_database_get',
 		'Get a D1 database in your Cloudflare account',
-		{ database_id: z.string() },
+		{ account_id: AccountIdParam, database_id: z.string() },
 		{
 			title: 'Get D1 database',
 			annotations: {
 				readOnlyHint: true,
 			},
 		},
-		async ({ database_id }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ account_id: account_id_param, database_id }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const account_id = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -205,6 +203,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		'd1_database_query',
 		'Query a D1 database in your Cloudflare account',
 		{
+			account_id: AccountIdParam,
 			database_id: z.string(),
 			sql: D1DatabaseQuerySqlParam,
 			params: D1DatabaseQueryParamsParam.nullable(),
@@ -216,11 +215,10 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 				destructiveHint: false,
 			},
 		},
-		async ({ database_id, sql, params }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ account_id: account_id_param, database_id, sql, params }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const account_id = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)

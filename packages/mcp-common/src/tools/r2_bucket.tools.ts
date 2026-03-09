@@ -1,5 +1,5 @@
+import { AccountIdParam, resolveAccountId } from './account.helpers'
 import { getCloudflareClient } from '../cloudflare-api'
-import { MISSING_ACCOUNT_ID_RESPONSE } from '../constants'
 import { getProps } from '../get-props'
 import { type CloudflareMcpAgent } from '../types/cloudflare-mcp-agent.types'
 import {
@@ -16,6 +16,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 		'r2_buckets_list',
 		'List r2 buckets in your Cloudflare account',
 		{
+			account_id: AccountIdParam,
 			cursor: BucketListCursorParam,
 			direction: BucketListDirectionParam,
 			name_contains: BucketListNameContainsParam,
@@ -28,11 +29,10 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 				readOnlyHint: true,
 			},
 		},
-		async ({ cursor, direction, name_contains, per_page, start_after }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ account_id: account_id_param, cursor, direction, name_contains, per_page, start_after }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const account_id = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -72,7 +72,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	agent.server.tool(
 		'r2_bucket_create',
 		'Create a new r2 bucket in your Cloudflare account',
-		{ name: BucketNameSchema },
+		{ account_id: AccountIdParam, name: BucketNameSchema },
 		{
 			title: 'Create R2 bucket',
 			annotations: {
@@ -80,11 +80,10 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 				destructiveHint: false,
 			},
 		},
-		async ({ name }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ account_id: account_id_param, name }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const account_id = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -116,18 +115,17 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	agent.server.tool(
 		'r2_bucket_get',
 		'Get details about a specific R2 bucket',
-		{ name: BucketNameSchema },
+		{ account_id: AccountIdParam, name: BucketNameSchema },
 		{
 			title: 'Get R2 bucket',
 			annotations: {
 				readOnlyHint: true,
 			},
 		},
-		async ({ name }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ account_id: account_id_param, name }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const account_id = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -156,7 +154,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	agent.server.tool(
 		'r2_bucket_delete',
 		'Delete an R2 bucket',
-		{ name: BucketNameSchema },
+		{ account_id: AccountIdParam, name: BucketNameSchema },
 		{
 			title: 'Delete R2 bucket',
 			annotations: {
@@ -164,11 +162,10 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 				destructiveHint: true,
 			},
 		},
-		async ({ name }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ account_id: account_id_param, name }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const account_id = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)

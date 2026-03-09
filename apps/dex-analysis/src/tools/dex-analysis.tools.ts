@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import { fetchCloudflareApi } from '@repo/mcp-common/src/cloudflare-api'
 import { getProps } from '@repo/mcp-common/src/get-props'
+import { AccountIdParam, resolveAccountId } from '@repo/mcp-common/src/tools/account.helpers'
 
 import { getReader } from '../warp_diag_reader'
 
@@ -522,12 +523,8 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 			'Hint: you can call dex_explore_remote_warp_diag_output multiple times in parallel if necessary to take advantage of in-memory caching for best performance.' +
 			'See https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/troubleshooting/warp-logs/ for more info on warp-diags',
 		agent,
-		callback: async ({ accessToken, deviceId, commandId }) => {
+		callback: async ({ accessToken, accountId, deviceId, commandId }) => {
 			const reader = await getReader({ accessToken, deviceId, commandId })
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return new Error(`Failed to get active account id`)
-			}
 
 			return await reader.list({ accessToken, accountId, commandId, deviceId })
 		},
@@ -545,12 +542,8 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		llmContext:
 			'To avoid hitting conversation and memory limits, avoid outputting the whole contents of these files to the user unless specifically asked to. Instead prefer to show relevant snippets only.',
 		agent,
-		callback: async ({ accessToken, deviceId, commandId, filepath }) => {
+		callback: async ({ accessToken, accountId, deviceId, commandId, filepath }) => {
 			const reader = await getReader({ accessToken, deviceId, commandId })
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return new Error(`Failed to get active account id`)
-			}
 
 			return await reader.read({ accessToken, accountId, deviceId, commandId, filepath })
 		},
@@ -606,23 +599,17 @@ const registerTool = <T extends ZodRawShape, U = unknown>({
 		>
 	) => Promise<U>
 }) => {
-	agent.server.tool<T>(name, description, schema, (async (params, extra) => {
-		const accountId = await agent.getActiveAccountId()
-		if (!accountId) {
-			return {
-				content: [
-					{
-						type: 'text',
-						text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-					},
-				],
-			}
-		}
+	const schemaWithAccountId = { account_id: AccountIdParam, ...schema } as T
+	agent.server.tool<T>(name, description, schemaWithAccountId, (async (params, extra) => {
+		const { account_id: account_id_param, ...restParams } = params as Record<string, unknown>
+		const resolved = resolveAccountId(agent, account_id_param as string | undefined)
+		if (resolved.error) return resolved.error
+		const accountId = resolved.accountId
 
 		try {
 			const props = getProps(agent)
 			const accessToken = props.accessToken
-			const res = await callback({ ...(params as T), extra, accountId, accessToken })
+			const res = await callback({ ...(restParams as T), extra, accountId, accessToken })
 			return {
 				content: [
 					{

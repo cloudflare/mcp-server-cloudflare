@@ -18,7 +18,7 @@ Currently available tools:
 | `get_log_request_body`  | Retrieves the request body associated with a specific log in a gateway.                                                             |
 | `get_log_response_body` | Retrieves the response body associated with a specific log in a gateway.                                                            |
 
-**Note:** To use these tools, ensure you have an active account set. If not, use `accounts_list` to list your accounts and `set_active_account` to set one as active.
+**Note:** Tools that require an account will accept an optional `account_id` parameter. If you have multiple accounts, use `accounts_list` to find your account IDs.
 
 This MCP server is still a work in progress, and we plan to add more tools in the future.
 

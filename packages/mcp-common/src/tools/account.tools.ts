@@ -1,5 +1,3 @@
-import { z } from 'zod'
-
 import { handleAccountsList } from '../api/account.api'
 import { getCloudflareClient } from '../cloudflare-api'
 import { getProps } from '../get-props'
@@ -65,54 +63,4 @@ export function registerAccountTools(agent: CloudflareMcpAgent) {
 			}
 		}
 	)
-
-	// Only register set_active_account tool when user token is provided, as it doesn't make sense to expose
-	// this tool for account scoped tokens, given that they're scoped to a single account
-	if (getProps(agent).type === 'user_token') {
-		const activeAccountIdParam = z
-			.string()
-			.describe(
-				'The accountId present in the users Cloudflare account, that should be the active accountId.'
-			)
-		agent.server.tool(
-			'set_active_account',
-			'Set active account to be used for tool calls that require accountId',
-			{
-				activeAccountIdParam,
-			},
-			{
-				title: 'Set active account',
-				annotations: {
-					readOnlyHint: false,
-					destructiveHint: false,
-				},
-			},
-			async (params) => {
-				try {
-					const { activeAccountIdParam: activeAccountId } = params
-					await agent.setActiveAccountId(activeAccountId)
-					return {
-						content: [
-							{
-								type: 'text',
-								text: JSON.stringify({
-									activeAccountId,
-								}),
-							},
-						],
-					}
-				} catch (e) {
-					agent.server.recordError(e)
-					return {
-						content: [
-							{
-								type: 'text',
-								text: `Error setting activeAccountID: ${e instanceof Error && e.message}`,
-							},
-						],
-					}
-				}
-			}
-		)
-	}
 }

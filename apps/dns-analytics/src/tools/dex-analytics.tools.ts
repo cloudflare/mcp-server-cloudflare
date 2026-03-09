@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
 import { getProps } from '@repo/mcp-common/src/get-props'
+import { AccountIdParam, resolveAccountId } from '@repo/mcp-common/src/tools/account.helpers'
 
 import type { AccountGetParams } from 'cloudflare/resources/accounts/accounts.mjs'
 import type { ReportGetParams } from 'cloudflare/resources/dns/analytics.mjs'
@@ -61,19 +62,14 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 	agent.server.tool(
 		'show_account_dns_settings',
 		'Show DNS settings for current account',
-		async () => {
+		{
+			account_id: AccountIdParam,
+		},
+		async ({ account_id: account_id_param }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 			try {
-				const accountId = await agent.getActiveAccountId()
-				if (!accountId) {
-					return {
-						content: [
-							{
-								type: 'text',
-								text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-							},
-						],
-					}
-				}
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
 				const params: AccountGetParams = {

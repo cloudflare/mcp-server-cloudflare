@@ -7,6 +7,7 @@ import {
 	queryWorkersObservability,
 } from '@repo/mcp-common/src/api/workers-observability.api'
 import { getProps } from '@repo/mcp-common/src/get-props'
+import { AccountIdParam, resolveAccountId } from '@repo/mcp-common/src/tools/account.helpers'
 import {
 	zKeysRequest,
 	zQueryRunRequest,
@@ -52,26 +53,21 @@ This tool provides three primary views of your Worker data:
 `,
 
 		{
+			account_id: AccountIdParam,
 			query: zQueryRunRequest,
 		},
-		async ({ query }, req) => {
+		async ({ account_id: account_id_param, query }, req) => {
 			logger.setTags({ userAgent: req.requestInfo?.headers?.['mcp-protocol-version'] })
 			logger.setTags({ mcpSessionId: req.requestInfo?.headers?.['mcp-session-id'] })
 			logger.setTags({ userAgent: req.requestInfo?.headers?.['sec-ch-ua'] })
 			logger.setTags({ toolName: 'query_worker_observability' })
-			const accountId = await agent.getActiveAccountId()
-			logger.setTags({ hasAccount: !!accountId })
-			if (!accountId) {
+			const resolved = resolveAccountId(agent, account_id_param)
+			logger.setTags({ hasAccount: !resolved.error })
+			if (resolved.error) {
 				logger.warn('Ran Workers Observability Tool')
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
+				return resolved.error
 			}
+			const accountId = resolved.accountId
 			try {
 				const props = getProps(agent)
 				logger.setTags({ datasets: query.parameters?.datasets })
@@ -207,19 +203,11 @@ This tool provides three primary views of your Worker data:
 - If expected fields are missing, verify the Worker is actively logging
 - For empty results, try broadening your time range
 `,
-		{ keysQuery: zKeysRequest },
-		async ({ keysQuery }) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		{ account_id: AccountIdParam, keysQuery: zKeysRequest },
+		async ({ account_id: account_id_param, keysQuery }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const result = await handleWorkerLogsKeys(props.accessToken, accountId, keysQuery)
@@ -258,19 +246,11 @@ This tool provides three primary views of your Worker data:
 ## Troubleshooting
 - For no results, verify the field exists using observability_keys first
 - If expected values are missing, try broadening your time range`,
-		{ valuesQuery: zValuesRequest },
-		async ({ valuesQuery }) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		{ account_id: AccountIdParam, valuesQuery: zValuesRequest },
+		async ({ account_id: account_id_param, valuesQuery }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const result = await handleWorkerLogsValues(props.accessToken, accountId, valuesQuery)

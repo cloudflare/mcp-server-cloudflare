@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { getProps } from '@repo/mcp-common/src/get-props'
+import { AccountIdParam, resolveAccountId } from '@repo/mcp-common/src/tools/account.helpers'
 
 import {
 	CreateScanResult,
@@ -23,23 +24,15 @@ type ToolResponse = {
 /**
  * Helper to get account ID or return error response
  */
-async function getAccountIdOrError(
-	agent: RadarMCP
-): Promise<{ accountId: string } | { error: ToolResponse }> {
-	const accountId = await agent.getActiveAccountId()
-	if (!accountId) {
-		return {
-			error: {
-				content: [
-					{
-						type: 'text' as const,
-						text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-					},
-				],
-			},
-		}
+function getAccountIdOrError(
+	agent: RadarMCP,
+	account_id_param?: string
+): { accountId: string } | { error: ToolResponse } {
+	const resolved = resolveAccountId(agent, account_id_param)
+	if (resolved.error) {
+		return { error: resolved.error }
 	}
-	return { accountId }
+	return { accountId: resolved.accountId }
 }
 
 export function registerUrlScannerTools(agent: RadarMCP) {
@@ -48,11 +41,12 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 		'search_url_scans',
 		"Search URL scans using ElasticSearch-like query syntax. Examples: 'page.domain:example.com', 'verdicts.malicious:true', 'page.asn:AS24940 AND hash:xxx', 'apikey:me AND date:[2025-01 TO 2025-02]'",
 		{
+			account_id: AccountIdParam,
 			query: SearchQueryParam,
 			size: SearchSizeParam,
 		},
-		async ({ query, size }) => {
-			const result = await getAccountIdOrError(agent)
+		async ({ account_id: account_id_param, query, size }) => {
+			const result = getAccountIdOrError(agent, account_id_param)
 			if ('error' in result) return result.error
 
 			try {
@@ -97,12 +91,13 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 		'create_url_scan',
 		'Submit a URL to scan. Returns the scan UUID which can be used to retrieve results.',
 		{
+			account_id: AccountIdParam,
 			url: UrlParam,
 			visibility: ScanVisibilityParam,
 			screenshotResolution: ScreenshotResolutionParam,
 		},
-		async ({ url, visibility, screenshotResolution }) => {
-			const result = await getAccountIdOrError(agent)
+		async ({ account_id: account_id_param, url, visibility, screenshotResolution }) => {
+			const result = getAccountIdOrError(agent, account_id_param)
 			if ('error' in result) return result.error
 
 			try {
@@ -158,10 +153,11 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 		'get_url_scan',
 		'Get the results of a URL scan by its UUID. Returns detailed information including verdicts, page info, requests, cookies, and more.',
 		{
+			account_id: AccountIdParam,
 			scanId: ScanIdParam,
 		},
-		async ({ scanId }) => {
-			const result = await getAccountIdOrError(agent)
+		async ({ account_id: account_id_param, scanId }) => {
+			const result = getAccountIdOrError(agent, account_id_param)
 			if ('error' in result) return result.error
 
 			try {
@@ -220,6 +216,7 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 		'get_url_scan_screenshot',
 		'Get the screenshot URL for a completed scan.',
 		{
+			account_id: AccountIdParam,
 			scanId: ScanIdParam,
 			resolution: z
 				.enum(['desktop', 'mobile', 'tablet'])
@@ -227,8 +224,8 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 				.optional()
 				.describe('Screenshot resolution/device type.'),
 		},
-		async ({ scanId, resolution }) => {
-			const result = await getAccountIdOrError(agent)
+		async ({ account_id: account_id_param, scanId, resolution }) => {
+			const result = getAccountIdOrError(agent, account_id_param)
 			if ('error' in result) return result.error
 
 			try {
@@ -276,10 +273,11 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 		'get_url_scan_har',
 		'Get the HAR (HTTP Archive) data for a completed scan. Contains detailed network request/response information.',
 		{
+			account_id: AccountIdParam,
 			scanId: ScanIdParam,
 		},
-		async ({ scanId }) => {
-			const result = await getAccountIdOrError(agent)
+		async ({ account_id: account_id_param, scanId }) => {
+			const result = getAccountIdOrError(agent, account_id_param)
 			if ('error' in result) return result.error
 
 			try {

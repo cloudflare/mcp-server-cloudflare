@@ -20,7 +20,7 @@ Tools are registered using the `agent.server.tool()` method.
 import { z } from 'zod'
 
 import { getCloudflareClient } from '../cloudflare-api'
-import { MISSING_ACCOUNT_ID_RESPONSE } from '../constants'
+import { AccountIdParam, resolveAccountId } from './account.helpers'
 import { type CloudflareMcpAgent } from '../types/cloudflare-mcp-agent'
 import { KvNamespaceIdSchema, KvNamespaceTitleSchema } from '../types/kv_namespace'
 
@@ -30,21 +30,21 @@ export function registerMyServiceTools(agent: CloudflareMcpAgent) {
 		'Detailed description', // String: Description for the LLM (CRITICAL!)
 		{
 			// Object: Parameter definitions using Zod schemas
+			account_id: AccountIdParam,
 			param1: MyParam1Schema,
 			param2: MyParam2Schema.optional(),
 			// ... other parameters
 		},
 		async (params) => {
 			// Async Function: The implementation logic
-			// params contains the validated parameters { param1, param2, ... }
+			// params contains the validated parameters { account_id, param1, param2, ... }
 
 			// --- Tool Logic Start ---
 			try {
-				// Access agent context if needed (e.g., account ID, credentials)
-				const account_id = await agent.getActiveAccountId()
-				if (!account_id) {
-					return MISSING_ACCOUNT_ID_RESPONSE // Handle missing context
-				}
+				// Resolve the account ID (handles account tokens, single accounts, and multi-account validation)
+				const resolved = resolveAccountId(agent, params.account_id)
+				if (resolved.error) return resolved.error
+				const account_id = resolved.accountId
 
 				// Perform the action (e.g., call SDK, query DB)
 				// const client = getCloudflareClient(agent.props.accessToken);
@@ -107,7 +107,7 @@ export function registerMyServiceTools(agent: CloudflareMcpAgent) {
     - The asynchronous function that executes the tool's logic.
     - It receives a single argument: an object (`params`) containing the validated parameters passed by the LLM, matching the keys defined in the `parameters` object.
     - **Implementation Details:**
-      - **Access Context:** Use `agent.getActiveAccountId()`, `agent.props.accessToken`, `agent.env` (for worker bindings like AI, D1, R2) to get necessary credentials, environment variables, or bindings.
+      - **Access Context:** Use `resolveAccountId(agent, params.account_id)` for account resolution, `agent.props.accessToken` for credentials, and `agent.env` (for worker bindings like AI, D1, R2) for environment resources.
       - **Error Handling:** Wrap the core logic in a `try...catch` block to gracefully handle failures (e.g., API errors, network issues, invalid inputs not caught by Zod).
       - **Perform Action:** Interact with the relevant service (Cloudflare SDK, database, vector store, etc.).
       - **Format Response:** Return an object with a `content` property, which is an array of `ContentBlock` objects (usually `type: 'text'` or `type: 'resource'`).
@@ -122,6 +122,6 @@ export function registerMyServiceTools(agent: CloudflareMcpAgent) {
 - **Robust Error Handling:** Anticipate potential failures and return informative error messages to the LLM.
 - **Consistent Naming:** Follow naming conventions for tools and parameters.
 - **Use Zod Validators:** Leverage Zod for input validation as described in the validator guide.
-- **Leverage Agent Context:** Use `agent.props`, `agent.env`, and helper methods like `agent.getActiveAccountId()` appropriately.
+- **Leverage Agent Context:** Use `agent.props`, `agent.env`, and `resolveAccountId()` for account resolution.
 - **Statelessness:** Aim for tools to be stateless where possible. Rely on parameters and agent context for necessary information.
 - **Security:** Be mindful of the actions tools perform, especially destructive ones (`delete`, `update`). Ensure proper authentication and authorization context is used (e.g., checking the active account ID).

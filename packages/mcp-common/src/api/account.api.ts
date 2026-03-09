@@ -1,4 +1,5 @@
 import { getProps } from '../get-props'
+import { resolveAccountId } from '../tools/account.helpers'
 
 import type { Cloudflare } from 'cloudflare'
 import type { Account } from 'cloudflare/resources/accounts/accounts.mjs'
@@ -15,24 +16,15 @@ export const withAccountCheck = <T extends Record<string, any>>(
 	agent: CloudflareMcpAgent,
 	handler: ToolHandler<T>
 ) => {
-	return async (params: T) => {
-		const accountId = await agent.getActiveAccountId()
-		if (!accountId) {
-			return {
-				content: [
-					{
-						type: 'text' as const,
-						text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-					},
-				],
-			}
-		}
+	return async (params: T & { account_id?: string }) => {
+		const resolved = resolveAccountId(agent, params.account_id)
+		if (resolved.error) return resolved.error
 
 		try {
 			const props = getProps(agent)
 			const result = await handler({
 				...params,
-				accountId,
+				accountId: resolved.accountId,
 				apiToken: props.accessToken || '',
 			})
 			return {
