@@ -11,7 +11,7 @@ export default defineWorkersProject({
 			workers: {
 				singleWorker: true,
 				miniflare: {
-					compatibilityDate: '2026-03-05',
+					compatibilityDate: '2026-03-09',
 					compatibilityFlags: ['nodejs_compat'],
 					bindings: {
 						CLOUDFLARE_MOCK_ACCOUNT_ID: 'mock-account-id',

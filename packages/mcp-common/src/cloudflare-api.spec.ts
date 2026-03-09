@@ -1,5 +1,10 @@
 import { fetchMock } from 'cloudflare:test'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
+
+// Mock the cloudflare SDK to avoid node:fs ReadStream import in workerd
+vi.mock('cloudflare', () => ({
+	Cloudflare: vi.fn(),
+}))
 
 import { fetchCloudflareApi } from './cloudflare-api'
 import { McpError } from './mcp-error'

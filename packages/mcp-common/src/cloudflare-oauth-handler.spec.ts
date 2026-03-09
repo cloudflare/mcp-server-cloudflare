@@ -1,6 +1,18 @@
 import { fetchMock } from 'cloudflare:test'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
+// Mock the cloudflare SDK to avoid node:fs ReadStream import in workerd
+vi.mock('cloudflare', () => ({
+	Cloudflare: vi.fn(),
+	APIError: class APIError extends Error {
+		status: number
+		constructor(status: number, message: string) {
+			super(message)
+			this.status = status
+		}
+	},
+}))
+
 // Import the mocked module
 import { refreshAuthToken } from './cloudflare-auth'
 import { getUserAndAccounts, handleTokenExchangeCallback } from './cloudflare-oauth-handler'
