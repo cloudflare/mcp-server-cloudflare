@@ -187,6 +187,11 @@ export async function getUserAndAccounts(
 		} catch (error) {
 			console.error('Cloudflare API /accounts response is not valid JSON', error)
 		}
+	} else if (userResponse.ok) {
+		// User succeeded but accounts failed — surface the accounts error
+		// (5xx should be reported, 4xx like 403 may indicate insufficient scopes)
+		console.error(`Cloudflare API /accounts failed with status ${accountsResponse.status}`)
+		throwUpstreamApiError(accountsResponse.status, 'Cloudflare API /accounts')
 	}
 
 	// Parse user with safeParse for graceful degradation
@@ -217,12 +222,6 @@ export async function getUserAndAccounts(
 	// Account-scoped token — user is null but accounts are present
 	if (accounts.length > 0) {
 		return { user: null, accounts }
-	}
-
-	// If accounts endpoint failed but user returned 200 with unparseable data,
-	// surface the accounts error rather than a misleading "no user/account" message
-	if (!accountsResponse.ok) {
-		throwUpstreamApiError(accountsResponse.status, 'Cloudflare API /accounts')
 	}
 
 	throw new McpError('Failed to verify token: no user or account information', 401, {
@@ -298,10 +297,23 @@ export async function handleTokenExchangeCallback(
 			expires_in = result.expires_in
 		} catch (e) {
 			if (e instanceof McpError) {
-				// Map upstream failures to OAuth error codes:
-				// 5xx upstream → server_error; 4xx upstream → invalid_grant (refresh token rejected)
-				const oauthCode = e.code >= 500 ? 'server_error' : 'invalid_grant'
-				throw new OAuthError(oauthCode, e.message, e.code >= 500 ? 500 : 400)
+				// Map upstream failures to OAuth error codes per RFC 6749
+				let oauthCode: string
+				let httpStatus: number
+				if (e.code >= 500) {
+					oauthCode = 'server_error'
+					httpStatus = 500
+				} else if (e.code === 429) {
+					oauthCode = 'temporarily_unavailable'
+					httpStatus = 503
+				} else if (e.code === 401) {
+					oauthCode = 'invalid_client'
+					httpStatus = 401
+				} else {
+					oauthCode = 'invalid_grant'
+					httpStatus = 400
+				}
+				throw new OAuthError(oauthCode, e.message, httpStatus)
 			}
 			throw e
 		}

@@ -29,7 +29,7 @@ export function throwUpstreamApiError(status: number, context: string, rawBody?:
 		{
 			reportToSentry: is5xx,
 			internalMessage: rawBody
-				? `${context} ${status}: ${rawBody}`
+				? `${context} ${status}: ${rawBody.slice(0, 500)}`
 				: `${context} returned ${status}`,
 		}
 	)

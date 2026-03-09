@@ -175,6 +175,60 @@ describe('handleTokenExchangeCallback', () => {
 			}
 		})
 
+		it('converts McpError 429 to OAuthError temporarily_unavailable', async () => {
+			mockRefreshAuthToken.mockRejectedValueOnce(
+				new McpError('Rate limited, try again later', 429, {
+					reportToSentry: false,
+					internalMessage: 'Upstream 429',
+				})
+			)
+
+			const options = makeRefreshOptions({
+				type: 'user_token',
+				accessToken: 'test-token',
+				refreshToken: 'valid-refresh-token',
+				user: { id: 'user-1', email: 'user@example.com' },
+				accounts: [{ name: 'test', id: 'test-id' }],
+			})
+
+			try {
+				await handleTokenExchangeCallback(options, clientId, clientSecret)
+				expect.unreachable()
+			} catch (e) {
+				expect(e).toBeInstanceOf(OAuthError)
+				const err = e as OAuthError
+				expect(err.code).toBe('temporarily_unavailable')
+				expect(err.statusCode).toBe(503)
+			}
+		})
+
+		it('converts McpError 401 to OAuthError invalid_client', async () => {
+			mockRefreshAuthToken.mockRejectedValueOnce(
+				new McpError('Access token is invalid or expired', 401, {
+					reportToSentry: false,
+					internalMessage: 'Upstream 401',
+				})
+			)
+
+			const options = makeRefreshOptions({
+				type: 'user_token',
+				accessToken: 'test-token',
+				refreshToken: 'valid-refresh-token',
+				user: { id: 'user-1', email: 'user@example.com' },
+				accounts: [{ name: 'test', id: 'test-id' }],
+			})
+
+			try {
+				await handleTokenExchangeCallback(options, clientId, clientSecret)
+				expect.unreachable()
+			} catch (e) {
+				expect(e).toBeInstanceOf(OAuthError)
+				const err = e as OAuthError
+				expect(err.code).toBe('invalid_client')
+				expect(err.statusCode).toBe(401)
+			}
+		})
+
 		it('re-throws non-McpError errors unchanged', async () => {
 			const genericError = new Error('unexpected failure')
 			mockRefreshAuthToken.mockRejectedValueOnce(genericError)
@@ -396,22 +450,35 @@ describe('getUserAndAccounts', () => {
 		})
 	})
 
-	it('surfaces accounts error when user returns 200 with malformed JSON and accounts fails', async () => {
-		fetchMock
-			.get('https://api.cloudflare.com')
-			.intercept({ path: '/client/v4/user', method: 'GET' })
-			.reply(200, 'not json')
-		mockAccountsResponse(403)
+	describe('accounts failure with user success', () => {
+		it('throws when accounts returns 500 even if user succeeds', async () => {
+			mockUserResponse(200, v4User)
+			mockAccountsResponse(500)
 
-		try {
-			await getUserAndAccounts('test-token')
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(McpError)
-			const err = e as McpError
-			// Should surface the accounts 403, not a generic "no user/account" error
-			expect(err.code).toBe(403)
-			expect(err.reportToSentry).toBe(false)
-		}
+			try {
+				await getUserAndAccounts('test-token')
+				expect.unreachable()
+			} catch (e) {
+				expect(e).toBeInstanceOf(McpError)
+				const err = e as McpError
+				expect(err.code).toBe(502)
+				expect(err.reportToSentry).toBe(true)
+			}
+		})
+
+		it('throws when accounts returns 403 even if user succeeds', async () => {
+			mockUserResponse(200, v4User)
+			mockAccountsResponse(403)
+
+			try {
+				await getUserAndAccounts('test-token')
+				expect.unreachable()
+			} catch (e) {
+				expect(e).toBeInstanceOf(McpError)
+				const err = e as McpError
+				expect(err.code).toBe(403)
+				expect(err.reportToSentry).toBe(false)
+			}
+		})
 	})
 })
