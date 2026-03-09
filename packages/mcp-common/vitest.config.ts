@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { defineWorkersProject } from '@cloudflare/vitest-pool-workers/config'
 
 export interface TestEnv {
@@ -20,6 +21,13 @@ export default defineWorkersProject({
 					},
 				},
 			},
+		},
+	},
+	resolve: {
+		alias: {
+			// The real cloudflare SDK imports ReadStream from node:fs which is unavailable in workerd.
+			// Alias to a lightweight mock that provides Cloudflare and APIError classes.
+			cloudflare: path.resolve(__dirname, 'src/__mocks__/cloudflare.ts'),
 		},
 	},
 })
