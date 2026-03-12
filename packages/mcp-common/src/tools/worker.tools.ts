@@ -100,7 +100,7 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 	// Tool to get a specific worker's script details
 	agent.server.tool(
 		'workers_get_worker',
-		'Get the details of the Cloudflare Worker.',
+		'Get detailed information about a specific Cloudflare Worker including its metadata, configuration, and deployment status. Use when the user wants to inspect or review an existing Worker's properties and settings. Do not use when you need to retrieve the actual source code (use workers_get_worker_code instead). Accepts `worker_name` (required string), e.g., "my-api-worker" or "image-resizer". Raises an error if the Worker does not exist or you lack permissions to access it.'s properties, settings, or current state. Do not use when you need to view the Worker's source code (use workers_get_worker_code instead). Accepts `worker_name` (required string) and `account_id` (optional, uses active account if not specified), e.g., worker_name="my-api-worker". Raises an error if the Worker does not exist or you lack permissions to access it.',
 		{
 			scriptName: workerNameParam,
 		},
@@ -174,7 +174,7 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 	// Tool to get a specific worker's script content
 	agent.server.tool(
 		'workers_get_worker_code',
-		'Get the source code of a Cloudflare Worker. Note: This may be a bundled version of the worker.',
+		'Retrieve the source code of a Cloudflare Worker script. Use when the user wants to inspect, review, or analyze the actual JavaScript/TypeScript code of a deployed worker. Do not use when you only need worker metadata or configuration details (use workers_get_worker instead). Accepts `worker_name` (required) and `account_id` (optional if active account is set). e.g., worker_name="my-api-worker". Raises an error if the worker does not exist or you lack permissions to access it."my-api-worker". Returns the bundled/compiled version which may differ from original source files. Raises an error if the worker does not exist or you lack read permissions.',
 		{ scriptName: workerNameParam },
 		{
 			title: 'Get Worker code',

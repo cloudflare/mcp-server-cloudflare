@@ -813,7 +813,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 	// Tool to fetch the complete GraphQL schema (combines overview and important type details)
 	agent.server.tool(
 		'graphql_complete_schema',
-		'Fetch the complete Cloudflare GraphQL API schema (combines overview and important type details)',
+		'Fetch the complete Cloudflare GraphQL API schema including all type definitions, fields, and available operations. Use when the user wants to explore the full GraphQL API structure, understand available data types, or discover what queries and mutations are possible. Do not use when you need to search for specific documentation topics (use search_cloudflare_documentation instead). Accepts no required parameters - `format` (optional) can specify output format. e.g., use this to see all available fields for Zone or DNS record types. Raises an error if the API is unreachable or authentication fails.'s API. Do not use when you need to search specific documentation topics (use search_cloudflare_documentation instead). Accepts no required parameters (`account_id` is automatically handled). e.g., use this to discover available fields for zones, DNS records, or analytics queries. Raises an error if the API authentication fails or the schema endpoint is unavailable.',
 		{
 			typesPageSize: z
 				.number()

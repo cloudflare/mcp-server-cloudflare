@@ -15,7 +15,7 @@ import { PaginationPageParam, PaginationPerPageParam } from '../types/shared.typ
 export function registerD1Tools(agent: CloudflareMcpAgent) {
 	agent.server.tool(
 		'd1_databases_list',
-		'List all of the D1 databases in your Cloudflare account',
+		'List all D1 databases in your Cloudflare account. Use when the user wants to view, browse, or inventory their existing D1 databases across the account. Do not use when you need details about a specific database (use d1_database_get instead) or want to create a new database (use d1_database_create instead). Accepts `account_id` (optional, uses active account if not specified). e.g., returns database names, IDs, and creation timestamps for all databases. Raises an error if no active account is set or if authentication fails.',
 		{
 			name: D1DatabaseNameParam.nullable().optional(),
 			page: PaginationPageParam,
@@ -68,7 +68,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 
 	agent.server.tool(
 		'd1_database_create',
-		'Create a new D1 database in your Cloudflare account',
+		'Create a new D1 database in your Cloudflare account. Use when the user wants to set up a new SQLite-compatible database for their applications or projects. Do not use when you need to view existing databases (use d1_databases_list instead) or query an existing database (use d1_database_query instead). Accepts `name` (required, string) for the database identifier, e.g., "my-app-db" or "production-data". Raises an error if the database name already exists or contains invalid characters. "my-app-db" or "production-users". Raises an error if a database with the same name already exists or if the account lacks D1 creation permissions.',
 		{
 			name: D1DatabaseNameParam,
 			primary_location_hint: D1DatabasePrimaryLocationHintParam.nullable().optional(),
@@ -117,7 +117,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 
 	agent.server.tool(
 		'd1_database_delete',
-		'Delete a d1 database in your Cloudflare account',
+		'Delete a D1 database from your Cloudflare account permanently. Use when the user wants to remove an existing database that is no longer needed or should be cleaned up. Do not use when you need to create a new database (use d1_database_create instead) or query an existing one (use d1_database_query instead). Accepts `database_id` (required) or `database_name` (required), e.g., database_id="abc123-def456-ghi789". Raises an error if the database does not exist or you lack deletion permissions."abc123-def456" or database_name="my-production-db". Raises an error if the database does not exist or if you lack deletion permissions for the specified database.',
 		{ database_id: z.string() },
 		{
 			title: 'Delete D1 database',
@@ -160,7 +160,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 
 	agent.server.tool(
 		'd1_database_get',
-		'Get a D1 database in your Cloudflare account',
+		'Get details and metadata for a specific D1 database in your Cloudflare account. Use when the user wants to inspect configuration, connection details, or properties of an existing database. Do not use when you need to see all databases (use d1_databases_list instead) or query database contents (use d1_database_query instead). Accepts `database_id` or `database_name` (required), e.g., "my-production-db" or "abc123-def456-ghi789". Raises an error if the database does not exist or you lack access permissions. "my-production-db" or "abc123-def456-ghi789". Raises an error if the database does not exist or you lack permissions to access it.',
 		{ database_id: z.string() },
 		{
 			title: 'Get D1 database',
@@ -203,7 +203,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 
 	agent.server.tool(
 		'd1_database_query',
-		'Query a D1 database in your Cloudflare account',
+		'Query a D1 database in your Cloudflare account to execute SQL statements and retrieve data. Use when the user wants to run SELECT queries, analyze data, or inspect database contents with custom SQL. Do not use when you need to list available databases (use d1_databases_list instead) or create a new database (use d1_database_create instead). Accepts `database_id` (required), `sql` (required SQL statement), and `account_id` (optional). e.g., sql="SELECT * FROM users WHERE active = 1". Raises an error if the database ID is invalid or the SQL query contains syntax errors."SELECT * FROM users WHERE active = 1 LIMIT 10". Raises an error if the database does not exist or the SQL query contains syntax errors.',
 		{
 			database_id: z.string(),
 			sql: D1DatabaseQuerySqlParam,
