@@ -119,7 +119,6 @@ export function registerBrowserTools(agent: BrowserMCP) {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
-				console.log('Requesting markdown rendering with params:', params)
 				const r = (await client.post(`/accounts/${accountId}/browser-rendering/markdown`, {
 					body: { ...browserRequestZodObject.parse(params) },
 				})) as { result: string }
