@@ -26,6 +26,31 @@ The following servers are included in this repository:
 | [**Cloudflare One CASB server**](/apps/cloudflare-one-casb)    | Quickly identify any security misconfigurations for SaaS applications to safeguard users & data | `https://casb.mcp.cloudflare.com/mcp`          |
 | [**GraphQL server**](/apps/graphql/)                           | Get analytics data using Cloudflare’s GraphQL API                                               | `https://graphql.mcp.cloudflare.com/mcp`       |
 
+## Which Cloudflare MCP server should you use?
+
+Cloudflare offers two categories of MCP servers:
+
+- **Code Mode server** (`mcp.cloudflare.com`) in [`cloudflare/mcp`](https://github.com/cloudflare/mcp):
+  best when you want broad access across Cloudflare's APIs through code execution.
+- **Domain-specific servers** (`*.mcp.cloudflare.com`) in this repository:
+  best when you want curated, typed tools for a specific Cloudflare product area.
+
+### When to use each
+
+Use the **Code Mode server** when:
+
+- you need broad API coverage across many Cloudflare products
+- you want a small number of general tools
+- your workflow is better served by code execution
+
+Use the **domain-specific servers** in this repository when:
+
+- you want purpose-built tools for a specific product area
+- you want more guided, typed interactions
+- you are working primarily within one Cloudflare domain such as observability, bindings, Radar, or Browser Rendering
+
+You can explore the Code Mode server here: [`cloudflare/mcp`](https://github.com/cloudflare/mcp).
+
 ## Access the remote MCP server from any MCP client
 
 If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL directly within its interface (e.g. [Cloudflare AI Playground](https://playground.ai.cloudflare.com/))
