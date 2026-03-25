@@ -28,19 +28,19 @@ The following servers are included in this repository:
 
 ## Which Cloudflare MCP server should you use?
 
-Cloudflare offers two categories of MCP servers:
+Cloudflare provides two categories of MCP servers:
 
 - **Code Mode server** (`mcp.cloudflare.com`) in [`cloudflare/mcp`](https://github.com/cloudflare/mcp):
   best when you want broad access across Cloudflare's APIs through code execution.
 - **Domain-specific servers** (`*.mcp.cloudflare.com`) in this repository:
   best when you want curated, typed tools for a specific Cloudflare product area.
 
-### When to use each
+### When should you use each?
 
 Use the **Code Mode server** when:
 
 - you need broad API coverage across many Cloudflare products
-- you want a small number of general tools
+- you prefer a smaller set of general-purpose tools
 - your workflow is better served by code execution
 
 Use the **domain-specific servers** in this repository when:
@@ -49,7 +49,7 @@ Use the **domain-specific servers** in this repository when:
 - you want more guided, typed interactions
 - you are working primarily within one Cloudflare domain such as observability, bindings, Radar, or Browser Rendering
 
-You can explore the Code Mode server here: [`cloudflare/mcp`](https://github.com/cloudflare/mcp).
+Learn more about the Code Mode server here: [`cloudflare/mcp`](https://github.com/cloudflare/mcp).
 
 ## Access the remote MCP server from any MCP client
 
