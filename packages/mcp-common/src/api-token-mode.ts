@@ -7,9 +7,21 @@ interface RequiredEnv {
 	DEV_CLOUDFLARE_API_TOKEN: string
 	DEV_CLOUDFLARE_EMAIL: string
 	DEV_DISABLE_OAUTH: string
+	ENVIRONMENT?: string
+}
+
+function assertDevOAuthNotInProd(env: RequiredEnv) {
+	if (
+		env.DEV_DISABLE_OAUTH === 'true' &&
+		(env.ENVIRONMENT === 'production' || env.ENVIRONMENT === 'staging')
+	) {
+		throw new Error('DEV_DISABLE_OAUTH must not be enabled in production or staging')
+	}
 }
 
 export async function isApiTokenRequest(req: Request, env: RequiredEnv) {
+	assertDevOAuthNotInProd(env)
+
 	// shortcircuit for dev
 	if (env.DEV_CLOUDFLARE_API_TOKEN && env.DEV_DISABLE_OAUTH === 'true') {
 		return true
@@ -30,6 +42,8 @@ export async function isApiTokenRequest(req: Request, env: RequiredEnv) {
 export async function handleApiTokenMode<
 	T extends typeof McpAgent<unknown, unknown, Record<string, unknown>>,
 >(agent: T, req: Request, env: RequiredEnv, ctx: ExecutionContext) {
+	assertDevOAuthNotInProd(env)
+
 	// Handle global API token case
 	let opts, token
 	// dev mode
