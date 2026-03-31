@@ -51,7 +51,7 @@ importers:
   apps/ai-gateway:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -100,7 +100,7 @@ importers:
   apps/auditlogs:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -149,7 +149,7 @@ importers:
   apps/autorag:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -198,7 +198,7 @@ importers:
   apps/browser-rendering:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -247,7 +247,7 @@ importers:
   apps/cloudflare-one-casb:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -333,7 +333,7 @@ importers:
   apps/dex-analysis:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -388,7 +388,7 @@ importers:
   apps/dns-analytics:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -437,7 +437,7 @@ importers:
   apps/docs-ai-search:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -489,7 +489,7 @@ importers:
   apps/docs-autorag:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -541,7 +541,7 @@ importers:
   apps/docs-vectorize:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -593,7 +593,7 @@ importers:
   apps/graphql:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -645,7 +645,7 @@ importers:
   apps/logpush:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -694,7 +694,7 @@ importers:
   apps/radar:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -743,7 +743,7 @@ importers:
   apps/sandbox-container:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/node-server':
         specifier: 1.13.8
@@ -822,7 +822,7 @@ importers:
   apps/workers-bindings:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@modelcontextprotocol/sdk':
         specifier: 1.20.2
@@ -883,7 +883,7 @@ importers:
   apps/workers-builds:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@hono/zod-validator':
         specifier: 0.4.3
@@ -938,7 +938,7 @@ importers:
   apps/workers-observability:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@fast-csv/format':
         specifier: 5.0.2
@@ -1078,7 +1078,7 @@ importers:
   packages/mcp-common:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: ^0.4.0
+        specifier: 0.4.0
         version: 0.4.0
       '@fast-csv/format':
         specifier: 5.0.2
