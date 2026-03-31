@@ -19,7 +19,7 @@
 		"eval:ci": "start-server-and-test --expect 404 eval:server http://localhost:8976 'vitest run --testTimeout=60000 --config vitest.config.evals.ts'"
 	},
 	"dependencies": {
-		"@cloudflare/workers-oauth-provider": "0.3.2",
+		"@cloudflare/workers-oauth-provider": "0.3.3",
 		"@hono/node-server": "1.13.8",
 		"@hono/zod-validator": "0.4.3",
 		"@modelcontextprotocol/sdk": "1.20.2",
