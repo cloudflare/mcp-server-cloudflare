@@ -132,6 +132,9 @@ export default {
 				),
 			// Cloudflare access token TTL
 			accessTokenTTL: 3600,
+			refreshTokenTTL: 2592000, // 30 days
+			// TODO: Remove after 2026-05-01 — all pre-0.4.0 grants will have expired by then
+			resourceMatchOriginOnly: true,
 			clientRegistrationEndpoint: '/register',
 		}).fetch(req, env, ctx)
 	},
