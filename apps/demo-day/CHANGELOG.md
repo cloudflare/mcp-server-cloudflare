@@ -1,5 +1,12 @@
 # demo-day
 
+## 0.1.11
+
+### Patch Changes
+
+- Updated dependencies [50926ec]
+  - @repo/mcp-common@0.20.4
+
 ## 0.1.10
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # docs-vectorize
 
+## 0.5.3
+
+### Patch Changes
+
+- 50926ec: Bump @cloudflare/workers-oauth-provider to ^0.4.0, add resourceMatchOriginOnly migration flag and 30-day refresh token TTL
+- Updated dependencies [50926ec]
+  - @repo/mcp-common@0.20.4
+
 ## 0.5.2
 
 ### Patch Changes
