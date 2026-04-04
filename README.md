@@ -95,6 +95,28 @@ To reduce the chance of running in to this issue:
 - Try to be specific, keep your queries concise.
 - If a single request calls multiple tools, try to to break it into several smaller tool calls to keep the responses short.
 
+## Tool-level policy enforcement
+
+These MCP servers expose tools that can create and delete D1 databases, R2 storage buckets, KV namespaces, and Hyperdrive configurations — as well as execute arbitrary commands in containers. Cloudflare OAuth controls which tools are available, but not how often or how aggressively an agent uses them once access is granted.
+
+You can add rate limits, daily caps, and access control by wrapping the server with [PolicyLayer Intercept](https://github.com/policylayer/intercept), an open-source MCP proxy:
+
+```sh
+npx -y @policylayer/intercept \
+  --policy policies/recommended.yaml \
+  -- npx mcp-remote https://bindings.mcp.cloudflare.com/mcp
+```
+
+Three policy presets are included in [`/policies`](/policies):
+
+| Policy | Description |
+|--------|-------------|
+| `recommended.yaml` | Rate limits on writes, blocks destructive operations (delete databases, buckets, namespaces), reads allowed freely |
+| `strict.yaml` | Default deny — only read and observability tools allowed unless explicitly opted in |
+| `permissive.yaml` | Everything allowed, rate limits on destructive and resource-creation operations |
+
+Policies are YAML files you can customise. See the [Intercept docs](https://github.com/policylayer/intercept) for the full policy reference.
+
 ## Paid Features
 
 Some features may require a paid Cloudflare Workers plan. Ensure your Cloudflare account has the necessary subscription level for the features you intend to use.

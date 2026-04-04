@@ -1,0 +1,476 @@
+version: "1"
+description: "Cloudflare MCP — strict policy. Default deny. Only read and observability tools are allowed."
+default: deny
+
+tools:
+  # Account — read only
+  accounts_list:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  # Workers — read only
+  workers_list:
+    rules:
+      - action: allow
+        rate_limit: "30/minute"
+
+  workers_get_worker:
+    rules:
+      - action: allow
+        rate_limit: "30/minute"
+
+  workers_get_worker_code:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  # KV — read only
+  kv_namespaces_list:
+    rules:
+      - action: allow
+        rate_limit: "30/minute"
+
+  kv_namespace_get:
+    rules:
+      - action: allow
+        rate_limit: "30/minute"
+
+  # R2 — read only
+  r2_buckets_list:
+    rules:
+      - action: allow
+        rate_limit: "30/minute"
+
+  r2_bucket_get:
+    rules:
+      - action: allow
+        rate_limit: "30/minute"
+
+  # D1 — read only (queries allowed, creation/deletion blocked)
+  d1_databases_list:
+    rules:
+      - action: allow
+        rate_limit: "30/minute"
+
+  d1_database_get:
+    rules:
+      - action: allow
+        rate_limit: "30/minute"
+
+  d1_database_query:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  # Hyperdrive — read only
+  hyperdrive_configs_list:
+    rules:
+      - action: allow
+        rate_limit: "30/minute"
+
+  hyperdrive_config_get:
+    rules:
+      - action: allow
+        rate_limit: "30/minute"
+
+  # Observability — read only
+  query_worker_observability:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  observability_keys:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  observability_values:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  # Builds — read only
+  workers_builds_list_builds:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  workers_builds_get_build:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  workers_builds_get_build_logs:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  workers_builds_set_active_worker:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  # Logpush — read only
+  logpush_jobs_by_account_id:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  # AI Gateway — read only
+  list_gateways:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  list_logs:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_log_details:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_log_request_body:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_log_response_body:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  # AutoRAG — read only
+  list_rags:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  search:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  ai_search:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  # Audit Logs — read only
+  auditlogs_by_account_id:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  # DNS Analytics — read only
+  zones_list:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  dns_report:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  show_account_dns_settings:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  show_zone_dns_settings:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  # Documentation — read only
+  search_cloudflare_documentation:
+    rules:
+      - action: allow
+        rate_limit: "30/minute"
+
+  # Browser Rendering — read only
+  get_url_html_content:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  get_url_markdown:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  get_url_screenshot:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  # GraphQL — schema browsing only, no query execution
+  graphql_schema_search:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  graphql_schema_overview:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  graphql_type_details:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  graphql_complete_schema:
+    rules:
+      - action: allow
+        rate_limit: "5/minute"
+
+  graphql_api_explorer:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  # Container — read only
+  container_ping:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  container_files_list:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  container_file_read:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  # DEX — read only
+  dex_list_tests:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  dex_test_statistics:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  dex_http_test_details:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  dex_traceroute_test_details:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  dex_traceroute_test_network_path:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  dex_traceroute_test_result_network_path:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  dex_list_remote_captures:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  dex_list_remote_warp_diag_contents:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  dex_explore_remote_warp_diag_output:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  dex_fleet_status_live:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  dex_fleet_status_over_time:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  dex_fleet_status_logs:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  dex_list_warp_change_events:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  dex_list_colos:
+    rules:
+      - action: allow
+        rate_limit: "10/minute"
+
+  # Radar — all tools are read-only
+  get_ai_data:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_annotations:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_outages:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_outages_by_location:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_traffic_anomalies:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_traffic_anomalies_by_location:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_as112_data:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  list_autonomous_systems:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_as_details:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_as_set:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_as_relationships:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bgp_hijacks:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bgp_leaks:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bgp_route_stats:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bgp_timeseries:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bgp_top_ases:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bgp_top_prefixes:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bgp_moas:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bgp_pfx2as:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bgp_ip_space_timeseries:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bgp_routes_realtime:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bgp_routing_table_ases:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bgp_top_ases_by_prefixes:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bots_data:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  list_bots:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bot_details:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_bots_crawlers_data:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_certificate_transparency_data:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  list_ct_authorities:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  get_ct_authority_details:
+    rules:
+      - action: allow
+        rate_limit: "20/minute"
+
+  # Everything else blocked by default: deny
+  # To allow writes, copy rules from recommended.yaml
