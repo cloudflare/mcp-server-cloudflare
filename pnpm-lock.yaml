@@ -642,6 +642,55 @@ importers:
         specifier: 4.10.0
         version: 4.10.0(@cloudflare/workers-types@4.20250416.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
+  apps/iam:
+    dependencies:
+      '@cloudflare/workers-oauth-provider':
+        specifier: 0.4.0
+        version: 0.4.0
+      '@hono/zod-validator':
+        specifier: 0.4.3
+        version: 0.4.3(hono@4.7.6)(zod@3.24.2)
+      '@modelcontextprotocol/sdk':
+        specifier: 1.20.2
+        version: 1.20.2
+      '@repo/mcp-common':
+        specifier: workspace:*
+        version: link:../../packages/mcp-common
+      '@repo/mcp-observability':
+        specifier: workspace:*
+        version: link:../../packages/mcp-observability
+      agents:
+        specifier: 0.2.19
+        version: 0.2.19(@cloudflare/workers-types@4.20250416.0)(react@17.0.2)(typescript@5.5.4)(viem@2.37.9(bufferutil@4.0.9)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.24.2))(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.5.4))(@tanstack/query-core@5.90.2)(@tanstack/react-query@5.90.2(react@17.0.2))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@17.0.2)(typescript@5.5.4)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
+      cloudflare:
+        specifier: 4.2.0
+        version: 4.2.0
+      hono:
+        specifier: 4.7.6
+        version: 4.7.6
+      zod:
+        specifier: 3.24.2
+        version: 3.24.2
+    devDependencies:
+      '@cloudflare/vitest-pool-workers':
+        specifier: 0.8.14
+        version: 0.8.14(@cloudflare/workers-types@4.20250416.0)(@vitest/runner@3.0.9)(@vitest/snapshot@3.0.9)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@3.0.9)
+      '@types/node':
+        specifier: 22.14.1
+        version: 22.14.1
+      prettier:
+        specifier: 3.5.3
+        version: 3.5.3
+      typescript:
+        specifier: 5.5.4
+        version: 5.5.4
+      vitest:
+        specifier: 3.0.9
+        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/ui@3.0.9)(lightningcss@1.29.2)(tsx@4.19.3)
+      wrangler:
+        specifier: 4.10.0
+        version: 4.10.0(@cloudflare/workers-types@4.20250416.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+
   apps/logpush:
     dependencies:
       '@cloudflare/workers-oauth-provider':
@@ -2029,9 +2078,11 @@ packages:
 
   '@metamask/sdk-analytics@0.0.5':
     resolution: {integrity: sha512-fDah+keS1RjSUlC8GmYXvx6Y26s3Ax1U9hGpWb6GSY5SAdmTSIqp2CvYy6yW0WgLhnYhW+6xERuD0eVqV63QIQ==}
+    deprecated: No longer maintained, superseded by @metamask/connect-analytics
 
   '@metamask/sdk-communication-layer@0.33.1':
     resolution: {integrity: sha512-0bI9hkysxcfbZ/lk0T2+aKVo1j0ynQVTuB3sJ5ssPWlz+Z3VwveCkP1O7EVu1tsVVCb0YV5WxK9zmURu2FIiaA==}
+    deprecated: No longer maintained, superseded by https://docs.metamask.io/metamask-connect
     peerDependencies:
       cross-fetch: ^4.0.0
       eciesjs: '*'
@@ -2041,9 +2092,11 @@ packages:
 
   '@metamask/sdk-install-modal-web@0.32.1':
     resolution: {integrity: sha512-MGmAo6qSjf1tuYXhCu2EZLftq+DSt5Z7fsIKr2P+lDgdTPWgLfZB1tJKzNcwKKOdf6q9Qmmxn7lJuI/gq5LrKw==}
+    deprecated: No longer maintained, superseded by https://docs.metamask.io/metamask-connect
 
   '@metamask/sdk@0.33.1':
     resolution: {integrity: sha512-1mcOQVGr9rSrVcbKPNVzbZ8eCl1K0FATsYH3WJ/MH4WcZDWGECWrXJPNMZoEAkLxWiMe8jOQBumg2pmcDa9zpQ==}
+    deprecated: No longer maintained, superseded by https://docs.metamask.io/metamask-connect
 
   '@metamask/superstruct@3.2.1':
     resolution: {integrity: sha512-fLgJnDOXFmuVlB38rUN5SmU7hAFQcCjrg3Vrxz67KTY7YHFnSNEKvX4avmEBdOI0yTCxZjwMCFEqsC8k2+Wd3g==}
