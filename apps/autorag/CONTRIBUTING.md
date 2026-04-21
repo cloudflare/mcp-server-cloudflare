@@ -1,5 +1,7 @@
 # Setup
 
+> ⚠️ **This server is deprecated.** See [`README.md`](./README.md) for the migration path to [`mcp.cloudflare.com/mcp`](https://mcp.cloudflare.com/mcp). Bug fixes are welcome; new features will generally not be accepted — please direct new work at the unified [`cloudflare/mcp`](https://github.com/cloudflare/mcp) repository instead.
+
 If you'd like to iterate and test your MCP server, you can do so in local development.
 
 ## Local Development

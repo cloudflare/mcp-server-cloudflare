@@ -28,6 +28,38 @@ const metrics = new MetricsTracker(env.MCP_METRICS, {
 	version: env.MCP_SERVER_VERSION,
 })
 
+// NOTE: This server is deprecated. AutoRAG has been superseded by Cloudflare AI
+// Search, and the unified Cloudflare MCP server at https://mcp.cloudflare.com/mcp
+// already covers AI Search (see https://github.com/cloudflare/mcp).
+//
+// The deprecation notice is surfaced via the MCP `instructions` field on the
+// initialize response. Humans see it in MCP-client UIs that render
+// `instructions`; it is also documented in README.md and CONTRIBUTING.md.
+export const DEPRECATION_INSTRUCTIONS = `⚠️ DEPRECATED: This AutoRAG MCP server is deprecated.
+
+AutoRAG has been superseded by Cloudflare AI Search. All new work should move
+to the unified Cloudflare MCP server at:
+
+    https://mcp.cloudflare.com/mcp
+
+That server covers the full Cloudflare API — including AI Search, which
+replaces AutoRAG — via Code Mode (two generic tools: \`search\` and \`execute\`).
+It supports both OAuth (connect to the URL and authorize) and Cloudflare API
+tokens (send as a bearer token).
+
+Example MCP client configuration:
+
+    {
+      "mcpServers": {
+        "cloudflare-api": {
+          "url": "https://mcp.cloudflare.com/mcp"
+        }
+      }
+    }
+
+This AutoRAG server continues to respond for now, but will be retired. Please
+migrate at your earliest convenience.`
+
 // Context from the auth process, encrypted & stored in the auth token
 // and provided to the DurableMCP as this.props
 type Props = AuthProps
@@ -62,11 +94,14 @@ export class AutoRAGMCP extends McpAgent<Env, State, Props> {
 				name: this.env.MCP_SERVER_NAME,
 				version: this.env.MCP_SERVER_VERSION,
 			},
+			options: {
+				instructions: DEPRECATION_INSTRUCTIONS,
+			},
 		})
 
 		registerAccountTools(this)
 
-		// Register Cloudflare Log Push tools
+		// Register Cloudflare AutoRAG tools
 		registerAutoRAGTools(this)
 	}
 
