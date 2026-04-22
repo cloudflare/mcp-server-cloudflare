@@ -1,0 +1,10 @@
+{
+	"extends": "@repo/typescript-config/workers.json",
+	"compilerOptions": {
+		"moduleResolution": "bundler",
+		"jsx": "react-jsx",
+		"jsxImportSource": "hono/jsx",
+		"types": ["@cloudflare/vitest-pool-workers"]
+	},
+	"include": ["src/**/*.ts", "tests/**/*.ts", "worker-configuration.d.ts"]
+}
