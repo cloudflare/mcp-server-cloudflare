@@ -545,10 +545,13 @@ export function registerIAMTools(agent: IAMMCP) {
 	// Token Management Tools
 	agent.server.tool(
 		'api_token_list',
-		`List all API tokens for the authenticated user.
+		`List all User API tokens for the authenticated user.
 		
+Note: This only returns User API tokens (personal tokens you create for your own use). 
+It does NOT return Account API tokens (service tokens created at the account level for automation).
+
 Use this when the user wants to:
-- See all their API tokens
+- See all their User API tokens
 - List active, disabled, or expired tokens
 - View token metadata (name, status, expiration dates)
 

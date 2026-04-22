@@ -10,20 +10,40 @@ This MCP server provides tools for managing:
 - **Account Members**: Add, remove, and manage account member access
 - **Roles**: View available roles and their permissions
 
+## 🔐 API Token Types
+
+Cloudflare has two types of API tokens:
+
+### User API Tokens
+Personal tokens created for your own use across all accounts you have access to. These tokens:
+- Are owned by you as a user
+- Can access multiple accounts (depending on permissions)
+- Are managed via `/user/tokens` endpoints
+- **This MCP server manages User API tokens only**
+
+### Account API Tokens
+Service tokens created at the account level for automation and service accounts. These tokens:
+- Are owned by the account
+- Are restricted to a single account
+- Are managed via `/accounts/{id}/tokens` endpoints
+- **Cannot be managed by this MCP server**
+
+**Note:** The `api_token_list` tool only returns User API tokens, not Account API tokens.
+
 ## 🔨 Available Tools
 
 ### API Token Management
 
-| Tool                         | Description                                       |
-| ---------------------------- | ------------------------------------------------- |
-| `api_token_list`             | List all API tokens for the authenticated user    |
-| `api_token_get`              | Get detailed information about a specific token   |
-| `api_token_create`           | Create a new API token with specified permissions |
-| `api_token_update`           | Update an existing token's settings               |
-| `api_token_delete`           | Delete an API token permanently                   |
-| `api_token_roll`             | Rotate a token's secret value                     |
-| `api_token_verify`           | Verify the current token's validity               |
-| `api_permission_groups_list` | List available permission groups                  |
+| Tool                         | Description                                                   |
+| ---------------------------- | ------------------------------------------------------------- |
+| `api_token_list`             | List all User API tokens (not Account API tokens)             |
+| `api_token_get`              | Get detailed information about a specific token               |
+| `api_token_create`           | Create a new API token with specified permissions             |
+| `api_token_update`           | Update an existing token's settings                           |
+| `api_token_delete`           | Delete an API token permanently                               |
+| `api_token_roll`             | Rotate a token's secret value                                 |
+| `api_token_verify`           | Verify the current token's validity                           |
+| `api_permission_groups_list` | List available permission groups                              |
 
 ### Account Member Management
 
