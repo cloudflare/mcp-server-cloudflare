@@ -13,42 +13,68 @@ export const resourceScopes = z.enum(['memberships', 'accounts', 'user', 'zones'
 export const sortDirections = z.enum(['desc', 'asc'])
 
 export const auditLogsQuerySchema = z.object({
-	account_name: z.string().optional().describe('The account name to filter audit logs by.'),
-	action_result: actionResults.optional().describe('Whether the action was a success or failure.'),
-	action_type: actionTypes.optional().describe('The type of action that was performed.'),
-	actor_context: actorContexts.optional().describe('The context in which the actor was operating.'),
-	actor_email: z
-		.string()
-		.email()
+	account_name: z.array(z.string()).optional().describe('Filter to audit logs matching the provided account names.'),
+	action_result: z.array(actionResults).optional().describe('Filter to audit logs matching the provided action results (success or failure).'),
+	action_type: z.array(actionTypes).optional().describe('Filter to audit logs matching the provided action types.'),
+	actor_context: z.array(actorContexts).optional().describe('Filter to audit logs matching the provided actor contexts.'),
+	actor_email: z.array(z.string().email())
 		.optional()
-		.describe('The email of the actor who triggered the event.'),
-	actor_id: z.string().optional().describe('The unique identifier of the actor.'),
-	actor_ip_address: z.string().optional().describe('The IP address of the actor.'),
-	actor_token_id: z.string().optional().describe('The API token ID used by the actor.'),
-	actor_token_name: z.string().optional().describe('The name of the API token used by the actor.'),
-	actor_type: actorTypes.optional().describe('The type of actor (e.g., user, token).'),
-	audit_log_id: z.string().optional().describe('The unique identifier of the audit log entry.'),
-	raw_cf_ray_id: z
-		.string()
+		.describe('Filter to audit logs from users with the provided emails.'),
+	actor_id: z.array(z.string()).optional().describe('Filter to audit logs matching the provided unique identifiers.'),
+	actor_ip_address: z.array(z.string()).optional().describe('Filter to audit logs from actors with the provided IP addresses.'),
+	actor_token_id: z.array(z.string()).optional().describe('Filter to audit logs for actions taken by the provided tokens.'),
+	actor_token_name: z.array(z.string()).optional().describe('Filter to audit logs for actions taken by the provided token names.'),
+	actor_type: z.array(actorTypes).optional().describe('Filter to audit logs matching the provided actor type.'),
+	audit_log_id: z.array(z.string()).optional().describe('Filter to audit logs matching the provided ids.'),
+	raw_cf_ray_id: z.array(z.string())
 		.optional()
-		.describe('The Cloudflare Ray ID associated with the request.'),
-	raw_method: z
-		.string()
+		.describe('Filter to audit logs matching the provided Cloudflare ray IDs..'),
+	raw_method: z.array(z.string())
 		.optional()
-		.describe('The HTTP method used in the request (e.g., GET, POST).'),
-	raw_status_code: z.number().optional().describe('The HTTP status code returned by the request.'),
-	raw_uri: z.string().optional().describe('The URI accessed in the request.'),
-	resource_id: z.string().optional().describe('The unique identifier of the resource affected.'),
-	resource_product: z
-		.string()
+		.describe('Filter to audit logs matching the provided HTTP methods.'),
+	raw_status_code: z.array(z.number()).optional().describe('Filter to audit logs matching the provided HTTP status codes.'),
+	raw_uri: z.array(z.string()).optional().describe('Filter to audit logs matching the provided URIs.'),
+	resource_id: z.array(z.string()).optional().describe('Filter to audit logs matching the provided resource IDs.'),
+	resource_product: z.array(z.string())
 		.optional()
-		.describe('The Cloudflare product related to the resource.'),
-	resource_type: z.string().optional().describe('The type of resource affected.'),
-	resource_scope: resourceScopes
+		.describe('Filter to audit logs matching the provided products.'),
+	resource_type: z.array(z.string()).optional().describe('Filter to audit logs matching the provided resource types.'),
+	resource_scope: z.array(resourceScopes)
 		.optional()
-		.describe('The scope of the resource (e.g., account, zone).'),
-	zone_id: z.string().optional().describe('The ID of the zone associated with the log.'),
-	zone_name: z.string().optional().describe('The name of the zone associated with the log.'),
+		.describe('Filter to audit logs matching the provided resource scopes.'),
+	zone_id: z.array(z.string()).optional().describe('Filter to audit logs matching the provided zone ids.'),
+	zone_name: z.array(z.string()).optional().describe('Filter to audit logs matching the provided zone names.'),
+	"account_name.not": z.array(z.string()).optional().describe('Filter out audit logs matching the provided account names.'),
+	"action_result.not": z.array(actionResults).optional().describe('Filter out audit logs matching the provided action results (success or failure).'),
+	"action_type.not": z.array(actionTypes).optional().describe('Filter out audit logs matching the provided action types.'),
+	"actor_context.not": z.array(actorContexts).optional().describe('Filter out audit logs matching the provided actor contexts.'),
+	"actor_email.not": z.array(z.string().email())
+		.optional()
+		.describe('Filter out audit logs from users with the provided emails.'),
+	"actor_id.not": z.array(z.string()).optional().describe('Filter out audit logs matching the provided unique identifiers.'),
+	"actor_ip_address.not": z.array(z.string()).optional().describe('Filter out audit logs from actors with the provided IP addresses.'),
+	"actor_token_id.not": z.array(z.string()).optional().describe('Filter out audit logs for actions taken by the provided tokens.'),
+	"actor_token_name.not": z.array(z.string()).optional().describe('Filter out audit logs for actions taken by the provided token names.'),
+	"actor_type.not": z.array(actorTypes).optional().describe('Filter out audit logs matching the provided actor type.'),
+	"audit_log_id.not": z.array(z.string()).optional().describe('Filter out audit logs matching the provided ids.'),
+	"raw_cf_ray_id.not": z.array(z.string())
+		.optional()
+		.describe('Filter out audit logs matching the provided Cloudflare ray IDs..'),
+	"raw_method.not": z.array(z.string())
+		.optional()
+		.describe('Filter out audit logs matching the provided HTTP methods.'),
+	"raw_status_code.not": z.array(z.number()).optional().describe('Filter out audit logs matching the provided HTTP status codes.'),
+	"raw_uri.not": z.array(z.string()).optional().describe('Filter out audit logs matching the provided URIs.'),
+	"resource_id.not": z.array(z.string()).optional().describe('Filter out audit logs matching the provided resource IDs.'),
+	"resource_product.not": z.array(z.string())
+		.optional()
+		.describe('Filter out audit logs matching the provided products.'),
+	"resource_type.not": z.array(z.string()).optional().describe('Filter out audit logs matching the provided resource types.'),
+	"resource_scope.not": z.array(resourceScopes)
+		.optional()
+		.describe('Filter out audit logs matching the provided resource scopes.'),
+	"zone_id.not": z.array(z.string()).optional().describe('Filter out audit logs matching the provided zone ids.'),
+	"zone_name.not": z.array(z.string()).optional().describe('Filter out audit logs matching the provided zone names.'),
 	since: z
 		.string()
 		.describe(
