@@ -10,7 +10,7 @@ export function registerAccountTools(agent: CloudflareMcpAgent) {
 	// Tool to list all accounts
 	agent.server.tool(
 		'accounts_list',
-		'List all accounts in your Cloudflare account',
+		'List all accounts associated with your Cloudflare organization. Use when the user wants to view available accounts before selecting one for operations or switching contexts. Do not use when you need to set which account to use for subsequent operations (use set_active_account instead). Accepts no required parameters but may include optional `page` and `per_page` for pagination. Returns account details such as account ID, name, and type, e.g., personal accounts or enterprise organizations. Raises an error if authentication credentials are invalid or expired.',
 		{},
 		{
 			title: 'List accounts',
@@ -76,7 +76,7 @@ export function registerAccountTools(agent: CloudflareMcpAgent) {
 			)
 		agent.server.tool(
 			'set_active_account',
-			'Set active account to be used for tool calls that require accountId',
+			'Set the active Cloudflare account to be used for subsequent tool calls that require an account ID. Use when the user wants to switch between multiple Cloudflare accounts or specify which account to operate on. Do not use when you need to see available accounts first (use accounts_list instead). Accepts `account_id` (required string), e.g., "f1234567890abcdef1234567890abcdef". Raises an error if the account ID is invalid or you lack access permissions to that account. "f1234567890abcdef1234567890abcdef". Raises an error if the account ID is invalid or inaccessible with current credentials.',
 			{
 				activeAccountIdParam,
 			},
