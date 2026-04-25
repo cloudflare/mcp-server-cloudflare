@@ -4,6 +4,7 @@ import { handleZonesList } from '../api/zone.api'
 import { getCloudflareClient } from '../cloudflare-api'
 import { getProps } from '../get-props'
 import { type CloudflareMcpAgent } from '../types/cloudflare-mcp-agent.types'
+import { AccountIdParam, resolveAccountId } from './account.helpers'
 
 export function registerZoneTools(agent: CloudflareMcpAgent) {
 	// Tool to list all zones under an account
@@ -28,6 +29,7 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 				.enum(['asc', 'desc'])
 				.default('desc')
 				.describe('Direction to order results (asc, desc)'),
+			account_id: AccountIdParam,
 		},
 		{
 			title: 'List zones',
@@ -36,18 +38,10 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 				destructiveHint: false,
 			},
 		},
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		async ({ account_id: account_id_param, ...params }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 
 			try {
 				const props = getProps(agent)
@@ -81,6 +75,7 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 							text: `Error listing zones: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -92,6 +87,7 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 		'Get details for a specific Cloudflare zone',
 		{
 			zoneId: z.string().describe('The ID of the zone to get details for'),
+			account_id: AccountIdParam,
 		},
 		{
 			title: 'Get zone details',
@@ -100,22 +96,13 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 				destructiveHint: false,
 			},
 		},
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		async ({ zoneId, account_id: account_id_param }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 
 			try {
 				const props = getProps(agent)
-				const { zoneId } = params
 				const client = getCloudflareClient(props.accessToken)
 
 				// Use the zones.get method to fetch a specific zone
@@ -139,6 +126,7 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 							text: `Error fetching zone details: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

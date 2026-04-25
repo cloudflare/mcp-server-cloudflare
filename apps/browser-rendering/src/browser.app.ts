@@ -6,7 +6,7 @@ import {
 	createAuthHandlers,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
-import { getUserDetails, UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
+import { UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { getProps } from '@repo/mcp-common/src/get-props'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
@@ -70,36 +70,6 @@ export class BrowserMCP extends McpAgent<Env, State, Props> {
 		registerBrowserTools(this)
 	}
 
-	async getActiveAccountId() {
-		try {
-			const props = getProps(this)
-			// account tokens are scoped to one account
-			if (props.type === 'account_token') {
-				return props.account.id
-			}
-			// Get UserDetails Durable Object based off the userId and retrieve the activeAccountId from it
-			// we do this so we can persist activeAccountId across sessions
-			const userDetails = getUserDetails(env, props.user.id)
-			return await userDetails.getActiveAccountId()
-		} catch (e) {
-			this.server.recordError(e)
-			return null
-		}
-	}
-
-	async setActiveAccountId(accountId: string) {
-		try {
-			const props = getProps(this)
-			// account tokens are scoped to one account
-			if (props.type === 'account_token') {
-				return
-			}
-			const userDetails = getUserDetails(env, props.user.id)
-			await userDetails.setActiveAccountId(accountId)
-		} catch (e) {
-			this.server.recordError(e)
-		}
-	}
 }
 
 const BrowserScopes = {

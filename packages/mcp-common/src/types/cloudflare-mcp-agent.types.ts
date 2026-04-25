@@ -19,7 +19,4 @@ export interface CloudflareMcpAgentNoAccount<EnvType = unknown>
 }
 
 export interface CloudflareMcpAgent<EnvType = unknown>
-	extends CloudflareMcpAgentNoAccount<EnvType> {
-	setActiveAccountId(accountId: string): Promise<void>
-	getActiveAccountId(): Promise<string | null>
-}
+	extends CloudflareMcpAgentNoAccount<EnvType> {}
