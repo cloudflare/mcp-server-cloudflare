@@ -113,10 +113,13 @@ async function fetchSchemaOverview(apiToken: string): Promise<SchemaOverviewResp
  * @param apiToken Cloudflare API token
  * @returns Detailed type information
  */
-async function fetchTypeDetails(typeName: string, apiToken: string): Promise<TypeDetailsResponse> {
+export async function fetchTypeDetails(
+	typeName: string,
+	apiToken: string
+): Promise<TypeDetailsResponse> {
 	const typeDetailsQuery = `
-		query TypeDetails {
-			__type(name: "${typeName}") {
+		query TypeDetails($typeName: String!) {
+			__type(name: $typeName) {
 				name
 				kind
 				description
@@ -174,7 +177,11 @@ async function fetchTypeDetails(typeName: string, apiToken: string): Promise<Typ
 		}
 	`
 
-	const response = await executeGraphQLRequest<TypeDetailsResponse>(typeDetailsQuery, apiToken)
+	const response = await executeGraphQLQuery<TypeDetailsResponse>(
+		typeDetailsQuery,
+		{ typeName },
+		apiToken
+	)
 	return response
 }
 
@@ -221,7 +228,11 @@ async function executeGraphQLRequest<T>(query: string, apiToken: string): Promis
  * @param apiToken Cloudflare API token
  * @returns The query results
  */
-async function executeGraphQLQuery(query: string, variables: any, apiToken: string) {
+async function executeGraphQLQuery<T>(
+	query: string,
+	variables: Record<string, unknown>,
+	apiToken: string
+): Promise<T> {
 	// Clone the variables to avoid modifying the original
 	const queryVariables = { ...variables }
 
@@ -249,7 +260,7 @@ async function executeGraphQLQuery(query: string, variables: any, apiToken: stri
 		console.warn(`GraphQL query errors: ${errorMessages}`)
 	}
 
-	return result
+	return result as T
 }
 
 /**
