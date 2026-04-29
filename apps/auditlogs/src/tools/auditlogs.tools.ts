@@ -113,7 +113,7 @@ const auditLogEntrySchema = z.object({
 			id: z.string().optional().describe('Resource ID involved in the action'),
 			product: z.string().optional().describe('Product related to the action'),
 			request: z.record(z.unknown()).optional().describe('Request details of the action'),
-			response: z.record(z.unknown()).optional().describe('Response details of the action'),
+			response: z.union([z.record(z.unknown()), z.array(z.unknown())]).optional().describe('Response details of the action'),
 			scope: z
 				.union([z.string(), z.object({})])
 				.optional()
