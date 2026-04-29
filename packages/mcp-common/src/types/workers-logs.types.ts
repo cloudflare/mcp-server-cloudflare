@@ -259,6 +259,7 @@ export const zCloudflareMiniEvent = z.object({
 		'tail',
 		'rpc',
 		'websocket',
+		'workflow',
 		'unknown',
 	]),
 	entrypoint: z.string().optional(),
@@ -287,8 +288,8 @@ export const zCloudflareEvent = zCloudflareMiniEvent.extend({
 		)
 		.optional(),
 	dispatchNamespace: z.string().optional(),
-	wallTimeMs: z.number(),
-	cpuTimeMs: z.number(),
+	wallTimeMs: z.number().optional(),
+	cpuTimeMs: z.number().optional(),
 })
 
 const zSourceSchema = z.object({
