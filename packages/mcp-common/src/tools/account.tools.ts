@@ -14,9 +14,7 @@ export function registerAccountTools(agent: CloudflareMcpAgent) {
 		{},
 		{
 			title: 'List accounts',
-			annotations: {
-				readOnlyHint: true,
-			},
+			readOnlyHint: true,
 		},
 		async () => {
 			try {
@@ -82,10 +80,8 @@ export function registerAccountTools(agent: CloudflareMcpAgent) {
 			},
 			{
 				title: 'Set active account',
-				annotations: {
-					readOnlyHint: false,
-					destructiveHint: false,
-				},
+				readOnlyHint: false,
+				destructiveHint: false,
 			},
 			async (params) => {
 				try {

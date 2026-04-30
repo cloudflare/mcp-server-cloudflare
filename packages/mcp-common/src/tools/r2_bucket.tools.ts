@@ -24,9 +24,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'List R2 buckets',
-			annotations: {
-				readOnlyHint: true,
-			},
+			readOnlyHint: true,
 		},
 		async ({ cursor, direction, name_contains, per_page, start_after }) => {
 			const account_id = await agent.getActiveAccountId()
@@ -75,10 +73,8 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 		{ name: BucketNameSchema },
 		{
 			title: 'Create R2 bucket',
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-			},
+			readOnlyHint: false,
+			destructiveHint: false,
 		},
 		async ({ name }) => {
 			const account_id = await agent.getActiveAccountId()
@@ -119,9 +115,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 		{ name: BucketNameSchema },
 		{
 			title: 'Get R2 bucket',
-			annotations: {
-				readOnlyHint: true,
-			},
+			readOnlyHint: true,
 		},
 		async ({ name }) => {
 			const account_id = await agent.getActiveAccountId()
@@ -159,10 +153,8 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 		{ name: BucketNameSchema },
 		{
 			title: 'Delete R2 bucket',
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: true,
-			},
+			readOnlyHint: false,
+			destructiveHint: true,
 		},
 		async ({ name }) => {
 			const account_id = await agent.getActiveAccountId()
