@@ -1,5 +1,12 @@
 # dex-analysis
 
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies [f77355c]
+  - @repo/mcp-common@0.20.5
+
 ## 0.4.1
 
 ### Patch Changes

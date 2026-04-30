@@ -1,5 +1,12 @@
 # workers-bindings
 
+## 0.4.7
+
+### Patch Changes
+
+- Updated dependencies [f77355c]
+  - @repo/mcp-common@0.20.5
+
 ## 0.4.6
 
 ### Patch Changes

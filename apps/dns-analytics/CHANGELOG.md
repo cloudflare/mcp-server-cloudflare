@@ -1,5 +1,12 @@
 # dns-analytics
 
+## 0.1.13
+
+### Patch Changes
+
+- Updated dependencies [f77355c]
+  - @repo/mcp-common@0.20.5
+
 ## 0.1.12
 
 ### Patch Changes

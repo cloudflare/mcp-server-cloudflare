@@ -1,5 +1,12 @@
 # docs-vectorize
 
+## 0.5.4
+
+### Patch Changes
+
+- Updated dependencies [f77355c]
+  - @repo/mcp-common@0.20.5
+
 ## 0.5.3
 
 ### Patch Changes
