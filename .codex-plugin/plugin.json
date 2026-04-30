@@ -1,0 +1,24 @@
+{
+  "name": "cloudflare-mcp",
+  "version": "0.1.0",
+  "description": "Cloudflare observability and bindings from Codex via MCP",
+  "author": {
+    "name": "cloudflare",
+    "url": "https://github.com/cloudflare/mcp-server-cloudflare"
+  },
+  "homepage": "https://github.com/cloudflare/mcp-server-cloudflare",
+  "repository": "https://github.com/cloudflare/mcp-server-cloudflare",
+  "keywords": [
+    "mcp",
+    "codex"
+  ],
+  "mcpServers": "./.mcp.json",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Cloudflare MCP",
+    "shortDescription": "Cloudflare observability and bindings from Codex via MCP",
+    "longDescription": "MCP servers for Cloudflare services including observability and bindings.",
+    "category": "Cloud",
+    "websiteURL": "https://github.com/cloudflare/mcp-server-cloudflare"
+  }
+}
