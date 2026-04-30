@@ -1,0 +1,4 @@
+ENVIRONMENT=development
+DEV_DISABLE_OAUTH=true
+DEV_CLOUDFLARE_API_TOKEN=your_token
+DEV_CLOUDFLARE_EMAIL=your_email@cloudflare.com
