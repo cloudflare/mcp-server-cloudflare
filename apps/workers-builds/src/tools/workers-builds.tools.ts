@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getBuild, getBuildLogs, listBuilds } from '@repo/mcp-common/src/api/workers-builds.api'
 import { fmt } from '@repo/mcp-common/src/format'
 import { getProps } from '@repo/mcp-common/src/get-props'
+import { AccountIdParam, resolveAccountId } from '@repo/mcp-common/src/tools/account.helpers'
 
 import type { BuildsMCP } from '../workers-builds.app'
 
@@ -46,25 +47,15 @@ export function registerBuildsTools(agent: BuildsMCP) {
 			MUST provide a workerId or call workers_builds_set_active_worker first.
 		`),
 		{
+			account_id: AccountIdParam,
 			workerId: z.string().optional().describe('The Worker ID to list builds for.'),
 			page: z.number().optional().default(1).describe('The page number to return.'),
 			perPage: z.number().optional().default(10).describe('The number of builds per page.'),
 		},
-		async ({ workerId, page, perPage }) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: fmt.oneLine(`
-								No currently active accountId. Try listing your accounts (accounts_list)
-								and then setting an active account (set_active_account)
-							`),
-						},
-					],
-				}
-			}
+		async ({ account_id: account_id_param, workerId, page, perPage }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 
 			if (!workerId) {
 				const activeWorkerId = await agent.getActiveWorkerId()
@@ -147,6 +138,7 @@ export function registerBuildsTools(agent: BuildsMCP) {
 							text: `Error: listing builds failed: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -159,20 +151,13 @@ export function registerBuildsTools(agent: BuildsMCP) {
 			Includes build and deploy commands for the build (useful for debugging build failures).
 		`),
 		{
+			account_id: AccountIdParam,
 			buildUUID: z.string().describe('The build UUID to get details for.'),
 		},
-		async ({ buildUUID }) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Set an active account first.',
-						},
-					],
-				}
-			}
+		async ({ account_id: account_id_param, buildUUID }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 
 			try {
 				const props = getProps(agent)
@@ -222,6 +207,7 @@ export function registerBuildsTools(agent: BuildsMCP) {
 							text: `Error: getting build failed: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -233,20 +219,13 @@ export function registerBuildsTools(agent: BuildsMCP) {
 			Get logs for a Cloudflare Workers build.
 		`),
 		{
+			account_id: AccountIdParam,
 			buildUUID: z.string().describe('The build UUID to get logs for.'),
 		},
-		async ({ buildUUID }) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Set an active account first.',
-						},
-					],
-				}
-			}
+		async ({ account_id: account_id_param, buildUUID }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 
 			try {
 				const props = getProps(agent)
@@ -275,6 +254,7 @@ export function registerBuildsTools(agent: BuildsMCP) {
 							text: `Error: getting build logs failed: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

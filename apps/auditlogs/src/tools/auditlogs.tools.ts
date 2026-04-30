@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import { fetchCloudflareApi } from '@repo/mcp-common/src/cloudflare-api'
 import { getProps } from '@repo/mcp-common/src/get-props'
+import { AccountIdParam, resolveAccountId } from '@repo/mcp-common/src/tools/account.helpers'
 
 import type { AuditlogMCP } from '../auditlogs.app'
 
@@ -240,19 +241,11 @@ export function registerAuditLogTools(agent: AuditlogMCP) {
 		This can be used to query activity on your Cloudflare account at a particular time.
 		Since and before are required to look at a slice of time and are dates with or without a time up to millisecond precision e.g YYYY-MM-DDTHH:mm:ss.sssZ.
 		There can be more than one page of results and they can be paginated using the returned cursor`,
-		auditLogsQuerySchema.shape,
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		{ account_id: AccountIdParam, ...auditLogsQuerySchema.shape },
+		async ({ account_id: account_id_param, ...params }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 			try {
 				const props = getProps(agent)
 				const result = await handleGetAuditLogs(accountId, props.accessToken, params)
@@ -274,6 +267,7 @@ export function registerAuditLogTools(agent: AuditlogMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}

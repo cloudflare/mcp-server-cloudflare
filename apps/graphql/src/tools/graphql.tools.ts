@@ -2,6 +2,7 @@ import * as LZString from 'lz-string'
 import { z } from 'zod'
 
 import { getProps } from '@repo/mcp-common/src/get-props'
+import { AccountIdParam, resolveAccountId } from '@repo/mcp-common/src/tools/account.helpers'
 
 import type { GraphQLMCP } from '../graphql.app'
 
@@ -461,6 +462,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 		This tool searches the Cloudflare GraphQL API schema for any schema elements (such as object types, field names, or enum options) that match a given keyword. It returns schema fragments and definitions to assist in constructing valid and precise GraphQL queries.
 		`,
 		{
+			account_id: AccountIdParam,
 			keyword: z.string().describe('The keyword to search for in the schema'),
 			maxDetailsToFetch: z
 				.number()
@@ -481,24 +483,16 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 					'Whether to only include OBJECT kind types in the search results with descriptions'
 				),
 		},
-		async (params) => {
+		async ({ account_id: account_id_param, ...params }) => {
 			const {
 				keyword,
 				maxDetailsToFetch = 10,
 				includeInternalTypes = false,
 				onlyObjectTypes = true,
 			} = params
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 
 			try {
 				const props = getProps(agent)
@@ -576,6 +570,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -596,6 +591,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 		This tool returns a high-level summary of the Cloudflare GraphQL API schema. It provides a structured outline of API entry points, data models, and relationships to help guide query construction or system integration.
 		`,
 		{
+			account_id: AccountIdParam,
 			pageSize: z
 				.number()
 				.min(10)
@@ -604,19 +600,11 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 				.describe('Number of types to return per page'),
 			page: z.number().min(1).default(1).describe('Page number to fetch'),
 		},
-		async (params) => {
+		async ({ account_id: account_id_param, ...params }) => {
 			const { pageSize = 100, page = 1 } = params
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 
 			try {
 				const props = getProps(agent)
@@ -669,6 +657,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -694,6 +683,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 			- When in doubt, ask the user for clarification rather than creating a complex query
 		`,
 		{
+			account_id: AccountIdParam,
 			typeName: z
 				.string()
 				.describe('The type name (dataset) of the GraphQL type to fetch details for'),
@@ -712,7 +702,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 				.describe('Number of enum values to return per page'),
 			enumValuesPage: z.number().min(1).default(1).describe('Page number for enum values to fetch'),
 		},
-		async (params) => {
+		async ({ account_id: account_id_param, ...params }) => {
 			const {
 				typeName,
 				fieldsPageSize = 50,
@@ -721,17 +711,9 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 				enumValuesPage = 1,
 			} = params
 
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 
 			try {
 				const props = getProps(agent)
@@ -805,6 +787,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -815,6 +798,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 		'graphql_complete_schema',
 		'Fetch the complete Cloudflare GraphQL API schema (combines overview and important type details)',
 		{
+			account_id: AccountIdParam,
 			typesPageSize: z
 				.number()
 				.min(10)
@@ -833,7 +817,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 				.default(3)
 				.describe('Maximum number of important types to fetch details for'),
 		},
-		async (params) => {
+		async ({ account_id: account_id_param, ...params }) => {
 			const {
 				typesPageSize = 100,
 				typesPage = 1,
@@ -841,17 +825,9 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 				maxTypeDetailsToFetch = 3,
 			} = params
 
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 
 			try {
 				const props = getProps(agent)
@@ -961,6 +937,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -991,21 +968,14 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 			- If a query fails due to size limits, advise the user to add or reduce limits in their query.
 		`,
 		{
+			account_id: AccountIdParam,
 			query: z.string().describe('The GraphQL query to execute'),
 			variables: z.record(z.any()).optional().describe('Variables for the query'),
 		},
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		async ({ account_id: account_id_param, ...params }) => {
+			const resolved = resolveAccountId(agent, account_id_param)
+			if (resolved.error) return resolved.error
+			const accountId = resolved.accountId
 
 			try {
 				const props = getProps(agent)
@@ -1057,6 +1027,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -1112,6 +1083,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
