@@ -23,9 +23,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'List D1 databases',
-			annotations: {
-				readOnlyHint: true,
-			},
+			readOnlyHint: true,
 		},
 		async ({ name, page, per_page }) => {
 			const account_id = await agent.getActiveAccountId()
@@ -75,10 +73,8 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'Create D1 database',
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-			},
+			readOnlyHint: false,
+			destructiveHint: false,
 		},
 		async ({ name, primary_location_hint }) => {
 			const account_id = await agent.getActiveAccountId()
@@ -121,10 +117,8 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		{ database_id: z.string() },
 		{
 			title: 'Delete D1 database',
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: true,
-			},
+			readOnlyHint: false,
+			destructiveHint: true,
 		},
 		async ({ database_id }) => {
 			const account_id = await agent.getActiveAccountId()
@@ -164,9 +158,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		{ database_id: z.string() },
 		{
 			title: 'Get D1 database',
-			annotations: {
-				readOnlyHint: true,
-			},
+			readOnlyHint: true,
 		},
 		async ({ database_id }) => {
 			const account_id = await agent.getActiveAccountId()
@@ -211,10 +203,8 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'Query D1 database',
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-			},
+			readOnlyHint: false,
+			destructiveHint: false,
 		},
 		async ({ database_id, sql, params }) => {
 			const account_id = await agent.getActiveAccountId()

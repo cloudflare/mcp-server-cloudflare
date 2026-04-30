@@ -32,9 +32,7 @@ export function registerDocsTools(server: McpServer, env: RequiredEnv) {
 		},
 		{
 			title: 'Search Cloudflare docs',
-			annotations: {
-				readOnlyHint: true,
-			},
+			readOnlyHint: true,
 		},
 		async ({ query }) => {
 			const results = await queryVectorize(env.AI, env.VECTORIZE, query, TOP_K)
@@ -63,9 +61,7 @@ ${result.text}
 		{},
 		{
 			title: 'Get Pages migration guide',
-			annotations: {
-				readOnlyHint: true,
-			},
+			readOnlyHint: true,
 		},
 		async () => {
 			const res = await fetch(
