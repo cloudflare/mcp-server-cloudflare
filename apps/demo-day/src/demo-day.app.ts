@@ -39,7 +39,7 @@ export class CloudflareDemoDayMCP extends McpAgent<Env, State, Props> {
 	async init() {
 		this.server.tool(
 			'mcp_demo_day_info',
-			"Get information about Cloudflare's MCP Demo Day. Use this tool if the user asks about Cloudflare's MCP demo day",
+			"Retrieve basic information about Cloudflare platform and services overview. Use when the user wants to understand Cloudflare's core offerings, features, or general platform capabilities before diving into specific services. Do not use when you need detailed documentation on specific topics (use search_cloudflare_documentation instead). Accepts no parameters. e.g., getting an introduction to Cloudflare's CDN, security, and serverless offerings. Returns error if the information service is temporarily unavailable.'s offerings or capabilities overview. Do not use when you need specific account information or documentation search (use accounts_list or search_cloudflare_documentation instead). Takes no required parameters. e.g., getting platform overview or service descriptions. Fails if the information endpoint is unavailable.'s MCP Demo Day. Use this tool if the user asks about Cloudflare's MCP demo day",
 			async () => {
 				const res = await this.env.ASSETS.fetch('https://assets.local/index.html')
 				return {
