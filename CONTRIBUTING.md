@@ -6,11 +6,17 @@ We welcome contributions to all of our MCP servers! Here's a quick run down on h
 
 This monorepo has two top-level directories: `/apps` and `/packages`.
 
-- **/apps**: Containing directories for each server. Within each server, you'll find a `CONTRIBUTING.md` with any special instructions on how to get set up:
-  - [apps/workers-observability](apps/workers-observability)
-  - [apps/workers-bindings](apps/workers-bindings)
-  - [apps/radar](apps/radar)
-  - [apps/cloudflare-one-casb](apps/cloudflare-one-casb)
+- **/apps**: Containing directories for each server. Some servers include a
+  `CONTRIBUTING.md` with special setup instructions:
+  - [apps/ai-gateway](apps/ai-gateway/CONTRIBUTING.md)
+  - [apps/autorag](apps/autorag/CONTRIBUTING.md)
+  - [apps/browser-rendering](apps/browser-rendering/CONTRIBUTING.md)
+  - [apps/dns-analytics](apps/dns-analytics/CONTRIBUTING.md)
+  - [apps/radar](apps/radar/CONTRIBUTING.md)
+  - [apps/sandbox-container](apps/sandbox-container/CONTRIBUTING.md)
+  - [apps/workers-bindings](apps/workers-bindings/CONTRIBUTING.md)
+  - [apps/workers-builds](apps/workers-builds/CONTRIBUTING.md)
+  - [apps/workers-observability](apps/workers-observability/CONTRIBUTING.md)
 - **/packages**: Containing shared packages used across our various apps.
   - packages/eslint-config: Eslint config used by all apps and packages.
   - packages/typescript-config: tsconfig used by all apps and packages.
