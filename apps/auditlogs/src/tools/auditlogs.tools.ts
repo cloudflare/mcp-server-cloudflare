@@ -7,7 +7,7 @@ import type { AuditlogMCP } from '../auditlogs.app'
 
 export const actionResults = z.enum(['success', 'failure', ''])
 export const actionTypes = z.enum(['create', 'delete', 'view', 'update', 'login'])
-export const actorContexts = z.enum(['api_key', 'api_token', 'dash', 'oauth', 'origin_ca_key'])
+export const actorContexts = z.enum(['api', 'api_key', 'api_token', 'dash', 'oauth', 'origin_ca_key'])
 export const actorTypes = z.enum(['cloudflare_admin', 'account', 'user', 'system'])
 export const resourceScopes = z.enum(['memberships', 'accounts', 'user', 'zones'])
 export const sortDirections = z.enum(['desc', 'asc'])
