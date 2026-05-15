@@ -4,6 +4,17 @@ This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introdu
 
 You should use this as a template to build an MCP server for Cloudflare, provided by Cloudflare at `server-name.mcp.cloudflare.com`. It has a basic set of tools `apps/template-start-here/src/tools/logpush.tools.ts` — you can modify these to do what you need
 
+## Required Cloudflare permissions
+
+When using Cloudflare OAuth, this server requests the following scopes:
+
+| OAuth scope      | API token permission                     |
+| ---------------- | ---------------------------------------- |
+| `user:read`      | User Details Read                        |
+| `offline_access` | OAuth only; not an API token permission  |
+| `account:read`   | Account Settings Read                    |
+| `teams:read`     | Zero Trust Read and Cloudflare CASB Read |
+
 ## Getting Started
 
 - Set secrets via Wrangler

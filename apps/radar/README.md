@@ -178,6 +178,18 @@ Currently available tools:
 - `What are the details of IP address 8.8.8.8?`
 - `Give me full information about IP 1.1.1.1 including ASN details.`
 
+## Required Cloudflare permissions
+
+When using Cloudflare OAuth, this server requests the following scopes:
+
+| OAuth scope         | API token permission                    |
+| ------------------- | --------------------------------------- |
+| `user:read`         | User Details Read                       |
+| `offline_access`    | OAuth only; not an API token permission |
+| `account:read`      | Account Settings Read                   |
+| `radar:read`        | User Details Read                       |
+| `url_scanner:write` | URL Scanner Edit                        |
+
 ## Access the remote MCP server from any MCP Client
 
 If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://radar.mcp.cloudflare.com`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).

@@ -18,6 +18,17 @@ Currently available tools:
 - `Were there any suspicious changes made to my Cloudflare account yesterday around lunch time?`
 - `When was the last activity that updated a DNS record?`
 
+## Required Cloudflare permissions
+
+When using Cloudflare OAuth, this server requests the following scopes:
+
+| OAuth scope      | API token permission                         |
+| ---------------- | -------------------------------------------- |
+| `user:read`      | User Details Read                            |
+| `offline_access` | OAuth only; not an API token permission      |
+| `account:read`   | Account Settings Read                        |
+| `auditlogs:read` | Account Settings Read for account audit logs |
+
 ## Access the remote MCP server from any MCP Client
 
 If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://auditlogs.mcp.cloudflare.com/mcp`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).

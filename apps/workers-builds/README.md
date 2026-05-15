@@ -26,6 +26,18 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 - `Show me the logs for build my latest build.`
 - `Did the latest build for worker frontend-app succeed?`
 
+## Required Cloudflare permissions
+
+When using Cloudflare OAuth, this server requests the following scopes:
+
+| OAuth scope           | API token permission                    |
+| --------------------- | --------------------------------------- |
+| `user:read`           | User Details Read                       |
+| `offline_access`      | OAuth only; not an API token permission |
+| `account:read`        | Account Settings Read                   |
+| `workers:read`        | Workers Scripts Read                    |
+| `workers_builds:read` | Workers CI Read                         |
+
 ## Access the remote MCP server from from any MCP Client
 
 If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://builds.mcp.cloudflare.com`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).

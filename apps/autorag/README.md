@@ -50,6 +50,17 @@ Currently available tools:
 - `Search for documents in AutoRAG with ID 'rag123' using the query 'cloudflare security'.`
 - `Perform an AI search in AutoRAG with ID 'rag456' for 'best practices for vector stores'.`
 
+## Required Cloudflare permissions
+
+When using Cloudflare OAuth, this server requests the following scopes:
+
+| OAuth scope      | API token permission                    |
+| ---------------- | --------------------------------------- |
+| `user:read`      | User Details Read                       |
+| `offline_access` | OAuth only; not an API token permission |
+| `account:read`   | Account Settings Read                   |
+| `rag:write`      | Auto Rag Write                          |
+
 ## Access the remote MCP server from any MCP Client
 
 > The following setup documentation is retained for existing users. New users should follow the migration path to [`mcp.cloudflare.com/mcp`](https://mcp.cloudflare.com/mcp) documented above.
