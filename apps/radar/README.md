@@ -8,11 +8,11 @@ All new work should move to the unified server:
 
 ```json
 {
-  "mcpServers": {
-    "cloudflare-api": {
-      "url": "https://mcp.cloudflare.com/mcp"
-    }
-  }
+	"mcpServers": {
+		"cloudflare-api": {
+			"url": "https://mcp.cloudflare.com/mcp"
+		}
+	}
 }
 ```
 
