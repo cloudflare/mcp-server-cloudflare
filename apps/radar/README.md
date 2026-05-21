@@ -1,5 +1,27 @@
 # Cloudflare Radar MCP Server 📡
 
+## ⚠️ Deprecated
+
+**This server is deprecated.** The unified Cloudflare MCP server at [`mcp.cloudflare.com/mcp`](https://mcp.cloudflare.com/mcp) already covers all Radar API endpoints (along with the rest of the Cloudflare API).
+
+All new work should move to the unified server:
+
+```json
+{
+  "mcpServers": {
+    "cloudflare-api": {
+      "url": "https://mcp.cloudflare.com/mcp"
+    }
+  }
+}
+```
+
+That server uses [Code Mode](https://blog.cloudflare.com/code-mode-mcp/) — two generic tools (`search` and `execute`) that give agents access to the full Cloudflare API through code execution. It supports both OAuth (connect to the URL and authorize) and Cloudflare API tokens (send as a bearer token). See [`cloudflare/mcp`](https://github.com/cloudflare/mcp) for details.
+
+The tools below still function. No new features will be added. Please migrate at your earliest convenience.
+
+---
+
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP
 connections, with Cloudflare OAuth built-in.
 
