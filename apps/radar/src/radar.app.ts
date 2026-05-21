@@ -92,7 +92,7 @@ export class RadarMCP extends McpAgent<Env, State, Props> {
 				name: this.env.MCP_SERVER_NAME,
 				version: this.env.MCP_SERVER_VERSION,
 			},
-			options: { instructions: DEPRECATION_INSTRUCTIONS },
+			options: { instructions: DEPRECATION_INSTRUCTIONS + '\n\n---\n\n' + BASE_INSTRUCTIONS },
 		})
 
 		registerAccountTools(this)

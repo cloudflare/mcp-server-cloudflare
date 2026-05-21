@@ -49,7 +49,6 @@
 				}
 			]
 		},
-
 		{
 			"url": "https://containers.mcp.cloudflare.com/mcp",
 			"type": "streamable-http",
@@ -199,7 +198,6 @@
 				}
 			]
 		},
-
 		{
 			"url": "https://containers.mcp.cloudflare.com/sse",
 			"type": "sse",
