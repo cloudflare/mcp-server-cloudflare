@@ -49,18 +49,7 @@
 				}
 			]
 		},
-		{
-			"url": "https://radar.mcp.cloudflare.com/mcp",
-			"type": "streamable-http",
-			"headers": [
-				{
-					"name": "Authentication",
-					"description": "Optional Cloudflare API key for authentication if not using OAuth. Can use User or Account owned tokens as a Bearer token.",
-					"is_required": false,
-					"is_secret": true
-				}
-			]
-		},
+
 		{
 			"url": "https://containers.mcp.cloudflare.com/mcp",
 			"type": "streamable-http",
@@ -210,18 +199,7 @@
 				}
 			]
 		},
-		{
-			"url": "https://radar.mcp.cloudflare.com/sse",
-			"type": "sse",
-			"headers": [
-				{
-					"name": "Authentication",
-					"description": "Optional Cloudflare API key for authentication if not using OAuth. Can use User or Account owned tokens as a Bearer token.",
-					"is_required": false,
-					"is_secret": true
-				}
-			]
-		},
+
 		{
 			"url": "https://containers.mcp.cloudflare.com/sse",
 			"type": "sse",

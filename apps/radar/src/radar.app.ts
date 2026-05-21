@@ -30,6 +30,34 @@ const metrics = new MetricsTracker(env.MCP_METRICS, {
 	version: env.MCP_SERVER_VERSION,
 })
 
+// NOTE: This server is deprecated. The unified Cloudflare MCP server at
+// https://mcp.cloudflare.com/mcp already covers all Radar API endpoints
+// (see https://github.com/cloudflare/mcp).
+//
+// The deprecation notice is surfaced via the MCP `instructions` field on the
+// initialize response. Humans see it in MCP-client UIs that render
+// `instructions`; it is also documented in README.md and CONTRIBUTING.md.
+export const DEPRECATION_INSTRUCTIONS = `⚠️ DEPRECATED: This Radar MCP server is deprecated.
+
+The unified Cloudflare MCP server at mcp.cloudflare.com/mcp already covers all
+Radar API endpoints (along with the rest of the Cloudflare API) via Code Mode —
+two generic tools (\`search\` and \`execute\`) that give agents access to the full
+Cloudflare API through code execution. It supports both OAuth (connect to the URL
+and authorize) and Cloudflare API tokens (send as a bearer token).
+
+Example MCP client configuration:
+
+{
+  "mcpServers": {
+    "cloudflare-api": {
+      "url": "https://mcp.cloudflare.com/mcp"
+    }
+  }
+}
+
+This Radar server continues to respond for now, but will be retired. Please
+migrate at your earliest convenience.`
+
 // Context from the auth process, encrypted & stored in the auth token
 // and provided to the DurableMCP as this.props
 type Props = AuthProps
@@ -64,7 +92,7 @@ export class RadarMCP extends McpAgent<Env, State, Props> {
 				name: this.env.MCP_SERVER_NAME,
 				version: this.env.MCP_SERVER_VERSION,
 			},
-			options: { instructions: BASE_INSTRUCTIONS },
+			options: { instructions: DEPRECATION_INSTRUCTIONS },
 		})
 
 		registerAccountTools(this)
