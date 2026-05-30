@@ -1101,6 +1101,9 @@ importers:
       hono:
         specifier: 4.7.6
         version: 4.7.6
+      mime:
+        specifier: 4.0.6
+        version: 4.0.6
       toucan-js:
         specifier: 4.1.1
         version: 4.1.1
@@ -8372,7 +8375,7 @@ snapshots:
       flatted: 3.3.3
       pathe: 2.0.3
       sirv: 3.0.1
-      tinyglobby: 0.2.12
+      tinyglobby: 0.2.13
       tinyrainbow: 2.0.0
       vitest: 3.0.9(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/ui@3.0.9)(lightningcss@1.29.2)(tsx@4.19.3)
 
@@ -9599,9 +9602,9 @@ snapshots:
 
   define-data-property@1.1.4:
     dependencies:
-      es-define-property: 1.0.0
+      es-define-property: 1.0.1
       es-errors: 1.3.0
-      gopd: 1.0.1
+      gopd: 1.2.0
 
   define-properties@1.2.1:
     dependencies:
@@ -10457,7 +10460,7 @@ snapshots:
 
   has-property-descriptors@1.0.2:
     dependencies:
-      es-define-property: 1.0.0
+      es-define-property: 1.0.1
 
   has-proto@1.0.3: {}
 
@@ -11687,8 +11690,8 @@ snapshots:
       define-data-property: 1.1.4
       es-errors: 1.3.0
       function-bind: 1.1.2
-      get-intrinsic: 1.2.4
-      gopd: 1.0.1
+      get-intrinsic: 1.3.0
+      gopd: 1.2.0
       has-property-descriptors: 1.0.2
 
   set-function-name@2.0.2:
