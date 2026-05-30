@@ -14,7 +14,7 @@ import { PaginationPerPageParam } from '../types/shared.types'
 export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	agent.server.tool(
 		'r2_buckets_list',
-		'List r2 buckets in your Cloudflare account',
+		'List all R2 storage buckets in your Cloudflare account. Use when the user wants to view, browse, or inventory their existing R2 buckets to see what storage resources are available. Do not use when you need details about a specific bucket (use r2_bucket_get instead) or want to create a new bucket (use r2_bucket_create instead). Accepts `account_id` (optional, uses active account if not specified). e.g., returns bucket names, creation dates, and basic metadata for all buckets. Raises an error if the account lacks R2 access permissions or the API credentials are invalid.',
 		{
 			cursor: BucketListCursorParam,
 			direction: BucketListDirectionParam,
@@ -71,7 +71,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 
 	agent.server.tool(
 		'r2_bucket_create',
-		'Create a new r2 bucket in your Cloudflare account',
+		'Create a new R2 bucket in your Cloudflare account. Use when the user wants to set up object storage for files, backups, or static assets. Do not use when you need to view existing buckets (use r2_buckets_list instead) or get details about a specific bucket (use r2_bucket_get instead). Accepts `name` (required, bucket identifier) and `location` (optional, geographic region). e.g., name="my-storage-bucket", location="us-east-1". Raises an error if the bucket name already exists or contains invalid characters."my-app-storage", location="us-east-1". Raises an error if the bucket name already exists or contains invalid characters.',
 		{ name: BucketNameSchema },
 		{
 			title: 'Create R2 bucket',
@@ -115,7 +115,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 
 	agent.server.tool(
 		'r2_bucket_get',
-		'Get details about a specific R2 bucket',
+		'Get detailed information about a specific R2 bucket in your Cloudflare account. Use when the user wants to inspect configuration, settings, or metadata for an individual R2 storage bucket. Do not use when you need to list all buckets (use r2_buckets_list instead) or view bucket metrics (use r2_metrics_list instead). Accepts `bucket_name` (required string), e.g., "my-storage-bucket" or "production-assets". Raises an error if the bucket does not exist or you lack permissions to access it. "my-storage-bucket" or "production-assets". Raises an error if the bucket does not exist or you lack permissions to access it.',
 		{ name: BucketNameSchema },
 		{
 			title: 'Get R2 bucket',
@@ -155,7 +155,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 
 	agent.server.tool(
 		'r2_bucket_delete',
-		'Delete an R2 bucket',
+		'Delete an R2 bucket from your Cloudflare account. Use when the user wants to permanently remove an empty R2 storage bucket that is no longer needed. Do not use when you need to create a new bucket (use r2_bucket_create instead) or list existing buckets (use r2_buckets_list instead). Accepts `bucket_name` (required string), e.g., "my-storage-bucket". Raises an error if the bucket contains objects or does not exist. "my-storage-bucket" or "production-assets". Raises an error if the bucket does not exist or contains objects that must be deleted first.',
 		{ name: BucketNameSchema },
 		{
 			title: 'Delete R2 bucket',
@@ -719,7 +719,7 @@ export function registerR2BucketTools(agent: CloudflareMcpAgent) {
 	// 	}
 	// )
 
-	// agent.server.tool('r2_metrics_list', 'List metrics for an R2 bucket', async () => {
+	// agent.server.tool('r2_metrics_list', 'List performance and usage metrics for a specific R2 bucket in your Cloudflare account. Use when the user wants to monitor storage statistics, request counts, or bandwidth usage for an R2 bucket. Do not use when you need to view bucket configuration details (use r2_bucket_get instead). Accepts `bucket_name` (required) and optional time range parameters. e.g., bucket_name="my-storage-bucket". Raises an error if the bucket does not exist or you lack permissions to view metrics."my-storage-bucket". Raises an error if the bucket does not exist or you lack permissions to view metrics.', async () => {
 	// 	const account_id = await agent.getActiveAccountId()
 	// 	if (!account_id) {
 	// 		return MISSING_ACCOUNT_ID_RESPONSE

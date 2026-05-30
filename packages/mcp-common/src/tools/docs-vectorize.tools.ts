@@ -59,7 +59,7 @@ ${result.text}
 	// prompt support is much less common than tools.
 	server.tool(
 		'migrate_pages_to_workers_guide',
-		`ALWAYS read this guide before migrating Pages projects to Workers.`,
+		`Read the comprehensive migration guide for converting Cloudflare Pages projects to Workers. Use when the user wants to understand the process, requirements, and best practices for migrating from Pages to Workers deployment. Do not use when you need general Cloudflare documentation (use search_cloudflare_documentation instead). This tool provides essential pre-migration information without requiring parameters. e.g., covers routing differences, build configurations, and environment variable handling. Returns an error if the guide content is unavailable or corrupted.`,
 		{},
 		{
 			title: 'Get Pages migration guide',

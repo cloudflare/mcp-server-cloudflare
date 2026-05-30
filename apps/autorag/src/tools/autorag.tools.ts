@@ -11,7 +11,7 @@ import type { AutoRAGMCP } from '../autorag.app'
 export function registerAutoRAGTools(agent: AutoRAGMCP) {
 	agent.server.tool(
 		'list_rags',
-		'List AutoRAGs (vector stores)',
+		'List all AutoRAGs (vector stores) in your Cloudflare account. Use when the user wants to view, browse, or inventory existing vector databases for AI applications. Do not use when you need to search documentation or query specific databases (use search_cloudflare_documentation or d1_database_query instead). Accepts `account_id` (optional, uses active account if not specified). e.g., returns vector stores like "my-embeddings-db" or "product-search-vectors". Raises an error if the account lacks AutoRAG access or API authentication fails. "customer-support-kb" or "product-docs-embeddings". Raises an error if no active account is set or if the account lacks AutoRAG access permissions.',
 		{
 			page: pageParam,
 			per_page: perPageParam,
@@ -73,7 +73,7 @@ export function registerAutoRAGTools(agent: AutoRAGMCP) {
 
 	agent.server.tool(
 		'search',
-		'Search Documents using AutoRAG (vector store)',
+		'Search documents using AutoRAG vector store to find relevant content based on semantic similarity. Use when the user wants to find information, answers, or relevant passages from indexed documents using natural language queries. Do not use when you need to search Cloudflare-specific documentation (use search_cloudflare_documentation instead). Accepts `query` (required string) for the search terms, e.g., "machine learning best practices" or "API authentication methods". Returns error if no documents are indexed in the vector store. "How to configure SSL certificates" or "database migration best practices". Returns error if the vector store is not initialized or the query is empty.',
 		{
 			rag_id: z.string().describe('ID of the AutoRAG to search'),
 			query: z.string().describe('Query to search for. Can be a URL, a title, or a snippet.'),
@@ -139,7 +139,7 @@ export function registerAutoRAGTools(agent: AutoRAGMCP) {
 
 	agent.server.tool(
 		'ai_search',
-		'AI Search Documents using AutoRAG (vector store)',
+		'Search documents using AutoRAG vector store to find semantically relevant content. Use when the user wants to find information, answers, or relevant passages from indexed documents using natural language queries. Do not use when you need to search Cloudflare-specific documentation (use search_cloudflare_documentation instead). Accepts `query` (required string) for the search terms, e.g., "machine learning best practices" or "API authentication methods". Raises an error if the vector store is not initialized or the query is empty. "How to configure SSL certificates" or "database migration best practices". Returns error if the vector store is not initialized or the query is empty.',
 		{
 			rag_id: z.string().describe('ID of the AutoRAG to search'),
 			query: z.string().describe('Query to search for. Can be a URL, a title, or a snippet.'),

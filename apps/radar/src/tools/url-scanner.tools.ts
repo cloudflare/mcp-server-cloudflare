@@ -46,7 +46,7 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 	// Search URL scans
 	agent.server.tool(
 		'search_url_scans',
-		"Search URL scans using ElasticSearch-like query syntax. Examples: 'page.domain:example.com', 'verdicts.malicious:true', 'page.asn:AS24940 AND hash:xxx', 'apikey:me AND date:[2025-01 TO 2025-02]'",
+		"Search URL scans using ElasticSearch-like query syntax to find matching scan results. Use when the user wants to filter, find, or analyze URL scan data based on specific criteria like domains, status codes, or scan metadata. Do not use when you need to search Cloudflare documentation or configuration details (use search_cloudflare_documentation instead). Accepts `query` (required ElasticSearch syntax string) and optional filtering parameters, e.g., "domain:example.com AND status:200" or "scan_date:[2024-01-01 TO 2024-12-31]". Raises an error if the query syntax is invalid or the scan database is unavailable. "domain:example.com AND status:200" or "scan_date:[2024-01-01 TO 2024-12-31]". Do not use when you need to search Cloudflare documentation or configuration details (use search_cloudflare_documentation instead). Returns an error if the query syntax is malformed or the search service is unavailable. 'page.domain:example.com', 'verdicts.malicious:true', 'page.asn:AS24940 AND hash:xxx', 'apikey:me AND date:[2025-01 TO 2025-02]'",
 		{
 			query: SearchQueryParam,
 			size: SearchSizeParam,
@@ -95,7 +95,7 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 	// Create URL scan
 	agent.server.tool(
 		'create_url_scan',
-		'Submit a URL to scan. Returns the scan UUID which can be used to retrieve results.',
+		'Submit a URL for security scanning and malware detection. Use when the user wants to analyze a website or URL for threats, vulnerabilities, or suspicious content before visiting or sharing it. Accepts `url` (required string), e.g., "https://example.com" or "http://suspicious-site.net". Do not use when you need to search Cloudflare documentation or manage Cloudflare services (use search_cloudflare_documentation or other Cloudflare tools instead). Raises an error if the URL format is invalid or the scanning service is temporarily unavailable. "https://example.com" or "http://suspicious-site.net". Returns a scan UUID that can be used to retrieve detailed results once the scan completes. Raises an error if the URL format is invalid or the scanning service is unavailable. Do not use when you need to search Cloudflare documentation about URL scanning (use search_cloudflare_documentation instead).',
 		{
 			url: UrlParam,
 			visibility: ScanVisibilityParam,
@@ -156,7 +156,7 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 	// Get URL scan result
 	agent.server.tool(
 		'get_url_scan',
-		'Get the results of a URL scan by its UUID. Returns detailed information including verdicts, page info, requests, cookies, and more.',
+		'Retrieve the results of a URL scan by its UUID and return detailed security analysis including verdicts, page info, requests, and cookies. Use when the user wants to examine or review the findings from a previously initiated URL security scan. Do not use when you need to start a new scan (use a URL scanning tool instead). Accepts `uuid` (required string) identifying the specific scan, e.g., "a1b2c3d4-e5f6-7890-abcd-ef1234567890". Raises an error if the UUID is invalid or the scan results are not yet available. "a1b2c3d4-e5f6-7890-abcd-ef1234567890". Returns error if the UUID is invalid or the scan is still in progress.',
 		{
 			scanId: ScanIdParam,
 		},
@@ -218,7 +218,7 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 	// Get scan screenshot
 	agent.server.tool(
 		'get_url_scan_screenshot',
-		'Get the screenshot URL for a completed scan.',
+		'Retrieve the screenshot URL for a completed URL scan in Cloudflare. Use when the user wants to view or download the visual capture of a scanned webpage after the scan has finished processing. Do not use when you need to initiate a new scan (use start_url_scan instead). Accepts `scan_id` (required) to identify the specific completed scan. e.g., scan_id="abc123-def456-ghi789". Raises an error if the scan ID does not exist or the scan is still in progress."abc123-def456-ghi789". Returns an error if the scan is still in progress or the scan ID does not exist.',
 		{
 			scanId: ScanIdParam,
 			resolution: z
@@ -274,7 +274,7 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 	// Get scan HAR
 	agent.server.tool(
 		'get_url_scan_har',
-		'Get the HAR (HTTP Archive) data for a completed scan. Contains detailed network request/response information.',
+		'Retrieve the HAR (HTTP Archive) data for a completed URL scan containing detailed network request and response information. Use when the user wants to analyze network traffic, debug performance issues, or inspect HTTP headers from a website scan. Do not use when you need to initiate a new scan (use start_url_scan instead). Accepts `scan_id` (required string identifier for the completed scan), e.g., scan_id="abc123-def456-ghi789". Raises an error if the scan ID does not exist or the scan is still in progress."abc123-def456-ghi789". Returns error if the scan ID does not exist or the scan is still in progress.',
 		{
 			scanId: ScanIdParam,
 		},
