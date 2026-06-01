@@ -1,10 +1,11 @@
 import { GrantType } from '@cloudflare/workers-oauth-provider'
-import { fetchMock } from 'cloudflare:test'
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { http, HttpResponse } from 'msw'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { refreshAuthToken } from './cloudflare-auth'
 import { getUserAndAccounts, handleTokenExchangeCallback } from './cloudflare-oauth-handler'
 import { McpError } from './mcp-error'
+import { server } from './test/msw-server'
 import { OAuthError } from './workers-oauth-utils'
 
 import type { TokenExchangeCallbackOptions } from '@cloudflare/workers-oauth-provider'
@@ -18,11 +19,6 @@ vi.mock('./cloudflare-auth', () => ({
 }))
 
 const mockRefreshAuthToken = vi.mocked(refreshAuthToken)
-
-beforeAll(() => {
-	fetchMock.activate()
-	fetchMock.disableNetConnect()
-})
 
 beforeEach(() => {
 	vi.resetAllMocks()
@@ -270,17 +266,19 @@ describe('handleTokenExchangeCallback', () => {
 })
 
 function mockUserResponse(status: number, body?: unknown) {
-	fetchMock
-		.get('https://api.cloudflare.com')
-		.intercept({ path: '/client/v4/user', method: 'GET' })
-		.reply(status, body ? JSON.stringify(body) : '')
+	server.use(
+		http.get('https://api.cloudflare.com/client/v4/user', () =>
+			HttpResponse.text(body ? JSON.stringify(body) : '', { status })
+		)
+	)
 }
 
 function mockAccountsResponse(status: number, body?: unknown) {
-	fetchMock
-		.get('https://api.cloudflare.com')
-		.intercept({ path: '/client/v4/accounts', method: 'GET' })
-		.reply(status, body ? JSON.stringify(body) : '')
+	server.use(
+		http.get('https://api.cloudflare.com/client/v4/accounts', () =>
+			HttpResponse.text(body ? JSON.stringify(body) : '', { status })
+		)
+	)
 }
 
 const v4User = {
@@ -393,10 +391,9 @@ describe('getUserAndAccounts', () => {
 	})
 
 	it('gracefully handles malformed JSON in /user response', async () => {
-		fetchMock
-			.get('https://api.cloudflare.com')
-			.intercept({ path: '/client/v4/user', method: 'GET' })
-			.reply(200, 'not json')
+		server.use(
+			http.get('https://api.cloudflare.com/client/v4/user', () => HttpResponse.text('not json'))
+		)
 		mockAccountsResponse(200, v4Accounts)
 
 		// Should still return accounts even if user parsing fails

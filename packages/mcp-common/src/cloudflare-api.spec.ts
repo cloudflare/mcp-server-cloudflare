@@ -1,13 +1,11 @@
-import { fetchMock } from 'cloudflare:test'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { http, HttpResponse } from 'msw'
+import { describe, expect, it } from 'vitest'
 
 import { fetchCloudflareApi } from './cloudflare-api'
 import { McpError } from './mcp-error'
+import { server } from './test/msw-server'
 
-beforeAll(() => {
-	fetchMock.activate()
-	fetchMock.disableNetConnect()
-})
+const ENDPOINT = 'https://api.cloudflare.com/client/v4/accounts/test-account-id/workers/scripts'
 
 describe('fetchCloudflareApi', () => {
 	const baseParams = {
@@ -18,26 +16,20 @@ describe('fetchCloudflareApi', () => {
 
 	it('returns parsed data on success', async () => {
 		const responseData = { result: { id: 'test-script' } }
-		fetchMock
-			.get('https://api.cloudflare.com')
-			.intercept({
-				path: '/client/v4/accounts/test-account-id/workers/scripts',
-				method: 'GET',
-			})
-			.reply(200, responseData)
+		server.use(http.get(ENDPOINT, () => HttpResponse.json(responseData)))
 
 		const result = await fetchCloudflareApi(baseParams)
 		expect(result).toEqual(responseData)
 	})
 
 	it('throws McpError with status 404 for not found', async () => {
-		fetchMock
-			.get('https://api.cloudflare.com')
-			.intercept({
-				path: '/client/v4/accounts/test-account-id/workers/scripts',
-				method: 'GET',
-			})
-			.reply(404, JSON.stringify({ errors: [{ message: 'Script not found' }] }))
+		server.use(
+			http.get(ENDPOINT, () =>
+				HttpResponse.text(JSON.stringify({ errors: [{ message: 'Script not found' }] }), {
+					status: 404,
+				})
+			)
+		)
 
 		try {
 			await fetchCloudflareApi(baseParams)
@@ -53,13 +45,11 @@ describe('fetchCloudflareApi', () => {
 	})
 
 	it('throws McpError with status 403 for forbidden', async () => {
-		fetchMock
-			.get('https://api.cloudflare.com')
-			.intercept({
-				path: '/client/v4/accounts/test-account-id/workers/scripts',
-				method: 'GET',
-			})
-			.reply(403, JSON.stringify({ errors: [{ message: 'Forbidden' }] }))
+		server.use(
+			http.get(ENDPOINT, () =>
+				HttpResponse.text(JSON.stringify({ errors: [{ message: 'Forbidden' }] }), { status: 403 })
+			)
+		)
 
 		try {
 			await fetchCloudflareApi(baseParams)
@@ -73,13 +63,13 @@ describe('fetchCloudflareApi', () => {
 	})
 
 	it('throws McpError with status 429 for rate limiting', async () => {
-		fetchMock
-			.get('https://api.cloudflare.com')
-			.intercept({
-				path: '/client/v4/accounts/test-account-id/workers/scripts',
-				method: 'GET',
-			})
-			.reply(429, JSON.stringify({ errors: [{ message: 'Rate limited' }] }))
+		server.use(
+			http.get(ENDPOINT, () =>
+				HttpResponse.text(JSON.stringify({ errors: [{ message: 'Rate limited' }] }), {
+					status: 429,
+				})
+			)
+		)
 
 		try {
 			await fetchCloudflareApi(baseParams)
@@ -93,13 +83,9 @@ describe('fetchCloudflareApi', () => {
 	})
 
 	it('throws McpError with status 502 for upstream 500 (bad gateway)', async () => {
-		fetchMock
-			.get('https://api.cloudflare.com')
-			.intercept({
-				path: '/client/v4/accounts/test-account-id/workers/scripts',
-				method: 'GET',
-			})
-			.reply(500, 'Internal Server Error')
+		server.use(
+			http.get(ENDPOINT, () => HttpResponse.text('Internal Server Error', { status: 500 }))
+		)
 
 		try {
 			await fetchCloudflareApi(baseParams)
@@ -115,13 +101,7 @@ describe('fetchCloudflareApi', () => {
 	})
 
 	it('throws McpError with status 502 for upstream 502', async () => {
-		fetchMock
-			.get('https://api.cloudflare.com')
-			.intercept({
-				path: '/client/v4/accounts/test-account-id/workers/scripts',
-				method: 'GET',
-			})
-			.reply(502, 'Bad Gateway')
+		server.use(http.get(ENDPOINT, () => HttpResponse.text('Bad Gateway', { status: 502 })))
 
 		try {
 			await fetchCloudflareApi(baseParams)
@@ -138,13 +118,7 @@ describe('fetchCloudflareApi', () => {
 
 	it('preserves error text in internalMessage (not user-facing message)', async () => {
 		const errorBody = '{"errors":[{"message":"Worker not found","code":10007}]}'
-		fetchMock
-			.get('https://api.cloudflare.com')
-			.intercept({
-				path: '/client/v4/accounts/test-account-id/workers/scripts',
-				method: 'GET',
-			})
-			.reply(404, errorBody)
+		server.use(http.get(ENDPOINT, () => HttpResponse.text(errorBody, { status: 404 })))
 
 		try {
 			await fetchCloudflareApi(baseParams)

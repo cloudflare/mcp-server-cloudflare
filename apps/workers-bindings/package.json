@@ -17,11 +17,11 @@
 		"test": "vitest"
 	},
 	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "0.12.0",
-		"@types/node": "22.14.1",
+		"@cloudflare/vitest-pool-workers": "0.16.11",
+		"@types/node": "22.15.17",
 		"marked": "15.0.7",
 		"typescript": "5.5.4",
-		"vitest": "3.2.6",
+		"vitest": "4.1.8",
 		"wrangler": "4.96.0"
 	},
 	"dependencies": {
@@ -38,5 +38,6 @@
 		"start-server-and-test": "2.0.11",
 		"vitest-evals": "0.1.4",
 		"zod": "4.4.3"
-	}
+	},
+	"type": "module"
 }

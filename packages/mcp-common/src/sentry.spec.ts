@@ -1,14 +1,10 @@
-import { fetchMock } from 'cloudflare:test'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { http, HttpResponse } from 'msw'
+import { describe, expect, it } from 'vitest'
 
 import { fetchCloudflareApi } from './cloudflare-api'
 import { getAuthToken, refreshAuthToken } from './cloudflare-auth'
 import { McpError } from './mcp-error'
-
-beforeAll(() => {
-	fetchMock.activate()
-	fetchMock.disableNetConnect()
-})
+import { server } from './test/msw-server'
 
 /**
  * Tests that the actual production code sets reportToSentry correctly:
@@ -24,13 +20,15 @@ describe('reportToSentry flag in production code paths', () => {
 		}
 
 		it('sets reportToSentry=false for 4xx errors', async () => {
-			fetchMock
-				.get('https://api.cloudflare.com')
-				.intercept({
-					path: '/client/v4/accounts/test-account-id/workers/scripts',
-					method: 'GET',
-				})
-				.reply(404, JSON.stringify({ errors: [{ message: 'Not found' }] }))
+			server.use(
+				http.get(
+					'https://api.cloudflare.com/client/v4/accounts/test-account-id/workers/scripts',
+					() =>
+						HttpResponse.text(JSON.stringify({ errors: [{ message: 'Not found' }] }), {
+							status: 404,
+						})
+				)
+			)
 
 			try {
 				await fetchCloudflareApi(baseParams)
@@ -42,13 +40,12 @@ describe('reportToSentry flag in production code paths', () => {
 		})
 
 		it('sets reportToSentry=true for 5xx errors', async () => {
-			fetchMock
-				.get('https://api.cloudflare.com')
-				.intercept({
-					path: '/client/v4/accounts/test-account-id/workers/scripts',
-					method: 'GET',
-				})
-				.reply(500, 'Internal Server Error')
+			server.use(
+				http.get(
+					'https://api.cloudflare.com/client/v4/accounts/test-account-id/workers/scripts',
+					() => HttpResponse.text('Internal Server Error', { status: 500 })
+				)
+			)
 
 			try {
 				await fetchCloudflareApi(baseParams)
@@ -70,10 +67,11 @@ describe('reportToSentry flag in production code paths', () => {
 		}
 
 		it('sets reportToSentry=false for 400 (invalid_grant)', async () => {
-			fetchMock
-				.get('https://dash.cloudflare.com')
-				.intercept({ path: '/oauth2/token', method: 'POST' })
-				.reply(400, JSON.stringify({ error: 'invalid_grant' }))
+			server.use(
+				http.post('https://dash.cloudflare.com/oauth2/token', () =>
+					HttpResponse.text(JSON.stringify({ error: 'invalid_grant' }), { status: 400 })
+				)
+			)
 
 			try {
 				await getAuthToken(baseParams)
@@ -85,10 +83,11 @@ describe('reportToSentry flag in production code paths', () => {
 		})
 
 		it('sets reportToSentry=true for 502 (upstream 500)', async () => {
-			fetchMock
-				.get('https://dash.cloudflare.com')
-				.intercept({ path: '/oauth2/token', method: 'POST' })
-				.reply(500, 'Internal Server Error')
+			server.use(
+				http.post('https://dash.cloudflare.com/oauth2/token', () =>
+					HttpResponse.text('Internal Server Error', { status: 500 })
+				)
+			)
 
 			try {
 				await getAuthToken(baseParams)
@@ -108,10 +107,11 @@ describe('reportToSentry flag in production code paths', () => {
 		}
 
 		it('sets reportToSentry=false for 400 (expired refresh token)', async () => {
-			fetchMock
-				.get('https://dash.cloudflare.com')
-				.intercept({ path: '/oauth2/token', method: 'POST' })
-				.reply(400, JSON.stringify({ error: 'invalid_grant' }))
+			server.use(
+				http.post('https://dash.cloudflare.com/oauth2/token', () =>
+					HttpResponse.text(JSON.stringify({ error: 'invalid_grant' }), { status: 400 })
+				)
+			)
 
 			try {
 				await refreshAuthToken(baseParams)
@@ -123,10 +123,11 @@ describe('reportToSentry flag in production code paths', () => {
 		})
 
 		it('sets reportToSentry=true for 502 (upstream 500)', async () => {
-			fetchMock
-				.get('https://dash.cloudflare.com')
-				.intercept({ path: '/oauth2/token', method: 'POST' })
-				.reply(500, 'Server Error')
+			server.use(
+				http.post('https://dash.cloudflare.com/oauth2/token', () =>
+					HttpResponse.text('Server Error', { status: 500 })
+				)
+			)
 
 			try {
 				await refreshAuthToken(baseParams)

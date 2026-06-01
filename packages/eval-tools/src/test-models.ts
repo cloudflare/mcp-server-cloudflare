@@ -5,9 +5,19 @@ import { GoogleGenerativeAILanguageModel } from '@ai-sdk/google/internal'
 import { createOpenAI } from '@ai-sdk/openai'
 import { OpenAIChatModelId } from '@ai-sdk/openai/internal'
 import { createAiGateway } from 'ai-gateway-provider'
-import { env } from 'cloudflare:test'
+import { env } from 'cloudflare:workers'
 import { describe } from 'vitest'
 import { createWorkersAI } from 'workers-ai-provider'
+
+// `cloudflare:workers` types `env` as the project-specific (here, empty) Cloudflare.Env.
+// Declare the eval-runtime variables this module reads; all optional, so the assignment is safe.
+interface EvalEnv {
+	CLOUDFLARE_ACCOUNT_ID?: string
+	AI_GATEWAY_ID?: string
+	AI_GATEWAY_TOKEN?: string
+	AI?: Ai
+}
+const evalEnv: EvalEnv = env
 
 export const factualityModel = getOpenAiModel('gpt-4o')
 
@@ -20,14 +30,14 @@ type AiTextGenerationModels = Exclude<
 >
 
 function getOpenAiModel(modelName: OpenAIChatModelId) {
-	if (!env.CLOUDFLARE_ACCOUNT_ID || !env.AI_GATEWAY_ID || !env.AI_GATEWAY_TOKEN) {
+	if (!evalEnv.CLOUDFLARE_ACCOUNT_ID || !evalEnv.AI_GATEWAY_ID || !evalEnv.AI_GATEWAY_TOKEN) {
 		throw new Error('No AI gateway credentials set!')
 	}
 
 	const aigateway = createAiGateway({
-		accountId: env.CLOUDFLARE_ACCOUNT_ID,
-		gateway: env.AI_GATEWAY_ID,
-		apiKey: env.AI_GATEWAY_TOKEN,
+		accountId: evalEnv.CLOUDFLARE_ACCOUNT_ID,
+		gateway: evalEnv.AI_GATEWAY_ID,
+		apiKey: evalEnv.AI_GATEWAY_TOKEN,
 	})
 
 	const ai = createOpenAI({
@@ -40,10 +50,14 @@ function getOpenAiModel(modelName: OpenAIChatModelId) {
 }
 
 function getAnthropicModel(modelName: AnthropicMessagesModelId) {
+	if (!evalEnv.CLOUDFLARE_ACCOUNT_ID || !evalEnv.AI_GATEWAY_ID || !evalEnv.AI_GATEWAY_TOKEN) {
+		throw new Error('No AI gateway credentials set!')
+	}
+
 	const aigateway = createAiGateway({
-		accountId: env.CLOUDFLARE_ACCOUNT_ID,
-		gateway: env.AI_GATEWAY_ID,
-		apiKey: env.AI_GATEWAY_TOKEN,
+		accountId: evalEnv.CLOUDFLARE_ACCOUNT_ID,
+		gateway: evalEnv.AI_GATEWAY_ID,
+		apiKey: evalEnv.AI_GATEWAY_TOKEN,
 	})
 
 	const ai = createAnthropic({
@@ -56,14 +70,14 @@ function getAnthropicModel(modelName: AnthropicMessagesModelId) {
 }
 
 function getGeminiModel(modelName: GoogleGenerativeAILanguageModel['modelId']) {
-	if (!env.CLOUDFLARE_ACCOUNT_ID || !env.AI_GATEWAY_ID || !env.AI_GATEWAY_TOKEN) {
+	if (!evalEnv.CLOUDFLARE_ACCOUNT_ID || !evalEnv.AI_GATEWAY_ID || !evalEnv.AI_GATEWAY_TOKEN) {
 		throw new Error('No AI gateway credentials set!')
 	}
 
 	const aigateway = createAiGateway({
-		accountId: env.CLOUDFLARE_ACCOUNT_ID,
-		gateway: env.AI_GATEWAY_ID,
-		apiKey: env.AI_GATEWAY_TOKEN,
+		accountId: evalEnv.CLOUDFLARE_ACCOUNT_ID,
+		gateway: evalEnv.AI_GATEWAY_ID,
+		apiKey: evalEnv.AI_GATEWAY_TOKEN,
 	})
 
 	const ai = createGoogleGenerativeAI({ apiKey: '' })
@@ -74,11 +88,11 @@ function getGeminiModel(modelName: GoogleGenerativeAILanguageModel['modelId']) {
 }
 
 function getWorkersAiModel(modelName: AiTextGenerationModels) {
-	if (!env.AI) {
+	if (!evalEnv.AI) {
 		throw new Error('No AI binding provided!')
 	}
 
-	const ai = createWorkersAI({ binding: env.AI })
+	const ai = createWorkersAI({ binding: evalEnv.AI })
 
 	const model = ai(modelName)
 	return { modelName, model, ai }

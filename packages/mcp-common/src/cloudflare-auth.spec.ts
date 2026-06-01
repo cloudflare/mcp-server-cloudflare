@@ -1,13 +1,11 @@
-import { fetchMock } from 'cloudflare:test'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { http, HttpResponse } from 'msw'
+import { describe, expect, it } from 'vitest'
 
 import { getAuthToken, refreshAuthToken } from './cloudflare-auth'
 import { McpError } from './mcp-error'
+import { server } from './test/msw-server'
 
-beforeAll(() => {
-	fetchMock.activate()
-	fetchMock.disableNetConnect()
-})
+const TOKEN_ENDPOINT = 'https://dash.cloudflare.com/oauth2/token'
 
 const validTokenResponse = {
 	access_token: 'test-access-token',
@@ -37,10 +35,7 @@ describe('getAuthToken', () => {
 	})
 
 	it('returns parsed token on success', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(200, validTokenResponse)
+		server.use(http.post(TOKEN_ENDPOINT, () => HttpResponse.json(validTokenResponse)))
 
 		const result = await getAuthToken(baseParams)
 		expect(result.access_token).toBe('test-access-token')
@@ -49,16 +44,17 @@ describe('getAuthToken', () => {
 	})
 
 	it('throws McpError with upstream status for 400 (expired/invalid grant)', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(
-				400,
-				JSON.stringify({
-					error: 'invalid_grant',
-					error_description: 'The authorization code has expired',
-				})
+		server.use(
+			http.post(TOKEN_ENDPOINT, () =>
+				HttpResponse.text(
+					JSON.stringify({
+						error: 'invalid_grant',
+						error_description: 'The authorization code has expired',
+					}),
+					{ status: 400 }
+				)
 			)
+		)
 
 		try {
 			await getAuthToken(baseParams)
@@ -75,16 +71,17 @@ describe('getAuthToken', () => {
 	})
 
 	it('throws McpError with upstream status for 401 (bad client credentials)', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(
-				401,
-				JSON.stringify({
-					error: 'invalid_client',
-					error_description: 'Invalid client credentials',
-				})
+		server.use(
+			http.post(TOKEN_ENDPOINT, () =>
+				HttpResponse.text(
+					JSON.stringify({
+						error: 'invalid_client',
+						error_description: 'Invalid client credentials',
+					}),
+					{ status: 401 }
+				)
 			)
+		)
 
 		try {
 			await getAuthToken(baseParams)
@@ -99,16 +96,17 @@ describe('getAuthToken', () => {
 	})
 
 	it('throws McpError with upstream status for 403 (insufficient permissions)', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(
-				403,
-				JSON.stringify({
-					error: 'access_denied',
-					error_description: 'Insufficient permissions',
-				})
+		server.use(
+			http.post(TOKEN_ENDPOINT, () =>
+				HttpResponse.text(
+					JSON.stringify({
+						error: 'access_denied',
+						error_description: 'Insufficient permissions',
+					}),
+					{ status: 403 }
+				)
 			)
+		)
 
 		try {
 			await getAuthToken(baseParams)
@@ -123,16 +121,17 @@ describe('getAuthToken', () => {
 	})
 
 	it('throws McpError with upstream status for 429 (rate limited)', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(
-				429,
-				JSON.stringify({
-					error: 'rate_limited',
-					error_description: 'Too many requests',
-				})
+		server.use(
+			http.post(TOKEN_ENDPOINT, () =>
+				HttpResponse.text(
+					JSON.stringify({
+						error: 'rate_limited',
+						error_description: 'Too many requests',
+					}),
+					{ status: 429 }
+				)
 			)
+		)
 
 		try {
 			await getAuthToken(baseParams)
@@ -146,10 +145,9 @@ describe('getAuthToken', () => {
 	})
 
 	it('throws McpError 502 for upstream 500 (server error)', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(500, 'Internal Server Error')
+		server.use(
+			http.post(TOKEN_ENDPOINT, () => HttpResponse.text('Internal Server Error', { status: 500 }))
+		)
 
 		try {
 			await getAuthToken(baseParams)
@@ -165,10 +163,9 @@ describe('getAuthToken', () => {
 	})
 
 	it('throws McpError 502 for upstream 503 (service unavailable)', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(503, 'Service Unavailable')
+		server.use(
+			http.post(TOKEN_ENDPOINT, () => HttpResponse.text('Service Unavailable', { status: 503 }))
+		)
 
 		try {
 			await getAuthToken(baseParams)
@@ -182,10 +179,11 @@ describe('getAuthToken', () => {
 	})
 
 	it('uses fallback message when upstream body is not JSON', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(400, 'Bad Request - plain text')
+		server.use(
+			http.post(TOKEN_ENDPOINT, () =>
+				HttpResponse.text('Bad Request - plain text', { status: 400 })
+			)
+		)
 
 		try {
 			await getAuthToken(baseParams)
@@ -208,10 +206,7 @@ describe('refreshAuthToken', () => {
 	}
 
 	it('returns parsed token on success', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(200, validTokenResponse)
+		server.use(http.post(TOKEN_ENDPOINT, () => HttpResponse.json(validTokenResponse)))
 
 		const result = await refreshAuthToken(baseParams)
 		expect(result.access_token).toBe('test-access-token')
@@ -219,16 +214,17 @@ describe('refreshAuthToken', () => {
 	})
 
 	it('throws McpError with upstream status for 400 (expired refresh token)', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(
-				400,
-				JSON.stringify({
-					error: 'invalid_grant',
-					error_description: 'The refresh token has expired',
-				})
+		server.use(
+			http.post(TOKEN_ENDPOINT, () =>
+				HttpResponse.text(
+					JSON.stringify({
+						error: 'invalid_grant',
+						error_description: 'The refresh token has expired',
+					}),
+					{ status: 400 }
+				)
 			)
+		)
 
 		try {
 			await refreshAuthToken(baseParams)
@@ -245,16 +241,17 @@ describe('refreshAuthToken', () => {
 	})
 
 	it('throws McpError with upstream status for 401 (invalid client)', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(
-				401,
-				JSON.stringify({
-					error: 'invalid_client',
-					error_description: 'Bad client credentials',
-				})
+		server.use(
+			http.post(TOKEN_ENDPOINT, () =>
+				HttpResponse.text(
+					JSON.stringify({
+						error: 'invalid_client',
+						error_description: 'Bad client credentials',
+					}),
+					{ status: 401 }
+				)
 			)
+		)
 
 		try {
 			await refreshAuthToken(baseParams)
@@ -268,10 +265,7 @@ describe('refreshAuthToken', () => {
 	})
 
 	it('throws McpError 502 for upstream 500', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(500, 'Server Error')
+		server.use(http.post(TOKEN_ENDPOINT, () => HttpResponse.text('Server Error', { status: 500 })))
 
 		try {
 			await refreshAuthToken(baseParams)
@@ -286,10 +280,11 @@ describe('refreshAuthToken', () => {
 	})
 
 	it('uses fallback message when upstream error code is unknown', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(400, JSON.stringify({ error: 'some_unknown_error' }))
+		server.use(
+			http.post(TOKEN_ENDPOINT, () =>
+				HttpResponse.text(JSON.stringify({ error: 'some_unknown_error' }), { status: 400 })
+			)
+		)
 
 		try {
 			await refreshAuthToken(baseParams)
@@ -304,16 +299,17 @@ describe('refreshAuthToken', () => {
 	})
 
 	it('maps known error codes to safe messages instead of forwarding error_description', async () => {
-		fetchMock
-			.get('https://dash.cloudflare.com')
-			.intercept({ path: '/oauth2/token', method: 'POST' })
-			.reply(
-				400,
-				JSON.stringify({
-					error: 'invalid_grant',
-					error_description: 'Internal: token xyz expired at 2024-01-01',
-				})
+		server.use(
+			http.post(TOKEN_ENDPOINT, () =>
+				HttpResponse.text(
+					JSON.stringify({
+						error: 'invalid_grant',
+						error_description: 'Internal: token xyz expired at 2024-01-01',
+					}),
+					{ status: 400 }
+				)
 			)
+		)
 
 		try {
 			await refreshAuthToken(baseParams)

@@ -18,6 +18,6 @@
 	},
 	"devDependencies": {
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "22.14.1"
+		"@types/node": "22.15.17"
 	}
 }

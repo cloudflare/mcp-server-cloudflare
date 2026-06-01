@@ -25,12 +25,13 @@
 		"zod": "4.4.3"
 	},
 	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "0.12.0",
+		"@cloudflare/vitest-pool-workers": "0.16.11",
 		"@types/jsonwebtoken": "9.0.9",
-		"@types/node": "22.14.1",
+		"@types/node": "22.15.17",
 		"prettier": "3.5.3",
 		"typescript": "5.5.4",
-		"vitest": "3.2.6",
+		"vitest": "4.1.8",
 		"wrangler": "4.96.0"
-	}
+	},
+	"type": "module"
 }
