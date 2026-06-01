@@ -7,7 +7,7 @@
 		"deploy": "run-wrangler-deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
-		"types": "wrangler types --include-env=false",
+		"types": "wrangler types",
 		"test": "vitest run"
 	},
 	"dependencies": {

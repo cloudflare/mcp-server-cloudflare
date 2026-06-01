@@ -13,7 +13,7 @@
 		"start:container": "tsx container/sandbox.container.app.ts",
 		"postinstall": "mkdir -p workdir",
 		"test": "vitest",
-		"types": "wrangler types --include-env=false",
+		"types": "wrangler types",
 		"eval:dev": "start-server-and-test --expect 404 eval:server http://localhost:8976 'vitest --testTimeout=60000 --config vitest.config.evals.ts'",
 		"eval:server": "concurrently \"tsx container/sandbox.container.app.ts\" \"wrangler dev --var ENVIRONMENT:test --var DEV_DISABLE_OAUTH:true --var DEV_CLOUDFLARE_EMAIL:mcp-server-eval-account@workers-for-platforms-dev.cfdata.org\"",
 		"eval:ci": "start-server-and-test --expect 404 eval:server http://localhost:8976 'vitest run --testTimeout=60000 --config vitest.config.evals.ts'"

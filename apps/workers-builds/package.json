@@ -8,7 +8,7 @@
 		"deploy": "run-wrangler-deploy",
 		"dev": "vite dev",
 		"start": "vite dev",
-		"types": "wrangler types --include-env=false",
+		"types": "wrangler types",
 		"test": "vitest run"
 	},
 	"dependencies": {

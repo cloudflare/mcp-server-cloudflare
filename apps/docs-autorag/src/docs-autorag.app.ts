@@ -25,7 +25,7 @@ export class CloudflareDocumentationMCP extends McpAgent<Env, State, Props> {
 	})
 
 	constructor(
-		public ctx: DurableObjectState,
+		ctx: DurableObjectState,
 		public env: Env
 	) {
 		super(ctx, env)

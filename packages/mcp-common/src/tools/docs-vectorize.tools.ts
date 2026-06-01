@@ -125,13 +125,11 @@ function sourceToUrl(path: string) {
 
 async function getEmbeddings(ai: Ai, strings: string[]): Promise<number[][]> {
 	const response = await doWithRetries(() =>
-		// @ts-expect-error embeddinggemma not in types yet
 		ai.run('@cf/google/embeddinggemma-300m', {
 			text: strings,
 		})
 	)
 
-	// @ts-expect-error embeddinggemma not in types yet
 	return response.data
 }
 

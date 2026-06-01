@@ -10,7 +10,7 @@ import type { Env } from './sandbox.server.context'
 
 export class UserContainer extends DurableObject<Env> {
 	constructor(
-		public ctx: DurableObjectState,
+		ctx: DurableObjectState,
 		public env: Env
 	) {
 		console.log('creating user container DO')

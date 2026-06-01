@@ -55,22 +55,26 @@ export async function handleApiTokenMode<
 
 	const { user, accounts } = await getUserAndAccounts(token, opts)
 
+	// `ExecutionContext.props` is typed readonly, but the agents runtime reads the props we set
+	// here before the request is served, so assign through a typed mutable view.
+	const ctxWithProps = ctx as { props: AuthProps }
+
 	// If user is null, handle API token mode
 	if (user === null) {
-		ctx.props = {
+		ctxWithProps.props = {
 			type: 'account_token',
 			accessToken: token,
 			// we always select the first account from the response,
 			// this assumes that account owned tokens can only access one account
 			account: accounts[0],
-		} satisfies AuthProps
+		}
 	} else {
-		ctx.props = {
+		ctxWithProps.props = {
 			type: 'user_token',
 			accessToken: token,
 			user,
 			accounts,
-		} satisfies AuthProps
+		}
 	}
 	return agent.serve('/mcp').fetch(req, env, ctx)
 }

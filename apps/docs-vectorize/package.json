@@ -8,7 +8,7 @@
 		"deploy": "run-wrangler-deploy",
 		"dev": "wrangler dev --experimental-vectorize-bind-to-prod",
 		"start": "npm run dev",
-		"types": "wrangler types --include-env=false",
+		"types": "wrangler types",
 		"test": "vitest run"
 	},
 	"dependencies": {

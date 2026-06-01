@@ -35,7 +35,7 @@ export class ContainerMcpAgent extends McpAgent<Env, never, Props> {
 	}
 
 	constructor(
-		public ctx: DurableObjectState,
+		ctx: DurableObjectState,
 		public env: Env
 	) {
 		console.log('creating container DO')

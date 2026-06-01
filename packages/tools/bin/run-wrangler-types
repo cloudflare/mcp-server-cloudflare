@@ -1,4 +1,4 @@
 #!/bin/bash
 set -euo pipefail
 
-wrangler types --include-env=false
+wrangler types

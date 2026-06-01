@@ -15,7 +15,7 @@ export class ContainerManager extends DurableObject<Env> {
 	})
 
 	constructor(
-		public ctx: DurableObjectState,
+		ctx: DurableObjectState,
 		public env: Env
 	) {
 		super(ctx, env)

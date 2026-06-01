@@ -23,7 +23,7 @@ export class CloudflareDocumentationMCP extends McpAgent<Env, never, never> {
 	}
 
 	constructor(
-		public ctx: DurableObjectState,
+		ctx: DurableObjectState,
 		public env: Env
 	) {
 		super(ctx, env)

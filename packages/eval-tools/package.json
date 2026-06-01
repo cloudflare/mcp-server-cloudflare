@@ -5,7 +5,7 @@
 	"sideEffects": false,
 	"type": "module",
 	"scripts": {
-		"types": "wrangler types --include-env=false"
+		"types": "wrangler types"
 	},
 	"directories": {
 		"bin": "bin"

@@ -13,7 +13,7 @@
 		"eval:ci": "start-server-and-test --expect 404 eval:server http://localhost:8977 'vitest run --testTimeout=60000 --config vitest.config.evals.ts'",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
-		"types": "wrangler types --include-env=false",
+		"types": "wrangler types",
 		"test": "vitest"
 	},
 	"devDependencies": {
