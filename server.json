@@ -157,6 +157,18 @@
 				}
 			]
 		},
+		{
+			"url": "https://websearch.mcp.cloudflare.com/mcp",
+			"type": "streamable-http",
+			"headers": [
+				{
+					"name": "Authentication",
+					"description": "Optional Cloudflare API key for authentication if not using OAuth. Can use User or Account owned tokens as a Bearer token.",
+					"is_required": false,
+					"is_secret": true
+				}
+			]
+		},
 
 		{
 			"url": "https://docs.mcp.cloudflare.com/sse",
