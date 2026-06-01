@@ -7,7 +7,6 @@ import {
 	createAuthHandlers,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
-import { UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { getProps } from '@repo/mcp-common/src/get-props'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
@@ -20,8 +19,6 @@ import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './autorag.context'
 
 const env = getEnv<Env>()
-
-export { UserDetails }
 
 const metrics = new MetricsTracker(env.MCP_METRICS, {
 	name: env.MCP_SERVER_NAME,

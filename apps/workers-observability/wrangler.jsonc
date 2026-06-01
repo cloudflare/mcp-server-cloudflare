@@ -12,6 +12,10 @@
 		{
 			"new_sqlite_classes": ["UserDetails", "ObservabilityMCP"],
 			"tag": "v1"
+		},
+		{
+			"deleted_classes": ["UserDetails"],
+			"tag": "v2"
 		}
 	],
 	"observability": {
@@ -26,10 +30,6 @@
 			{
 				"class_name": "ObservabilityMCP",
 				"name": "MCP_OBJECT"
-			},
-			{
-				"class_name": "UserDetails",
-				"name": "USER_DETAILS"
 			}
 		]
 	},
@@ -76,10 +76,6 @@
 					{
 						"class_name": "ObservabilityMCP",
 						"name": "MCP_OBJECT"
-					},
-					{
-						"class_name": "UserDetails",
-						"name": "USER_DETAILS"
 					}
 				]
 			},
@@ -121,10 +117,6 @@
 					{
 						"class_name": "ObservabilityMCP",
 						"name": "MCP_OBJECT"
-					},
-					{
-						"class_name": "UserDetails",
-						"name": "USER_DETAILS"
 					}
 				]
 			},

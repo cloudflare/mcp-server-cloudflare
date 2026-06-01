@@ -7,7 +7,6 @@ import {
 	createAuthHandlers,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
-import { UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { getProps } from '@repo/mcp-common/src/get-props'
 import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-ai-search.prompts'
@@ -22,8 +21,6 @@ import { registerObservabilityTools } from './tools/workers-observability.tools'
 
 import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './workers-observability.context'
-
-export { UserDetails }
 
 const env = getEnv<Env>()
 

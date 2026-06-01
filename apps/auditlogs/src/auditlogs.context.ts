@@ -1,4 +1,3 @@
-import type { UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
 import type { AuditlogMCP } from './auditlogs.app'
 
 export interface Env {
@@ -11,7 +10,6 @@ export interface Env {
 	CLOUDFLARE_CLIENT_ID: string
 	CLOUDFLARE_CLIENT_SECRET: string
 	MCP_OBJECT: DurableObjectNamespace<AuditlogMCP>
-	USER_DETAILS: DurableObjectNamespace<UserDetails>
 	MCP_METRICS: AnalyticsEngineDataset
 	DEV_DISABLE_OAUTH: string
 	DEV_CLOUDFLARE_API_TOKEN: string

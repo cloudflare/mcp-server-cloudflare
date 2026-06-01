@@ -1,4 +1,3 @@
-import type { UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
 import type { ObservabilityMCP } from './workers-observability.app'
 
 export interface Env {
@@ -10,7 +9,6 @@ export interface Env {
 	CLOUDFLARE_CLIENT_ID: string
 	CLOUDFLARE_CLIENT_SECRET: string
 	MCP_OBJECT: DurableObjectNamespace<ObservabilityMCP>
-	USER_DETAILS: DurableObjectNamespace<UserDetails>
 	MCP_METRICS: AnalyticsEngineDataset
 	SENTRY_ACCESS_CLIENT_ID: string
 	SENTRY_ACCESS_CLIENT_SECRET: string

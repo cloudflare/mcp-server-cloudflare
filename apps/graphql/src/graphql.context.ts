@@ -1,4 +1,4 @@
-import type { GraphQLMCP, UserDetails } from './graphql.app'
+import type { GraphQLMCP } from './graphql.app'
 
 export interface Env {
 	OAUTH_KV: KVNamespace
@@ -9,7 +9,6 @@ export interface Env {
 	CLOUDFLARE_CLIENT_ID: string
 	CLOUDFLARE_CLIENT_SECRET: string
 	MCP_OBJECT: DurableObjectNamespace<GraphQLMCP>
-	USER_DETAILS: DurableObjectNamespace<UserDetails>
 	MCP_METRICS: AnalyticsEngineDataset
 	SENTRY_ACCESS_CLIENT_ID: string
 	SENTRY_ACCESS_CLIENT_SECRET: string

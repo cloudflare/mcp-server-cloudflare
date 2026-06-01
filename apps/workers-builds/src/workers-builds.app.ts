@@ -7,7 +7,6 @@ import {
 	createAuthHandlers,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
-import { UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { fmt } from '@repo/mcp-common/src/format'
 import { getProps } from '@repo/mcp-common/src/get-props'
@@ -21,8 +20,6 @@ import { registerBuildsTools } from './tools/workers-builds.tools'
 
 import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './workers-builds.context'
-
-export { UserDetails }
 
 const env = getEnv<Env>()
 

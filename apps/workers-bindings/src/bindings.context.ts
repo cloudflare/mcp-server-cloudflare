@@ -1,4 +1,3 @@
-import type { UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
 import type { WorkersBindingsMCP } from './bindings.app'
 
 export interface Env {
@@ -10,7 +9,6 @@ export interface Env {
 	CLOUDFLARE_CLIENT_ID: string
 	CLOUDFLARE_CLIENT_SECRET: string
 	MCP_OBJECT: DurableObjectNamespace<WorkersBindingsMCP>
-	USER_DETAILS: DurableObjectNamespace<UserDetails>
 	MCP_METRICS: AnalyticsEngineDataset
 	CLOUDFLARE_API_TOKEN: string
 	OPENAI_API_KEY: string

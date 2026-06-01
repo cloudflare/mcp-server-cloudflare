@@ -61,11 +61,6 @@
 					{
 						"class_name": "RadarMCP",
 						"name": "MCP_OBJECT"
-					},
-					{
-						"class_name": "UserDetails",
-						"name": "USER_DETAILS",
-						"script_name": "mcp-cloudflare-workers-observability-staging"
 					}
 				]
 			},
@@ -96,11 +91,6 @@
 					{
 						"class_name": "RadarMCP",
 						"name": "MCP_OBJECT"
-					},
-					{
-						"class_name": "UserDetails",
-						"name": "USER_DETAILS",
-						"script_name": "mcp-cloudflare-workers-observability-production"
 					}
 				]
 			},

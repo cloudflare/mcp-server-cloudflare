@@ -1,4 +1,4 @@
-import type { CASBMCP, UserDetails } from './cf1-casb.app'
+import type { CASBMCP } from './cf1-casb.app'
 
 export interface Env {
 	ENVIRONMENT: 'development' | 'staging' | 'production'
@@ -9,7 +9,6 @@ export interface Env {
 	AI: Ai
 	CLOUDFLARE_CLIENT_ID: string
 	CLOUDFLARE_CLIENT_SECRET: string
-	USER_DETAILS: DurableObjectNamespace<UserDetails>
 	DEV_DISABLE_OAUTH: string
 	DEV_CLOUDFLARE_API_TOKEN: string
 	DEV_CLOUDFLARE_EMAIL: string
