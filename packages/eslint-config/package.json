@@ -20,6 +20,6 @@
 		"eslint-plugin-only-warn": "1.1.0",
 		"eslint-plugin-unused-imports": "3.2.0",
 		"typescript": "5.5.4",
-		"vitest": "3.0.9"
+		"vitest": "3.2.6"
 	}
 }

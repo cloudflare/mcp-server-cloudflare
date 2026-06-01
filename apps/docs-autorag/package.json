@@ -24,11 +24,11 @@
 		"zod": "4.4.3"
 	},
 	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "0.8.14",
+		"@cloudflare/vitest-pool-workers": "0.12.0",
 		"@types/node": "22.14.1",
 		"prettier": "3.5.3",
 		"typescript": "5.5.4",
-		"vitest": "3.0.9",
-		"wrangler": "4.10.0"
+		"vitest": "3.2.6",
+		"wrangler": "4.96.0"
 	}
 }

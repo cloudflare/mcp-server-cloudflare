@@ -23,14 +23,14 @@
 		"zod": "4.4.3"
 	},
 	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "0.8.14",
+		"@cloudflare/vitest-pool-workers": "0.12.0",
 		"@repo/eslint-config": "workspace:*",
 		"@repo/tools": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@sentry/types": "8.9.2",
 		"@types/node": "22.14.1",
-		"@vitest/ui": "3.0.9",
-		"vitest": "3.0.9",
-		"wrangler": "4.10.0"
+		"@vitest/ui": "3.2.6",
+		"vitest": "3.2.6",
+		"wrangler": "4.96.0"
 	}
 }

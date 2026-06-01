@@ -29,7 +29,7 @@
 		"@repo/mcp-observability": "workspace:*",
 		"agents": "0.13.3",
 		"cron-schedule": "5.0.4",
-		"esbuild": "0.25.1",
+		"esbuild": "0.27.3",
 		"hono": "4.7.6",
 		"mime": "4.0.6",
 		"simple-git-hooks": "2.12.1",
@@ -38,13 +38,13 @@
 		"zod": "4.4.3"
 	},
 	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "0.8.14",
+		"@cloudflare/vitest-pool-workers": "0.12.0",
 		"@types/mock-fs": "4.13.4",
 		"@types/node": "22.14.1",
 		"ai": "6.0.193",
 		"concurrently": "9.1.2",
 		"mock-fs": "5.5.0",
 		"start-server-and-test": "2.0.11",
-		"wrangler": "4.10.0"
+		"wrangler": "4.96.0"
 	}
 }

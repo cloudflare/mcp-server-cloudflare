@@ -10,7 +10,7 @@
 	"devDependencies": {
 		"@types/fs-extra": "11.0.4",
 		"@types/node": "22.14.1",
-		"vitest": "3.0.9"
+		"vitest": "3.2.6"
 	},
 	"dependencies": {
 		"@commander-js/extra-typings": "13.1.0",
