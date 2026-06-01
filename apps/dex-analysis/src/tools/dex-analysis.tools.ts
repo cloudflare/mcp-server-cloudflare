@@ -6,7 +6,7 @@ import { getProps } from '@repo/mcp-common/src/get-props'
 import { getReader } from '../warp_diag_reader'
 
 import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js'
-import type { ZodRawShape, ZodTypeAny } from 'zod'
+import type { ZodRawShape } from 'zod'
 import type { AccountToolCallback } from '@repo/mcp-common/src/server'
 import type { CloudflareDEXMCP } from '../dex-analysis.app'
 
@@ -592,10 +592,7 @@ const registerTool = <T extends ZodRawShape, U = unknown>({
 	llmContext?: string
 	agent: CloudflareDEXMCP
 	callback: (
-		p: { extra: unknown; accountId: string; accessToken: string } & z.objectOutputType<
-			T,
-			ZodTypeAny
-		>
+		p: { extra: unknown; accountId: string; accessToken: string } & z.infer<z.ZodObject<T>>
 	) => Promise<U>
 }) => {
 	agent.server.accountTool<T>(
@@ -606,7 +603,12 @@ const registerTool = <T extends ZodRawShape, U = unknown>({
 			try {
 				const props = getProps(agent)
 				const accessToken = props.accessToken
-				const res = await callback({ ...(params as T), extra, accountId, accessToken })
+				const res = await callback({
+					...(params as z.infer<z.ZodObject<T>>),
+					extra,
+					accountId,
+					accessToken,
+				})
 				return {
 					content: [
 						{

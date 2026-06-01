@@ -11,7 +11,12 @@ export const AsnParam = z
 	.positive()
 	.describe('Autonomous System Number (ASN), must be a positive number.')
 
-export const IpParam = z.string().ip().describe('IPv4 or IPv6 address in standard notation.')
+export const IpParam = z
+	.string()
+	.refine((v) => z.ipv4().safeParse(v).success || z.ipv6().safeParse(v).success, {
+		message: 'Must be a valid IPv4 or IPv6 address',
+	})
+	.describe('IPv4 or IPv6 address in standard notation.')
 
 export const DomainParam = z
 	.string()

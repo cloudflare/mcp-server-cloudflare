@@ -11,11 +11,11 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "1.20.2",
+		"@modelcontextprotocol/sdk": "1.29.0",
 		"@repo/mcp-common": "workspace:*",
 		"@repo/mcp-observability": "workspace:*",
-		"agents": "0.2.19",
-		"zod": "3.24.2"
+		"agents": "0.13.3",
+		"zod": "4.4.3"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.8.14",

@@ -2,7 +2,8 @@ import type { McpAgent } from 'agents/mcp'
 
 // Support both SSE and Streamable HTTP
 export function createApiHandler<
-	T extends typeof McpAgent<unknown, unknown, Record<string, unknown>>,
+	Env extends Cloudflare.Env,
+	T extends typeof McpAgent<Env, unknown, Record<string, unknown>>,
 >(agent: T, opts?: { binding?: string }) {
 	return {
 		fetch: (req: Request, env: unknown, ctx: ExecutionContext) => {

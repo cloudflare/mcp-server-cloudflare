@@ -6,7 +6,7 @@ import type {
 	ServerNotification,
 	ServerRequest,
 } from '@modelcontextprotocol/sdk/types.js'
-import type { objectOutputType, ZodRawShape, ZodTypeAny } from 'zod'
+import type { z, ZodRawShape } from 'zod'
 import type { AccountManager } from './account-manager'
 
 type ToolExtra = RequestHandlerExtra<ServerRequest, ServerNotification>
@@ -17,7 +17,7 @@ type ToolExtra = RequestHandlerExtra<ServerRequest, ServerNotification>
  * usual request extra.
  */
 export type AccountToolCallback<Shape extends ZodRawShape> = (
-	args: objectOutputType<Shape, ZodTypeAny>,
+	args: z.infer<z.ZodObject<Shape>>,
 	accountId: string,
 	extra: ToolExtra
 ) => CallToolResult | Promise<CallToolResult>
@@ -58,7 +58,7 @@ export function buildAccountTool<Shape extends ZodRawShape>(
 		if (resolved.error) {
 			return resolved.error
 		}
-		return handler(args as objectOutputType<Shape, ZodTypeAny>, resolved.accountId, extra)
+		return handler(args as z.infer<z.ZodObject<Shape>>, resolved.accountId, extra)
 	}
 
 	return { shape: registeredShape, callback }

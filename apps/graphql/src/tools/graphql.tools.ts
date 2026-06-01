@@ -78,7 +78,7 @@ const graphQLErrorSchema = z.object({
 
 // Define the overall GraphQL response schema
 const graphQLResponseSchema = z.object({
-	data: z.union([z.record(z.unknown()), z.null()]),
+	data: z.union([z.record(z.string(), z.unknown()), z.null()]),
 	errors: z.union([z.array(graphQLErrorSchema), z.null()]),
 })
 
@@ -950,7 +950,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 		`,
 		{
 			query: z.string().describe('The GraphQL query to execute'),
-			variables: z.record(z.any()).optional().describe('Variables for the query'),
+			variables: z.record(z.string(), z.any()).optional().describe('Variables for the query'),
 		},
 		async (params) => {
 			try {
@@ -1026,7 +1026,10 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 		`,
 		{
 			query: z.string().describe('The GraphQL query to include in the explorer link'),
-			variables: z.record(z.any()).optional().describe('Variables for the query in JSON format'),
+			variables: z
+				.record(z.string(), z.any())
+				.optional()
+				.describe('Variables for the query in JSON format'),
 		},
 		async (params) => {
 			try {

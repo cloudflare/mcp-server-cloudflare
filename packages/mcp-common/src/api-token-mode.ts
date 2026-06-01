@@ -28,7 +28,8 @@ export async function isApiTokenRequest(req: Request, env: RequiredEnv) {
 }
 
 export async function handleApiTokenMode<
-	T extends typeof McpAgent<unknown, unknown, Record<string, unknown>>,
+	Env extends Cloudflare.Env,
+	T extends typeof McpAgent<Env, unknown, Record<string, unknown>>,
 >(agent: T, req: Request, env: RequiredEnv, ctx: ExecutionContext) {
 	// Handle global API token case
 	let opts, token

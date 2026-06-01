@@ -31,9 +31,7 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 		{ params: KvNamespacesListParamsSchema.optional() },
 		{
 			title: 'List KV namespaces',
-			annotations: {
-				readOnlyHint: true,
-			},
+			readOnlyHint: true,
 		},
 		async ({ params }, account_id) => {
 			try {
@@ -86,10 +84,8 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'Create KV namespace',
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-			},
+			readOnlyHint: false,
+			destructiveHint: false,
 		},
 		async ({ title }, account_id) => {
 			try {
@@ -129,10 +125,8 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'Delete KV namespace',
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: true,
-			},
+			readOnlyHint: false,
+			destructiveHint: true,
 		},
 		async ({ namespace_id }, account_id) => {
 			try {
@@ -179,9 +173,7 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'Get KV namespace',
-			annotations: {
-				readOnlyHint: true,
-			},
+			readOnlyHint: true,
 		},
 		async ({ namespace_id }, account_id) => {
 			try {
@@ -222,10 +214,8 @@ export function registerKVTools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'Update KV namespace',
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-			},
+			readOnlyHint: false,
+			destructiveHint: false,
 		},
 		async ({ namespace_id, title }, account_id) => {
 			try {

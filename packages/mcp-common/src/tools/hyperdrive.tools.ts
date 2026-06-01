@@ -45,9 +45,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'List Hyperdrive configs',
-			annotations: {
-				readOnlyHint: true,
-			},
+			readOnlyHint: true,
 		},
 		async ({ page, per_page, order, direction }, account_id) => {
 			try {
@@ -170,10 +168,8 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'Delete Hyperdrive config',
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: true,
-			},
+			readOnlyHint: false,
+			destructiveHint: true,
 		},
 		async ({ hyperdrive_id }, account_id) => {
 			try {
@@ -213,9 +209,7 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'Get Hyperdrive config',
-			annotations: {
-				readOnlyHint: true,
-			},
+			readOnlyHint: true,
 		},
 		async ({ hyperdrive_id }, account_id) => {
 			try {
@@ -267,10 +261,8 @@ export function registerHyperdriveTools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'Edit Hyperdrive config',
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-			},
+			readOnlyHint: false,
+			destructiveHint: false,
 		},
 		async (
 			{

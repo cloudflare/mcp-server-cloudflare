@@ -69,7 +69,7 @@ eachModel('$modelName', ({ model }) => {
 
 			const toolArgs = toolCalls.find((tool) => {
 				return tool.toolName === 'container_file_write' ? tool : undefined
-			})?.args as { args: { path: string } } | undefined
+			})?.input as { args: { path: string } } | undefined
 
 			assert(toolArgs !== undefined)
 			expect(toolCalls).toEqual(

@@ -32,10 +32,8 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 		{},
 		{
 			title: 'List Workers',
-			annotations: {
-				readOnlyHint: true,
-				destructiveHint: false,
-			},
+			readOnlyHint: true,
+			destructiveHint: false,
 		},
 		async (_params, accountId) => {
 			try {
@@ -95,10 +93,8 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'Get Worker details',
-			annotations: {
-				readOnlyHint: true,
-				destructiveHint: false,
-			},
+			readOnlyHint: true,
+			destructiveHint: false,
 		},
 		async (params, accountId) => {
 			try {
@@ -156,10 +152,8 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 		{ scriptName: workerNameParam },
 		{
 			title: 'Get Worker code',
-			annotations: {
-				readOnlyHint: true,
-				destructiveHint: false,
-			},
+			readOnlyHint: true,
+			destructiveHint: false,
 		},
 		async (params, accountId) => {
 			try {

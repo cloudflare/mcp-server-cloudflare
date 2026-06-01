@@ -31,10 +31,8 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'List zones',
-			annotations: {
-				readOnlyHint: true,
-				destructiveHint: false,
-			},
+			readOnlyHint: true,
+			destructiveHint: false,
 		},
 		async (params, accountId) => {
 			try {
@@ -84,10 +82,8 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 		},
 		{
 			title: 'Get zone details',
-			annotations: {
-				readOnlyHint: true,
-				destructiveHint: false,
-			},
+			readOnlyHint: true,
+			destructiveHint: false,
 		},
 		async (params, _accountId) => {
 			try {

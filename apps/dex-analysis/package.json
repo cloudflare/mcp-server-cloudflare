@@ -15,14 +15,14 @@
 	"dependencies": {
 		"@cloudflare/workers-oauth-provider": "0.4.0",
 		"@hono/zod-validator": "0.4.3",
-		"@modelcontextprotocol/sdk": "1.20.2",
+		"@modelcontextprotocol/sdk": "1.29.0",
 		"@repo/mcp-common": "workspace:*",
 		"@repo/mcp-observability": "workspace:*",
-		"agents": "0.2.19",
+		"agents": "0.13.3",
 		"cloudflare": "4.2.0",
 		"hono": "4.7.6",
 		"jszip": "3.10.1",
-		"zod": "3.24.2"
+		"zod": "4.4.3"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.8.14",

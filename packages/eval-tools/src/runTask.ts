@@ -1,12 +1,12 @@
 import { type MCPClientManager } from 'agents/mcp/client'
-import { generateText, jsonSchema, tool } from 'ai'
+import { generateText, jsonSchema, stepCountIs, tool } from 'ai'
 import { z } from 'zod'
 
-import type { GenerateTextResult, LanguageModelV1, ToolCallPart, ToolSet } from 'ai'
+import type { GenerateTextResult, LanguageModel, ToolCallPart, ToolSet } from 'ai'
 
 export async function runTask(
 	clientManager: MCPClientManager,
-	model: LanguageModelV1,
+	model: LanguageModel,
 	input: string
 ): Promise<{
 	promptOutput: string
@@ -20,7 +20,7 @@ export async function runTask(
 		}
 
 		acc[v.name] = tool({
-			parameters: jsonSchema(v.inputSchema as any),
+			inputSchema: jsonSchema(v.inputSchema as any),
 			description: v.description,
 			execute: async (args: any, opts) => {
 				try {
@@ -50,7 +50,7 @@ export async function runTask(
 		tools: toolSet,
 		prompt: input,
 		maxRetries: 1,
-		maxSteps: 10,
+		stopWhen: stepCountIs(10),
 	})
 
 	// convert into an LLM readable result so our factuality checker can validate tool calls
@@ -66,7 +66,7 @@ export async function runTask(
 			} else if (messagePart.type === 'tool-call') {
 				messagesWithTools += `<message_content type=${messagePart.type}>
     <tool_name>${messagePart.toolName}</tool_name>
-    <tool_arguments>${JSON.stringify(messagePart.args)}</tool_arguments>
+    <tool_arguments>${JSON.stringify(messagePart.input)}</tool_arguments>
 </message_content>`
 				toolCalls.push(messagePart)
 			} else if (messagePart.type === 'text') {

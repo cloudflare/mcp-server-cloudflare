@@ -230,7 +230,7 @@ const zCloudflareMiniEventDetailsRequest = z.object({
 	url: z.string().optional(),
 	method: z.string().optional(),
 	path: z.string().optional(),
-	search: z.record(z.any()).optional(),
+	search: z.record(z.string(), z.any()).optional(),
 })
 
 const zCloudflareMiniEventDetailsResponse = z.object({
