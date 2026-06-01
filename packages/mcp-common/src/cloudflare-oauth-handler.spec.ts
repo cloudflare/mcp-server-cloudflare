@@ -31,6 +31,7 @@ afterEach(() => {
 function makeRefreshOptions(propsOverride: Record<string, unknown>): TokenExchangeCallbackOptions {
 	return {
 		grantType: GrantType.REFRESH_TOKEN,
+		grantId: 'test-grant-id',
 		props: propsOverride,
 		clientId: 'test',
 		userId: 'test-user',
@@ -252,6 +253,7 @@ describe('handleTokenExchangeCallback', () => {
 		it('returns undefined for authorization_code grant type', async () => {
 			const options: TokenExchangeCallbackOptions = {
 				grantType: GrantType.AUTHORIZATION_CODE,
+				grantId: 'test-grant-id',
 				props: {},
 				clientId: 'test',
 				userId: 'test-user',

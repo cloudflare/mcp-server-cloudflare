@@ -52,8 +52,8 @@ importers:
   apps/ai-gateway:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -101,8 +101,8 @@ importers:
   apps/auditlogs:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -150,8 +150,8 @@ importers:
   apps/autorag:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -199,8 +199,8 @@ importers:
   apps/browser-rendering:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -248,8 +248,8 @@ importers:
   apps/cloudflare-one-casb:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -334,8 +334,8 @@ importers:
   apps/dex-analysis:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -389,8 +389,8 @@ importers:
   apps/dns-analytics:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -438,8 +438,8 @@ importers:
   apps/docs-ai-search:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -490,8 +490,8 @@ importers:
   apps/docs-autorag:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -542,8 +542,8 @@ importers:
   apps/docs-vectorize:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -594,8 +594,8 @@ importers:
   apps/graphql:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -646,8 +646,8 @@ importers:
   apps/logpush:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -695,8 +695,8 @@ importers:
   apps/radar:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -744,8 +744,8 @@ importers:
   apps/sandbox-container:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/node-server':
         specifier: 1.13.8
         version: 1.13.8(hono@4.7.6)
@@ -823,8 +823,8 @@ importers:
   apps/workers-bindings:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@modelcontextprotocol/sdk':
         specifier: 1.29.0
         version: 1.29.0(@cfworker/json-schema@4.1.1)(zod@4.4.3)
@@ -884,8 +884,8 @@ importers:
   apps/workers-builds:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@hono/zod-validator':
         specifier: 0.4.3
         version: 0.4.3(hono@4.7.6)(zod@4.4.3)
@@ -939,8 +939,8 @@ importers:
   apps/workers-observability:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@fast-csv/format':
         specifier: 5.0.2
         version: 5.0.2
@@ -1067,8 +1067,8 @@ importers:
   packages/mcp-common:
     dependencies:
       '@cloudflare/workers-oauth-provider':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@fast-csv/format':
         specifier: 5.0.2
         version: 5.0.2
@@ -1627,8 +1627,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-oauth-provider@0.4.0':
-    resolution: {integrity: sha512-UtbV8hjC2NloB+Ds6J6v/9HiG8rx8MbdeYGCyFwOACT5vANWzDL6SKo3W5UZymsXiameAgC7jAmtUx4cc+Qpaw==}
+  '@cloudflare/workers-oauth-provider@0.7.0':
+    resolution: {integrity: sha512-w0s740/aV76mOkCgTcAQ31Lcju38Bt2BN3gbWPfhF9TvN6ED8nv08TSkNPARJa7X2AZzWhxqRlMrbWzEDPcY+Q==}
 
   '@cloudflare/workers-types@4.20250416.0':
     resolution: {integrity: sha512-i37TX0Clp+MrPdXMBdvKZM7JghCrWD9GtG7E+8ANOAPmtZjUkZfEy9qq46IG3XlNpagPaWDkY3SgJ3s01gPxCw==}
@@ -6030,7 +6030,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20260529.1':
     optional: true
 
-  '@cloudflare/workers-oauth-provider@0.4.0': {}
+  '@cloudflare/workers-oauth-provider@0.7.0': {}
 
   '@cloudflare/workers-types@4.20250416.0': {}
 
