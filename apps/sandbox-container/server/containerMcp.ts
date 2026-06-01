@@ -57,10 +57,12 @@ export class ContainerMcpAgent extends McpAgent<Env, never, Props> {
 			options: { instructions: BASE_INSTRUCTIONS },
 		})
 
-		this.server.tool(
+		this.server.registerTool(
 			'container_initialize',
-			`Start or restart the container.
+			{
+				description: `Start or restart the container.
 			Use this tool to initialize a container before running any python or node.js code that the user requests ro run.`,
+			},
 			async () => {
 				const props = getProps(this)
 				if (props.type === 'account_token') {
@@ -88,31 +90,37 @@ export class ContainerMcpAgent extends McpAgent<Env, never, Props> {
 			}
 		)
 
-		this.server.tool(
+		this.server.registerTool(
 			'container_ping',
-			`Ping the container for liveliness. Use this tool to check if the container is running.`,
+			{
+				description: `Ping the container for liveliness. Use this tool to check if the container is running.`,
+			},
 			async () => {
 				return {
 					content: [{ type: 'text', text: await this.userContainer.container_ping() }],
 				}
 			}
 		)
-		this.server.tool(
+		this.server.registerTool(
 			'container_exec',
-			`Run a command in a container and return the results from stdout.
+			{
+				description: `Run a command in a container and return the results from stdout.
 			If necessary, set a timeout. To debug, stream back standard error.
 			If you're using python, ALWAYS use python3 alongside pip3`,
-			{ args: ExecParams },
+				inputSchema: { args: ExecParams },
+			},
 			async ({ args }) => {
 				return {
 					content: [{ type: 'text', text: await this.userContainer.container_exec(args) }],
 				}
 			}
 		)
-		this.server.tool(
+		this.server.registerTool(
 			'container_file_delete',
-			'Delete file in the working directory',
-			{ args: FilePathParam },
+			{
+				description: 'Delete file in the working directory',
+				inputSchema: { args: FilePathParam },
+			},
 			async ({ args }) => {
 				const path = await stripProtocolFromFilePath(args.path)
 				const deleted = await this.userContainer.container_file_delete(path)
@@ -121,10 +129,13 @@ export class ContainerMcpAgent extends McpAgent<Env, never, Props> {
 				}
 			}
 		)
-		this.server.tool(
+		this.server.registerTool(
 			'container_file_write',
-			'Create a new file with the provided contents in the working direcotry, overwriting the file if it already exists',
-			{ args: FileWrite },
+			{
+				description:
+					'Create a new file with the provided contents in the working direcotry, overwriting the file if it already exists',
+				inputSchema: { args: FileWrite },
+			},
 			async ({ args }) => {
 				args.path = await stripProtocolFromFilePath(args.path)
 				return {
@@ -132,9 +143,12 @@ export class ContainerMcpAgent extends McpAgent<Env, never, Props> {
 				}
 			}
 		)
-		this.server.tool(
+		this.server.registerTool(
 			'container_files_list',
-			'List working directory file tree. This just reads the contents of the current working directory',
+			{
+				description:
+					'List working directory file tree. This just reads the contents of the current working directory',
+			},
 			async () => {
 				// Begin workaround using container read rather than ls:
 				const readFile = await this.userContainer.container_file_read('.')
@@ -152,10 +166,13 @@ export class ContainerMcpAgent extends McpAgent<Env, never, Props> {
 				}
 			}
 		)
-		this.server.tool(
+		this.server.registerTool(
 			'container_file_read',
-			'Read a specific file or directory. Use this tool if you would like to read files or display them to the user. This allow you to get a displayable image for the user if there is an image file.',
-			{ args: FilePathParam },
+			{
+				description:
+					'Read a specific file or directory. Use this tool if you would like to read files or display them to the user. This allow you to get a displayable image for the user if there is an image file.',
+				inputSchema: { args: FilePathParam },
+			},
 			async ({ args }) => {
 				const path = await stripProtocolFromFilePath(args.path)
 				const readFile = await this.userContainer.container_file_read(path)

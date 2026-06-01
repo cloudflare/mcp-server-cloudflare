@@ -13,17 +13,19 @@ import type { BuildsMCP } from '../workers-builds.app'
  * @param apiToken Cloudflare API token
  */
 export function registerBuildsTools(agent: BuildsMCP) {
-	agent.server.tool(
+	agent.server.registerTool(
 		'workers_builds_set_active_worker',
-		fmt.trim(`
+		{
+			description: fmt.trim(`
 			Set the active Worker ID for subsequent calls.
 			Use this tool to set the active worker for subsequent calls.
 
 			Worker IDs are formatted similar to: db6a6421c2b046679a9daada1537088b
 			If you are given a Worker name or script name, you can use workers_get_worker to get the Worker ID.
 		`),
-		{
-			workerId: z.string().describe('The Worker ID to set as active.'),
+			inputSchema: {
+				workerId: z.string().describe('The Worker ID to set as active.'),
+			},
 		},
 		async ({ workerId }) => {
 			await agent.setActiveWorkerId(workerId)

@@ -1,5 +1,6 @@
 import { AccountIdParam, CF_ACCOUNT_ID_HEADER } from './account-manager'
 
+import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js'
 import type {
 	CallToolResult,
@@ -37,10 +38,7 @@ export function buildAccountTool<Shape extends ZodRawShape>(
 	handler: AccountToolCallback<Shape>
 ): {
 	shape: ZodRawShape
-	callback: (
-		args: Record<string, unknown>,
-		extra: ToolExtra
-	) => CallToolResult | Promise<CallToolResult>
+	callback: ToolCallback<ZodRawShape>
 } {
 	const registeredShape: ZodRawShape = accountManager.requiresAccountSelection
 		? { ...shape, account_id: AccountIdParam }

@@ -16,12 +16,14 @@ function getStartDate(days: number) {
 
 export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 	// Register DNS Report tool
-	agent.server.tool(
+	agent.server.registerTool(
 		'dns_report',
-		'Fetch the DNS Report for a given zone since a date',
 		{
-			zone: z.string(),
-			days: z.number(),
+			description: 'Fetch the DNS Report for a given zone since a date',
+			inputSchema: {
+				zone: z.string(),
+				days: z.number(),
+			},
 		},
 		async ({ zone, days }) => {
 			try {
@@ -95,11 +97,13 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 		}
 	)
 	// Register Zone DNS Settings display tool
-	agent.server.tool(
+	agent.server.registerTool(
 		'show_zone_dns_settings',
-		'Show DNS settings for a zone',
 		{
-			zone: z.string(),
+			description: 'Show DNS settings for a zone',
+			inputSchema: {
+				zone: z.string(),
+			},
 		},
 		async ({ zone }) => {
 			try {

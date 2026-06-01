@@ -15,9 +15,10 @@ const TOP_K = 10
  * @param server The MCP server instance
  */
 export function registerDocsTools(server: McpServer, env: RequiredEnv) {
-	server.tool(
+	server.registerTool(
 		'search_cloudflare_documentation',
-		`Search the Cloudflare documentation.
+		{
+			description: `Search the Cloudflare documentation.
 
 		This tool should be used to answer any question about Cloudflare products or features, including:
 		- Workers, Pages, R2, Images, Stream, D1, Durable Objects, KV, Workflows, Hyperdrive, Queues
@@ -27,12 +28,13 @@ export function registerDocsTools(server: McpServer, env: RequiredEnv) {
 
 		Results are returned as semantically similar chunks to the query.
 		`,
-		{
-			query: z.string(),
-		},
-		{
-			title: 'Search Cloudflare docs',
-			readOnlyHint: true,
+			inputSchema: {
+				query: z.string(),
+			},
+			annotations: {
+				title: 'Search Cloudflare docs',
+				readOnlyHint: true,
+			},
 		},
 		async ({ query }) => {
 			const results = await queryVectorize(env.AI, env.VECTORIZE, query, TOP_K)
@@ -55,13 +57,15 @@ ${result.text}
 
 	// Note: this is a tool instead of a prompt because
 	// prompt support is much less common than tools.
-	server.tool(
+	server.registerTool(
 		'migrate_pages_to_workers_guide',
-		`ALWAYS read this guide before migrating Pages projects to Workers.`,
-		{},
 		{
-			title: 'Get Pages migration guide',
-			readOnlyHint: true,
+			description: `ALWAYS read this guide before migrating Pages projects to Workers.`,
+			inputSchema: {},
+			annotations: {
+				title: 'Get Pages migration guide',
+				readOnlyHint: true,
+			},
 		},
 		async () => {
 			const res = await fetch(

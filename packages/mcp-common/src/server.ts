@@ -66,10 +66,13 @@ export class CloudflareMCPServer extends McpServer {
 			this.recordError(e)
 		}
 
-		const _tool = this.tool.bind(this)
-		this.tool = (name: string, ...rest: unknown[]): ReturnType<typeof this.tool> => {
-			const toolCb = rest[rest.length - 1] as ToolCallback<ZodRawShape | undefined>
-			const replacementToolCb: ToolCallback<ZodRawShape | undefined> = (arg1, arg2) => {
+		// Wrap a tool callback to record success/error metrics. Shared by the tool() and
+		// registerTool() overrides so every registration path is tracked identically.
+		const trackCb = (
+			name: string,
+			toolCb: ToolCallback<ZodRawShape | undefined>
+		): ToolCallback<ZodRawShape | undefined> => {
+			return (arg1, arg2) => {
 				const toolCall = toolCb(
 					arg1 as { [x: string]: any } & RequestHandlerExtra<ServerRequest, ServerNotification>,
 					arg2
@@ -80,12 +83,7 @@ export class CloudflareMCPServer extends McpServer {
 						return toolCall
 							.then((r: any) => {
 								// promise succeeds
-								this.metrics.logEvent(
-									new ToolCall({
-										toolName: name,
-										userId,
-									})
-								)
+								this.metrics.logEvent(new ToolCall({ toolName: name, userId }))
 								return r
 							})
 							.catch((e: unknown) => {
@@ -95,12 +93,7 @@ export class CloudflareMCPServer extends McpServer {
 							})
 					} else {
 						// non-promise succeeds
-						this.metrics.logEvent(
-							new ToolCall({
-								toolName: name,
-								userId,
-							})
-						)
+						this.metrics.logEvent(new ToolCall({ toolName: name, userId }))
 						return toolCall
 					}
 				} catch (e: unknown) {
@@ -109,10 +102,29 @@ export class CloudflareMCPServer extends McpServer {
 					throw e
 				}
 			}
-			rest[rest.length - 1] = replacementToolCb
+		}
 
+		const _tool = this.tool.bind(this)
+		this.tool = (name: string, ...rest: unknown[]): ReturnType<typeof this.tool> => {
+			rest[rest.length - 1] = trackCb(
+				name,
+				rest[rest.length - 1] as ToolCallback<ZodRawShape | undefined>
+			)
 			// @ts-ignore
 			return _tool(name, ...rest)
+		}
+
+		const _registerTool = this.registerTool.bind(this)
+		this.registerTool = (
+			name: string,
+			...rest: unknown[]
+		): ReturnType<typeof this.registerTool> => {
+			rest[rest.length - 1] = trackCb(
+				name,
+				rest[rest.length - 1] as ToolCallback<ZodRawShape | undefined>
+			)
+			// @ts-ignore
+			return _registerTool(name, ...rest)
 		}
 	}
 
@@ -160,8 +172,11 @@ export class CloudflareMCPServer extends McpServer {
 
 		const { shape: registeredShape, callback } = buildAccountTool(accountManager, shape, handler)
 
-		// @ts-ignore — registeredShape is built dynamically; the SDK validates args at runtime.
-		return this.tool(name, description, registeredShape, annotations, callback)
+		return this.registerTool(
+			name,
+			{ description, inputSchema: registeredShape, annotations },
+			callback
+		)
 	}
 
 	private trackToolCallError(e: unknown, toolName: string, userId?: string) {

@@ -10,9 +10,10 @@ import type { CloudflareDocumentationMCP } from '../docs-autorag.app'
  */
 export function registerDocsTools(agent: CloudflareDocumentationMCP) {
 	// Register the worker logs analysis tool by worker name
-	agent.server.tool(
+	agent.server.registerTool(
 		'search_cloudflare_documentation',
-		`Search the Cloudflare documentation.
+		{
+			description: `Search the Cloudflare documentation.
 
 		You should use this tool when:
 		- A user asks questions about Cloudflare products (Workers, Developer Platform, Zero Trust, CDN, etc)
@@ -22,25 +23,26 @@ export function registerDocsTools(agent: CloudflareDocumentationMCP) {
 
 		This tool returns a number of results from a vector database. These are embedded as resources in the response and are plaintext documents in a variety of formats.
 		`,
-		{
-			// partially pulled from autorag query optimization example
-			query: z.string().describe(`Search query. The query should:
+			inputSchema: {
+				// partially pulled from autorag query optimization example
+				query: z.string().describe(`Search query. The query should:
 1. Identify the core concepts and intent
 2. Add relevant synonyms and related terms
 3. Remove irrelevant filler words
 4. Structure the query to emphasize key terms
 5. Include technical or domain-specific terminology if applicable`),
-			scoreThreshold: z
-				.number()
-				.min(0)
-				.max(1)
-				.optional()
-				.describe('A score threshold (0-1) for which matches should be included.'),
-			maxNumResults: z
-				.number()
-				.default(10)
-				.optional()
-				.describe('The maximum number of results to return.'),
+				scoreThreshold: z
+					.number()
+					.min(0)
+					.max(1)
+					.optional()
+					.describe('A score threshold (0-1) for which matches should be included.'),
+				maxNumResults: z
+					.number()
+					.default(10)
+					.optional()
+					.describe('The maximum number of results to return.'),
+			},
 		},
 		async (params) => {
 			// we don't need "rewrite query" OR aiSearch because an LLM writes the query and formats the output for us.

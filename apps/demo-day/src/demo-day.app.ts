@@ -37,9 +37,12 @@ export class CloudflareDemoDayMCP extends McpAgent<Env, State, Props> {
 	}
 
 	async init() {
-		this.server.tool(
+		this.server.registerTool(
 			'mcp_demo_day_info',
-			"Get information about Cloudflare's MCP Demo Day. Use this tool if the user asks about Cloudflare's MCP demo day",
+			{
+				description:
+					"Get information about Cloudflare's MCP Demo Day. Use this tool if the user asks about Cloudflare's MCP demo day",
+			},
 			async () => {
 				const res = await this.env.ASSETS.fetch('https://assets.local/index.html')
 				return {

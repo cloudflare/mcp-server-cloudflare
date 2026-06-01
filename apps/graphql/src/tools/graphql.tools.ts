@@ -1010,9 +1010,10 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 	)
 
 	// Tool to generate a GraphQL API Explorer link
-	agent.server.tool(
+	agent.server.registerTool(
 		'graphql_api_explorer',
-		`Generate a Cloudflare GraphQL API Explorer link
+		{
+			description: `Generate a Cloudflare GraphQL API Explorer link
 
 		Use this tool when:
 
@@ -1024,12 +1025,13 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 		The response includes a clickable Markdown link that users can click to open the query in Cloudflare's interactive GraphQL playground.
 		The original query and variables are also displayed for reference.
 		`,
-		{
-			query: z.string().describe('The GraphQL query to include in the explorer link'),
-			variables: z
-				.record(z.string(), z.any())
-				.optional()
-				.describe('Variables for the query in JSON format'),
+			inputSchema: {
+				query: z.string().describe('The GraphQL query to include in the explorer link'),
+				variables: z
+					.record(z.string(), z.any())
+					.optional()
+					.describe('Variables for the query in JSON format'),
+			},
 		},
 		async (params) => {
 			try {
