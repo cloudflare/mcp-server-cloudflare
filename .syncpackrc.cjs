@@ -48,7 +48,7 @@ const config = {
 		{
 			label: 'use zod v4 in packages/tools',
 			dependencies: ['zod'],
-			pinVersion: '4.0.0-beta.20250505T195954',
+			pinVersion: '4.4.3',
 			packages: ['@repo/tools'],
 		},
 	],
