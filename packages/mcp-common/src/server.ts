@@ -104,17 +104,18 @@ export class CloudflareMCPServer extends McpServer {
 			}
 		}
 
-		const _tool = this.tool.bind(this)
+		const _tool = this.tool.bind(this) as (...args: unknown[]) => ReturnType<McpServer['tool']>
 		this.tool = (name: string, ...rest: unknown[]): ReturnType<typeof this.tool> => {
 			rest[rest.length - 1] = trackCb(
 				name,
 				rest[rest.length - 1] as ToolCallback<ZodRawShape | undefined>
 			)
-			// @ts-ignore
 			return _tool(name, ...rest)
 		}
 
-		const _registerTool = this.registerTool.bind(this)
+		const _registerTool = this.registerTool.bind(this) as (
+			...args: unknown[]
+		) => ReturnType<McpServer['registerTool']>
 		this.registerTool = (
 			name: string,
 			...rest: unknown[]
@@ -123,7 +124,6 @@ export class CloudflareMCPServer extends McpServer {
 				name,
 				rest[rest.length - 1] as ToolCallback<ZodRawShape | undefined>
 			)
-			// @ts-ignore
 			return _registerTool(name, ...rest)
 		}
 	}
