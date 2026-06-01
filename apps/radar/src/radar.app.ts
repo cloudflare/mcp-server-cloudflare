@@ -58,7 +58,7 @@ migrate at your earliest convenience.`
 // Context from the auth process, encrypted & stored in the auth token
 // and provided to the DurableMCP as this.props
 type Props = AuthProps
-type State = { activeAccountId: string | null }
+type State = Record<string, never>
 
 export class RadarMCP extends McpAgent<Env, State, Props> {
 	_server: CloudflareMCPServer | undefined

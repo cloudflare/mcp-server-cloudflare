@@ -33,7 +33,7 @@ const metrics = new MetricsTracker(env.MCP_METRICS, {
 // and provided to the DurableMCP as this.props
 type Props = AuthProps
 
-type State = { activeAccountId: string | null }
+type State = Record<string, never>
 
 export class ObservabilityMCP extends McpAgent<Env, State, Props> {
 	_server: CloudflareMCPServer | undefined

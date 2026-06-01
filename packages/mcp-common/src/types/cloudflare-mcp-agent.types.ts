@@ -3,7 +3,11 @@ import { type McpAgent } from 'agents/mcp'
 import type { AuthProps } from '../cloudflare-oauth-handler'
 import type { CloudflareMCPServer } from '../server'
 
-export type CloudflareMCPAgentState = { activeAccountId: string | null }
+// Base agent state shared across servers. Account resolution is centralized in AccountManager
+// (no longer persisted as state), so the base carries no fields; individual servers may add
+// their own state (e.g. workers-builds tracks the active build/worker), hence the permissive
+// index signature so those servers stay assignable to CloudflareMcpAgent.
+export type CloudflareMCPAgentState = Record<string, unknown>
 
 export type CloudflareMCPAgentProps = AuthProps
 

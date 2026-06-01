@@ -30,7 +30,7 @@ const metrics = new MetricsTracker(env.MCP_METRICS, {
 	version: env.MCP_SERVER_VERSION,
 })
 
-export type WorkersBindingsMCPState = { activeAccountId: string | null }
+export type WorkersBindingsMCPState = Record<string, never>
 
 // Context from the auth process, encrypted & stored in the auth token
 // and provided to the DurableMCP as this.props
@@ -48,10 +48,6 @@ export class WorkersBindingsMCP extends McpAgent<Env, WorkersBindingsMCPState, P
 		}
 
 		return this._server
-	}
-
-	initialState: WorkersBindingsMCPState = {
-		activeAccountId: null,
 	}
 
 	constructor(ctx: DurableObjectState, env: Env) {

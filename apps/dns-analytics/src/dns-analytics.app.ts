@@ -30,7 +30,7 @@ const metrics = new MetricsTracker(env.MCP_METRICS, {
 // and provided to the DurableMCP as this.props
 export type Props = AuthProps
 
-export type State = { activeAccountId: string | null }
+export type State = Record<string, never>
 
 export class DNSAnalyticsMCP extends McpAgent<Env, State, Props> {
 	_server: CloudflareMCPServer | undefined

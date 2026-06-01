@@ -33,7 +33,6 @@ const metrics = new MetricsTracker(env.MCP_METRICS, {
 type Props = AuthProps
 
 type State = {
-	activeAccountId: string | null
 	activeBuildUUID: string | null
 	activeWorkerId: string | null
 }
