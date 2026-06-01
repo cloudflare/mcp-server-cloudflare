@@ -6,24 +6,13 @@ import { getProps } from '@repo/mcp-common/src/get-props'
 import type { BrowserMCP } from '../browser.app'
 
 export function registerBrowserTools(agent: BrowserMCP) {
-	agent.server.tool(
+	agent.server.accountTool(
 		'get_url_html_content',
 		'Get page HTML content',
 		{
 			url: z.string().url(),
 		},
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		async (params, accountId) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -50,29 +39,19 @@ export function registerBrowserTools(agent: BrowserMCP) {
 							text: `Error getting page html: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
-	agent.server.tool(
+	agent.server.accountTool(
 		'get_url_markdown',
 		'Get page converted into Markdown',
 		{
 			url: z.string().url(),
 		},
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		async (params, accountId) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -100,12 +79,13 @@ export function registerBrowserTools(agent: BrowserMCP) {
 							text: `Error getting page in markdown: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
-	agent.server.tool(
+	agent.server.accountTool(
 		'get_url_screenshot',
 		'Get page screenshot',
 		{
@@ -117,18 +97,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 				})
 				.optional(),
 		},
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		async (params, accountId) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -162,6 +131,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 							text: `Error getting page screenshot: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

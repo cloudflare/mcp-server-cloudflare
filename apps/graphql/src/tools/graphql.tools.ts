@@ -438,7 +438,7 @@ async function searchGraphQLSchema(
  */
 export function registerGraphQLTools(agent: GraphQLMCP) {
 	// Tool to search the GraphQL schema for types, fields, and enum values matching a keyword
-	agent.server.tool(
+	agent.server.accountTool(
 		'graphql_schema_search',
 		`Search the Cloudflare GraphQL API schema for types, fields, and enum values matching a keyword
 
@@ -481,24 +481,13 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 					'Whether to only include OBJECT kind types in the search results with descriptions'
 				),
 		},
-		async (params) => {
+		async (params, accountId) => {
 			const {
 				keyword,
 				maxDetailsToFetch = 10,
 				includeInternalTypes = false,
 				onlyObjectTypes = true,
 			} = params
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
 
 			try {
 				const props = getProps(agent)
@@ -576,13 +565,14 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
 	// Tool to fetch the GraphQL schema overview (high-level structure)
-	agent.server.tool(
+	agent.server.accountTool(
 		'graphql_schema_overview',
 		`Fetch the high-level overview of the Cloudflare GraphQL API schema
 		
@@ -606,17 +596,6 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 		},
 		async (params) => {
 			const { pageSize = 100, page = 1 } = params
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
 
 			try {
 				const props = getProps(agent)
@@ -669,13 +648,14 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
 	// Tool to fetch detailed information about a specific GraphQL type
-	agent.server.tool(
+	agent.server.accountTool(
 		'graphql_type_details',
 		`Fetch detailed information about a specific GraphQL type (dataset)
 
@@ -720,18 +700,6 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 				enumValuesPageSize = 50,
 				enumValuesPage = 1,
 			} = params
-
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
 
 			try {
 				const props = getProps(agent)
@@ -805,13 +773,14 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
 	// Tool to fetch the complete GraphQL schema (combines overview and important type details)
-	agent.server.tool(
+	agent.server.accountTool(
 		'graphql_complete_schema',
 		'Fetch the complete Cloudflare GraphQL API schema (combines overview and important type details)',
 		{
@@ -840,18 +809,6 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 				includeRootTypeDetails = true,
 				maxTypeDetailsToFetch = 3,
 			} = params
-
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
 
 			try {
 				const props = getProps(agent)
@@ -961,13 +918,14 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
 	// Tool to execute a GraphQL query
-	agent.server.tool(
+	agent.server.accountTool(
 		'graphql_query',
 		`Execute a GraphQL query against the Cloudflare API
 
@@ -995,18 +953,6 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 			variables: z.record(z.any()).optional().describe('Variables for the query'),
 		},
 		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
-
 			try {
 				const props = getProps(agent)
 				const { query, variables = {} } = params
@@ -1057,6 +1003,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
@@ -1112,6 +1059,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}

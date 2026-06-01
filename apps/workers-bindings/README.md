@@ -11,8 +11,6 @@ Currently available tools:
 
 | **Category**      | **Tool**                   | **Description**                                                               |
 | ----------------- | -------------------------- | ----------------------------------------------------------------------------- |
-| **Account**       | `accounts_list`            | List all accounts in your Cloudflare account                                  |
-|                   | `set_active_account`       | Set active account to be used for tool calls that require accountId           |
 | **KV Namespaces** | `kv_namespaces_list`       | List all of the kv namespaces in your Cloudflare account                      |
 |                   | `kv_namespace_create`      | Create a new kv namespace in your Cloudflare account                          |
 |                   | `kv_namespace_delete`      | Delete a kv namespace in your Cloudflare account                              |

@@ -7,25 +7,14 @@ import type { LogListParams } from 'cloudflare/resources/ai-gateway'
 import type { AIGatewayMCP } from '../ai-gateway.app'
 
 export function registerAIGatewayTools(agent: AIGatewayMCP) {
-	agent.server.tool(
+	agent.server.accountTool(
 		'list_gateways',
 		'List Gateways',
 		{
 			page: pageParam,
 			per_page: perPageParam,
 		},
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		async (params, accountId) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -54,25 +43,14 @@ export function registerAIGatewayTools(agent: AIGatewayMCP) {
 							text: `Error listing gateways: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
-	agent.server.tool('list_logs', 'List Logs', ListLogsParams, async (params) => {
+	agent.server.accountTool('list_logs', 'List Logs', ListLogsParams, async (params, accountId) => {
 		try {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
-
 			const { gateway_id, ...filters } = params
 
 			const props = getProps(agent)
@@ -101,30 +79,19 @@ export function registerAIGatewayTools(agent: AIGatewayMCP) {
 						text: `Error listing logs: ${error instanceof Error && error.message}`,
 					},
 				],
+				isError: true,
 			}
 		}
 	})
 
-	agent.server.tool(
+	agent.server.accountTool(
 		'get_log_details',
 		'Get a single Log details',
 		{
 			gateway_id: GatewayIdParam,
 			log_id: LogIdParam,
 		},
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
-
+		async (params, accountId) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -150,31 +117,20 @@ export function registerAIGatewayTools(agent: AIGatewayMCP) {
 							text: `Error getting log: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
-	agent.server.tool(
+	agent.server.accountTool(
 		'get_log_request_body',
 		'Get Log Request Body',
 		{
 			gateway_id: GatewayIdParam,
 			log_id: LogIdParam,
 		},
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
-
+		async (params, accountId) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -200,31 +156,20 @@ export function registerAIGatewayTools(agent: AIGatewayMCP) {
 							text: `Error getting log request body: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
-	agent.server.tool(
+	agent.server.accountTool(
 		'get_log_response_body',
 		'Get Log Response Body',
 		{
 			gateway_id: GatewayIdParam,
 			log_id: LogIdParam,
 		},
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
-
+		async (params, accountId) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -250,6 +195,7 @@ export function registerAIGatewayTools(agent: AIGatewayMCP) {
 							text: `Error getting log response body: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

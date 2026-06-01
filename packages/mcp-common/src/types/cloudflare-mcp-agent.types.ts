@@ -13,13 +13,8 @@ type McpAgentWithoutServer<EnvType = unknown> = Omit<
 	'server'
 >
 
-export interface CloudflareMcpAgentNoAccount<EnvType = unknown>
-	extends McpAgentWithoutServer<EnvType> {
+// Account resolution is centralized in AccountManager + CloudflareMCPServer.accountTool,
+// so agents no longer carry get/setActiveAccountId.
+export interface CloudflareMcpAgent<EnvType = unknown> extends McpAgentWithoutServer<EnvType> {
 	server: CloudflareMCPServer
-}
-
-export interface CloudflareMcpAgent<EnvType = unknown>
-	extends CloudflareMcpAgentNoAccount<EnvType> {
-	setActiveAccountId(accountId: string): Promise<void>
-	getActiveAccountId(): Promise<string | null>
 }

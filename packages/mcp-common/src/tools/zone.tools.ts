@@ -7,7 +7,7 @@ import { type CloudflareMcpAgent } from '../types/cloudflare-mcp-agent.types'
 
 export function registerZoneTools(agent: CloudflareMcpAgent) {
 	// Tool to list all zones under an account
-	agent.server.tool(
+	agent.server.accountTool(
 		'zones_list',
 		'List all zones under a Cloudflare account',
 		{
@@ -36,19 +36,7 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 				destructiveHint: false,
 			},
 		},
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
-
+		async (params, accountId) => {
 			try {
 				const props = getProps(agent)
 				const { page = 1, perPage = 50 } = params
@@ -81,13 +69,14 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 							text: `Error listing zones: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
 	// Tool to get zone details by ID
-	agent.server.tool(
+	agent.server.accountTool(
 		'zone_details',
 		'Get details for a specific Cloudflare zone',
 		{
@@ -100,19 +89,7 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 				destructiveHint: false,
 			},
 		},
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
-
+		async (params, _accountId) => {
 			try {
 				const props = getProps(agent)
 				const { zoneId } = params
@@ -139,6 +116,7 @@ export function registerZoneTools(agent: CloudflareMcpAgent) {
 							text: `Error fetching zone details: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

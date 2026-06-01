@@ -23,7 +23,7 @@ This server provides tools powered by the Cloudflare Radar API for global Intern
 
 ## Authentication
 
-- **URL Scanner** requires an active account (use \`set_active_account\`)
+- **URL Scanner** is account-scoped: if your credentials span multiple accounts, pass \`account_id\` (or set a \`cf-account-id\` request header in your MCP client config)
 - All other Radar data tools work without account selection
 
 ## Tool Categories

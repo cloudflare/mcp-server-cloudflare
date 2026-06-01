@@ -5,9 +5,9 @@ import { getProps } from '@repo/mcp-common/src/get-props'
 
 import { getReader } from '../warp_diag_reader'
 
-import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js'
 import type { ZodRawShape, ZodTypeAny } from 'zod'
+import type { AccountToolCallback } from '@repo/mcp-common/src/server'
 import type { CloudflareDEXMCP } from '../dex-analysis.app'
 
 export function registerDEXTools(agent: CloudflareDEXMCP) {
@@ -522,12 +522,8 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 			'Hint: you can call dex_explore_remote_warp_diag_output multiple times in parallel if necessary to take advantage of in-memory caching for best performance.' +
 			'See https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/troubleshooting/warp-logs/ for more info on warp-diags',
 		agent,
-		callback: async ({ accessToken, deviceId, commandId }) => {
+		callback: async ({ accessToken, accountId, deviceId, commandId }) => {
 			const reader = await getReader({ accessToken, deviceId, commandId })
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return new Error(`Failed to get active account id`)
-			}
 
 			return await reader.list({ accessToken, accountId, commandId, deviceId })
 		},
@@ -545,12 +541,8 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		llmContext:
 			'To avoid hitting conversation and memory limits, avoid outputting the whole contents of these files to the user unless specifically asked to. Instead prefer to show relevant snippets only.',
 		agent,
-		callback: async ({ accessToken, deviceId, commandId, filepath }) => {
+		callback: async ({ accessToken, accountId, deviceId, commandId, filepath }) => {
 			const reader = await getReader({ accessToken, deviceId, commandId })
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return new Error(`Failed to get active account id`)
-			}
 
 			return await reader.read({ accessToken, accountId, deviceId, commandId, filepath })
 		},
@@ -606,47 +598,41 @@ const registerTool = <T extends ZodRawShape, U = unknown>({
 		>
 	) => Promise<U>
 }) => {
-	agent.server.tool<T>(name, description, schema, (async (params, extra) => {
-		const accountId = await agent.getActiveAccountId()
-		if (!accountId) {
-			return {
-				content: [
-					{
-						type: 'text',
-						text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-					},
-				],
+	agent.server.accountTool<T>(
+		name,
+		description,
+		schema as T,
+		(async (params, accountId, extra) => {
+			try {
+				const props = getProps(agent)
+				const accessToken = props.accessToken
+				const res = await callback({ ...(params as T), extra, accountId, accessToken })
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								data: res,
+								llmContext,
+							}),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								error: `Error with tool ${name}: ${error instanceof Error && error.message}`,
+							}),
+						},
+					],
+					isError: true,
+				}
 			}
-		}
-
-		try {
-			const props = getProps(agent)
-			const accessToken = props.accessToken
-			const res = await callback({ ...(params as T), extra, accountId, accessToken })
-			return {
-				content: [
-					{
-						type: 'text',
-						text: JSON.stringify({
-							data: res,
-							llmContext,
-						}),
-					},
-				],
-			}
-		} catch (error) {
-			return {
-				content: [
-					{
-						type: 'text',
-						text: JSON.stringify({
-							error: `Error with tool ${name}: ${error instanceof Error && error.message}`,
-						}),
-					},
-				],
-			}
-		}
-	}) as ToolCallback<T>)
+		}) as AccountToolCallback<T>
+	)
 }
 
 // Shared parameter schemas

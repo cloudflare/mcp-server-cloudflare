@@ -234,25 +234,14 @@ export async function handleGetAuditLogs(
  */
 export function registerAuditLogTools(agent: AuditlogMCP) {
 	// Register the audit log tool by account
-	agent.server.tool(
+	agent.server.accountTool(
 		'auditlogs_by_account_id',
 		`Find all audit logs (a list of who made what change when) for a Cloudflare Account by ID.
 		This can be used to query activity on your Cloudflare account at a particular time.
 		Since and before are required to look at a slice of time and are dates with or without a time up to millisecond precision e.g YYYY-MM-DDTHH:mm:ss.sssZ.
 		There can be more than one page of results and they can be paginated using the returned cursor`,
 		auditLogsQuerySchema.shape,
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		async (params, accountId) => {
 			try {
 				const props = getProps(agent)
 				const result = await handleGetAuditLogs(accountId, props.accessToken, params)
@@ -274,6 +263,7 @@ export function registerAuditLogTools(agent: AuditlogMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}

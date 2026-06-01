@@ -1,19 +1,19 @@
 import OAuthProvider from '@cloudflare/workers-oauth-provider'
 import { McpAgent } from 'agents/mcp'
 
+import { AccountManager } from '@repo/mcp-common/src/account-manager'
 import { handleApiTokenMode, isApiTokenRequest } from '@repo/mcp-common/src/api-token-mode'
 import {
 	createAuthHandlers,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
-import { getUserDetails, UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
+import { UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { fmt } from '@repo/mcp-common/src/format'
 import { getProps } from '@repo/mcp-common/src/get-props'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { initSentryWithUser } from '@repo/mcp-common/src/sentry'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
-import { registerAccountTools } from '@repo/mcp-common/src/tools/account.tools'
 import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker.tools'
 
 import { MetricsTracker } from '../../../packages/mcp-observability/src'
@@ -59,6 +59,7 @@ export class BuildsMCP extends McpAgent<Env, State, Props> {
 		const userId = props.type === 'user_token' ? props.user.id : undefined
 		const sentry =
 			props.type === 'user_token' ? initSentryWithUser(env, this.ctx, props.user.id) : undefined
+		const accountManager = new AccountManager(props)
 
 		this.server = new CloudflareMCPServer({
 			userId,
@@ -68,60 +69,28 @@ export class BuildsMCP extends McpAgent<Env, State, Props> {
 				version: this.env.MCP_SERVER_VERSION,
 			},
 			sentry,
+			accountManager,
 			options: {
-				instructions: fmt.trim(`
+				instructions:
+					fmt.trim(`
 					# Cloudflare Workers Builds Tool
 					* A Cloudflare Worker is a serverless function
 					* Workers Builds is a CI/CD system for building and deploying your Worker whenever you push code to GitHub/GitLab.
 
 					This server allows you to view and debug Cloudflare Workers Builds for your Workers (NOT Cloudflare Pages).
 
-					To get started, you can list your accounts (accounts_list) and then set an active account (set_active_account).
-					Once you have an active account, you can list your Workers (workers_list) and set an active Worker (workers_builds_set_active_worker).
+					To get started, you can list your Workers (workers_list) and set an active Worker (workers_builds_set_active_worker).
 					You can then list the builds for your Worker (workers_builds_list_builds) and set an active build (workers_builds_set_active_build).
 					Once you have an active build, you can view the logs (workers_builds_get_build_logs).
-				`),
+				`) + accountManager.instructionsSuffix(),
 			},
 		})
-
-		registerAccountTools(this)
 
 		// Register Cloudflare Workers tools
 		registerWorkersTools(this)
 
 		// Register Cloudflare Workers logs tools
 		registerBuildsTools(this)
-	}
-
-	async getActiveAccountId() {
-		try {
-			const props = getProps(this)
-			// account tokens are scoped to one account
-			if (props.type === 'account_token') {
-				return props.account.id
-			}
-			// Get UserDetails Durable Object based off the userId and retrieve the activeAccountId from it
-			// we do this so we can persist activeAccountId across sessions
-			const userDetails = getUserDetails(env, props.user.id)
-			return await userDetails.getActiveAccountId()
-		} catch (e) {
-			this.server.recordError(e)
-			return null
-		}
-	}
-
-	async setActiveAccountId(accountId: string) {
-		try {
-			const props = getProps(this)
-			// account tokens are scoped to one account
-			if (props.type === 'account_token') {
-				return
-			}
-			const userDetails = getUserDetails(env, props.user.id)
-			await userDetails.setActiveAccountId(accountId)
-		} catch (e) {
-			this.server.recordError(e)
-		}
 	}
 
 	async getActiveBuildUUID(): Promise<string | null> {

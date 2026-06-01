@@ -16,7 +16,7 @@ Currently available tools:
 | `get_url_markdown`     | Fetches the webpage content and converts it into Markdown format.            |
 | `get_url_screenshot`   | Captures a screenshot of the webpage. Optionally, specify the viewport size. |
 
-**Note:** To use these tools, ensure you have an active account set. If not, use `accounts_list` to list your accounts and `set_active_account` to set one as active.
+**Note:** These tools are account-scoped. Single-account credentials (and account-scoped API tokens) are detected automatically. If your credentials can access multiple accounts, pass `account_id` to the tool, or set a `cf-account-id` request header in your MCP client config.
 
 This MCP server is still a work in progress, and we plan to add more tools in the future.
 

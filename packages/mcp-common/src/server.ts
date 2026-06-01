@@ -4,16 +4,26 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { type ZodRawShape } from 'zod'
 
 import { MetricsTracker, SessionStart, ToolCall } from '../../mcp-observability/src'
+import { buildAccountTool } from './account-tool'
 import { McpError } from './mcp-error'
 
 import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js'
-import type { ServerNotification, ServerRequest } from '@modelcontextprotocol/sdk/types.js'
+import type {
+	ServerNotification,
+	ServerRequest,
+	ToolAnnotations,
+} from '@modelcontextprotocol/sdk/types.js'
+import type { AccountManager } from './account-manager'
+import type { AccountToolCallback } from './account-tool'
 import type { SentryClient } from './sentry'
+
+export type { AccountToolCallback } from './account-tool'
 
 export class CloudflareMCPServer extends McpServer {
 	private metrics
 	private sentry?: SentryClient
+	private accountManager?: AccountManager
 
 	constructor({
 		userId,
@@ -21,6 +31,7 @@ export class CloudflareMCPServer extends McpServer {
 		serverInfo,
 		options,
 		sentry,
+		accountManager,
 	}: {
 		userId?: string
 		wae: AnalyticsEngineDataset
@@ -31,10 +42,13 @@ export class CloudflareMCPServer extends McpServer {
 		}
 		options?: ServerOptions
 		sentry?: SentryClient
+		/** Enables {@link CloudflareMCPServer.accountTool}; required to register account-scoped tools. */
+		accountManager?: AccountManager
 	}) {
 		super(serverInfo, options)
 		this.metrics = new MetricsTracker(wae, serverInfo)
 		this.sentry = sentry
+		this.accountManager = accountManager
 
 		this.server.oninitialized = () => {
 			const clientInfo = this.server.getClientVersion()
@@ -100,6 +114,54 @@ export class CloudflareMCPServer extends McpServer {
 			// @ts-ignore
 			return _tool(name, ...rest)
 		}
+	}
+
+	/**
+	 * Register an account-scoped tool. Centralizes the 3-layer account-ID resolution:
+	 *  - When the session's account is auth-pinned (account token, or user token with one
+	 *    account), no `account_id` parameter is added — the tool schema stays lean.
+	 *  - For multi-account user tokens an optional `account_id` parameter is appended, and at
+	 *    call time the id is resolved as: `cf-account-id` header → `account_id` argument.
+	 *
+	 * The resolved account id is passed to {@link handler} as its second argument. If resolution
+	 * fails (multi-account with no/invalid selection) the error {@link CallToolResult} is returned
+	 * and {@link handler} is never invoked.
+	 */
+	public accountTool<Shape extends ZodRawShape>(
+		name: string,
+		description: string,
+		shape: Shape,
+		handler: AccountToolCallback<Shape>
+	): ReturnType<McpServer['tool']>
+	public accountTool<Shape extends ZodRawShape>(
+		name: string,
+		description: string,
+		shape: Shape,
+		annotations: ToolAnnotations,
+		handler: AccountToolCallback<Shape>
+	): ReturnType<McpServer['tool']>
+	public accountTool<Shape extends ZodRawShape>(
+		name: string,
+		description: string,
+		shape: Shape,
+		annotationsOrHandler: ToolAnnotations | AccountToolCallback<Shape>,
+		maybeHandler?: AccountToolCallback<Shape>
+	): ReturnType<McpServer['tool']> {
+		const accountManager = this.accountManager
+		if (!accountManager) {
+			throw new Error(`accountTool("${name}") requires an accountManager on the server`)
+		}
+
+		const hasAnnotations = typeof annotationsOrHandler !== 'function'
+		const annotations = (hasAnnotations ? annotationsOrHandler : {}) as ToolAnnotations
+		const handler = (
+			hasAnnotations ? maybeHandler : annotationsOrHandler
+		) as AccountToolCallback<Shape>
+
+		const { shape: registeredShape, callback } = buildAccountTool(accountManager, shape, handler)
+
+		// @ts-ignore — registeredShape is built dynamically; the SDK validates args at runtime.
+		return this.tool(name, description, registeredShape, annotations, callback)
 	}
 
 	private trackToolCallError(e: unknown, toolName: string, userId?: string) {

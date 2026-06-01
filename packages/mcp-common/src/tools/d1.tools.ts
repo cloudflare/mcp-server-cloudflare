@@ -1,7 +1,6 @@
 import { z } from 'zod'
 
 import { getCloudflareClient } from '../cloudflare-api'
-import { MISSING_ACCOUNT_ID_RESPONSE } from '../constants'
 import { getProps } from '../get-props'
 import { type CloudflareMcpAgent } from '../types/cloudflare-mcp-agent.types'
 import {
@@ -13,7 +12,7 @@ import {
 import { PaginationPageParam, PaginationPerPageParam } from '../types/shared.types'
 
 export function registerD1Tools(agent: CloudflareMcpAgent) {
-	agent.server.tool(
+	agent.server.accountTool(
 		'd1_databases_list',
 		'List all of the D1 databases in your Cloudflare account',
 		{
@@ -27,11 +26,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 				readOnlyHint: true,
 			},
 		},
-		async ({ name, page, per_page }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ name, page, per_page }, account_id) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -61,12 +56,13 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 							text: `Error listing D1 databases: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
-	agent.server.tool(
+	agent.server.accountTool(
 		'd1_database_create',
 		'Create a new D1 database in your Cloudflare account',
 		{
@@ -80,11 +76,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 				destructiveHint: false,
 			},
 		},
-		async ({ name, primary_location_hint }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ name, primary_location_hint }, account_id) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -110,12 +102,13 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 							text: `Error creating D1 database: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
-	agent.server.tool(
+	agent.server.accountTool(
 		'd1_database_delete',
 		'Delete a d1 database in your Cloudflare account',
 		{ database_id: z.string() },
@@ -126,11 +119,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 				destructiveHint: true,
 			},
 		},
-		async ({ database_id }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ database_id }, account_id) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -153,12 +142,13 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 							text: `Error deleting D1 database: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
-	agent.server.tool(
+	agent.server.accountTool(
 		'd1_database_get',
 		'Get a D1 database in your Cloudflare account',
 		{ database_id: z.string() },
@@ -168,11 +158,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 				readOnlyHint: true,
 			},
 		},
-		async ({ database_id }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ database_id }, account_id) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -196,12 +182,13 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 							text: `Error getting D1 database: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
-	agent.server.tool(
+	agent.server.accountTool(
 		'd1_database_query',
 		'Query a D1 database in your Cloudflare account',
 		{
@@ -216,11 +203,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 				destructiveHint: false,
 			},
 		},
-		async ({ database_id, sql, params }) => {
-			const account_id = await agent.getActiveAccountId()
-			if (!account_id) {
-				return MISSING_ACCOUNT_ID_RESPONSE
-			}
+		async ({ database_id, sql, params }, account_id) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -245,6 +228,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 							text: `Error querying D1 database: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

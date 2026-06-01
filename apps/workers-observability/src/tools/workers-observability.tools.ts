@@ -27,7 +27,7 @@ const logger = new WorkersLogger<Tags>()
  */
 export function registerObservabilityTools(agent: ObservabilityMCP) {
 	// Register the worker logs analysis tool by worker name
-	agent.server.tool(
+	agent.server.accountTool(
 		'query_worker_observability',
 		`Query the Workers Observability API to analyze logs and metrics from your Cloudflare Workers.
 
@@ -54,24 +54,12 @@ This tool provides three primary views of your Worker data:
 		{
 			query: zQueryRunRequest,
 		},
-		async ({ query }, req) => {
+		async ({ query }, accountId, req) => {
 			logger.setTags({ userAgent: req.requestInfo?.headers?.['mcp-protocol-version'] })
 			logger.setTags({ mcpSessionId: req.requestInfo?.headers?.['mcp-session-id'] })
 			logger.setTags({ userAgent: req.requestInfo?.headers?.['sec-ch-ua'] })
 			logger.setTags({ toolName: 'query_worker_observability' })
-			const accountId = await agent.getActiveAccountId()
 			logger.setTags({ hasAccount: !!accountId })
-			if (!accountId) {
-				logger.warn('Ran Workers Observability Tool')
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
 			try {
 				const props = getProps(agent)
 				logger.setTags({ datasets: query.parameters?.datasets })
@@ -190,12 +178,13 @@ This tool provides three primary views of your Worker data:
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
-	agent.server.tool(
+	agent.server.accountTool(
 		'observability_keys',
 		`Find keys in the Workers Observability Data
 
@@ -208,18 +197,7 @@ This tool provides three primary views of your Worker data:
 - For empty results, try broadening your time range
 `,
 		{ keysQuery: zKeysRequest },
-		async ({ keysQuery }) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		async ({ keysQuery }, accountId) => {
 			try {
 				const props = getProps(agent)
 				const result = await handleWorkerLogsKeys(props.accessToken, accountId, keysQuery)
@@ -246,12 +224,13 @@ This tool provides three primary views of your Worker data:
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
-	agent.server.tool(
+	agent.server.accountTool(
 		'observability_values',
 		`Find values in the Workers Observability Data.
 
@@ -259,18 +238,7 @@ This tool provides three primary views of your Worker data:
 - For no results, verify the field exists using observability_keys first
 - If expected values are missing, try broadening your time range`,
 		{ valuesQuery: zValuesRequest },
-		async ({ valuesQuery }) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		async ({ valuesQuery }, accountId) => {
 			try {
 				const props = getProps(agent)
 				const result = await handleWorkerLogsValues(props.accessToken, accountId, valuesQuery)
@@ -296,6 +264,7 @@ This tool provides three primary views of your Worker data:
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}

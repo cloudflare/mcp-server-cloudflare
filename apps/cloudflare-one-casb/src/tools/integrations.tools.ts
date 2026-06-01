@@ -1,6 +1,5 @@
 import { z } from 'zod'
 
-import { withAccountCheck } from '@repo/mcp-common/src/api/account.api'
 import {
 	handleAssetById,
 	handleAssetCategories,
@@ -11,6 +10,7 @@ import {
 	handleIntegrationById,
 	handleIntegrations,
 } from '@repo/mcp-common/src/api/cf1-integration.api'
+import { getProps } from '@repo/mcp-common/src/get-props'
 import {
 	assetCategoryTypeParam,
 	assetCategoryVendorParam,
@@ -243,6 +243,26 @@ const toolDefinitions: Array<ToolDefinition<any>> = [
  */
 export function registerIntegrationsTools(agent: CASBMCP) {
 	toolDefinitions.forEach(({ name, description, params, handler }) => {
-		agent.server.tool(name, description, params, withAccountCheck(agent, handler))
+		agent.server.accountTool(name, description, params, async (toolParams, accountId) => {
+			try {
+				const apiToken = getProps(agent).accessToken || ''
+				const result = await handler({ ...toolParams, accountId, apiToken })
+				return {
+					content: [{ type: 'text', text: JSON.stringify(result) }],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								error: `Error processing request: ${error instanceof Error ? error.message : 'Unknown error'}`,
+							}),
+						},
+					],
+					isError: true,
+				}
+			}
+		})
 	})
 }

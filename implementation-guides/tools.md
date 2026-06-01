@@ -13,42 +13,44 @@ Tools are the mechanism by which an MCP agent (powered by an LLM) can perform ac
 
 ## Registering a Tool
 
-Tools are registered using the `agent.server.tool()` method.
+Tools are registered using the `agent.server.tool()` method. **Account-scoped tools** (anything that needs a Cloudflare account id) instead use `agent.server.accountTool()`, which centrally resolves the account id and passes it to your handler.
+
+Account-id resolution (handled by `accountTool`, in priority order):
+
+1. **Auth-pinned account** — an account-scoped API token's single account, or an OAuth token with exactly one account. No `account_id` parameter is exposed in this case.
+2. **`cf-account-id` request header** — set by the user in their MCP client config (multi-account tokens only).
+3. **`account_id` argument** — `accountTool` automatically appends an optional `account_id` parameter when the token spans multiple accounts.
+
+If the account can't be resolved (multi-account, no header/argument), `accountTool` returns an error result and your handler is never called.
 
 ```typescript
 // Import your Zod schemas
 import { z } from 'zod'
 
 import { getCloudflareClient } from '../cloudflare-api'
-import { MISSING_ACCOUNT_ID_RESPONSE } from '../constants'
 import { type CloudflareMcpAgent } from '../types/cloudflare-mcp-agent'
 import { KvNamespaceIdSchema, KvNamespaceTitleSchema } from '../types/kv_namespace'
 
 export function registerMyServiceTools(agent: CloudflareMcpAgent) {
-	agent.server.tool(
+	agent.server.accountTool(
 		'tool_name', // String: Unique name for the tool
 		'Detailed description', // String: Description for the LLM (CRITICAL!)
 		{
-			// Object: Parameter definitions using Zod schemas
+			// Object: Parameter definitions using Zod schemas. Do NOT add `account_id`
+			// yourself — accountTool adds it when (and only when) it is needed.
 			param1: MyParam1Schema,
 			param2: MyParam2Schema.optional(),
 			// ... other parameters
 		},
-		async (params) => {
-			// Async Function: The implementation logic
-			// params contains the validated parameters { param1, param2, ... }
+		async (params, accountId) => {
+			// params: the validated parameters { param1, param2, ... }
+			// accountId: the resolved (and validated) Cloudflare account id
 
 			// --- Tool Logic Start ---
 			try {
-				// Access agent context if needed (e.g., account ID, credentials)
-				const account_id = await agent.getActiveAccountId()
-				if (!account_id) {
-					return MISSING_ACCOUNT_ID_RESPONSE // Handle missing context
-				}
-
 				// Perform the action (e.g., call SDK, query DB)
 				// const client = getCloudflareClient(agent.props.accessToken);
-				// const result = await client.someService.someAction(...);
+				// const result = await client.someService.someAction({ account_id: accountId, ... });
 
 				// Format the successful response
 				return {
@@ -61,7 +63,7 @@ export function registerMyServiceTools(agent: CloudflareMcpAgent) {
 					],
 				}
 			} catch (error) {
-				// Format the error response
+				// Format the error response — set isError so clients can distinguish failures
 				return {
 					content: [
 						{
@@ -69,11 +71,14 @@ export function registerMyServiceTools(agent: CloudflareMcpAgent) {
 							text: `Error performing action: ${error instanceof Error ? error.message : String(error)}`,
 						},
 					],
+					isError: true,
 				}
 			}
 			// --- Tool Logic End ---
 		}
 	)
+
+	// Tools that do NOT need an account id use `agent.server.tool(...)` as before.
 
 	// ... register other tools ...
 }
@@ -105,9 +110,9 @@ export function registerMyServiceTools(agent: CloudflareMcpAgent) {
 
 4.  **`handlerFunction` (async function):**
     - The asynchronous function that executes the tool's logic.
-    - It receives a single argument: an object (`params`) containing the validated parameters passed by the LLM, matching the keys defined in the `parameters` object.
+    - It receives the validated `params` object. Account-scoped tools registered with `accountTool` also receive the resolved `accountId` as a second argument.
     - **Implementation Details:**
-      - **Access Context:** Use `agent.getActiveAccountId()`, `agent.props.accessToken`, `agent.env` (for worker bindings like AI, D1, R2) to get necessary credentials, environment variables, or bindings.
+      - **Access Context:** Use the `accountId` passed to your `accountTool` handler, `agent.props.accessToken`, and `agent.env` (for worker bindings like AI, D1, R2) to get necessary credentials, environment variables, or bindings.
       - **Error Handling:** Wrap the core logic in a `try...catch` block to gracefully handle failures (e.g., API errors, network issues, invalid inputs not caught by Zod).
       - **Perform Action:** Interact with the relevant service (Cloudflare SDK, database, vector store, etc.).
       - **Format Response:** Return an object with a `content` property, which is an array of `ContentBlock` objects (usually `type: 'text'` or `type: 'resource'`).
@@ -122,6 +127,6 @@ export function registerMyServiceTools(agent: CloudflareMcpAgent) {
 - **Robust Error Handling:** Anticipate potential failures and return informative error messages to the LLM.
 - **Consistent Naming:** Follow naming conventions for tools and parameters.
 - **Use Zod Validators:** Leverage Zod for input validation as described in the validator guide.
-- **Leverage Agent Context:** Use `agent.props`, `agent.env`, and helper methods like `agent.getActiveAccountId()` appropriately.
+- **Leverage Agent Context:** Use `agent.props`, `agent.env`, and the `accountId` provided to `accountTool` handlers appropriately.
 - **Statelessness:** Aim for tools to be stateless where possible. Rely on parameters and agent context for necessary information.
-- **Security:** Be mindful of the actions tools perform, especially destructive ones (`delete`, `update`). Ensure proper authentication and authorization context is used (e.g., checking the active account ID).
+- **Security:** Be mindful of the actions tools perform, especially destructive ones (`delete`, `update`). Ensure proper authentication and authorization context is used (the account id is resolved and validated for you by `accountTool`).

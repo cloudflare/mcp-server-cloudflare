@@ -1,18 +1,18 @@
 import OAuthProvider from '@cloudflare/workers-oauth-provider'
 import { McpAgent } from 'agents/mcp'
 
+import { AccountManager } from '@repo/mcp-common/src/account-manager'
 import { handleApiTokenMode, isApiTokenRequest } from '@repo/mcp-common/src/api-token-mode'
 import {
 	createAuthHandlers,
 	handleTokenExchangeCallback,
 } from '@repo/mcp-common/src/cloudflare-oauth-handler'
-import { getUserDetails, UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
+import { UserDetails } from '@repo/mcp-common/src/durable-objects/user_details.do'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { getProps } from '@repo/mcp-common/src/get-props'
 import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-ai-search.prompts'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
-import { registerAccountTools } from '@repo/mcp-common/src/tools/account.tools'
 import { registerD1Tools } from '@repo/mcp-common/src/tools/d1.tools'
 import { registerDocsTools } from '@repo/mcp-common/src/tools/docs-ai-search.tools'
 import { registerHyperdriveTools } from '@repo/mcp-common/src/tools/hyperdrive.tools'
@@ -65,6 +65,7 @@ export class WorkersBindingsMCP extends McpAgent<Env, WorkersBindingsMCPState, P
 		// TODO: Probably we'll want to track account tokens usage through an account identifier at some point
 		const props = getProps(this)
 		const userId = props.type === 'user_token' ? props.user.id : undefined
+		const accountManager = new AccountManager(props)
 
 		this.server = new CloudflareMCPServer({
 			userId,
@@ -73,9 +74,10 @@ export class WorkersBindingsMCP extends McpAgent<Env, WorkersBindingsMCPState, P
 				name: this.env.MCP_SERVER_NAME,
 				version: this.env.MCP_SERVER_VERSION,
 			},
+			accountManager,
+			options: { instructions: accountManager.instructionsSuffix() },
 		})
 
-		registerAccountTools(this)
 		registerKVTools(this)
 		registerWorkersTools(this)
 		registerR2BucketTools(this)
@@ -85,37 +87,6 @@ export class WorkersBindingsMCP extends McpAgent<Env, WorkersBindingsMCPState, P
 		// Add docs tools
 		registerDocsTools(this.server, this.env)
 		registerPrompts(this.server)
-	}
-
-	async getActiveAccountId() {
-		try {
-			const props = getProps(this)
-			// account tokens are scoped to one account
-			if (props.type === 'account_token') {
-				return props.account.id
-			}
-			// Get UserDetails Durable Object based off the userId and retrieve the activeAccountId from it
-			// we do this so we can persist activeAccountId across sessions
-			const userDetails = getUserDetails(env, props.user.id)
-			return await userDetails.getActiveAccountId()
-		} catch (e) {
-			this.server.recordError(e)
-			return null
-		}
-	}
-
-	async setActiveAccountId(accountId: string) {
-		try {
-			const props = getProps(this)
-			// account tokens are scoped to one account
-			if (props.type === 'account_token') {
-				return
-			}
-			const userDetails = getUserDetails(env, props.user.id)
-			await userDetails.setActiveAccountId(accountId)
-		} catch (e) {
-			this.server.recordError(e)
-		}
 	}
 }
 

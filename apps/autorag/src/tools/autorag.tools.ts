@@ -9,25 +9,14 @@ import { pageParam, perPageParam } from '../types'
 import type { AutoRAGMCP } from '../autorag.app'
 
 export function registerAutoRAGTools(agent: AutoRAGMCP) {
-	agent.server.tool(
+	agent.server.accountTool(
 		'list_rags',
 		'List AutoRAGs (vector stores)',
 		{
 			page: pageParam,
 			per_page: perPageParam,
 		},
-		async (params) => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		async (params, accountId) => {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
@@ -66,32 +55,21 @@ export function registerAutoRAGTools(agent: AutoRAGMCP) {
 							text: `Error listing rags: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
-	agent.server.tool(
+	agent.server.accountTool(
 		'search',
 		'Search Documents using AutoRAG (vector store)',
 		{
 			rag_id: z.string().describe('ID of the AutoRAG to search'),
 			query: z.string().describe('Query to search for. Can be a URL, a title, or a snippet.'),
 		},
-		async (params) => {
+		async (params, accountId) => {
 			try {
-				const accountId = await agent.getActiveAccountId()
-				if (!accountId) {
-					return {
-						content: [
-							{
-								type: 'text',
-								text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-							},
-						],
-					}
-				}
-
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.post(
@@ -132,32 +110,21 @@ export function registerAutoRAGTools(agent: AutoRAGMCP) {
 							text: `Error searching rag: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}
 	)
 
-	agent.server.tool(
+	agent.server.accountTool(
 		'ai_search',
 		'AI Search Documents using AutoRAG (vector store)',
 		{
 			rag_id: z.string().describe('ID of the AutoRAG to search'),
 			query: z.string().describe('Query to search for. Can be a URL, a title, or a snippet.'),
 		},
-		async (params) => {
+		async (params, accountId) => {
 			try {
-				const accountId = await agent.getActiveAccountId()
-				if (!accountId) {
-					return {
-						content: [
-							{
-								type: 'text',
-								text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-							},
-						],
-					}
-				}
-
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.post(
@@ -186,6 +153,7 @@ export function registerAutoRAGTools(agent: AutoRAGMCP) {
 							text: `Error searching rag: ${error instanceof Error && error.message}`,
 						},
 					],
+					isError: true,
 				}
 			}
 		}

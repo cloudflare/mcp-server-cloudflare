@@ -102,7 +102,7 @@ export async function handleGetAccountLogPushJobs(
  */
 export function registerLogsTools(agent: LogsMCP) {
 	// Register the worker logs analysis tool by worker name
-	agent.server.tool(
+	agent.server.accountTool(
 		'logpush_jobs_by_account_id',
 		`All Logpush jobs by Account ID.
 
@@ -113,18 +113,7 @@ export function registerLogsTools(agent: LogsMCP) {
 		This tool returns at most the first 100 jobs.
 		`,
 		{},
-		async () => {
-			const accountId = await agent.getActiveAccountId()
-			if (!accountId) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: 'No currently active accountId. Try listing your accounts (accounts_list) and then setting an active account (set_active_account)',
-						},
-					],
-				}
-			}
+		async (_args, accountId) => {
 			try {
 				const props = getProps(agent)
 				const result = await handleGetAccountLogPushJobs(accountId, props.accessToken)
@@ -149,6 +138,7 @@ export function registerLogsTools(agent: LogsMCP) {
 							}),
 						},
 					],
+					isError: true,
 				}
 			}
 		}
