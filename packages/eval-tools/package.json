@@ -11,14 +11,10 @@
 		"bin": "bin"
 	},
 	"dependencies": {
-		"@ai-sdk/anthropic": "3.0.81",
-		"@ai-sdk/google": "3.0.80",
-		"@ai-sdk/openai": "3.0.67",
 		"@cloudflare/vitest-pool-workers": "0.16.11",
 		"agents": "0.13.3",
-		"ai": "6.0.193",
+		"ai": "6.0.194",
 		"ai-gateway-provider": "3.1.3",
-		"workers-ai-provider": "0.3.0",
 		"wrangler": "4.96.0",
 		"zod": "4.4.3"
 	},

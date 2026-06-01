@@ -32,7 +32,7 @@
 		"@repo/mcp-common": "workspace:*",
 		"@repo/mcp-observability": "workspace:*",
 		"agents": "0.13.3",
-		"ai": "6.0.193",
+		"ai": "6.0.194",
 		"concurrently": "9.1.2",
 		"hono": "4.7.6",
 		"start-server-and-test": "2.0.11",
