@@ -12,6 +12,10 @@
 		{
 			"new_sqlite_classes": ["GraphQLMCP"],
 			"tag": "v1"
+		},
+		{
+			"deleted_classes": ["UserDetails"],
+			"tag": "v2"
 		}
 	],
 	"observability": {
