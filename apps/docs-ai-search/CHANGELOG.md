@@ -1,5 +1,27 @@
 # docs-ai-search
 
+## 0.4.8
+
+### Patch Changes
+
+- a358e69: Upgrade `@cloudflare/workers-oauth-provider` 0.4.0 → 0.7.0.
+
+  No tool or behavior changes. The only API change affecting this repo is that
+  `TokenExchangeCallbackOptions` now carries a required `grantId` field, which only
+  touched a test fixture (the provider supplies it at runtime).
+
+- f625075: Upgrade core dependencies: `agents` 0.2.19 → 0.13.3, `@modelcontextprotocol/sdk` 1.20.2 →
+  1.29.0, `zod` 3 → 4, and `ai` 4 → 6.
+
+  No user-facing tool or behavior changes. Internal adjustments for the new versions:
+
+  - `zod` 4: `z.record(...)` now takes an explicit key schema; `z.string().ip()` replaced with
+    `z.ipv4()`/`z.ipv6()` validation; dropped the removed `objectOutputType` helper.
+  - `agents` 0.13: `McpAgent` env generic is constrained to `Cloudflare.Env`.
+  - MCP SDK 1.29: tool `annotations` hints must be flat (`{ title, readOnlyHint, ... }`) — fixes a
+    latent bug where nested hints were silently ignored.
+  - `ai` 6: eval tooling updated (`LanguageModel`, `inputSchema`, `stopWhen`/`stepCountIs`, tool-call `input`).
+
 ## 0.4.7
 
 ### Patch Changes

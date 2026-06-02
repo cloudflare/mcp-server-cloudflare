@@ -1,5 +1,21 @@
 # demo-day
 
+## 0.1.13
+
+### Patch Changes
+
+- f625075: Upgrade core dependencies: `agents` 0.2.19 → 0.13.3, `@modelcontextprotocol/sdk` 1.20.2 →
+  1.29.0, `zod` 3 → 4, and `ai` 4 → 6.
+
+  No user-facing tool or behavior changes. Internal adjustments for the new versions:
+
+  - `zod` 4: `z.record(...)` now takes an explicit key schema; `z.string().ip()` replaced with
+    `z.ipv4()`/`z.ipv6()` validation; dropped the removed `objectOutputType` helper.
+  - `agents` 0.13: `McpAgent` env generic is constrained to `Cloudflare.Env`.
+  - MCP SDK 1.29: tool `annotations` hints must be flat (`{ title, readOnlyHint, ... }`) — fixes a
+    latent bug where nested hints were silently ignored.
+  - `ai` 6: eval tooling updated (`LanguageModel`, `inputSchema`, `stopWhen`/`stepCountIs`, tool-call `input`).
+
 ## 0.1.12
 
 ### Patch Changes

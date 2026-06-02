@@ -1,5 +1,46 @@
 # workers-bindings
 
+## 0.5.0
+
+### Minor Changes
+
+- f625075: Centralize Cloudflare account resolution and remove the account-management tools.
+
+  The `accounts_list` and `set_active_account` tools are removed. Account scoping is now
+  resolved automatically by an `AccountManager` (via the new `server.accountTool()`
+  registration), in priority order:
+
+  1. **Auth-pinned account** — an account-scoped API token's account, or an OAuth token with a
+     single account, is used automatically (no `account_id` parameter is exposed).
+  2. **`cf-account-id` request header** — for tokens that can access multiple accounts, set this
+     header in your MCP client config to pick an account.
+  3. **`account_id` tool argument** — for multi-account tokens, account-scoped tools expose an
+     optional `account_id` parameter; when omitted (and no header is set) the tool returns an
+     error listing the accounts you can use. Multi-account credentials also list their accounts
+     in the server's `initialize` instructions.
+
+  All tool error responses now set `isError: true` so clients can distinguish failures.
+
+### Patch Changes
+
+- a358e69: Upgrade `@cloudflare/workers-oauth-provider` 0.4.0 → 0.7.0.
+
+  No tool or behavior changes. The only API change affecting this repo is that
+  `TokenExchangeCallbackOptions` now carries a required `grantId` field, which only
+  touched a test fixture (the provider supplies it at runtime).
+
+- f625075: Upgrade core dependencies: `agents` 0.2.19 → 0.13.3, `@modelcontextprotocol/sdk` 1.20.2 →
+  1.29.0, `zod` 3 → 4, and `ai` 4 → 6.
+
+  No user-facing tool or behavior changes. Internal adjustments for the new versions:
+
+  - `zod` 4: `z.record(...)` now takes an explicit key schema; `z.string().ip()` replaced with
+    `z.ipv4()`/`z.ipv6()` validation; dropped the removed `objectOutputType` helper.
+  - `agents` 0.13: `McpAgent` env generic is constrained to `Cloudflare.Env`.
+  - MCP SDK 1.29: tool `annotations` hints must be flat (`{ title, readOnlyHint, ... }`) — fixes a
+    latent bug where nested hints were silently ignored.
+  - `ai` 6: eval tooling updated (`LanguageModel`, `inputSchema`, `stopWhen`/`stepCountIs`, tool-call `input`).
+
 ## 0.4.7
 
 ### Patch Changes
