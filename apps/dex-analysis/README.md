@@ -43,6 +43,17 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 - `Which Cloudflare colo is most used by my users in the EU running DEX application tests?`
 - `Look at the latest WARP diag for user@cloudflare.com and tell me if you see anything notable in dns logs`
 
+## Required Cloudflare permissions
+
+When using Cloudflare OAuth, this server requests the following scopes:
+
+| OAuth scope      | API token permission                    |
+| ---------------- | --------------------------------------- |
+| `user:read`      | User Details Read                       |
+| `offline_access` | OAuth only; not an API token permission |
+| `account:read`   | Account Settings Read                   |
+| `dex:write`      | Cloudflare DEX Edit                     |
+
 ## Access the remote MCP server from any MCP Client
 
 If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://dex.mcp.cloudflare.com`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).

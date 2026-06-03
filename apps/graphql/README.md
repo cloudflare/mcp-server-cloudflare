@@ -23,6 +23,17 @@ Currently available tools:
 - `Can you generate a link to the Cloudflare GraphQL API Explorer with a pre-populated query and variables?`
 - `I need to monitor HTTP requests and responses for a specific domain. Can you help me with that using the Cloudflare GraphQL API?`
 
+## Required Cloudflare permissions
+
+When using Cloudflare OAuth, this server requests the following scopes:
+
+| OAuth scope      | API token permission                    |
+| ---------------- | --------------------------------------- |
+| `user:read`      | User Details Read                       |
+| `offline_access` | OAuth only; not an API token permission |
+| `account:read`   | Account Settings Read                   |
+| `zone:read`      | Zone Read                               |
+
 ## Access the remote MCP server from Claude Desktop
 
 If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://graphql.mcp.cloudflare.com/mcp`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
