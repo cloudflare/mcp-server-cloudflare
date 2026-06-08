@@ -12,7 +12,7 @@ import {
 	getAuthToken,
 	refreshAuthToken,
 } from './cloudflare-auth'
-import { McpError, safeStatusCode, throwUpstreamApiError } from './mcp-error'
+import { McpError, safeStatusCode } from './mcp-error'
 import { useSentry } from './sentry'
 import { V4Schema } from './v4-api'
 import {
@@ -54,7 +54,7 @@ function mcpErrorToOAuthResponse(e: McpError): Response {
 	} else {
 		oauthCode = 'invalid_request'
 	}
-	return new OAuthError(oauthCode, e.message, e.code >= 500 ? 500 : e.code).toResponse()
+	return new OAuthError(oauthCode, e.message, e.code >= 500 ? 500 : e.code, e.headers).toResponse()
 }
 
 type AuthContext = {
@@ -81,50 +81,70 @@ type AccountsSchema = z.infer<typeof CloudflareAccountsSchema>
 export { AuthPropsSchema }
 export type { AuthProps } from './auth-props'
 
-/**
- * Throws an McpError for combined /user + /accounts failures.
- * Uses priority-based classification matching cloudflare-mcp patterns.
- */
-function throwCombinedApiError(userStatus: number, accountsStatus: number): never {
-	const statuses = [userStatus, accountsStatus]
+function retryAfterHeaders(...responses: Response[]): Record<string, string> {
+	return {
+		'Retry-After':
+			responses.find((response) => response.status === 429)?.headers.get('Retry-After') ?? '30',
+	}
+}
 
-	if (statuses.some((s) => s >= 500)) {
+/** Classifies one or more identity-probe failures by priority. */
+function throwIdentityProbeError(
+	statuses: readonly [number, ...number[]],
+	internalMessage: string,
+	headers: Record<string, string> = {}
+): never {
+	if (statuses.some((status) => status >= 500)) {
 		throw new McpError('Cloudflare API is temporarily unavailable', 502, {
 			reportToSentry: true,
-			internalMessage: `Upstream user=${userStatus}, accounts=${accountsStatus}`,
+			internalMessage,
 		})
 	}
-
 	if (statuses.includes(429)) {
 		throw new McpError('Rate limited, try again later', 429, {
 			reportToSentry: false,
-			internalMessage: `Upstream user=${userStatus}, accounts=${accountsStatus}`,
+			internalMessage,
+			headers,
 		})
 	}
-
 	if (statuses.includes(401)) {
 		throw new McpError('Access token is invalid or expired', 401, {
 			reportToSentry: false,
-			internalMessage: `Upstream user=${userStatus}, accounts=${accountsStatus}`,
+			internalMessage,
 		})
 	}
-
 	if (statuses.includes(403)) {
-		throw new McpError('Insufficient permissions', 403, {
+		throw new McpError('Token lacks required user:read or account:read scope', 403, {
 			reportToSentry: false,
-			internalMessage: `Upstream user=${userStatus}, accounts=${accountsStatus}`,
+			internalMessage,
 		})
 	}
-
-	throw new McpError('Failed to verify token', safeStatusCode(userStatus), {
+	if (statuses.includes(400)) {
+		throw new McpError('Access token appears malformed; reauthenticate and try again', 401, {
+			reportToSentry: false,
+			internalMessage,
+		})
+	}
+	throw new McpError('Failed to verify token', safeStatusCode(statuses[0]), {
 		reportToSentry: false,
-		internalMessage: `Upstream user=${userStatus}, accounts=${accountsStatus}`,
+		internalMessage,
 	})
 }
 
+function throwCombinedApiError(userResponse: Response, accountsResponse: Response): never {
+	throwIdentityProbeError(
+		[userResponse.status, accountsResponse.status],
+		`Upstream user=${userResponse.status}, accounts=${accountsResponse.status}`,
+		retryAfterHeaders(userResponse, accountsResponse)
+	)
+}
+
+export type CloudflareTokenOwner = 'account' | 'unknown' | 'user'
+
 export async function getUserAndAccounts(
 	accessToken: string,
-	devModeHeaders?: HeadersInit
+	devModeHeaders?: HeadersInit,
+	tokenOwner: CloudflareTokenOwner = 'unknown'
 ): Promise<{ user: UserSchema | null; accounts: AccountsSchema }> {
 	const headers = devModeHeaders
 		? devModeHeaders
@@ -132,12 +152,16 @@ export async function getUserAndAccounts(
 				Authorization: `Bearer ${accessToken}`,
 			}
 
-	// Fetch the user & accounts info from Cloudflare in parallel
-	let userResponse: Response
+	// Account-owned tokens cannot represent a user, so skip the unnecessary user probe.
+	let userResponse: Response | undefined
 	let accountsResponse: Response
 	try {
+		const userRequest =
+			tokenOwner === 'account'
+				? Promise.resolve(undefined)
+				: fetch('https://api.cloudflare.com/client/v4/user', { headers })
 		;[userResponse, accountsResponse] = await Promise.all([
-			fetch('https://api.cloudflare.com/client/v4/user', { headers }),
+			userRequest,
 			fetch('https://api.cloudflare.com/client/v4/accounts', { headers }),
 		])
 	} catch (error) {
@@ -148,12 +172,29 @@ export async function getUserAndAccounts(
 		})
 	}
 
-	// If both endpoints failed, use priority-based error classification
-	if (!userResponse.ok && !accountsResponse.ok) {
-		console.error(
-			`Cloudflare API error: user=${userResponse.status}, accounts=${accountsResponse.status}`
+	if (userResponse === undefined && !accountsResponse.ok) {
+		const message = `Cloudflare API error: accounts=${accountsResponse.status}`
+		if (accountsResponse.status >= 500) {
+			console.error(message)
+		} else {
+			console.warn(message)
+		}
+		throwIdentityProbeError(
+			[accountsResponse.status],
+			`Upstream accounts=${accountsResponse.status}`,
+			retryAfterHeaders(accountsResponse)
 		)
-		throwCombinedApiError(userResponse.status, accountsResponse.status)
+	}
+
+	// If both endpoints failed, use priority-based error classification
+	if (userResponse !== undefined && !userResponse.ok && !accountsResponse.ok) {
+		const message = `Cloudflare API error: user=${userResponse.status}, accounts=${accountsResponse.status}`
+		if (userResponse.status >= 500 || accountsResponse.status >= 500) {
+			console.error(message)
+		} else {
+			console.warn(message)
+		}
+		throwCombinedApiError(userResponse, accountsResponse)
 	}
 
 	// Parse accounts with safeParse for graceful degradation
@@ -170,11 +211,28 @@ export async function getUserAndAccounts(
 		} catch (error) {
 			console.error('Cloudflare API /accounts response is not valid JSON', error)
 		}
-	} else if (userResponse.ok) {
+	} else if (userResponse?.ok) {
 		// User succeeded but accounts failed — surface the accounts error
 		// (5xx should be reported, 4xx like 403 may indicate insufficient scopes)
-		console.error(`Cloudflare API /accounts failed with status ${accountsResponse.status}`)
-		throwUpstreamApiError(accountsResponse.status, 'Cloudflare API /accounts')
+		const message = `Cloudflare API /accounts failed with status ${accountsResponse.status}`
+		if (accountsResponse.status >= 500) {
+			console.error(message)
+		} else {
+			console.warn(message)
+		}
+		throwIdentityProbeError(
+			[accountsResponse.status],
+			`Upstream accounts=${accountsResponse.status}`,
+			retryAfterHeaders(accountsResponse)
+		)
+	}
+
+	if (userResponse === undefined) {
+		if (accounts.length === 1) return { user: null, accounts }
+		throw new McpError('Account token must resolve to exactly one Cloudflare account', 401, {
+			reportToSentry: false,
+			internalMessage: `accounts=${accountsResponse.status}, count=${accounts.length}`,
+		})
 	}
 
 	// Parse user with safeParse for graceful degradation
@@ -191,19 +249,24 @@ export async function getUserAndAccounts(
 		} catch (error) {
 			console.error('Cloudflare API /user response is not valid JSON', error)
 		}
-	} else if (accounts.length > 0) {
-		// User endpoint failed but accounts succeeded — account-scoped token
+	} else if (accounts.length > 0 && tokenOwner === 'unknown' && userResponse.status < 429) {
+		// Only legacy credentials need response-based account-token inference.
+		// Transient failures must never change the inferred credential owner.
 		return { user: null, accounts }
 	} else {
-		throwUpstreamApiError(userResponse.status, 'Cloudflare API /user')
+		throwIdentityProbeError(
+			[userResponse.status],
+			`Upstream user=${userResponse.status}`,
+			retryAfterHeaders(userResponse)
+		)
 	}
 
 	if (user) {
 		return { user, accounts }
 	}
 
-	// Account-scoped token — user is null but accounts are present
-	if (accounts.length > 0) {
+	// Only legacy unprefixed tokens need response-based account-token inference.
+	if (accounts.length > 0 && tokenOwner === 'unknown') {
 		return { user: null, accounts }
 	}
 
@@ -240,7 +303,8 @@ async function getTokenAndUserDetails(
 		code_verifier,
 	})
 
-	const { user, accounts } = await getUserAndAccounts(accessToken)
+	// Cloudflare OAuth authorization-code grants always represent a user principal.
+	const { user, accounts } = await getUserAndAccounts(accessToken, undefined, 'user')
 	// User cannot be null for OAuth flow
 	if (user === null) {
 		throw new McpError('Failed to fetch user', 500, { reportToSentry: true })

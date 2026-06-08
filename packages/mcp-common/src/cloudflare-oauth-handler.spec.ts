@@ -266,18 +266,18 @@ describe('handleTokenExchangeCallback', () => {
 	})
 })
 
-function mockUserResponse(status: number, body?: unknown) {
+function mockUserResponse(status: number, body?: unknown, headers?: HeadersInit) {
 	server.use(
 		http.get('https://api.cloudflare.com/client/v4/user', () =>
-			HttpResponse.text(body ? JSON.stringify(body) : '', { status })
+			HttpResponse.text(body ? JSON.stringify(body) : '', { status, headers })
 		)
 	)
 }
 
-function mockAccountsResponse(status: number, body?: unknown) {
+function mockAccountsResponse(status: number, body?: unknown, headers?: HeadersInit) {
 	server.use(
 		http.get('https://api.cloudflare.com/client/v4/accounts', () =>
-			HttpResponse.text(body ? JSON.stringify(body) : '', { status })
+			HttpResponse.text(body ? JSON.stringify(body) : '', { status, headers })
 		)
 	)
 }
@@ -312,6 +312,52 @@ describe('getUserAndAccounts', () => {
 		const result = await getUserAndAccounts('test-token')
 		expect(result.user).toBeNull()
 		expect(result.accounts).toEqual([{ id: 'acc-1', name: 'My Account' }])
+	})
+
+	it('does not infer an account token when the caller knows the token is user-owned', async () => {
+		mockUserResponse(401, { errors: [{ message: 'Unauthorized' }] })
+		mockAccountsResponse(200, v4Accounts)
+
+		await expect(getUserAndAccounts('test-token', undefined, 'user')).rejects.toMatchObject({
+			code: 401,
+		})
+	})
+
+	it('does not infer an account token when the user probe is rate limited', async () => {
+		mockUserResponse(429, undefined, { 'Retry-After': '17' })
+		mockAccountsResponse(200, v4Accounts)
+
+		await expect(getUserAndAccounts('legacy-token')).rejects.toMatchObject({
+			code: 429,
+			headers: { 'Retry-After': '17' },
+		})
+	})
+
+	it('returns a retryable 429 when the accounts probe is rate limited', async () => {
+		mockUserResponse(200, v4User)
+		mockAccountsResponse(429)
+
+		await expect(getUserAndAccounts('test-token', undefined, 'user')).rejects.toMatchObject({
+			code: 429,
+			headers: { 'Retry-After': '30' },
+		})
+	})
+
+	it('uses only the accounts probe and preserves 429 backoff for account tokens', async () => {
+		let userCalls = 0
+		server.use(
+			http.get('https://api.cloudflare.com/client/v4/user', () => {
+				userCalls += 1
+				return HttpResponse.json(v4User)
+			})
+		)
+		mockAccountsResponse(429, undefined, { 'Retry-After': '23' })
+
+		await expect(getUserAndAccounts('test-token', undefined, 'account')).rejects.toMatchObject({
+			code: 429,
+			headers: { 'Retry-After': '23' },
+		})
+		expect(userCalls).toBe(0)
 	})
 
 	describe('combined failure (both endpoints fail)', () => {
@@ -371,6 +417,23 @@ describe('getUserAndAccounts', () => {
 				expect(e).toBeInstanceOf(McpError)
 				const err = e as McpError
 				expect(err.code).toBe(403)
+				expect(err.message).toBe('Token lacks required user:read or account:read scope')
+				expect(err.reportToSentry).toBe(false)
+			}
+		})
+
+		it('maps malformed-token 400s to 401 invalid token', async () => {
+			mockUserResponse(400)
+			mockAccountsResponse(400)
+
+			try {
+				await getUserAndAccounts('malformed-token')
+				expect.unreachable()
+			} catch (e) {
+				expect(e).toBeInstanceOf(McpError)
+				const err = e as McpError
+				expect(err.code).toBe(401)
+				expect(err.message).toBe('Access token appears malformed; reauthenticate and try again')
 				expect(err.reportToSentry).toBe(false)
 			}
 		})
@@ -404,8 +467,8 @@ describe('getUserAndAccounts', () => {
 	})
 
 	describe('mixed-status priority in combined failures', () => {
-		it('prioritizes 5xx over 429 (401+500 → 502)', async () => {
-			mockUserResponse(401)
+		it('prioritizes 5xx over 429 (429+500 → 502)', async () => {
+			mockUserResponse(429)
 			mockAccountsResponse(500)
 
 			try {

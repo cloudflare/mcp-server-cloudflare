@@ -28,6 +28,14 @@ describe('OAuthError', () => {
 			error_description: 'Bad state',
 		})
 	})
+
+	it('preserves response headers', () => {
+		const response = new OAuthError('temporarily_unavailable', 'Try again later', 429, {
+			'Retry-After': '17',
+		}).toResponse()
+
+		expect(response.headers.get('retry-after')).toBe('17')
+	})
 })
 
 describe('parseRedirectApproval', () => {

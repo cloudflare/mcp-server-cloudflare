@@ -1,6 +1,8 @@
 import { getUserAndAccounts } from './cloudflare-oauth-handler'
+import { McpError } from './mcp-error'
 
 import type { AuthProps } from './auth-props'
+import type { CloudflareTokenOwner } from './cloudflare-oauth-handler'
 
 interface RequiredEnv {
 	DEV_CLOUDFLARE_API_TOKEN: string
@@ -10,6 +12,12 @@ interface RequiredEnv {
 
 export interface RequestHandler<Env> {
 	fetch(req: Request, env: Env, ctx: ExecutionContext): Response | Promise<Response>
+}
+
+function cloudflareTokenOwner(token: string): CloudflareTokenOwner {
+	if (token.startsWith('cfat_')) return 'account'
+	if (token.startsWith('cfoat_') || token.startsWith('cfut_')) return 'user'
+	return 'unknown'
 }
 
 export async function isApiTokenRequest(req: Request, env: RequiredEnv) {
@@ -23,7 +31,9 @@ export async function isApiTokenRequest(req: Request, env: RequiredEnv) {
 	const [type, token] = authHeader.split(' ')
 	if (type !== 'Bearer' || !token) return false
 
-	// OAuth Provider tokens have the provider's user:grant:secret format.
+	// MCP OAuth Provider tokens have a separate user:grant:secret format.
+	// Every other bearer value may be a Cloudflare API/OAuth credential; ownership
+	// prefixes are optimization hints, not an allowlist, so legacy values still work.
 	return token.split(':').length !== 3
 }
 
@@ -48,7 +58,7 @@ export async function getApiTokenProps(req: Request, env: RequiredEnv): Promise<
 		token = tokenValue
 	}
 
-	const { user, accounts } = await getUserAndAccounts(token, headers)
+	const { user, accounts } = await getUserAndAccounts(token, headers, cloudflareTokenOwner(token))
 	if (user === null) {
 		const account = accounts[0]
 		if (!account) {
@@ -79,7 +89,48 @@ export async function handleApiTokenMode<Env extends RequiredEnv>(
 	env: Env,
 	ctx: ExecutionContext
 ): Promise<Response> {
-	const props = await getApiTokenProps(req, env)
+	let props: AuthProps
+	try {
+		props = await getApiTokenProps(req, env)
+	} catch (error) {
+		if (error instanceof McpError) return apiTokenErrorResponse(req, error)
+		throw error
+	}
 	;(ctx as { props: AuthProps }).props = props
 	return handler.fetch(req, env, ctx)
+}
+
+function apiTokenErrorResponse(request: Request, error: McpError): Response {
+	let oauthCode: string
+	if (error.code >= 500) {
+		oauthCode = 'server_error'
+	} else if (error.code === 429) {
+		oauthCode = 'temporarily_unavailable'
+	} else if (error.code === 401) {
+		oauthCode = 'invalid_token'
+	} else if (error.code === 403) {
+		oauthCode = 'insufficient_scope'
+	} else {
+		oauthCode = 'invalid_request'
+	}
+	const headers: Record<string, string> = {
+		'Cache-Control': 'no-store',
+		'Content-Type': 'application/json',
+		Pragma: 'no-cache',
+		...error.headers,
+	}
+	if (error.code === 401 || error.code === 403) {
+		const url = new URL(request.url)
+		const resourceMetadata = `${url.origin}/.well-known/oauth-protected-resource${url.pathname}`
+		headers['WWW-Authenticate'] =
+			`Bearer realm="OAuth", resource_metadata="${resourceMetadata}", error="${oauthCode}"`
+	}
+
+	return new Response(
+		JSON.stringify({
+			error: oauthCode,
+			error_description: error.message,
+		}),
+		{ status: error.code, headers }
+	)
 }

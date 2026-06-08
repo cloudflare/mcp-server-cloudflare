@@ -185,17 +185,16 @@ describe('AI Gateway exported Worker authentication', () => {
 			})
 		)
 
+		const tokens = ['a'.repeat(40), 'b'.repeat(40)]
 		const [first, second] = await Promise.all(
-			['api-a', 'api-b'].map((token) =>
-				worker.fetch(toolRequest(token), testEnv, executionContext())
-			)
+			tokens.map((token) => worker.fetch(toolRequest(token), testEnv, executionContext()))
 		)
 		const documents = await Promise.all([responseDocument(first), responseDocument(second)])
 
 		expect([first.status, second.status]).toEqual([200, 200])
-		expect(documents[0].result.content[0].text).toContain('account-api-a:api-a')
-		expect(documents[1].result.content[0].text).toContain('account-api-b:api-b')
-		expect(getCloudflareClientMock).toHaveBeenCalledWith('api-a')
-		expect(getCloudflareClientMock).toHaveBeenCalledWith('api-b')
+		expect(documents[0].result.content[0].text).toContain(`account-${tokens[0]}:${tokens[0]}`)
+		expect(documents[1].result.content[0].text).toContain(`account-${tokens[1]}:${tokens[1]}`)
+		expect(getCloudflareClientMock).toHaveBeenCalledWith(tokens[0])
+		expect(getCloudflareClientMock).toHaveBeenCalledWith(tokens[1])
 	})
 })
