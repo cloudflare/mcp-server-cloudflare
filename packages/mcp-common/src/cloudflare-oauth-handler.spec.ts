@@ -372,6 +372,23 @@ describe('getUserAndAccounts', () => {
 				expect(e).toBeInstanceOf(McpError)
 				const err = e as McpError
 				expect(err.code).toBe(403)
+				expect(err.message).toBe('Token lacks required user:read or account:read scope')
+				expect(err.reportToSentry).toBe(false)
+			}
+		})
+
+		it('maps malformed-token 400s to 401 invalid token', async () => {
+			mockUserResponse(400)
+			mockAccountsResponse(400)
+
+			try {
+				await getUserAndAccounts('malformed-token')
+				expect.unreachable()
+			} catch (e) {
+				expect(e).toBeInstanceOf(McpError)
+				const err = e as McpError
+				expect(err.code).toBe(401)
+				expect(err.message).toBe('Access token appears malformed; reauthenticate and try again')
 				expect(err.reportToSentry).toBe(false)
 			}
 		})
