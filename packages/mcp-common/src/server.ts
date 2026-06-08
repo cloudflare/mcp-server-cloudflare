@@ -4,8 +4,21 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { type ZodRawShape } from 'zod'
 
 import { MetricsTracker, SessionStart, ToolCall } from '../../mcp-observability/src'
+import * as zodJsonSchemaCompat from '@modelcontextprotocol/sdk/server/zod-json-schema-compat.js'
+
 import { buildAccountTool } from './account-tool'
+import { stripNotEmptyJsonSchema } from './json-schema-sanitize'
 import { McpError } from './mcp-error'
+
+const patchJsonSchemaCompat = zodJsonSchemaCompat as typeof zodJsonSchemaCompat & {
+	__cfSanitizePatched?: boolean
+}
+if (!patchJsonSchemaCompat.__cfSanitizePatched) {
+	const originalToJsonSchema = patchJsonSchemaCompat.toJsonSchemaCompat
+	patchJsonSchemaCompat.toJsonSchemaCompat = (schema, opts) =>
+		stripNotEmptyJsonSchema(originalToJsonSchema(schema, opts))
+	patchJsonSchemaCompat.__cfSanitizePatched = true
+}
 
 import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js'
