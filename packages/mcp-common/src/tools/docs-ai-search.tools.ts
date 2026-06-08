@@ -6,6 +6,18 @@ interface RequiredEnv {
 	AI: Ai
 }
 
+type DocsSearchResult = {
+	similarity: number
+	id: string
+	url: string
+	title: string
+	text: string
+}
+
+type DocsSearchOutput = {
+	results: DocsSearchResult[]
+}
+
 // Zod schema for AI Search response validation
 const AiSearchResponseSchema = z.object({
 	object: z.string(),
@@ -55,26 +67,29 @@ export function registerDocsTools(server: McpServer, env: RequiredEnv) {
 			inputSchema: {
 				query: z.string(),
 			},
+			outputSchema: {
+				results: z.array(
+					z.object({
+						similarity: z.number().describe('Similarity score from AI Search'),
+						id: z.string().describe('Source file ID'),
+						url: z.string().describe('Developer documentation URL'),
+						title: z.string().describe('Documentation page title'),
+						text: z.string().describe('Matching documentation chunk text'),
+					})
+				),
+			},
 			annotations: {
 				title: 'Search Cloudflare docs',
 				readOnlyHint: true,
 			},
 		},
 		async ({ query }) => {
-			const results = await queryAiSearch(env.AI, query)
-			const resultsAsXml = results
-				.map((result) => {
-					return `<result>
-<url>${result.url}</url>
-<title>${result.title}</title>
-<text>
-${result.text}
-</text>
-</result>`
-				})
-				.join('\n')
+			const structuredContent: DocsSearchOutput = {
+				results: await queryAiSearch(env.AI, query),
+			}
 			return {
-				content: [{ type: 'text', text: resultsAsXml }],
+				content: [{ type: 'text', text: formatDocsResults(structuredContent.results) }],
+				structuredContent,
 			}
 		}
 	)
@@ -117,7 +132,7 @@ ${result.text}
 	)
 }
 
-async function queryAiSearch(ai: Ai, query: string) {
+export async function queryAiSearch(ai: Ai, query: string): Promise<DocsSearchResult[]> {
 	const rawResponse = await doWithRetries(() =>
 		ai.autorag('docs-mcp-rag').search({
 			query,
@@ -134,6 +149,20 @@ async function queryAiSearch(ai: Ai, query: string) {
 		title: extractTitle(item.filename),
 		text: item.content.map((c) => c.text).join('\n'),
 	}))
+}
+
+export function formatDocsResults(results: DocsSearchResult[]): string {
+	return results
+		.map((result) => {
+			return `<result>
+<url>${result.url}</url>
+<title>${result.title}</title>
+<text>
+${result.text}
+</text>
+</result>`
+		})
+		.join('\n')
 }
 
 function sourceToUrl(filename: string): string {
