@@ -1,5 +1,12 @@
 # docs-autorag
 
+## 0.1.14
+
+### Patch Changes
+
+- Updated dependencies [cb01861]
+  - @repo/mcp-common@0.20.6
+
 ## 0.1.13
 
 ### Patch Changes
