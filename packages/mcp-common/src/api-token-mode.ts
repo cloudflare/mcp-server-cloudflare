@@ -9,17 +9,20 @@ interface RequiredEnv {
 	DEV_DISABLE_OAUTH: string
 }
 
+function extractBearerToken(authHeader: string | null): string | null {
+	if (!authHeader?.startsWith('Bearer ')) return null
+	const token = authHeader.slice(7).trim()
+	return token || null
+}
+
 export async function isApiTokenRequest(req: Request, env: RequiredEnv) {
 	// shortcircuit for dev
 	if (env.DEV_CLOUDFLARE_API_TOKEN && env.DEV_DISABLE_OAUTH === 'true') {
 		return true
 	}
 
-	const authHeader = req.headers.get('Authorization')
-	if (!authHeader) return false
-
-	const [type, token] = authHeader.split(' ')
-	if (type !== 'Bearer') return false
+	const token = extractBearerToken(req.headers.get('Authorization'))
+	if (!token) return false
 
 	// Return true only if the token was issued by the OAuthProvider.
 	// A token provisioned by the OAuthProvider has 3 parts, split by colons.
@@ -41,16 +44,13 @@ export async function handleApiTokenMode<
 		token = env.DEV_CLOUDFLARE_API_TOKEN
 		// header mode
 	} else {
-		const authHeader = req.headers.get('Authorization')
-		if (!authHeader) {
-			throw new Error('Authorization header is required')
+		token = extractBearerToken(req.headers.get('Authorization'))
+		if (!token) {
+			return new Response(JSON.stringify({ error: 'Bearer token required' }), {
+				status: 401,
+				headers: { 'Content-Type': 'application/json' },
+			})
 		}
-
-		const [type, tokenStr] = authHeader.split(' ')
-		if (type !== 'Bearer') {
-			throw new Error('Invalid authorization type, must be Bearer')
-		}
-		token = tokenStr
 	}
 
 	const { user, accounts } = await getUserAndAccounts(token, opts)
