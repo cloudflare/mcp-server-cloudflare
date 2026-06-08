@@ -1,4 +1,4 @@
-import { GrantType } from '@cloudflare/workers-oauth-provider'
+import { GrantType, OAuthError as ProviderOAuthError } from '@cloudflare/workers-oauth-provider'
 import { http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -196,7 +196,8 @@ describe('handleTokenExchangeCallback', () => {
 				expect(e).toBeInstanceOf(OAuthError)
 				const err = e as OAuthError
 				expect(err.code).toBe('temporarily_unavailable')
-				expect(err.statusCode).toBe(503)
+				expect(err.statusCode).toBe(429)
+				expect(err).toBeInstanceOf(ProviderOAuthError)
 			}
 		})
 

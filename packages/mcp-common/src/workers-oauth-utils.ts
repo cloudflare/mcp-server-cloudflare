@@ -1,3 +1,4 @@
+import { OAuthError as ProviderOAuthError } from '@cloudflare/workers-oauth-provider'
 import { z } from 'zod'
 
 import type { AuthRequest, ClientInfo } from '@cloudflare/workers-oauth-provider'
@@ -6,16 +7,19 @@ const COOKIE_NAME = '__Host-MCP_APPROVED_CLIENTS'
 const ONE_YEAR_IN_SECONDS = 31536000
 
 /**
- * OAuth error class for handling OAuth-specific errors
+ * OAuth error class for handling OAuth-specific errors.
+ *
+ * Extends the provider's OAuthError so errors thrown from tokenExchangeCallback
+ * are converted into structured /token responses instead of surfacing as 500s.
  */
-export class OAuthError extends Error {
+export class OAuthError extends ProviderOAuthError {
 	constructor(
-		public code: string,
-		public description: string,
-		public statusCode = 400
+		code: string,
+		description: string,
+		statusCode = 400,
+		headers: Record<string, string> = {}
 	) {
-		super(description)
-		this.name = 'OAuthError'
+		super(code, { description, statusCode, headers })
 	}
 
 	toResponse(): Response {
@@ -26,7 +30,7 @@ export class OAuthError extends Error {
 			}),
 			{
 				status: this.statusCode,
-				headers: { 'Content-Type': 'application/json' },
+				headers: { 'Content-Type': 'application/json', ...this.headers },
 			}
 		)
 	}

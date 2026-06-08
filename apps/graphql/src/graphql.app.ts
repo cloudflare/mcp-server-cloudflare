@@ -1,8 +1,9 @@
-import OAuthProvider from '@cloudflare/workers-oauth-provider'
+import OAuthProvider, { getOAuthApi } from '@cloudflare/workers-oauth-provider'
 import { McpAgent } from 'agents/mcp'
 
 import { AccountManager } from '@repo/mcp-common/src/account-manager'
 import { handleApiTokenMode, isApiTokenRequest } from '@repo/mcp-common/src/api-token-mode'
+import { handleBenignDisconnect } from '@repo/mcp-common/src/benign-disconnect'
 import {
 	createAuthHandlers,
 	handleTokenExchangeCallback,
@@ -87,10 +88,10 @@ const GraphQLScopes = {
 export default {
 	fetch: async (req: Request, env: Env, ctx: ExecutionContext) => {
 		if (await isApiTokenRequest(req, env)) {
-			return await handleApiTokenMode(GraphQLMCP, req, env, ctx)
+			return await handleBenignDisconnect(handleApiTokenMode(GraphQLMCP, req, env, ctx))
 		}
 
-		return new OAuthProvider({
+		const oauthOptions: ConstructorParameters<typeof OAuthProvider<Env>>[0] = {
 			apiHandlers: {
 				'/mcp': GraphQLMCP.serve('/mcp'),
 				'/sse': GraphQLMCP.serveSSE('/sse'),
@@ -102,7 +103,9 @@ export default {
 				handleTokenExchangeCallback(
 					options,
 					env.CLOUDFLARE_CLIENT_ID,
-					env.CLOUDFLARE_CLIENT_SECRET
+					env.CLOUDFLARE_CLIENT_SECRET,
+					env.OAUTH_KV,
+					() => getOAuthApi(oauthOptions, env)
 				),
 			// Cloudflare access token TTL
 			accessTokenTTL: 3600,
@@ -110,6 +113,7 @@ export default {
 			// TODO: Remove after 2026-05-01 — all pre-0.4.0 grants will have expired by then
 			resourceMatchOriginOnly: true,
 			clientRegistrationEndpoint: '/register',
-		}).fetch(req, env, ctx)
+		}
+		return handleBenignDisconnect(new OAuthProvider(oauthOptions).fetch(req, env, ctx))
 	},
 }
