@@ -292,16 +292,18 @@ export const zCloudflareEvent = zCloudflareMiniEvent.extend({
 	cpuTimeMs: z.number().optional(),
 })
 
-const zSourceSchema = z.object({
-	exception: z
-		.object({
-			stack: z.string().optional(),
-			name: z.string().optional(),
-			message: z.string().optional(),
-			timestamp: z.number().optional(),
-		})
-		.optional(),
-})
+const zSourceSchema = z
+	.object({
+		exception: z
+			.object({
+				stack: z.string().optional(),
+				name: z.string().optional(),
+				message: z.string().optional(),
+				timestamp: z.number().optional(),
+			})
+			.optional(),
+	})
+	.passthrough()
 
 export const zReturnedTelemetryEvent = z.object({
 	dataset: z.string(),
