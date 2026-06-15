@@ -21,6 +21,17 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 - `Do any of my Logpush jobs in my <insert name> account have errors?`
 - `Can you list all the enabled job failures from today?`
 
+## Required Cloudflare permissions
+
+When using Cloudflare OAuth, this server requests the following scopes:
+
+| OAuth scope      | API token permission                    |
+| ---------------- | --------------------------------------- |
+| `user:read`      | User Details Read                       |
+| `offline_access` | OAuth only; not an API token permission |
+| `account:read`   | Account Settings Read                   |
+| `logpush:write`  | Logs Edit                               |
+
 ## Access the remote MCP server from any MCP Client
 
 If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://logs.mcp.cloudflare.com`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
