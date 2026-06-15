@@ -5,6 +5,7 @@ export interface Env {
 	MCP_SERVER_NAME: string
 	MCP_SERVER_VERSION: string
 	MCP_OBJECT: DurableObjectNamespace<CASBMCP>
+	OAUTH_KV: KVNamespace
 	MCP_METRICS: AnalyticsEngineDataset
 	AI: Ai
 	CLOUDFLARE_CLIENT_ID: string

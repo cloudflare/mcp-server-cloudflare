@@ -1,5 +1,6 @@
 import { createMcpHandler, McpAgent } from 'agents/mcp'
 
+import { handleBenignDisconnect } from '@repo/mcp-common/src/benign-disconnect'
 import { getEnv } from '@repo/mcp-common/src/env'
 import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-ai-search.prompts'
 import { initSentry } from '@repo/mcp-common/src/sentry'
@@ -40,12 +41,12 @@ export default {
 	fetch: async (req: Request, env: Env, ctx: ExecutionContext) => {
 		const url = new URL(req.url)
 		if (url.pathname === '/sse' || url.pathname === '/sse/message') {
-			return sseHandler.fetch(req, env, ctx)
+			return handleBenignDisconnect(sseHandler.fetch(req, env, ctx))
 		}
 		if (url.pathname === '/mcp') {
 			const server = createMcpServer(env, ctx, req)
 			const mcpHandler = createMcpHandler(server)
-			return mcpHandler(req, env, ctx)
+			return handleBenignDisconnect(mcpHandler(req, env, ctx))
 		}
 		return new Response('Not found', { status: 404 })
 	},
