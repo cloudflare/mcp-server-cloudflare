@@ -1,0 +1,67 @@
+{
+  "name": "cloudflare",
+  "version": "1.0.0",
+  "description": "Cloudflare MCP servers for managing Workers, R2, D1, KV, and more.",
+  "mcpServers": {
+    "cloudflare-docs": {
+      "httpUrl": "https://docs.mcp.cloudflare.com/mcp",
+      "description": "Get up to date reference information on Cloudflare documentation."
+    },
+    "cloudflare-observability": {
+      "httpUrl": "https://observability.mcp.cloudflare.com/mcp",
+      "description": "Debug and get insight into your application's logs and analytics."
+    },
+    "cloudflare-workers-bindings": {
+      "httpUrl": "https://bindings.mcp.cloudflare.com/mcp",
+      "description": "Build Workers applications with storage, AI, and compute primitives (KV, R2, D1, etc.)."
+    },
+    "cloudflare-workers-builds": {
+      "httpUrl": "https://builds.mcp.cloudflare.com/mcp",
+      "description": "Get insights and manage your Cloudflare Workers Builds."
+    },
+    "cloudflare-radar": {
+      "httpUrl": "https://radar.mcp.cloudflare.com/mcp",
+      "description": "Get global Internet traffic insights, trends, URL scans, and other utilities."
+    },
+    "cloudflare-sandbox-containers": {
+      "httpUrl": "https://containers.mcp.cloudflare.com/mcp",
+      "description": "Spin up a sandbox development environment."
+    },
+    "cloudflare-browser-rendering": {
+      "httpUrl": "https://browser.mcp.cloudflare.com/mcp",
+      "description": "Fetch web pages, convert them to markdown and take screenshots."
+    },
+    "cloudflare-logpush": {
+      "httpUrl": "https://logs.mcp.cloudflare.com/mcp",
+      "description": "Get quick summaries for Logpush job health."
+    },
+    "cloudflare-ai-gateway": {
+      "httpUrl": "https://ai-gateway.mcp.cloudflare.com/mcp",
+      "description": "Search your logs, get details about the prompts and responses."
+    },
+    "cloudflare-autorag": {
+      "httpUrl": "https://autorag.mcp.cloudflare.com/mcp",
+      "description": "List and search documents on your AutoRAGs."
+    },
+    "cloudflare-auditlogs": {
+      "httpUrl": "https://auditlogs.mcp.cloudflare.com/mcp",
+      "description": "Query audit logs and generate reports for review."
+    },
+    "cloudflare-dns-analytics": {
+      "httpUrl": "https://dns-analytics.mcp.cloudflare.com/mcp",
+      "description": "Optimize DNS performance and debug issues based on current set up."
+    },
+    "cloudflare-dex-analysis": {
+      "httpUrl": "https://dex.mcp.cloudflare.com/mcp",
+      "description": "Get quick insight on critical applications for your organization."
+    },
+    "cloudflare-one-casb": {
+      "httpUrl": "https://casb.mcp.cloudflare.com/mcp",
+      "description": "Quickly identify any security misconfigurations for SaaS applications."
+    },
+    "cloudflare-graphql": {
+      "httpUrl": "https://graphql.mcp.cloudflare.com/mcp",
+      "description": "Get analytics data using Cloudflare's GraphQL API."
+    }
+  }
+}
