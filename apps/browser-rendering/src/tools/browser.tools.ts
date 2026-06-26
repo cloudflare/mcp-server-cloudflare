@@ -503,15 +503,19 @@ export function registerBrowserTools(agent: BrowserMCP) {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
+				// This endpoint returns a bare JSON array of sessions, not the
+				// usual `{ success, result }` envelope, so use the response as-is.
 				const r = (await client.get(
 					`/accounts/${accountId}/browser-rendering/devtools/session`
-				)) as { result: unknown }
+				)) as unknown
+				const result =
+					r && typeof r === 'object' && 'result' in r ? (r as { result: unknown }).result : r
 
 				return {
 					content: [
 						{
 							type: 'text',
-							text: JSON.stringify({ result: r.result }),
+							text: JSON.stringify({ result }),
 						},
 					],
 				}
