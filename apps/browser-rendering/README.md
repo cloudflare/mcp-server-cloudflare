@@ -10,11 +10,21 @@ web pages, convert them to markdown, and take screenshots.
 
 Currently available tools:
 
-| **Tool**               | **Description**                                                              |
-| ---------------------- | ---------------------------------------------------------------------------- |
-| `get_url_html_content` | Retrieves the HTML content of the specified URL.                             |
-| `get_url_markdown`     | Fetches the webpage content and converts it into Markdown format.            |
-| `get_url_screenshot`   | Captures a screenshot of the webpage. Optionally, specify the viewport size. |
+| **Tool**                | **Description**                                                                     |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| `get_url_html_content`  | Retrieves the HTML content of the specified URL.                                    |
+| `get_url_markdown`      | Fetches the webpage content and converts it into Markdown format.                   |
+| `get_url_screenshot`    | Captures a screenshot of the webpage. Optionally, specify the viewport size.        |
+| `get_url_pdf`           | Renders the webpage to a PDF document.                                              |
+| `get_url_snapshot`      | Returns the page HTML content and a screenshot in a single call.                    |
+| `scrape_url_elements`   | Scrapes elements from the page by CSS selector.                                     |
+| `get_url_json`          | Extracts structured JSON from the page using AI. Supports a prompt and JSON schema. |
+| `get_url_links`         | Returns the list of links on the page.                                              |
+| `start_crawl`           | Starts an asynchronous crawl of a website and returns a `job_id`.                   |
+| `get_crawl_result`      | Returns the status and records of a crawl job.                                      |
+| `cancel_crawl`          | Cancels a running crawl job.                                                        |
+| `list_browser_sessions` | Lists active Browser Rendering sessions for the account.                            |
+| `kill_browser_session`  | Closes (kills) a Browser Rendering session by its session ID.                       |
 
 **Note:** These tools are account-scoped. Single-account credentials (and account-scoped API tokens) are detected automatically. If your credentials can access multiple accounts, pass `account_id` to the tool, or set a `cf-account-id` request header in your MCP client config.
 
@@ -25,6 +35,11 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 - `Get the HTML content of https://example.com.`
 - `Convert https://example.com to Markdown.`
 - `Take a screenshot of https://example.com.`
+- `Render https://example.com to a PDF.`
+- `Extract the product name and price from https://example.com as JSON.`
+- `List all the links on https://example.com.`
+- `Crawl https://example.com two levels deep and give me the results.`
+- `List my active browser sessions and kill the oldest one.`
 
 ## Access the remote MCP server from any MCP Client
 
