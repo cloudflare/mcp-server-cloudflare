@@ -115,8 +115,8 @@ async function fetchSchemaOverview(apiToken: string): Promise<SchemaOverviewResp
  */
 async function fetchTypeDetails(typeName: string, apiToken: string): Promise<TypeDetailsResponse> {
 	const typeDetailsQuery = `
-		query TypeDetails {
-			__type(name: "${typeName}") {
+		query TypeDetails($typeName: String!) {
+			__type(name: $typeName) {
 				name
 				kind
 				description
@@ -174,8 +174,30 @@ async function fetchTypeDetails(typeName: string, apiToken: string): Promise<Typ
 		}
 	`
 
-	const response = await executeGraphQLRequest<TypeDetailsResponse>(typeDetailsQuery, apiToken)
-	return response
+	const response = await fetch(CLOUDFLARE_GRAPHQL_ENDPOINT, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${apiToken}`,
+		},
+		body: JSON.stringify({
+			query: typeDetailsQuery,
+			variables: { typeName },
+		}),
+	})
+
+	if (!response.ok) {
+		throw new Error(`Failed to execute GraphQL request: ${response.statusText}`)
+	}
+
+	const data = graphQLResponseSchema.parse(await response.json())
+
+	if (data && data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+		const errorMessages = data.errors.map((e: { message: string }) => e.message).join(', ')
+		console.warn(`GraphQL errors: ${errorMessages}`)
+	}
+
+	return data as unknown as TypeDetailsResponse
 }
 
 /**
