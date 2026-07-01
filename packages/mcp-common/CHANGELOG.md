@@ -1,5 +1,11 @@
 # @repo/mcp-common
 
+## 0.20.6
+
+### Patch Changes
+
+- cb01861: Add structured output for the Cloudflare documentation AI Search tool while preserving XML text content for older clients.
+
 ## 0.20.5
 
 ### Patch Changes
