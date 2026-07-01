@@ -16,7 +16,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		'd1_databases_list',
 		'List all of the D1 databases in your Cloudflare account',
 		{
-			name: D1DatabaseNameParam.nullable().optional(),
+			name: D1DatabaseNameParam.optional(),
 			page: PaginationPageParam,
 			per_page: PaginationPerPageParam,
 		},
@@ -65,7 +65,7 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		'Create a new D1 database in your Cloudflare account',
 		{
 			name: D1DatabaseNameParam,
-			primary_location_hint: D1DatabasePrimaryLocationHintParam.nullable().optional(),
+			primary_location_hint: D1DatabasePrimaryLocationHintParam,
 		},
 		{
 			title: 'Create D1 database',
