@@ -1,5 +1,12 @@
 # logpush
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [cb01861]
+  - @repo/mcp-common@0.20.6
+
 ## 0.2.0
 
 ### Minor Changes
