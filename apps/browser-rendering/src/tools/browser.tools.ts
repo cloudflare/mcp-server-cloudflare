@@ -382,7 +382,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 				.boolean()
 				.default(true)
 				.describe('Whether to render pages with a browser (vs. fetching raw HTML)'),
-			depth: z.number().int().min(0).optional().describe('How many links deep to crawl'),
+			depth: z.number().int().min(1).optional().describe('How many links deep to crawl'),
 			limit: z.number().int().min(1).optional().describe('Maximum number of pages to crawl'),
 		},
 		async (params, accountId) => {
