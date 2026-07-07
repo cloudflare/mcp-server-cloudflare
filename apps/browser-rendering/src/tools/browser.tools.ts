@@ -16,7 +16,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
-				const r = await client.browserRun.content.create({
+				const r = await client.browserRendering.content.create({
 					account_id: accountId,
 					url: params.url,
 				})
