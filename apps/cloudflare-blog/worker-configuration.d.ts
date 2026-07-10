@@ -9,6 +9,9 @@ interface __BaseEnv_Env {
 	MCP_SERVER_VERSION?: string;
 	BLOG_BASE_URL: string;
 	SEARCH_BASE_URL: string;
+	CLOUDFLARE_ACCOUNT_ID?: string;
+	AI_GATEWAY_ID?: string;
+	AI_GATEWAY_TOKEN?: string;
 }
 declare namespace Cloudflare {
 	interface GlobalProps {

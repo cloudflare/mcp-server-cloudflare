@@ -1,5 +1,13 @@
 import { z } from 'zod'
 
+import {
+	BlogListCursorParam,
+	BlogListLimitParam,
+	BlogListTagParam,
+	BlogPostSlugParam,
+	BlogSearchQueryParam,
+} from '../types/blog.types'
+
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 
 interface RequiredEnv {
@@ -39,9 +47,9 @@ Examples of good queries:
 - "Workers KV storage limits"
 - "DDoS protection announcements 2024"
 - "how Cloudflare uses Rust"`,
-			inputSchema: {
-				query: z.string().describe('The search query'),
-			},
+		inputSchema: {
+			query: BlogSearchQueryParam,
+		},
 			outputSchema: {
 				results: z.array(
 					z.object({
@@ -127,20 +135,11 @@ Examples of good queries:
 			description: `List Cloudflare Blog posts in reverse chronological order.
 
 Optionally filter by tag. Use the returned nextCursor to paginate through results.`,
-			inputSchema: {
-				limit: z
-					.number()
-					.int()
-					.min(1)
-					.max(50)
-					.optional()
-					.describe('Number of posts to return (1–50, default 20)'),
-				cursor: z
-					.string()
-					.optional()
-					.describe('Pagination cursor from a previous list_posts response'),
-				tag: z.string().optional().describe('Filter by tag slug, e.g. "workers" or "zero-trust"'),
-			},
+		inputSchema: {
+			limit: BlogListLimitParam,
+			cursor: BlogListCursorParam,
+			tag: BlogListTagParam,
+		},
 			outputSchema: {
 				posts: z.array(
 					z.object({
@@ -186,9 +185,9 @@ Optionally filter by tag. Use the returned nextCursor to paginate through result
 			description: `Get a single Cloudflare Blog post by slug, including its full HTML content.
 
 Use the slug from a list_posts or search_posts result.`,
-			inputSchema: {
-				slug: z.string().describe('The post slug, e.g. "workers-python-support"'),
-			},
+		inputSchema: {
+			slug: BlogPostSlugParam,
+		},
 			outputSchema: {
 				slug: z.string(),
 				title: z.string(),

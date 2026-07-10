@@ -146,6 +146,10 @@
 			]
 		},
 		{
+			"url": "https://blog.mcp.cloudflare.com/mcp",
+			"type": "streamable-http"
+		},
+		{
 			"url": "https://graphql.mcp.cloudflare.com/mcp",
 			"type": "streamable-http",
 			"headers": [
@@ -293,6 +297,10 @@
 					"is_secret": true
 				}
 			]
+		},
+		{
+			"url": "https://blog.mcp.cloudflare.com/sse",
+			"type": "sse"
 		},
 		{
 			"url": "https://graphql.mcp.cloudflare.com/sse",

@@ -23,6 +23,7 @@ The following servers are included in this repository:
 | [**Digital Experience Monitoring server**](/apps/dex-analysis) | Get quick insight on critical applications for your organization                                | `https://dex.mcp.cloudflare.com/mcp`           |
 | [**Cloudflare One CASB server**](/apps/cloudflare-one-casb)    | Quickly identify any security misconfigurations for SaaS applications to safeguard users & data | `https://casb.mcp.cloudflare.com/mcp`          |
 | [**GraphQL server**](/apps/graphql/)                           | Get analytics data using Cloudflare’s GraphQL API                                               | `https://graphql.mcp.cloudflare.com/mcp`       |
+| [**Cloudflare Blog server**](/apps/cloudflare-blog)            | Search and read posts from the Cloudflare Blog                                                  | `https://blog.mcp.cloudflare.com/mcp`          |
 
 ## Which Cloudflare MCP server should you use?
 

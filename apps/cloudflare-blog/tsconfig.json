@@ -1,4 +1,4 @@
 {
 	"extends": "@repo/typescript-config/workers.json",
-	"include": ["*/**.ts", "./vitest.config.ts"]
+	"include": ["*/**.ts", "./vitest.config.ts", "./evals/**/*.ts"]
 }
