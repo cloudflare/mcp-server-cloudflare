@@ -47,9 +47,9 @@ Examples of good queries:
 - "Workers KV storage limits"
 - "DDoS protection announcements 2024"
 - "how Cloudflare uses Rust"`,
-		inputSchema: {
-			query: BlogSearchQueryParam,
-		},
+			inputSchema: {
+				query: BlogSearchQueryParam,
+			},
 			outputSchema: {
 				results: z.array(
 					z.object({
@@ -135,11 +135,11 @@ Examples of good queries:
 			description: `List Cloudflare Blog posts in reverse chronological order.
 
 Optionally filter by tag. Use the returned nextCursor to paginate through results.`,
-		inputSchema: {
-			limit: BlogListLimitParam,
-			cursor: BlogListCursorParam,
-			tag: BlogListTagParam,
-		},
+			inputSchema: {
+				limit: BlogListLimitParam,
+				cursor: BlogListCursorParam,
+				tag: BlogListTagParam,
+			},
 			outputSchema: {
 				posts: z.array(
 					z.object({
@@ -185,9 +185,9 @@ Optionally filter by tag. Use the returned nextCursor to paginate through result
 			description: `Get a single Cloudflare Blog post by slug, including its full HTML content.
 
 Use the slug from a list_posts or search_posts result.`,
-		inputSchema: {
-			slug: BlogPostSlugParam,
-		},
+			inputSchema: {
+				slug: BlogPostSlugParam,
+			},
 			outputSchema: {
 				slug: z.string(),
 				title: z.string(),

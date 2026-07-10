@@ -35,6 +35,4 @@ export const BlogListTagParam = z
 
 // ---- get_post --------------------------------------------------------------
 
-export const BlogPostSlugParam = z
-	.string()
-	.describe('The post slug, e.g. "workers-python-support"')
+export const BlogPostSlugParam = z.string().describe('The post slug, e.g. "workers-python-support"')

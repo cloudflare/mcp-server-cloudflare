@@ -57,13 +57,13 @@
 					}
 				]
 			},
-		"vars": {
-			"ENVIRONMENT": "staging",
-			"MCP_SERVER_NAME": "Cloudflare Blog MCP Server - Staging",
-			"MCP_SERVER_VERSION": "0.1.0",
-			"BLOG_BASE_URL": "https://blog.cloudflare.com",
-			"SEARCH_BASE_URL": "https://search.blog.cloudflare.com"
-		},
+			"vars": {
+				"ENVIRONMENT": "staging",
+				"MCP_SERVER_NAME": "Cloudflare Blog MCP Server - Staging",
+				"MCP_SERVER_VERSION": "0.1.0",
+				"BLOG_BASE_URL": "https://blog.cloudflare.com",
+				"SEARCH_BASE_URL": "https://search.blog.cloudflare.com"
+			},
 			"analytics_engine_datasets": [
 				{
 					"binding": "MCP_METRICS",
@@ -83,13 +83,13 @@
 					}
 				]
 			},
-		"vars": {
-			"ENVIRONMENT": "production",
-			"MCP_SERVER_NAME": "Cloudflare Blog MCP Server",
-			"MCP_SERVER_VERSION": "0.1.0",
-			"BLOG_BASE_URL": "https://blog.cloudflare.com",
-			"SEARCH_BASE_URL": "https://search.blog.cloudflare.com"
-		},
+			"vars": {
+				"ENVIRONMENT": "production",
+				"MCP_SERVER_NAME": "Cloudflare Blog MCP Server",
+				"MCP_SERVER_VERSION": "0.1.0",
+				"BLOG_BASE_URL": "https://blog.cloudflare.com",
+				"SEARCH_BASE_URL": "https://search.blog.cloudflare.com"
+			},
 			"analytics_engine_datasets": [
 				{
 					"binding": "MCP_METRICS",
