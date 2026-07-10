@@ -1,7 +1,6 @@
 import { createMcpHandler, McpAgent } from 'agents/mcp'
 
 import { getEnv } from '@repo/mcp-common/src/env'
-import { initSentry } from '@repo/mcp-common/src/sentry'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 
 import { registerBlogTools } from './tools/blog.tools'
@@ -56,17 +55,14 @@ function createMcpServer(
 	ctx: {
 		waitUntil: ExecutionContext['waitUntil']
 	},
-	req?: Request
+	_req?: Request
 ) {
-	const sentry = initSentry(env, ctx, req)
-
 	const server = new CloudflareMCPServer({
 		wae: env.MCP_METRICS,
 		serverInfo: {
 			name: env.MCP_SERVER_NAME,
 			version: env.MCP_SERVER_VERSION,
 		},
-		sentry,
 	})
 
 	registerBlogTools(server, env)

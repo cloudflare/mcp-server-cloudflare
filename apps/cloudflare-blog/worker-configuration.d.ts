@@ -4,7 +4,6 @@
 interface __BaseEnv_Env {
 	MCP_METRICS: AnalyticsEngineDataset;
 	ENVIRONMENT: 'development' | 'staging' | 'production';
-	SENTRY_DSN?: string;
 	MCP_OBJECT: DurableObjectNamespace<import('./src/cloudflare-blog.app').CloudflareBlogMCP>;
 	MCP_SERVER_NAME?: string;
 	MCP_SERVER_VERSION?: string;
@@ -19,7 +18,6 @@ declare namespace Cloudflare {
 	interface StagingEnv {
 		MCP_METRICS: AnalyticsEngineDataset;
 		ENVIRONMENT: 'staging';
-		SENTRY_DSN: string;
 		MCP_OBJECT: DurableObjectNamespace<import('./src/cloudflare-blog.app').CloudflareBlogMCP>;
 		BLOG_BASE_URL: string;
 		SEARCH_BASE_URL: string;
@@ -27,7 +25,6 @@ declare namespace Cloudflare {
 	interface ProductionEnv {
 		MCP_METRICS: AnalyticsEngineDataset;
 		ENVIRONMENT: 'production';
-		SENTRY_DSN: string;
 		MCP_OBJECT: DurableObjectNamespace<import('./src/cloudflare-blog.app').CloudflareBlogMCP>;
 		BLOG_BASE_URL: string;
 		SEARCH_BASE_URL: string;

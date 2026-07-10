@@ -30,8 +30,8 @@
 		"ENVIRONMENT": "development",
 		"MCP_SERVER_NAME": "PLACEHOLDER",
 		"MCP_SERVER_VERSION": "PLACEHOLDER",
-		"BLOG_BASE_URL": "https://cloudflare-blog-emdash.mrk.workers.dev",
-		"SEARCH_BASE_URL": "https://1d22aaf0-f4ae-4c2e-ae71-b3b1cd7dd2ce.search.ai.cloudflare.com"
+		"BLOG_BASE_URL": "https://blog.cloudflare.com",
+		"SEARCH_BASE_URL": "https://search.blog.cloudflare.com"
 	},
 	"dev": {
 		"port": 8977
@@ -47,7 +47,7 @@
 	"env": {
 		"staging": {
 			"name": "mcp-cloudflare-blog-staging",
-			"account_id": "PLACEHOLDER",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "blog-staging.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
@@ -59,9 +59,8 @@
 			},
 			"vars": {
 				"ENVIRONMENT": "staging",
-				"BLOG_BASE_URL": "https://cloudflare-blog-emdash.mrk.workers.dev",
-				"SEARCH_BASE_URL": "https://1d22aaf0-f4ae-4c2e-ae71-b3b1cd7dd2ce.search.ai.cloudflare.com",
-				"SENTRY_DSN": "https://d3ffa014f0daa57b27a174476bc2573f@sentry10.cfdata.org/2090"
+				"BLOG_BASE_URL": "https://blog.cloudflare.com",
+				"SEARCH_BASE_URL": "https://search.blog.cloudflare.com"
 			},
 			"analytics_engine_datasets": [
 				{
@@ -72,7 +71,7 @@
 		},
 		"production": {
 			"name": "mcp-cloudflare-blog-production",
-			"account_id": "PLACEHOLDER",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "blog.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
@@ -85,8 +84,7 @@
 			"vars": {
 				"ENVIRONMENT": "production",
 				"BLOG_BASE_URL": "https://blog.cloudflare.com",
-				"SEARCH_BASE_URL": "https://search.blog.cloudflare.com",
-				"SENTRY_DSN": "https://d3ffa014f0daa57b27a174476bc2573f@sentry10.cfdata.org/2090"
+				"SEARCH_BASE_URL": "https://search.blog.cloudflare.com"
 			},
 			"analytics_engine_datasets": [
 				{
