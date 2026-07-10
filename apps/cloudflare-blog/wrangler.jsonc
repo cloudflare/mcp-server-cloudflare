@@ -1,0 +1,99 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": "src/cloudflare-blog.app.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"name": "mcp-cloudflare-blog-dev",
+	"minify": true,
+	"migrations": [
+		{
+			"new_sqlite_classes": ["CloudflareBlogMCP"],
+			"tag": "v1"
+		}
+	],
+	"observability": {
+		"enabled": true,
+		"traces": {
+			"enabled": true,
+			"head_sampling_rate": 0.1
+		}
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "CloudflareBlogMCP",
+				"name": "MCP_OBJECT"
+			}
+		]
+	},
+	"vars": {
+		"ENVIRONMENT": "development",
+		"MCP_SERVER_NAME": "PLACEHOLDER",
+		"MCP_SERVER_VERSION": "PLACEHOLDER",
+		"BLOG_BASE_URL": "https://cloudflare-blog-emdash.mrk.workers.dev",
+		"SEARCH_BASE_URL": "https://1d22aaf0-f4ae-4c2e-ae71-b3b1cd7dd2ce.search.ai.cloudflare.com"
+	},
+	"dev": {
+		"port": 8977
+	},
+	"workers_dev": false,
+	"preview_urls": false,
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-dev"
+		}
+	],
+	"env": {
+		"staging": {
+			"name": "mcp-cloudflare-blog-staging",
+			"account_id": "PLACEHOLDER",
+			"routes": [{ "pattern": "blog-staging.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "CloudflareBlogMCP",
+						"name": "MCP_OBJECT"
+					}
+				]
+			},
+			"vars": {
+				"ENVIRONMENT": "staging",
+				"BLOG_BASE_URL": "https://cloudflare-blog-emdash.mrk.workers.dev",
+				"SEARCH_BASE_URL": "https://1d22aaf0-f4ae-4c2e-ae71-b3b1cd7dd2ce.search.ai.cloudflare.com",
+				"SENTRY_DSN": "https://d3ffa014f0daa57b27a174476bc2573f@sentry10.cfdata.org/2090"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-staging"
+				}
+			]
+		},
+		"production": {
+			"name": "mcp-cloudflare-blog-production",
+			"account_id": "PLACEHOLDER",
+			"routes": [{ "pattern": "blog.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "CloudflareBlogMCP",
+						"name": "MCP_OBJECT"
+					}
+				]
+			},
+			"vars": {
+				"ENVIRONMENT": "production",
+				"BLOG_BASE_URL": "https://blog.cloudflare.com",
+				"SEARCH_BASE_URL": "https://search.blog.cloudflare.com",
+				"SENTRY_DSN": "https://d3ffa014f0daa57b27a174476bc2573f@sentry10.cfdata.org/2090"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-production"
+				}
+			]
+		}
+	}
+}
