@@ -52,7 +52,7 @@ export default {
 
 function createMcpServer(
 	env: Env,
-	ctx: {
+	_ctx: {
 		waitUntil: ExecutionContext['waitUntil']
 	},
 	_req?: Request
