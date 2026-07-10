@@ -25,12 +25,10 @@
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.16.11",
-		"@repo/eval-tools": "workspace:*",
 		"@types/node": "22.15.17",
 		"prettier": "3.5.3",
 		"typescript": "5.5.4",
 		"vitest": "4.1.8",
-		"vitest-evals": "0.1.4",
 		"wrangler": "4.96.0"
 	},
 	"type": "module"

@@ -281,9 +281,6 @@ importers:
       '@cloudflare/vitest-pool-workers':
         specifier: 0.16.11
         version: 0.16.11(@cloudflare/workers-types@4.20250416.0)(@vitest/runner@4.1.8)(@vitest/snapshot@4.1.8)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@4.1.8)
-      '@repo/eval-tools':
-        specifier: workspace:*
-        version: link:../../packages/eval-tools
       '@types/node':
         specifier: 22.15.17
         version: 22.15.17
@@ -296,9 +293,6 @@ importers:
       vitest:
         specifier: 4.1.8
         version: 4.1.8(@opentelemetry/api@1.9.0)(@types/node@22.15.17)(@vitest/ui@4.1.8)(msw@2.14.6(@types/node@22.15.17)(typescript@5.5.4))(vite@6.3.4(@types/node@22.15.17)(lightningcss@1.29.2)(tsx@4.19.3))
-      vitest-evals:
-        specifier: 0.1.4
-        version: 0.1.4(vitest@4.1.8)
       wrangler:
         specifier: 4.96.0
         version: 4.96.0(@cloudflare/workers-types@4.20250416.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
