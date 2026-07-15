@@ -4,7 +4,8 @@ This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introdu
 connections, with Cloudflare OAuth built-in.
 
 It integrates tools powered by [Workers Observability](https://developers.cloudflare.com/workers/observability/) to debug
-and get insight into your Workers' logs and analytics.
+and get insight into your W<img width="500" height="500" alt="1000229896" src="https://github.com/user-attachments/assets/9a0cb856-91a6-4e59-ab75-fbec154c5346" />
+orkers' logs and analytics.
 
 ## 🔨 Available Tools
 
