@@ -1,9 +1,9 @@
-# Cloudflare Browser Rendering MCP Server 📡
+# Cloudflare Browser Run MCP Server 📡
 
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP
 connections, with Cloudflare OAuth built-in.
 
-It integrates tools powered by the [Cloudflare Browser Rendering API](https://developers.cloudflare.com/browser-rendering/) to fetch
+It integrates tools powered by the [Cloudflare Browser Run API](https://developers.cloudflare.com/browser-run/) to fetch
 web pages, convert them to markdown, and take screenshots.
 
 ## 🔨 Available Tools
@@ -23,8 +23,8 @@ Currently available tools:
 | `start_crawl`           | Starts an asynchronous crawl of a website and returns a `job_id`.                   |
 | `get_crawl_result`      | Returns the status and records of a crawl job.                                      |
 | `cancel_crawl`          | Cancels a running crawl job.                                                        |
-| `list_browser_sessions` | Lists active Browser Rendering sessions for the account.                            |
-| `kill_browser_session`  | Closes (kills) a Browser Rendering session by its session ID.                       |
+| `list_browser_sessions` | Lists active Browser Run sessions for the account.                                  |
+| `kill_browser_session`  | Closes (kills) a Browser Run session by its session ID.                             |
 
 **Note:** These tools are account-scoped. Single-account credentials (and account-scoped API tokens) are detected automatically. If your credentials can access multiple accounts, pass `account_id` to the tool, or set a `cf-account-id` request header in your MCP client config.
 

@@ -74,7 +74,7 @@
 			],
 			"vars": {
 				"ENVIRONMENT": "staging",
-				"MCP_SERVER_NAME": "Cloudflare Browser Rendering Remote MCP Server - Staging",
+				"MCP_SERVER_NAME": "Cloudflare Browser Run Remote MCP Server - Staging",
 				"MCP_SERVER_VERSION": "1.0.0"
 			},
 			"analytics_engine_datasets": [
@@ -104,7 +104,7 @@
 			],
 			"vars": {
 				"ENVIRONMENT": "production",
-				"MCP_SERVER_NAME": "Cloudflare Browser Rendering Remote MCP Server",
+				"MCP_SERVER_NAME": "Cloudflare Browser Run Remote MCP Server",
 				"MCP_SERVER_VERSION": "1.0.0"
 			},
 			"analytics_engine_datasets": [

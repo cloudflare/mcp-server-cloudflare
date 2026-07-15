@@ -5,7 +5,7 @@ interface __BaseEnv_Env {
 	OAUTH_KV: KVNamespace;
 	MCP_METRICS: AnalyticsEngineDataset;
 	ENVIRONMENT: "staging" | "production" | "development";
-	MCP_SERVER_NAME: "Cloudflare Browser Rendering Remote MCP Server - Staging" | "Cloudflare Browser Rendering Remote MCP Server" | "<PLACEHOLDER>";
+	MCP_SERVER_NAME: "Cloudflare Browser Run Remote MCP Server - Staging" | "Cloudflare Browser Run Remote MCP Server" | "<PLACEHOLDER>";
 	MCP_SERVER_VERSION: "1.0.0" | "<PLACEHOLDER>";
 	MCP_OBJECT: DurableObjectNamespace<import("./src/browser.app").BrowserMCP>;
 	CLOUDFLARE_CLIENT_ID?: "<PLACEHOLDER>";
@@ -20,7 +20,7 @@ declare namespace Cloudflare {
 		OAUTH_KV: KVNamespace;
 		MCP_METRICS: AnalyticsEngineDataset;
 		ENVIRONMENT: "staging";
-		MCP_SERVER_NAME: "Cloudflare Browser Rendering Remote MCP Server - Staging";
+		MCP_SERVER_NAME: "Cloudflare Browser Run Remote MCP Server - Staging";
 		MCP_SERVER_VERSION: "1.0.0";
 		MCP_OBJECT: DurableObjectNamespace<import("./src/browser.app").BrowserMCP>;
 	}
@@ -28,7 +28,7 @@ declare namespace Cloudflare {
 		OAUTH_KV: KVNamespace;
 		MCP_METRICS: AnalyticsEngineDataset;
 		ENVIRONMENT: "production";
-		MCP_SERVER_NAME: "Cloudflare Browser Rendering Remote MCP Server";
+		MCP_SERVER_NAME: "Cloudflare Browser Run Remote MCP Server";
 		MCP_SERVER_VERSION: "1.0.0";
 		MCP_OBJECT: DurableObjectNamespace<import("./src/browser.app").BrowserMCP>;
 	}

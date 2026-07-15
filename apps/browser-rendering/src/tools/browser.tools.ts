@@ -55,7 +55,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
-				const r = (await client.post(`/accounts/${accountId}/browser-rendering/markdown`, {
+				const r = (await client.post(`/accounts/${accountId}/browser-run/markdown`, {
 					body: {
 						url: params.url,
 					},
@@ -102,7 +102,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await client
-					.post(`/accounts/${accountId}/browser-rendering/screenshot`, {
+					.post(`/accounts/${accountId}/browser-run/screenshot`, {
 						body: {
 							url: params.url,
 							viewport: params.viewport,
@@ -148,7 +148,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await client
-					.post(`/accounts/${accountId}/browser-rendering/pdf`, {
+					.post(`/accounts/${accountId}/browser-run/pdf`, {
 						body: {
 							url: params.url,
 						},
@@ -195,7 +195,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
-				const r = (await client.post(`/accounts/${accountId}/browser-rendering/snapshot`, {
+				const r = (await client.post(`/accounts/${accountId}/browser-run/snapshot`, {
 					body: {
 						url: params.url,
 					},
@@ -251,7 +251,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
-				const r = (await client.post(`/accounts/${accountId}/browser-rendering/scrape`, {
+				const r = (await client.post(`/accounts/${accountId}/browser-run/scrape`, {
 					body: {
 						url: params.url,
 						elements: params.elements,
@@ -298,7 +298,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
-				const r = (await client.post(`/accounts/${accountId}/browser-rendering/json`, {
+				const r = (await client.post(`/accounts/${accountId}/browser-run/json`, {
 					body: {
 						url: params.url,
 						...(params.prompt ? { prompt: params.prompt } : {}),
@@ -342,7 +342,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
-				const r = (await client.post(`/accounts/${accountId}/browser-rendering/links`, {
+				const r = (await client.post(`/accounts/${accountId}/browser-run/links`, {
 					body: {
 						url: params.url,
 						...(params.visibleLinksOnly !== undefined
@@ -389,7 +389,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 			try {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
-				const r = (await client.post(`/accounts/${accountId}/browser-rendering/crawl`, {
+				const r = (await client.post(`/accounts/${accountId}/browser-run/crawl`, {
 					body: {
 						url: params.url,
 						render: params.render,
@@ -434,7 +434,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.get(
-					`/accounts/${accountId}/browser-rendering/crawl/${params.job_id}`
+					`/accounts/${accountId}/browser-run/crawl/${params.job_id}`
 				)) as { result: unknown }
 
 				return {
@@ -470,7 +470,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.delete(
-					`/accounts/${accountId}/browser-rendering/crawl/${params.job_id}`
+					`/accounts/${accountId}/browser-run/crawl/${params.job_id}`
 				)) as { result: unknown }
 
 				return {
@@ -506,7 +506,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 				// This endpoint returns a bare JSON array of sessions, not the
 				// usual `{ success, result }` envelope, so use the response as-is.
 				const r = (await client.get(
-					`/accounts/${accountId}/browser-rendering/devtools/session`
+					`/accounts/${accountId}/browser-run/devtools/session`
 				)) as unknown
 				const result =
 					r && typeof r === 'object' && 'result' in r ? (r as { result: unknown }).result : r
@@ -544,7 +544,7 @@ export function registerBrowserTools(agent: BrowserMCP) {
 				const props = getProps(agent)
 				const client = getCloudflareClient(props.accessToken)
 				await client.delete(
-					`/accounts/${accountId}/browser-rendering/devtools/browser/${params.session_id}`
+					`/accounts/${accountId}/browser-run/devtools/browser/${params.session_id}`
 				)
 
 				return {

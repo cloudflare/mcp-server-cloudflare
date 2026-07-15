@@ -72,7 +72,7 @@ export class BrowserMCP extends McpAgent<Env, State, Props> {
 const BrowserScopes = {
 	...RequiredScopes,
 	'account:read': 'See your account info such as account details, analytics, and memberships.',
-	'browser:write': 'Grants write level access to Browser Rendering.',
+	'browser:write': 'Grants write level access to Browser Run.',
 } as const
 
 export default {
