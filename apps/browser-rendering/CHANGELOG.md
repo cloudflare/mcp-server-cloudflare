@@ -1,5 +1,17 @@
 # cloudflare-browser-mcp-server
 
+## 0.3.0
+
+### Minor Changes
+
+- d9cc342: Add MCP tools for the remaining Browser Rendering REST quick actions, bringing the Browser Run MCP server to parity with the REST API: `get_url_pdf`, `get_url_snapshot`, `scrape_url_elements`, `get_url_json`, `get_url_links`, `start_crawl`, `get_crawl_result`, `cancel_crawl`, `list_browser_sessions`, and `kill_browser_session`.
+
+### Patch Changes
+
+- 52c633e: Fix `start_crawl` tool `depth` parameter validation: the REST `/crawl` endpoint requires `depth >= 1`, but the MCP tool schema allowed `depth: 0`, producing a confusing downstream 400 instead of a clear local validation error. Schema now uses `.min(1)`.
+- Updated dependencies [cb01861]
+  - @repo/mcp-common@0.20.6
+
 ## 0.2.0
 
 ### Minor Changes
