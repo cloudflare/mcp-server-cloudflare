@@ -22,7 +22,7 @@ Currently available tools:
 |                                      | `dex_create_remote_warp_diag`              | Initiate a remote Warp diagnostic capture on a specific device by id.                                                                                  |
 |                                      | `dex_list_remote_captures`                 | Retrieve a list of previously created remote captures along with their details and status.                                                             |
 |                                      | `dex_list_remote_warp_diag_contents`       | List the filenames included in a remote WARP diag capture returned by `dex_list_remote_captures`.                                                      |
-|                                      | `dex_explore_remote_warp_diag_output`      | Retreive remote WARP diag file contents by filepath returned by `dex_list_remote_warp_diag_contents`.                                                  |
+|                                      | `dex_explore_remote_warp_diag_output`      | Retrieve remote WARP diag file contents by filepath returned by `dex_list_remote_warp_diag_contents`.                                                  |
 |                                      | `dex_analyze_warp_diag`                    | Analyze successful WARP-diag remote captures for common issues.                                                                                        |
 | **Fleet Status**                     | `dex_fleet_status_live`                    | View live metrics for your fleet of zero trust devices for up to the past 1 hour.                                                                      |
 |                                      | `dex_fleet_status_over_time`               | View historical metrics for your fleet of zero trust devices over time.                                                                                |
@@ -34,7 +34,7 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 
 ### Prompt Examples
 
-- `Are there any anomolies in the DEX test to the internal wiki in the past 24 hours?`
+- `Are there any anomalies in the DEX test to the internal wiki in the past 24 hours?`
 - `Can you see any bottlenecks in user@cloudflare.com's network path for Zoom today between 1 and 2 PM?`
 - `How many macOS devices are connected right now in DFW?`
 - `Do you notice any unusual performance metrics for user@cloudflare.com's device in the past few hours?`
