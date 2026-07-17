@@ -1,0 +1,81 @@
+apps/agent-memory/CONTRIBUTING.md
+  s_d68a657313ed4a::t_f21a17e7d622d7 20,33,35-37
+apps/agent-memory/README.md
+  s_d68a657313ed4a::t_762da73a9862c9 6-9,15-19,21-25,34,64
+apps/agent-memory/src/config.ts
+  s_afe9dbc6b0b881::t_6952318fb708a8 2,4-6,16-17,20-23,45-60,65-68,70,79-82
+apps/agent-memory/src/content-hash.ts
+  s_afe9dbc6b0b881::t_2c363eaab6ca75 1-5
+apps/agent-memory/src/conversations.test.ts
+  s_d68a657313ed4a::t_234a6ef0be2dc7 1-499
+apps/agent-memory/src/llm/workers-ai.test.ts
+  s_f29dc387ad9b18::t_ad20d246a806a9 1-85
+apps/agent-memory/src/llm/workers-ai.ts
+  s_f29dc387ad9b18::t_4832cbde46adce 72-82,98-101,110-126,164,171-173,175,194,227-229,272-273,306-309,311,313-316,320,322
+apps/agent-memory/src/reflection/agentic.test.ts
+  s_afe9dbc6b0b881::t_b6ff1e4ee1079b 1-94
+apps/agent-memory/src/reflection/index.test.ts
+  s_afe9dbc6b0b881::t_035c927fd2bd2b 1-160
+apps/agent-memory/src/reflection/index.ts
+  s_f29dc387ad9b18::t_98313bb1eb4447 5-6,17,40-41,61-83,102,108,131-142,158-169,171-172,183-185,189-199,201-205,207-208,211,214-215,217
+apps/agent-memory/src/reflection/staging.test.ts
+  s_f29dc387ad9b18::t_5abee4c672486a 1-22
+apps/agent-memory/src/reflection/staging.ts
+  s_afe9dbc6b0b881::t_3e68972ea5eb4a 67-68,74-94,270-279,282-285,287,289-290
+apps/agent-memory/src/reminders.ts
+  s_f29dc387ad9b18::t_c5d29d2f32b49a 31,40-48,66,71-73,152-156,176,180-181,185,189-212,215-265
+apps/agent-memory/src/search/index-write.test.ts
+  s_f29dc387ad9b18::t_53e30cfe995bb4 1-51
+apps/agent-memory/src/search/index-write.ts
+  s_afe9dbc6b0b881::t_1350960097a221 14,48-49,78-83,87-88,91-101,103-104,110,115-118,120-121,123-124,129-131
+apps/agent-memory/src/search/vector-index.ts
+  s_f29dc387ad9b18::t_2dfe2e231fda8d 6-15,17,19-21,24-25,28-30,33-34,38,41-48,51-54,56,59-63,65-71,74,78-81,84
+apps/agent-memory/src/storage/r2.ts
+  s_afe9dbc6b0b881::t_c6ec1f95ff4eea 2,5,7-8,18-28,37-113,115-116,119-120,125-127,129-142,144-149,151-162,167-168,173,175,177-178,180,183-186,191-199,201-215,220-223,234-235,240-244,256-260,263,266-267,274-275,280
+apps/agent-memory/src/tags.test.ts
+  s_f29dc387ad9b18::t_318f99e729fb9a 1-95
+apps/agent-memory/src/test/mock-ai.ts
+  s_f29dc387ad9b18::t_2d0119988db662 1-104
+apps/agent-memory/src/test/mock-storage.ts
+  s_f29dc387ad9b18::t_f420b6e4e996f8 1-110
+apps/agent-memory/src/truncate.test.ts
+  s_f29dc387ad9b18::t_f17518e64cdd14 1-133
+apps/agent-memory/src/user-context.ts
+  s_afe9dbc6b0b881::t_942e89fdd861ff 11,13-17,24-25,33,42-46
+apps/agent-memory/src/webhook.ts
+  s_d68a657313ed4a::t_f3c115f8d43031 7-8,55,58-59
+apps/agent-memory/src/wikilinks.test.ts
+  s_f29dc387ad9b18::t_629d54abe500ef 1-97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "b41f329571a5df3a8a34c71d15be29d4295422f5",
+  "prompts": {},
+  "sessions": {
+    "s_afe9dbc6b0b881": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a0263628-a56c-48c4-87b5-1b39d3bd3fe0",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_d68a657313ed4a": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019f7101-c1d9-78c9-bb25-a599df395d9f",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_f29dc387ad9b18": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019f709f-33e4-74b6-a35f-a1662aa9b115",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
