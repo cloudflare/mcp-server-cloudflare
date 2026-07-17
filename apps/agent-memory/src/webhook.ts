@@ -4,8 +4,8 @@
  * Fired when a reflection completes, *if* the user has configured a
  * `webhookUrl` (see `config.ts`). Deliberately vendor-neutral: it POSTs a
  * plain JSON payload with optional user-supplied headers. The user decides
- * what sits on the other end — a Slack/Discord incoming webhook, a Google
- * Chat middleware, an n8n flow, a Worker, anything that accepts a POST.
+ * what sits on the other end — typically an automation flow or Worker that
+ * can adapt the generic payload for a vendor-specific webhook format.
  *
  * There is no product-specific formatting (no cards, no space IDs). Callers
  * that want richer formatting can transform the payload at their endpoint.
@@ -51,10 +51,12 @@ export async function sendWebhook(
 		const response = await fetch(config.url, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json',
 				...config.headers,
+				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify(payload),
+			redirect: 'error',
+			signal: AbortSignal.timeout(5_000),
 		})
 
 		if (!response.ok) {

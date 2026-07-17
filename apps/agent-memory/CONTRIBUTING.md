@@ -17,7 +17,7 @@ If you'd like to iterate and test your MCP server, you can do so in local develo
 
    ```
    DEV_DISABLE_OAUTH=true
-   # This is your global api token
+   # Use an API token with Account Read, Workers R2 Storage Write, and Workers AI permissions.
    DEV_CLOUDFLARE_API_TOKEN=your_development_api_token
    ```
 
@@ -30,11 +30,11 @@ If you'd like to iterate and test your MCP server, you can do so in local develo
 3. To test locally, open Inspector and connect to `http://localhost:8990/mcp`.
    Once you follow the prompts, you'll be able to "List Tools". You can also connect with any MCP client.
 
-## Storage & inference are billed to the authenticated account
+## Storage & inference are billed to the selected account
 
-This server intentionally uses the **user's own** R2 bucket and Workers AI via the Cloudflare REST API rather than
-Worker bindings, so all storage and inference spend is billed to the account that authenticates. The first write
-creates the `agent-memory-mcp` R2 bucket in that account if it does not already exist.
+This server intentionally uses R2 and Workers AI in the selected Cloudflare account via the REST API rather than
+Worker bindings. The first write creates the account-scoped `agent-memory-mcp` bucket if it does not already exist;
+account members with the required permissions share its memory and search index.
 
 The OAuth scopes requested include `account:read`, `workers:write` (which grants R2 object access), and `ai:write` in
 addition to the shared `RequiredScopes`.

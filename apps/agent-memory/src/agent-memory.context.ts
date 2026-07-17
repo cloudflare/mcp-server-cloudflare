@@ -5,15 +5,15 @@ import type { MemoryIndex } from './search/durable-object'
  * Worker environment bindings for the Agent Memory MCP server.
  *
  * Note what is *not* here: there is no `AI` binding and no `R2Bucket`
- * binding. Both Workers AI and R2 are accessed through the *user's own*
- * Cloudflare account via the REST API, using the OAuth access token minted
- * during the authorization flow. That keeps all Workers AI and R2 spend
- * scoped to the end user rather than the account hosting this server.
+ * binding. Both Workers AI and R2 are accessed in the selected Cloudflare
+ * account through the REST API, using the OAuth access token minted during
+ * authorization. That keeps Workers AI and R2 spend on the selected account
+ * rather than the account hosting this server.
  *
- * The only per-user state that lives on the server account is the search
- * index Durable Object (`MEMORY_INDEX`), which stores embeddings + a small
- * SQLite index. There is one instance per user (`idFromName(userId)`), so
- * the compute and storage there are naturally partitioned per user.
+ * The only account-derived state that lives on the server account is the
+ * search-index Durable Object (`MEMORY_INDEX`), which stores embeddings and
+ * a small SQLite index. There is one instance per selected Cloudflare account
+ * (`idFromName(accountId)`), matching the account boundary of the R2 bucket.
  */
 export interface Env {
 	OAUTH_KV: KVNamespace
@@ -27,8 +27,8 @@ export interface Env {
 	MEMORY_INDEX: DurableObjectNamespace<MemoryIndex>
 	MCP_METRICS: AnalyticsEngineDataset
 	/**
-	 * Name of the R2 bucket created (idempotently) in each user's account to
-	 * hold their memory files. Defaults to `agent-memory-mcp`.
+	 * Name of the R2 bucket created (idempotently) in the selected account to
+	 * hold its memory files. Defaults to `agent-memory-mcp`.
 	 */
 	AGENT_MEMORY_BUCKET_NAME: string
 	DEV_DISABLE_OAUTH: string

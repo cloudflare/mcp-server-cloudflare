@@ -64,10 +64,32 @@ export async function readStagedReflectionData(
 	const file = await storage.read(jsonPath)
 	if (!file) return null
 	try {
-		return JSON.parse(file.content) as StagedReflection
+		const parsed = JSON.parse(file.content) as unknown
+		return isStagedReflection(parsed) ? parsed : null
 	} catch {
 		return null
 	}
+}
+
+function isStagedReflection(value: unknown): value is StagedReflection {
+	if (!value || typeof value !== 'object') return false
+	const candidate = value as Partial<StagedReflection>
+	if (!Array.isArray(candidate.proposedEdits) || candidate.proposedEdits.length > 100) return false
+	return candidate.proposedEdits.every((edit) => {
+		if (!edit || typeof edit !== 'object') return false
+		return (
+			typeof edit.path === 'string' &&
+			edit.path.length > 0 &&
+			edit.path.length <= 1024 &&
+			['replace', 'append', 'delete', 'create'].includes(edit.action) &&
+			typeof edit.reason === 'string' &&
+			(edit.content === undefined ||
+				(typeof edit.content === 'string' && edit.content.length <= 1_000_000)) &&
+			(edit.expectedContentHash === undefined ||
+				(typeof edit.expectedContentHash === 'string' &&
+					/^[0-9a-f]{64}$/i.test(edit.expectedContentHash)))
+		)
+	})
 }
 
 /**
@@ -245,18 +267,27 @@ export async function archiveReflection(
 	}
 
 	const date = match[1]
-	const archivePath = `memory/reflections/archive/${date}.md`
-	await storage.write(archivePath, file.content)
-	await storage.delete(pendingPath)
-
-	// Move the JSON sidecar too, if it exists. Don't fail archiving if the
-	// sidecar is missing — it's optional for backwards compat.
+	let archiveStem = date
+	for (
+		let revision = 2;
+		await storage.read(`memory/reflections/archive/${archiveStem}.md`);
+		revision++
+	) {
+		if (revision > 100) throw new Error(`Too many archived reflections for ${date}`)
+		archiveStem = `${date}-${revision}`
+	}
+	const archivePath = `memory/reflections/archive/${archiveStem}.md`
 	const jsonSource = `${PENDING_DIR}/${date}.json`
 	const jsonSidecar = await storage.read(jsonSource)
+
+	// Copy every available artifact before deleting either source. If an R2
+	// write fails, the pending review remains recoverable and can be retried.
+	await storage.write(archivePath, file.content)
 	if (jsonSidecar) {
-		await storage.write(`memory/reflections/archive/${date}.json`, jsonSidecar.content)
-		await storage.delete(jsonSource)
+		await storage.write(`memory/reflections/archive/${archiveStem}.json`, jsonSidecar.content)
 	}
+	await storage.delete(pendingPath)
+	if (jsonSidecar) await storage.delete(jsonSource)
 
 	return archivePath
 }

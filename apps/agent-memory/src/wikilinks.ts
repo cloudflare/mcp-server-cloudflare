@@ -33,6 +33,8 @@
 // opening pair — the same behaviour Obsidian has. Leading `!` (embed)
 // is optional.
 const WIKILINK_RE = /!?\[\[([^[\]\n]+?)\]\]/g
+const MAX_LINKS = 1_000
+const MAX_TARGET_LENGTH = 1_024
 
 function normalizeTarget(raw: string): string {
 	let target = raw.trim()
@@ -65,9 +67,10 @@ export function parseWikilinks(content: string): string[] {
 	WIKILINK_RE.lastIndex = 0
 	for (let match = WIKILINK_RE.exec(content); match !== null; match = WIKILINK_RE.exec(content)) {
 		const target = normalizeTarget(match[1])
-		if (!target || seen.has(target)) continue
+		if (!target || target.length > MAX_TARGET_LENGTH || seen.has(target)) continue
 		seen.add(target)
 		out.push(target)
+		if (out.length >= MAX_LINKS) break
 	}
 
 	return out

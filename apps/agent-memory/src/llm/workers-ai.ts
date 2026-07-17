@@ -69,6 +69,17 @@ interface OpenAITool {
 	}
 }
 
+interface OpenAIMessage {
+	role: string
+	content: string
+	tool_call_id?: string
+	tool_calls?: Array<{
+		id: string
+		type: 'function'
+		function: { name: string; arguments: string }
+	}>
+}
+
 export class WorkersAIProvider implements LLMProvider {
 	readonly name = 'workers-ai'
 	readonly model: string
@@ -84,19 +95,35 @@ export class WorkersAIProvider implements LLMProvider {
 		prompt: string | LLMMessage[],
 		options?: LLMCompletionOptions
 	): Promise<LLMCompletionResult> {
-		// Build messages array
-		const messages: Array<{ role: string; content: string }> = []
+		// Build an OpenAI-compatible message history. Multi-turn function
+		// calling requires both the assistant's original tool_calls and each
+		// matching tool_call_id to survive into the next request.
+		const messages: OpenAIMessage[] = []
 
-		// Add system prompt if provided
 		if (options?.systemPrompt) {
 			messages.push({ role: 'system', content: options.systemPrompt })
 		}
 
-		// Add user prompt or message array
 		if (typeof prompt === 'string') {
 			messages.push({ role: 'user', content: prompt })
 		} else {
-			messages.push(...prompt.map((m) => ({ role: m.role, content: m.content })))
+			for (const message of prompt) {
+				const serialized: OpenAIMessage = { role: message.role, content: message.content }
+				if (message.role === 'assistant' && message.tool_calls?.length) {
+					serialized.tool_calls = message.tool_calls.map((call) => ({
+						id: call.id,
+						type: 'function' as const,
+						function: { name: call.name, arguments: JSON.stringify(call.arguments) },
+					}))
+				}
+				if (message.role === 'tool') {
+					if (!message.tool_call_id) {
+						throw new Error('Tool result message is missing tool_call_id')
+					}
+					serialized.tool_call_id = message.tool_call_id
+				}
+				messages.push(serialized)
+			}
 		}
 
 		// Convert tools to OpenAI format for /v1/chat/completions endpoint
@@ -134,14 +161,18 @@ export class WorkersAIProvider implements LLMProvider {
 		)
 
 		const choice = response.choices?.[0]
+		if (!choice?.message) throw new Error('Workers AI returned no completion choice')
 		// Reasoning models (Kimi K2.7, Gemma 4, GPT-OSS, etc.) sometimes return
 		// the answer in reasoning_content when max_tokens runs out during
 		// deliberation. Fall back so the caller never sees a silently-empty
 		// response from a model that did produce useful output.
 		const responseText = choice?.message?.content ?? choice?.message?.reasoning_content ?? ''
 
+		if ((choice.message.tool_calls?.length ?? 0) > 20) {
+			throw new Error('Workers AI returned more than 20 tool calls in one turn')
+		}
 		// Parse tool calls from OpenAI format
-		const toolCalls = this.parseOpenAIToolCalls(choice?.message?.tool_calls)
+		const toolCalls = this.parseOpenAIToolCalls(choice.message.tool_calls)
 
 		return {
 			response: responseText,
@@ -160,7 +191,7 @@ export class WorkersAIProvider implements LLMProvider {
 	 * Call the /v1/chat/completions endpoint
 	 */
 	private async callChatCompletions(
-		messages: Array<{ role: string; content: string }>,
+		messages: OpenAIMessage[],
 		tools: OpenAITool[] | undefined,
 		options?: LLMCompletionOptions
 	): Promise<ChatCompletionResponse> {
@@ -192,6 +223,9 @@ export class WorkersAIProvider implements LLMProvider {
 		// but we need to handle both the direct response and wrapped response formats
 		if (this.isChatCompletionResponse(response)) {
 			return response
+		}
+		if (typeof response === 'object' && response !== null && 'choices' in response) {
+			throw new Error('Workers AI returned an invalid chat completion response')
 		}
 
 		// Fallback: wrap legacy response format
@@ -235,7 +269,8 @@ export class WorkersAIProvider implements LLMProvider {
 			typeof response === 'object' &&
 			response !== null &&
 			'choices' in response &&
-			Array.isArray((response as ChatCompletionResponse).choices)
+			Array.isArray((response as ChatCompletionResponse).choices) &&
+			(response as ChatCompletionResponse).choices.length > 0
 		)
 	}
 
@@ -268,16 +303,23 @@ export class WorkersAIProvider implements LLMProvider {
 		}
 
 		return toolCalls.map((call) => {
-			let args: Record<string, unknown>
+			if (!call.id || !call.function?.name) {
+				throw new Error('Workers AI returned an invalid tool call')
+			}
+			let parsed: unknown
 			try {
-				args = JSON.parse(call.function.arguments)
+				parsed = JSON.parse(call.function.arguments)
 			} catch {
-				args = {}
+				throw new Error(`Workers AI returned invalid arguments for ${call.function.name}`)
+			}
+			if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+				throw new Error(`Workers AI returned non-object arguments for ${call.function.name}`)
 			}
 
 			return {
+				id: call.id,
 				name: call.function.name,
-				arguments: args,
+				arguments: parsed as Record<string, unknown>,
 			}
 		})
 	}

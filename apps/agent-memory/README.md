@@ -3,22 +3,26 @@
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP
 connections, with Cloudflare OAuth built-in.
 
-It gives agents a persistent, semantically searchable memory. Files are stored in **your own R2 bucket** and indexed
-with **your own Workers AI** embeddings, so all storage and inference spend is billed to the Cloudflare account you
-authenticate with. On first use the server creates an R2 bucket (`agent-memory-mcp`) in your account and a per-user
-vector index backed by a Durable Object.
+It gives agents a persistent, semantically searchable memory. Files are stored in an R2 bucket in the **selected
+Cloudflare account** and indexed with that account's Workers AI, so storage and inference spend are billed there. On
+first write the server creates an R2 bucket (`agent-memory-mcp`) in the account. Files and their Durable Object search
+index are account-scoped, so account members with the required permissions share the same memory.
 
 ## How it works
 
 - **Storage** — every file lives in an R2 bucket in your account, addressed via the Cloudflare REST object API. Reads,
   writes, listing, and deletes all run against your bucket.
-- **Search** — content is chunked and embedded with Workers AI (`@cf/baai/bge-*`), stored in an in-memory HNSW index
-  inside a per-user Durable Object (`idFromName(userId)`), and queried by cosine similarity.
-- **Reflection** — an on-demand agentic pass that scans your memory, auto-applies low-risk fixes, and proposes
-  substantive improvements. It is **opt-out** (`set_config { reflectionsEnabled: false }`) and runs only when you call
-  `run_reflection` — there is no background cron. All LLM spend is billed to your account.
+- **Search** — each file is embedded with Workers AI (`@cf/baai/bge-m3`), stored in a bounded in-memory vector index
+  inside an account-scoped Durable Object (`idFromName(accountId)`), and queried by exact cosine similarity.
+- **Reflection** — an on-demand agentic pass that scans memory, auto-applies low-risk fixes, and stages substantive
+  improvements for review. It is **opt-out** (`set_config { reflectionsEnabled: false }`) and runs only when you call
+  `run_reflection` — there is no background cron. All LLM spend is billed to the selected account.
 - **Notifications** — configure a generic webhook (`set_config { webhookUrl }`) to receive a JSON POST when a
-  reflection finishes. Works with Slack, Discord, a Worker, n8n, or any HTTP endpoint.
+  reflection finishes. Use a Worker or automation endpoint to adapt the generic payload for vendor-specific webhooks.
+
+Memory is shared by authorized members of the selected account. The managed server limits individual objects to 5 MB,
+directory listings to 1,000 results, and the search index to 5,000 entries. Use narrower directories and `reindex` in
+batches when repairing larger collections.
 
 ## 🔨 Available Tools
 
@@ -27,11 +31,10 @@ vector index backed by a Durable Object.
 | **Files**         | `read`                     | Read one file or up to 50 files from memory storage                    |
 |                   | `write`                    | Write a file; auto-indexes tags and `[[wikilinks]]`, warns on overlaps |
 |                   | `write_many`               | Write up to 50 files in one call                                       |
+|                   | `reindex`                  | Repair search metadata for up to 50 stored files                       |
 |                   | `list`                     | List files in a directory, optionally filtered by tags                 |
 |                   | `list_tags`                | List all indexed tags with file counts                                 |
 |                   | `get_backlinks`            | List files linking to a target via `[[wikilinks]]`                     |
-|                   | `history`                  | List prior versions of a file (unavailable on REST storage)            |
-|                   | `rollback`                 | Restore a prior version (unavailable on REST storage)                  |
 | **Search**        | `search`                   | Semantic search across memory files                                    |
 | **Conversations** | `search_conversations`     | Semantic search across indexed conversations                           |
 |                   | `index_conversations`      | Index conversation sessions from a sync script                         |
@@ -58,7 +61,7 @@ vector index backed by a Durable Object.
 - `Remind me to review the escalation backlog every Monday at 9am.`
 - `Run a reflection over my memory.`
 - `Turn off reflections.`
-- `Send reflection notifications to this Slack webhook: https://hooks.slack.com/...`
+- `Send reflection notifications to my automation Worker at https://example.com/reflections.`
 
 ## Access the remote MCP server from any MCP Client
 

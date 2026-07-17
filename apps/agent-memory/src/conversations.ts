@@ -8,6 +8,8 @@
  * Each session file contains an array of messages with roles and content.
  */
 
+import { contentHash } from './content-hash'
+
 import type { R2Storage } from './storage/r2'
 
 // Conversation exchange - one user prompt + assistant response pair
@@ -37,6 +39,13 @@ export interface ConversationSearchResult {
 
 const CONVERSATION_INDEX_PATH = 'conversations/index.json'
 const CONVERSATIONS_PREFIX = 'conversations/sessions/'
+const MAX_STORED_EXCHANGES = 1_000
+const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/
+const UNSAFE_SESSION_IDS = new Set(['__proto__', 'constructor', 'prototype'])
+
+export function isSafeSessionId(value: string): boolean {
+	return SESSION_ID_PATTERN.test(value) && !UNSAFE_SESSION_IDS.has(value)
+}
 
 /**
  * Parse a raw OpenCode session into exchanges
@@ -139,34 +148,25 @@ function extractAssistantText(content: string | AssistantContent[]): string {
 }
 
 /**
- * Simple hash for change detection
- */
-function hashContent(content: string): string {
-	let hash = 0
-	for (let i = 0; i < content.length; i++) {
-		const char = content.charCodeAt(i)
-		hash = (hash << 5) - hash + char
-		hash = hash & hash
-	}
-	return hash.toString(16)
-}
-
-/**
  * Load or initialize the conversation index
  */
 export async function loadConversationIndex(storage: R2Storage): Promise<ConversationIndex> {
 	const file = await storage.read(CONVERSATION_INDEX_PATH)
 	if (file) {
 		try {
-			return JSON.parse(file.content)
-		} catch {
-			// Corrupted, start fresh
+			const parsed = JSON.parse(file.content) as unknown
+			if (!isConversationIndex(parsed)) throw new Error('invalid shape')
+			return parsed
+		} catch (error) {
+			throw new Error(
+				`Conversation index is corrupted: ${error instanceof Error ? error.message : String(error)}`
+			)
 		}
 	}
 	return {
 		exchanges: [],
 		lastUpdated: new Date().toISOString(),
-		sessionHashes: {},
+		sessionHashes: Object.create(null) as Record<string, string>,
 	}
 }
 
@@ -177,6 +177,9 @@ export async function saveConversationIndex(
 	storage: R2Storage,
 	index: ConversationIndex
 ): Promise<void> {
+	if (index.exchanges.length > MAX_STORED_EXCHANGES) {
+		throw new Error(`Conversation index is limited to ${MAX_STORED_EXCHANGES} exchanges`)
+	}
 	index.lastUpdated = new Date().toISOString()
 	await storage.write(CONVERSATION_INDEX_PATH, JSON.stringify(index, null, 2))
 }
@@ -194,10 +197,11 @@ export async function indexSessions(
 	let unchanged = 0
 
 	for (const { sessionId, project, data } of sessions) {
-		const contentHash = hashContent(JSON.stringify(data))
+		if (!isSafeSessionId(sessionId)) throw new Error('Invalid conversation session ID')
+		const sessionHash = await contentHash(JSON.stringify(data))
 		const existingHash = index.sessionHashes[sessionId]
 
-		if (existingHash === contentHash) {
+		if (existingHash === sessionHash) {
 			unchanged++
 			continue
 		}
@@ -209,9 +213,13 @@ export async function indexSessions(
 		// Parse and add new exchanges
 		const newExchanges = parseOpenCodeSession(sessionId, project, data)
 		index.exchanges.push(...newExchanges)
-		index.sessionHashes[sessionId] = contentHash
+		index.sessionHashes[sessionId] = sessionHash
 
-		// Also store the raw session data for expand_conversation
+		if (index.exchanges.length > MAX_STORED_EXCHANGES) {
+			throw new Error(`Conversation index is limited to ${MAX_STORED_EXCHANGES} exchanges`)
+		}
+
+		// Also store the raw session data for expand_conversation.
 		await storage.write(
 			`${CONVERSATIONS_PREFIX}${sessionId}.json`,
 			JSON.stringify({ project, data, indexedAt: new Date().toISOString() })
@@ -253,7 +261,10 @@ export async function expandConversation(
 	project: string
 	exchanges: ConversationExchange[]
 	messages?: Array<{ role: string; content: string }>
+	totalExchanges: number
+	truncated?: boolean
 } | null> {
+	if (!isSafeSessionId(sessionId)) throw new Error('Invalid conversation session ID')
 	// Try to load raw session data
 	const sessionFile = await storage.read(`${CONVERSATIONS_PREFIX}${sessionId}.json`)
 	if (!sessionFile) {
@@ -263,11 +274,14 @@ export async function expandConversation(
 		if (exchanges.length === 0) return null
 		return {
 			project: exchanges[0].project,
-			exchanges,
+			exchanges: exchanges.slice(-20),
+			totalExchanges: exchanges.length,
+			truncated: exchanges.length > 20 || undefined,
 		}
 	}
 
-	const { project, data } = JSON.parse(sessionFile.content)
+	const stored = parseStoredSession(sessionFile.content)
+	const { project, data } = stored
 	const exchanges = parseOpenCodeSession(sessionId, project, data)
 
 	// If exchangeId specified, return context around it
@@ -279,33 +293,109 @@ export async function expandConversation(
 			return {
 				project,
 				exchanges: exchanges.slice(start, end),
+				totalExchanges: exchanges.length,
 			}
 		}
 	}
 
 	return {
 		project,
-		exchanges,
-		messages: data.messages?.slice(-20).map((m: OpenCodeMessage) => ({
-			role: m.role,
-			content: typeof m.content === 'string' ? m.content.slice(0, 500) : '[complex content]',
+		exchanges: exchanges.slice(-20),
+		totalExchanges: exchanges.length,
+		truncated: exchanges.length > 20 || undefined,
+		messages: data.messages?.slice(-20).map((message) => ({
+			role: message.role,
+			content:
+				typeof message.content === 'string' ? message.content.slice(0, 500) : '[complex content]',
 		})),
 	}
 }
 
+function isConversationIndex(value: unknown): value is ConversationIndex {
+	if (!value || typeof value !== 'object') return false
+	const candidate = value as Partial<ConversationIndex>
+	return (
+		Array.isArray(candidate.exchanges) &&
+		candidate.exchanges.length <= MAX_STORED_EXCHANGES &&
+		candidate.exchanges.every(isConversationExchange) &&
+		typeof candidate.lastUpdated === 'string' &&
+		Boolean(candidate.sessionHashes) &&
+		typeof candidate.sessionHashes === 'object' &&
+		Object.entries(candidate.sessionHashes).every(
+			([sessionId, hash]) => isSafeSessionId(sessionId) && typeof hash === 'string'
+		)
+	)
+}
+
+function isConversationExchange(value: unknown): value is ConversationExchange {
+	if (!value || typeof value !== 'object') return false
+	const candidate = value as Partial<ConversationExchange>
+	return (
+		typeof candidate.id === 'string' &&
+		typeof candidate.sessionId === 'string' &&
+		typeof candidate.project === 'string' &&
+		typeof candidate.userPrompt === 'string' &&
+		typeof candidate.assistantResponse === 'string' &&
+		typeof candidate.timestamp === 'string' &&
+		Number.isInteger(candidate.messageIndex)
+	)
+}
+
+function parseStoredSession(content: string): { project: string; data: OpenCodeSession } {
+	const parsed = JSON.parse(content) as unknown
+	if (!parsed || typeof parsed !== 'object') throw new Error('Stored conversation is corrupted')
+	const candidate = parsed as { project?: unknown; data?: unknown }
+	if (typeof candidate.project !== 'string' || !isOpenCodeSession(candidate.data)) {
+		throw new Error('Stored conversation is corrupted')
+	}
+	return { project: candidate.project, data: candidate.data }
+}
+
+export function isOpenCodeSession(value: unknown): value is OpenCodeSession {
+	if (!value || typeof value !== 'object') return false
+	const candidate = value as OpenCodeSession
+	return (
+		(candidate.messages === undefined ||
+			(Array.isArray(candidate.messages) &&
+				candidate.messages.length <= 2_000 &&
+				candidate.messages.every(isOpenCodeMessage))) &&
+		(candidate.createdAt === undefined || typeof candidate.createdAt === 'string')
+	)
+}
+
+function isOpenCodeMessage(value: unknown): value is OpenCodeMessage {
+	if (!value || typeof value !== 'object') return false
+	const candidate = value as OpenCodeMessage
+	return (
+		['user', 'assistant', 'system'].includes(candidate.role) &&
+		(typeof candidate.content === 'string' ||
+			(Array.isArray(candidate.content) && candidate.content.every(isAssistantContent))) &&
+		(candidate.timestamp === undefined || typeof candidate.timestamp === 'string')
+	)
+}
+
+function isAssistantContent(value: unknown): value is AssistantContent {
+	if (!value || typeof value !== 'object') return false
+	const candidate = value as AssistantContent
+	return (
+		['text', 'tool_use', 'tool_result'].includes(candidate.type) &&
+		(candidate.text === undefined || typeof candidate.text === 'string')
+	)
+}
+
 // OpenCode session types (for parsing)
-interface OpenCodeMessage {
+export interface OpenCodeMessage {
 	role: 'user' | 'assistant' | 'system'
 	content: string | AssistantContent[]
 	timestamp?: string
 }
 
-interface AssistantContent {
+export interface AssistantContent {
 	type: 'text' | 'tool_use' | 'tool_result'
 	text?: string
 }
 
-interface OpenCodeSession {
+export interface OpenCodeSession {
 	id?: string
 	messages?: OpenCodeMessage[]
 	createdAt?: string

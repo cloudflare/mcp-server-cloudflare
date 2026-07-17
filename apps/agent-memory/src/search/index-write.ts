@@ -11,13 +11,8 @@ export interface IndexWriteResult {
 	tags: string[]
 	links: string[]
 	embedding_error?: string
+	overlap_error?: string
 	overlaps?: Array<{ path: string; score: number; snippet: string }>
-	/**
-	 * `true` when the embedding update was deferred via `ctx.waitUntil` and
-	 * has not been awaited. The R2 write has already landed; the search
-	 * index will become consistent within ~1–3s.
-	 */
-	index_deferred?: boolean
 }
 
 export interface IndexWriteOptions {
@@ -27,19 +22,6 @@ export interface IndexWriteOptions {
 	 * R2 reads, so leave off for bulk or low-stakes writes.
 	 */
 	detectOverlaps?: boolean
-	/**
-	 * Cloudflare ExecutionContext. When provided together with
-	 * `waitForIndex: false`, the embedding update runs in `ctx.waitUntil`
-	 * and the function returns as soon as the R2 write lands.
-	 */
-	ctx?: ExecutionContext
-	/**
-	 * When `false` and `ctx` is provided, defer the embedding update to
-	 * `ctx.waitUntil` and return immediately after the R2 write. Default:
-	 * `true`. Mutually exclusive with `detectOverlaps: true` — overlap
-	 * detection needs the index update to complete first, so it wins.
-	 */
-	waitForIndex?: boolean
 	/**
 	 * Opt in to writing empty content. Refused by default: an empty-string
 	 * write silently destroys whatever was at `path`.
@@ -63,8 +45,8 @@ export class EmptyContentError extends Error {
 /**
  * Write a file to R2 and update the search index in one go.
  *
- * Persists to the user's R2 bucket, parses tags + wikilinks out of the
- * content, pushes the embedding update to the user's index DO, and
+ * Persists to the selected account's R2 bucket, parses tags + wikilinks out
+ * of the content, pushes the embedding update to the account's index DO, and
  * (optionally) surfaces semantic overlap warnings so callers don't silently
  * create duplicate memory files.
  *
@@ -93,49 +75,61 @@ export async function indexWrite(
 		links,
 	}
 
-	const wantOverlaps = options.detectOverlaps && path.startsWith('memory/')
-	const shouldDefer = options.ctx && options.waitForIndex === false && !wantOverlaps
-
-	if (shouldDefer && options.ctx) {
-		options.ctx.waitUntil(
-			index.update({ path, content, tags, links }).catch((e) => {
-				console.error(`Deferred index update failed for ${path}:`, e)
-			})
-		)
-		response.index_deferred = true
+	if (content.length === 0) {
+		try {
+			await index.delete(path)
+		} catch (error) {
+			response.embedding_error = error instanceof Error ? error.message : String(error)
+		}
 		return response
 	}
 
+	const wantOverlaps = options.detectOverlaps && path.startsWith('memory/')
+
 	try {
 		await index.update({ path, content, tags, links })
+	} catch (error) {
+		response.embedding_error = error instanceof Error ? error.message : String(error)
+		// Never leave an old vector pointing at content that has already been
+		// replaced in R2. A missing search hit is safer than a stale one.
+		try {
+			await index.delete(path)
+		} catch (deleteError) {
+			console.error(`Failed to remove stale index entry for ${path}:`, deleteError)
+		}
+		return response
+	}
 
-		if (wantOverlaps) {
+	if (wantOverlaps) {
+		try {
 			const OVERLAP_THRESHOLD = 0.72
 			const candidates = await index.search({
 				query: content.slice(0, 8000),
 				limit: 5,
 				timeWeight: false,
+				scope: 'memory',
 			})
 			const overlaps = await Promise.all(
 				candidates
 					.filter(
-						(c) => c.id !== path && c.id.startsWith('memory/') && c.score >= OVERLAP_THRESHOLD
+						(candidate) =>
+							candidate.id !== path &&
+							candidate.id.startsWith('memory/') &&
+							candidate.score >= OVERLAP_THRESHOLD
 					)
-					.map(async (c) => {
-						const file = await storage.read(c.id)
+					.map(async (candidate) => {
+						const file = await storage.read(candidate.id)
 						return {
-							path: c.id,
-							score: Math.round(c.score * 1000) / 1000,
+							path: candidate.id,
+							score: Math.round(candidate.score * 1000) / 1000,
 							snippet: file ? extractSnippet(file.content, { maxLength: 300 }) : '',
 						}
 					})
 			)
-			if (overlaps.length > 0) {
-				response.overlaps = overlaps
-			}
+			if (overlaps.length > 0) response.overlaps = overlaps
+		} catch (error) {
+			response.overlap_error = error instanceof Error ? error.message : String(error)
 		}
-	} catch (e) {
-		response.embedding_error = e instanceof Error ? e.message : String(e)
 	}
 
 	return response

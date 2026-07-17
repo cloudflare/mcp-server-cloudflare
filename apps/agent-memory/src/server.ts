@@ -2,12 +2,17 @@ import { z } from 'zod'
 
 import { getProps } from '@repo/mcp-common/src/get-props'
 
+import { WORKERS_AI_MODEL_ID_PATTERN } from './ai/runner'
 import { loadConfig, saveConfig } from './config'
+import { contentHash } from './content-hash'
 import {
 	expandConversation,
 	getConversationStats,
 	indexSessions,
+	isOpenCodeSession,
+	isSafeSessionId,
 	loadConversationIndex,
+	parseOpenCodeSession,
 } from './conversations'
 import { errResult, isToolResult, okResult } from './helpers'
 import { runReflection } from './reflection'
@@ -18,8 +23,11 @@ import {
 } from './reflection/staging'
 import { checkReminders, listReminders, removeReminder, scheduleReminder } from './reminders'
 import { EmptyContentError, indexWrite } from './search/index-write'
+import { isManagedMemoryPath, isSecretMemoryPath } from './storage/r2'
+import { parseTags } from './tags'
 import { extractSnippet, truncateWithMeta } from './truncate'
 import { buildUserContext } from './user-context'
+import { parseWikilinks } from './wikilinks'
 
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 import type { ZodRawShape } from 'zod'
@@ -29,6 +37,74 @@ import type { Env } from './agent-memory.context'
 import type { ToolResult } from './helpers'
 import type { ProposedEdit } from './reflection/tool-executor'
 import type { UserContext } from './user-context'
+
+const MAX_FILE_CONTENT_LENGTH = 1_000_000
+const MAX_BATCH_CONTENT_LENGTH = 5_000_000
+const MAX_CONVERSATION_PAYLOAD_LENGTH = 2_000_000
+const MAX_CONVERSATION_EXCHANGES = 50
+const CONVERSATION_INDEX_CONCURRENCY = 5
+const MAX_SEARCH_RESULTS = 50
+
+const StoragePath = z
+	.string()
+	.min(1)
+	.max(1024)
+	.refine(
+		(path) =>
+			!path.startsWith('/') &&
+			!path.endsWith('/') &&
+			!path.includes('\\') &&
+			!path.split('/').some((segment) => segment === '' || segment === '.' || segment === '..'),
+		{ message: 'Use a relative memory path without empty, ".", or ".." segments' }
+	)
+const ReadablePath = StoragePath.refine(
+	(path) => !isSecretMemoryPath(path),
+	'Path is managed by a dedicated Agent Memory tool'
+)
+const WritablePath = StoragePath.refine(
+	(path) => !isManagedMemoryPath(path),
+	'Path is reserved for Agent Memory internal state'
+)
+const DirectoryPath = z
+	.string()
+	.max(1024)
+	.refine((path) => {
+		if (path.startsWith('/')) return false
+		const normalized = path.endsWith('/') ? path.slice(0, -1) : path
+		return (
+			normalized === '' ||
+			(!normalized.startsWith('/') &&
+				!normalized.includes('\\') &&
+				!normalized
+					.split('/')
+					.some((segment) => segment === '' || segment === '.' || segment === '..'))
+		)
+	}, 'Use a relative directory path without empty, ".", or ".." segments')
+	.refine(
+		(path) => !isSecretMemoryPath(path.replace(/\/$/, '')),
+		'Path is managed by a dedicated Agent Memory tool'
+	)
+const Tag = z.string().trim().min(1).max(128)
+const Tags = z.array(Tag).max(20)
+const SearchLimit = z.number().int().min(1).max(MAX_SEARCH_RESULTS)
+const ReflectionDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD')
+const ModelId = z
+	.string()
+	.min(1)
+	.max(256)
+	.regex(WORKERS_AI_MODEL_ID_PATTERN, 'Expected a Workers AI model ID like @cf/provider/model')
+
+async function mapWithConcurrency<T, R>(
+	items: T[],
+	concurrency: number,
+	mapper: (item: T) => Promise<R>
+): Promise<R[]> {
+	const results: R[] = []
+	for (let offset = 0; offset < items.length; offset += concurrency) {
+		results.push(...(await Promise.all(items.slice(offset, offset + concurrency).map(mapper))))
+	}
+	return results
+}
 
 /**
  * Structural view of the McpAgent the tools need. Kept minimal so the tool
@@ -49,8 +125,8 @@ type Handler<Shape extends ZodRawShape> = (
  * Register an account-scoped memory tool.
  *
  * Wraps `server.accountTool` so the handler receives a fully-built
- * {@link UserContext} (per-user R2 storage, per-user Workers AI, per-user
- * search index) instead of a raw account id, and so every handler shares the
+ * {@link UserContext} (account-scoped R2 storage, Workers AI, and search
+ * index) instead of a raw account id, and so every handler shares the
  * same success/error shaping.
  */
 function memoryTool<Shape extends ZodRawShape>(
@@ -98,31 +174,32 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 		'Read one file or up to 50 files from memory storage.',
 		{
 			path: z
-				.union([z.string(), z.array(z.string())])
+				.union([ReadablePath, z.array(ReadablePath).min(1).max(50)])
 				.describe("File path or array of paths, e.g., 'memory/learnings.md'"),
 		},
 		async ({ path }, { storage }) => {
 			if (Array.isArray(path)) {
-				if (path.length > 50) {
-					return errResult('Cannot read more than 50 paths in a single call')
+				const files: Array<readonly [string, Record<string, unknown>]> = []
+				// Read sequentially so a valid 50-file request cannot buffer 50 large
+				// R2 objects in the Worker at once.
+				for (const filePath of path) {
+					const file = await storage.read(filePath)
+					if (!file) {
+						files.push([filePath, { error: 'File not found' }])
+						continue
+					}
+					const truncated = truncateWithMeta(file.content)
+					const entry: Record<string, unknown> = {
+						content: truncated.content,
+						updated_at: file.updated_at,
+						size: file.size,
+					}
+					if (truncated.truncated) {
+						entry.truncated = true
+						entry.original_size = file.size
+					}
+					files.push([filePath, entry])
 				}
-				const files = await Promise.all(
-					path.map(async (p) => {
-						const file = await storage.read(p)
-						if (!file) return [p, { error: 'File not found' }] as const
-						const t = truncateWithMeta(file.content)
-						const entry: Record<string, unknown> = {
-							content: t.content,
-							updated_at: file.updated_at,
-							size: file.size,
-						}
-						if (t.truncated) {
-							entry.truncated = true
-							entry.original_size = t.original_size
-						}
-						return [p, entry] as const
-					})
-				)
 				const found = files.filter(([, v]) => !('error' in v)).length
 				return okResult({ files: Object.fromEntries(files) }, `Read ${found}/${path.length} files`)
 			}
@@ -139,10 +216,10 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 			}
 			if (t.truncated) {
 				body.truncated = true
-				body.original_size = t.original_size
+				body.original_size = file.size
 			}
 			const prefix = t.truncated
-				? `Read ${path} (${t.original_size} bytes, truncated to ${t.content.length})`
+				? `Read ${path} (${file.size} bytes, content truncated to ${t.content.length} characters)`
 				: `Read ${path} (${file.size} bytes)`
 			return okResult(body, prefix)
 		}
@@ -152,8 +229,8 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 		'write',
 		'Write content to a file. Automatically updates the search index, extracts tags from YAML frontmatter, and indexes Obsidian-style [[wikilinks]]. Returns semantic overlap warnings for memory/ paths by default.\n\nPass `detect_overlaps: false` to skip the post-write similarity search.\n\nEmpty content is refused by default — pass `allow_empty: true` to truncate a file deliberately.',
 		{
-			path: z.string().describe("File path, e.g., 'memory/learnings.md'"),
-			content: z.string().describe('Content to write'),
+			path: WritablePath.describe("File path, e.g., 'memory/learnings.md'"),
+			content: z.string().max(MAX_FILE_CONTENT_LENGTH).describe('Content to write'),
 			detect_overlaps: z
 				.boolean()
 				.optional()
@@ -171,6 +248,14 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 					detectOverlaps: detect_overlaps,
 					allowEmpty: allow_empty,
 				})
+				if (result.embedding_error) {
+					return errResult('File was stored, but search indexing failed', {
+						path,
+						stored: true,
+						index_error: result.embedding_error,
+						hint: 'Call reindex for this path to retry indexing.',
+					})
+				}
 				return okResult(result, `Wrote ${path}`)
 			} catch (e) {
 				if (e instanceof EmptyContentError) {
@@ -188,36 +273,105 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 			files: z
 				.array(
 					z.object({
-						path: z.string(),
-						content: z.string(),
+						path: WritablePath,
+						content: z.string().max(MAX_FILE_CONTENT_LENGTH),
 						detect_overlaps: z.boolean().optional(),
 						allow_empty: z.boolean().optional(),
 					})
 				)
 				.min(1)
 				.max(50)
+				.refine(
+					(files) => new Set(files.map((file) => file.path)).size === files.length,
+					'File paths must be unique within a batch'
+				)
+				.refine(
+					(files) =>
+						files.reduce((total, file) => total + file.content.length, 0) <=
+						MAX_BATCH_CONTENT_LENGTH,
+					`Combined content must not exceed ${MAX_BATCH_CONTENT_LENGTH} characters`
+				)
 				.describe('Up to 50 files to write.'),
 		},
 		async ({ files }, userCtx) => {
-			const results = await Promise.all(
-				files.map(async (f) => {
-					try {
-						const r = await indexWrite(userCtx.index, userCtx.storage, f.path, f.content, {
-							detectOverlaps: f.detect_overlaps ?? false,
-							allowEmpty: f.allow_empty ?? false,
-						})
-						return { ...r, path: f.path, success: true }
-					} catch (e) {
-						return {
-							path: f.path,
-							success: false,
-							error: e instanceof Error ? e.message : String(e),
-						}
+			const results = await mapWithConcurrency(files, 5, async (file) => {
+				try {
+					const result = await indexWrite(userCtx.index, userCtx.storage, file.path, file.content, {
+						detectOverlaps: file.detect_overlaps ?? false,
+						allowEmpty: file.allow_empty ?? false,
+					})
+					return {
+						...result,
+						path: file.path,
+						stored: true,
+						success: !result.embedding_error,
+						error: result.embedding_error,
 					}
-				})
-			)
+				} catch (error) {
+					return {
+						path: file.path,
+						success: false,
+						error: error instanceof Error ? error.message : String(error),
+					}
+				}
+			})
 			const ok = results.filter((r) => r.success).length
 			return okResult({ results }, `Wrote ${ok}/${files.length} files`)
+		}
+	)
+
+	tool(
+		'reindex',
+		'Rebuild search, tag, and backlink entries for one file or up to 50 files already stored in R2. Use this after a write reports an indexing error.',
+		{
+			path: z
+				.union([
+					WritablePath,
+					z
+						.array(WritablePath)
+						.min(1)
+						.max(50)
+						.refine(
+							(paths) => new Set(paths).size === paths.length,
+							'Paths must be unique within a reindex batch'
+						),
+				])
+				.describe('Stored file path or array of paths to reindex'),
+		},
+		async ({ path }, { storage, index }) => {
+			const paths = Array.isArray(path) ? path : [path]
+			const results = await mapWithConcurrency(paths, 5, async (filePath) => {
+				try {
+					const file = await storage.read(filePath)
+					if (!file || file.content.length === 0) {
+						await index.delete(filePath)
+						return {
+							path: filePath,
+							success: Boolean(file),
+							indexed: false,
+							message: file
+								? 'Empty file removed from index'
+								: 'File not found; stale index removed',
+						}
+					}
+					await index.update({
+						path: filePath,
+						content: file.content,
+						tags: parseTags(file.content),
+						links: parseWikilinks(file.content),
+					})
+					return { path: filePath, success: true, indexed: true }
+				} catch (error) {
+					return {
+						path: filePath,
+						success: false,
+						indexed: false,
+						error: error instanceof Error ? error.message : String(error),
+					}
+				}
+			})
+			const succeeded = results.filter((result) => result.success).length
+			return okResult({ results }, `Reindexed ${succeeded}/${paths.length} files`)
 		}
 	)
 
@@ -225,21 +379,20 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 		'list',
 		'List files in a directory. Pass `tags` to restrict to files matching every tag (intersection).',
 		{
-			path: z.string().optional().describe('Directory path, defaults to root'),
+			path: DirectoryPath.optional().describe('Directory path, defaults to root'),
 			recursive: z.boolean().optional().default(false).describe('List recursively'),
-			tags: z
-				.array(z.string())
-				.optional()
-				.describe('If provided, only return files tagged with all of these'),
+			tags: Tags.optional().describe('If provided, only return files tagged with all of these'),
 		},
 		async ({ path, recursive, tags }, { storage, index }) => {
-			const files = await storage.list(path, recursive)
+			const files = (await storage.list(path, recursive)).filter(
+				(file) => !isSecretMemoryPath(file.path.replace(/\/$/, ''))
+			)
 			if (!tags || tags.length === 0) {
 				return { files }
 			}
 			const { paths } = await index.filesWithTags(tags)
 			const allowed = new Set(paths)
-			return { files: files.filter((f) => allowed.has(f.path)), filtered_by_tags: tags }
+			return { files: files.filter((file) => allowed.has(file.path)), filtered_by_tags: tags }
 		}
 	)
 
@@ -254,12 +407,9 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 		'search',
 		"Search memory by meaning. Returns relevant file snippets. Pass `tags` to restrict to files matching every tag. Pass `scope: 'conversations'` to search indexed chat exchanges instead of memory files, or `scope: 'all'` for both.",
 		{
-			query: z.string().describe('Natural language query'),
-			limit: z.number().optional().default(5).describe('Max results to return'),
-			tags: z
-				.array(z.string())
-				.optional()
-				.describe('If provided, only match files tagged with all of these'),
+			query: z.string().trim().min(1).max(8_000).describe('Natural language query'),
+			limit: SearchLimit.optional().default(5).describe('Max results to return'),
+			tags: Tags.optional().describe('If provided, only match files tagged with all of these'),
 			scope: z
 				.enum(['memory', 'conversations', 'all'])
 				.optional()
@@ -269,11 +419,11 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 		async ({ query, limit, tags, scope }, { storage, index }) => {
 			const effectiveLimit = limit ?? 5
 			const searchScope = scope ?? 'memory'
-			const overshoot = searchScope === 'memory' ? effectiveLimit : effectiveLimit * 2
 			const rawResults = await index.search({
 				query,
-				limit: overshoot,
+				limit: effectiveLimit,
 				tags,
+				scope: searchScope,
 				timeWeight: searchScope !== 'memory',
 			})
 
@@ -286,12 +436,15 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 					? []
 					: rawResults.filter((r) => r.id.startsWith('conversations/exchanges/'))
 
-			const enrichedMemory = await Promise.all(
-				memoryHits.slice(0, effectiveLimit).map(async (r) => {
-					const file = await storage.read(r.id)
-					return { path: r.id, snippet: file ? extractSnippet(file.content) : '', score: r.score }
+			const enrichedMemory: Array<{ path: string; snippet: string; score: number }> = []
+			for (const result of memoryHits.slice(0, effectiveLimit)) {
+				const file = await storage.read(result.id)
+				enrichedMemory.push({
+					path: result.id,
+					snippet: file ? extractSnippet(file.content) : '',
+					score: result.score,
 				})
-			)
+			}
 
 			let enrichedConversations: Array<Record<string, unknown>> = []
 			if (conversationHits.length > 0) {
@@ -337,48 +490,14 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 	)
 
 	tool(
-		'history',
-		'List previous versions of a file. Object versioning is not exposed through the managed REST storage, so this returns an empty list with a hint.',
-		{
-			path: z.string().describe('File path'),
-			limit: z.number().optional().default(10).describe('Max versions to return'),
-		},
-		async ({ path, limit }, { storage }) => {
-			const versions = await storage.getVersions(path, limit)
-			if (versions.length === 0) {
-				return {
-					versions: [],
-					versioning_enabled: false,
-					hint: 'Object version history is not available through the managed Agent Memory server.',
-				}
-			}
-			return { versions, versioning_enabled: true }
-		}
-	)
-
-	tool(
-		'rollback',
-		'Restore a file to a previous version. Not available in the managed server (object versioning is not exposed through REST storage).',
-		{
-			path: z.string().describe('File path'),
-			version_id: z.string().describe('Version ID to restore'),
-		},
-		async ({ path, version_id }, { storage }) => {
-			const fileContent = await storage.getVersion(path, version_id)
-			if (!fileContent) {
-				return errResult('Version not found', { path, version_id })
-			}
-			await storage.write(path, fileContent)
-			return { success: true, restored_from: version_id }
-		}
-	)
-
-	tool(
 		'get_backlinks',
 		'List files that link to the given target via Obsidian-style wikilinks ([[target]]).',
 		{
 			target: z
 				.string()
+				.trim()
+				.min(1)
+				.max(1024)
 				.describe("Wikilink target as written inside [[...]], e.g. 'memory/learnings'"),
 		},
 		async ({ target }, { index }) => {
@@ -393,8 +512,13 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 		'search_conversations',
 		"Search past conversations by meaning. Prefer `search({ scope: 'conversations' })` in new code.",
 		{
-			query: z.string().describe("What to search for, e.g., 'TypeScript errors', 'API design'"),
-			limit: z.number().optional().default(5).describe('Max results to return'),
+			query: z
+				.string()
+				.trim()
+				.min(1)
+				.max(8_000)
+				.describe("What to search for, e.g., 'TypeScript errors', 'API design'"),
+			limit: SearchLimit.optional().default(5).describe('Max results to return'),
 		},
 		async ({ query, limit }, { storage, index }) => {
 			const conversationIndex = await loadConversationIndex(storage)
@@ -407,24 +531,22 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 			const effectiveLimit = limit ?? 5
 			const rawResults = await index.search({
 				query,
-				limit: effectiveLimit * 2,
+				limit: effectiveLimit,
 				timeWeight: true,
+				scope: 'conversations',
 			})
-			const results = rawResults
-				.filter((r) => r.id.startsWith('conversations/exchanges/'))
-				.slice(0, effectiveLimit)
-				.map((r) => {
-					const exchangeId = r.id.replace('conversations/exchanges/', '').replace('.txt', '')
-					const exchange = conversationIndex.exchanges.find((e) => e.id === exchangeId)
-					return {
-						id: exchangeId,
-						score: r.score,
-						project: exchange?.project,
-						userPrompt: exchange?.userPrompt?.slice(0, 200),
-						timestamp: exchange?.timestamp,
-						sessionId: exchange?.sessionId,
-					}
-				})
+			const results = rawResults.slice(0, effectiveLimit).map((r) => {
+				const exchangeId = r.id.replace('conversations/exchanges/', '').replace('.txt', '')
+				const exchange = conversationIndex.exchanges.find((e) => e.id === exchangeId)
+				return {
+					id: exchangeId,
+					score: r.score,
+					project: exchange?.project,
+					userPrompt: exchange?.userPrompt?.slice(0, 200),
+					timestamp: exchange?.timestamp,
+					sessionId: exchange?.sessionId,
+				}
+			})
 			return { results, hint: 'Use expand_conversation with sessionId to see full context' }
 		}
 	)
@@ -436,36 +558,83 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 			sessions: z
 				.array(
 					z.object({
-						sessionId: z.string(),
-						project: z.string(),
-						data: z.record(z.string(), z.unknown()),
+						sessionId: z.string().refine(isSafeSessionId, 'Invalid session ID'),
+						project: z.string().trim().min(1).max(256),
+						data: z
+							.record(z.string(), z.unknown())
+							.refine(isOpenCodeSession, 'Expected a supported OpenCode session shape'),
 					})
+				)
+				.min(1)
+				.max(20)
+				.refine(
+					(sessions) =>
+						new Set(sessions.map((session) => session.sessionId)).size === sessions.length,
+					'Session IDs must be unique within a batch'
+				)
+				.refine(
+					(sessions) => JSON.stringify(sessions).length <= MAX_CONVERSATION_PAYLOAD_LENGTH,
+					`Conversation payload must not exceed ${MAX_CONVERSATION_PAYLOAD_LENGTH} characters`
 				)
 				.describe('Array of session objects to index'),
 		},
 		async ({ sessions }, { storage, index }) => {
-			const result = await indexSessions(
-				storage,
-				sessions.map((s) => ({
-					sessionId: s.sessionId,
-					project: s.project,
-					data: s.data as unknown as Parameters<typeof indexSessions>[1][number]['data'],
-				}))
+			const typedSessions = sessions.map((session) => ({
+				sessionId: session.sessionId,
+				project: session.project,
+				data: session.data as unknown as Parameters<typeof indexSessions>[1][number]['data'],
+			}))
+			const exchangeCount = typedSessions.reduce(
+				(total, session) =>
+					total + parseOpenCodeSession(session.sessionId, session.project, session.data).length,
+				0
+			)
+			if (exchangeCount > MAX_CONVERSATION_EXCHANGES) {
+				throw new Error(
+					`Batch contains ${exchangeCount} exchanges; maximum is ${MAX_CONVERSATION_EXCHANGES}`
+				)
+			}
+
+			const previousIndex = await loadConversationIndex(storage)
+			const affectedSessionIds = new Set(typedSessions.map((session) => session.sessionId))
+			const previousExchangeIds = new Set(
+				previousIndex.exchanges
+					.filter((exchange) => affectedSessionIds.has(exchange.sessionId))
+					.map((exchange) => exchange.id)
 			)
 
+			const result = await indexSessions(storage, typedSessions)
 			const conversationIndex = await loadConversationIndex(storage)
-			let indexed = 0
-			for (const exchange of conversationIndex.exchanges) {
-				const content = `[${exchange.project}] ${exchange.userPrompt}\n\nResponse: ${exchange.assistantResponse}`
-				await index.update({ path: `conversations/exchanges/${exchange.id}.txt`, content })
-				indexed++
-			}
+			const currentExchanges = conversationIndex.exchanges.filter((exchange) =>
+				affectedSessionIds.has(exchange.sessionId)
+			)
+			const currentExchangeIds = new Set(currentExchanges.map((exchange) => exchange.id))
+			await mapWithConcurrency(
+				[...previousExchangeIds].filter((exchangeId) => !currentExchangeIds.has(exchangeId)),
+				CONVERSATION_INDEX_CONCURRENCY,
+				async (exchangeId) => {
+					await index.delete(`conversations/exchanges/${exchangeId}.txt`)
+				}
+			)
+			await mapWithConcurrency(
+				currentExchanges,
+				CONVERSATION_INDEX_CONCURRENCY,
+				async (exchange) => {
+					const content = `[${exchange.project}] ${exchange.userPrompt}\n\nResponse: ${exchange.assistantResponse}`
+					const parsedTimestamp = Date.parse(exchange.timestamp)
+					await index.update({
+						path: `conversations/exchanges/${exchange.id}.txt`,
+						content,
+						updatedAt: Number.isFinite(parsedTimestamp) ? parsedTimestamp : undefined,
+					})
+				}
+			)
 			return {
 				success: true,
 				added: result.added,
 				updated: result.updated,
 				unchanged: result.unchanged,
-				totalIndexed: indexed,
+				indexed: currentExchanges.length,
 			}
 		}
 	)
@@ -474,8 +643,11 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 		'expand_conversation',
 		'Load full context from a past conversation session.',
 		{
-			sessionId: z.string().describe('Session ID from search results'),
-			exchangeId: z.string().optional().describe('Specific exchange ID to center on'),
+			sessionId: z
+				.string()
+				.refine(isSafeSessionId, 'Invalid session ID')
+				.describe('Session ID from search results'),
+			exchangeId: z.string().max(260).optional().describe('Specific exchange ID to center on'),
 		},
 		async ({ sessionId, exchangeId }, { storage }) => {
 			const result = await expandConversation(storage, sessionId, exchangeId)
@@ -499,14 +671,20 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 		'schedule_reminder',
 		"Create a reminder. Use type 'cron' for recurring (e.g., '0 9 * * *' for 9am UTC daily) or 'once' for one-shot (ISO datetime).",
 		{
-			id: z.string().describe('Unique identifier for this reminder'),
+			id: z
+				.string()
+				.regex(/^[A-Za-z0-9_-]{1,128}$/)
+				.describe('Unique identifier for this reminder'),
 			type: z.enum(['cron', 'once']).describe("'cron' for recurring, 'once' for one-shot"),
 			expression: z
 				.string()
+				.trim()
+				.min(1)
+				.max(128)
 				.describe("Cron expression (e.g., '0 9 * * *') or ISO datetime for one-shot"),
-			description: z.string().describe('What this reminder is for'),
-			payload: z.string().describe('Message/instructions when reminder fires'),
-			model: z.string().optional().describe('Optional model hint for client'),
+			description: z.string().trim().min(1).max(500).describe('What this reminder is for'),
+			payload: z.string().min(1).max(10_000).describe('Message/instructions when reminder fires'),
+			model: z.string().max(256).optional().describe('Optional model hint for client'),
 		},
 		async (args, { storage }) => {
 			const reminder = await scheduleReminder(storage, args)
@@ -521,7 +699,12 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 	tool(
 		'remove_reminder',
 		'Remove a scheduled reminder.',
-		{ id: z.string().describe('ID of the reminder to remove') },
+		{
+			id: z
+				.string()
+				.regex(/^[A-Za-z0-9_-]{1,128}$/)
+				.describe('ID of the reminder to remove'),
+		},
 		async ({ id }, { storage }) => {
 			const removed = await removeReminder(storage, id)
 			return { success: removed, message: removed ? 'Removed' : 'Not found' }
@@ -549,16 +732,12 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 
 	tool(
 		'run_reflection',
-		'Run an agentic reflection over your memory now: a quick scan auto-applies low-risk fixes (typos, whitespace) and a deep analysis proposes and applies substantive improvements. Reflection is opt-out — disable it with set_config { reflectionsEnabled: false }. All LLM spend is billed to your Cloudflare account.',
+		'Run an agentic reflection over your memory now: a quick scan auto-applies low-risk fixes (typos, whitespace), while deep analysis stages substantive improvements for review. Reflection is opt-out — disable it with set_config { reflectionsEnabled: false }. All LLM spend is billed to your Cloudflare account.',
 		{},
 		async (_args, userCtx) => {
 			const result = await runReflection(userCtx)
-			return okResult(
-				result,
-				result.skipped
-					? 'Reflection skipped'
-					: `Reflection ${result.success ? 'complete' : 'failed'}`
-			)
+			if (!result.success) return errResult('Reflection failed', result)
+			return okResult(result, result.skipped ? 'Reflection skipped' : 'Reflection complete')
 		}
 	)
 
@@ -583,9 +762,11 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 		'apply_reflection_changes',
 		'Apply proposed changes from a reflection. Reads the structured JSON sidecar (preferred) or falls back to parsing the markdown, applies specified edits, and optionally archives the reflection.',
 		{
-			date: z.string().describe('Date of the reflection (YYYY-MM-DD)'),
+			date: ReflectionDate.describe('Date of the reflection (YYYY-MM-DD)'),
 			editIndices: z
-				.array(z.number())
+				.array(z.number().int().positive())
+				.min(1)
+				.max(100)
 				.optional()
 				.describe('Which edits to apply (1-indexed). Omit to apply all.'),
 			archive: z
@@ -614,30 +795,89 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 				return { success: true, message: 'No proposed edits to apply', archived: archive }
 			}
 
-			const toApply = editIndices ? edits.filter((_, i) => editIndices.includes(i + 1)) : edits
+			if (editIndices?.some((index) => index > edits.length)) {
+				return errResult('editIndices contains an index outside the proposed edit list', {
+					available_edits: edits.length,
+				})
+			}
+			const requestedIndices = editIndices ? new Set(editIndices) : undefined
+			const toApply = requestedIndices
+				? edits.filter((_, index) => requestedIndices.has(index + 1))
+				: edits
 
 			const results: Array<{ path: string; action: string; success: boolean; error?: string }> = []
 			for (const edit of toApply) {
 				try {
+					if (!edit.path.startsWith('memory/') || isManagedMemoryPath(edit.path)) {
+						throw new Error('Reflection edits may only change user-authored files under memory/')
+					}
 					switch (edit.action) {
 						case 'replace':
-						case 'create':
-							if (edit.content) await indexWrite(index, storage, edit.path, edit.content)
-							results.push({ path: edit.path, action: edit.action, success: true })
-							break
-						case 'append':
-							if (edit.content) {
-								const existing = await storage.read(edit.path)
-								const newContent = existing ? `${existing.content}\n${edit.content}` : edit.content
-								await indexWrite(index, storage, edit.path, newContent)
+						case 'create': {
+							if (!edit.content) throw new Error(`Content required for ${edit.action}`)
+							const existing = await storage.read(edit.path)
+							if (edit.action === 'create' && existing?.content !== edit.content) {
+								throw new Error(`File already exists with different content: ${edit.path}`)
+							}
+							if (edit.action === 'replace' && !existing) {
+								throw new Error(`File not found: ${edit.path}`)
+							}
+							if (edit.action === 'replace' && existing && existing.content !== edit.content) {
+								await verifyReflectionSource(edit, existing.content)
+							}
+							// Rewriting identical content is intentional: it makes retries repair
+							// a prior embedding failure without changing the file again.
+							const writeResult = await indexWrite(index, storage, edit.path, edit.content)
+							if (writeResult.embedding_error) {
+								throw new Error(
+									`File applied, but search indexing failed: ${writeResult.embedding_error}. Call reindex before archiving.`
+								)
 							}
 							results.push({ path: edit.path, action: edit.action, success: true })
 							break
-						case 'delete':
+						}
+						case 'append': {
+							if (!edit.content) throw new Error('Content required for append')
+							const existing = await storage.read(edit.path)
+							if (!existing) throw new Error(`File not found: ${edit.path}`)
+							const suffix = `\n${edit.content}`
+							if (!edit.expectedContentHash) {
+								throw new Error(
+									'Reflection lacks source-version metadata; run a new reflection before applying it'
+								)
+							}
+							const currentHash = await contentHash(existing.content)
+							let appendedContent: string
+							if (currentHash === edit.expectedContentHash) {
+								appendedContent = `${existing.content}${suffix}`
+							} else if (
+								existing.content.endsWith(suffix) &&
+								(await contentHash(existing.content.slice(0, -suffix.length))) ===
+									edit.expectedContentHash
+							) {
+								appendedContent = existing.content
+							} else {
+								throw new Error(`File changed since reflection was generated: ${edit.path}`)
+							}
+							const writeResult = await indexWrite(index, storage, edit.path, appendedContent)
+							if (writeResult.embedding_error) {
+								throw new Error(
+									`File applied, but search indexing failed: ${writeResult.embedding_error}. Call reindex before archiving.`
+								)
+							}
+							results.push({ path: edit.path, action: edit.action, success: true })
+							break
+						}
+						case 'delete': {
+							const existing = await storage.read(edit.path)
+							if (existing) await verifyReflectionSource(edit, existing.content)
 							await storage.delete(edit.path)
 							await index.delete(edit.path)
 							results.push({ path: edit.path, action: edit.action, success: true })
 							break
+						}
+						default:
+							throw new Error(`Unsupported reflection action: ${String(edit.action)}`)
 					}
 				} catch (e) {
 					results.push({
@@ -656,20 +896,21 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 				archived = true
 			}
 
-			return {
+			const response = {
 				success: allSucceeded,
-				applied: results.filter((r) => r.success).length,
-				failed: results.filter((r) => !r.success).length,
+				applied: results.filter((result) => result.success).length,
+				failed: results.filter((result) => !result.success).length,
 				results,
 				archived,
 			}
+			return allSucceeded ? response : errResult('Some reflection edits failed', response)
 		}
 	)
 
 	tool(
 		'archive_reflection',
 		'Archive a pending reflection without applying changes (mark as reviewed).',
-		{ date: z.string().describe('Date of the reflection (YYYY-MM-DD)') },
+		{ date: ReflectionDate.describe('Date of the reflection (YYYY-MM-DD)') },
 		async ({ date }, { storage }) => {
 			const pendingPath = `memory/reflections/pending/${date}.md`
 			const archivePath = await archiveReflection(storage, pendingPath)
@@ -688,11 +929,12 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 		{},
 		async (_args, { storage }) => {
 			const config = await loadConfig(storage)
-			// Never echo raw webhook auth headers back verbatim; report presence only.
+			// Webhook URLs often contain credentials in their path. Return only the
+			// host, and never echo header values.
 			return {
 				reflectionsEnabled: config.reflectionsEnabled,
 				webhookConfigured: Boolean(config.webhookUrl),
-				webhookUrl: config.webhookUrl,
+				webhookHost: config.webhookUrl ? new URL(config.webhookUrl).host : undefined,
 				webhookHeaderKeys: config.webhookHeaders ? Object.keys(config.webhookHeaders) : [],
 				reflectionModel: config.reflectionModel,
 				reflectionModelFast: config.reflectionModelFast,
@@ -702,27 +944,31 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 
 	tool(
 		'set_config',
-		'Update your Agent Memory configuration. Set `reflectionsEnabled` to opt out of reflections. Set `webhookUrl` (+ optional `webhookHeaders`) to receive a generic JSON POST when a reflection completes — works with any endpoint (Slack, Discord, a Worker, n8n, etc.). Pass `clearWebhook: true` to remove it.',
+		'Update your Agent Memory configuration. Set `reflectionsEnabled` to opt out of reflections. Set `webhookUrl` (+ optional `webhookHeaders`) to receive a generic JSON POST when a reflection completes. Use an automation endpoint to adapt the payload for vendor-specific webhooks. Pass `clearWebhook: true` to remove it.',
 		{
 			reflectionsEnabled: z.boolean().optional().describe('Enable/disable reflections.'),
 			webhookUrl: z
 				.string()
+				.max(2_048)
 				.url()
+				.refine(
+					(url) => ['http:', 'https:'].includes(new URL(url).protocol),
+					'Expected HTTP(S) URL'
+				)
 				.optional()
 				.describe('Outbound webhook URL for reflection notifications.'),
 			webhookHeaders: z
-				.record(z.string(), z.string())
+				.record(z.string().min(1).max(128), z.string().max(4_096))
 				.optional()
+				.refine((headers) => !headers || Object.keys(headers).length <= 20, 'Maximum 20 headers')
 				.describe('Optional headers sent with the webhook POST (e.g. an auth token).'),
 			clearWebhook: z.boolean().optional().describe('Remove the configured webhook.'),
-			reflectionModel: z
-				.string()
-				.optional()
-				.describe('Override the deep-analysis Workers AI model id.'),
-			reflectionModelFast: z
-				.string()
-				.optional()
-				.describe('Override the quick-scan Workers AI model id.'),
+			reflectionModel: ModelId.optional().describe(
+				'Override the deep-analysis Workers AI model id.'
+			),
+			reflectionModelFast: ModelId.optional().describe(
+				'Override the quick-scan Workers AI model id.'
+			),
 		},
 		async (args, { storage }) => {
 			const patch: Record<string, unknown> = {}
@@ -754,6 +1000,17 @@ export function registerMemoryTools(agent: MemoryAgent, env: Env): void {
 /**
  * Fallback parser for reflections without a JSON sidecar.
  */
+async function verifyReflectionSource(edit: ProposedEdit, currentContent: string): Promise<void> {
+	if (!edit.expectedContentHash) {
+		throw new Error(
+			'Reflection lacks source-version metadata; run a new reflection before applying it'
+		)
+	}
+	if ((await contentHash(currentContent)) !== edit.expectedContentHash) {
+		throw new Error(`File changed since reflection was generated: ${edit.path}`)
+	}
+}
+
 function parseProposedEditsFromMarkdown(content: string): ProposedEdit[] {
 	const edits: ProposedEdit[] = []
 	const editPattern =

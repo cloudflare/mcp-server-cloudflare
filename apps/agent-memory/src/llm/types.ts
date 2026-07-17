@@ -8,7 +8,9 @@
 export interface LLMMessage {
 	role: 'system' | 'user' | 'assistant' | 'tool'
 	content: string
-	/** Tool call ID for tool responses */
+	/** Tool calls made by an assistant message. */
+	tool_calls?: LLMToolCall[]
+	/** Tool call ID for tool responses. */
 	tool_call_id?: string
 }
 
@@ -36,6 +38,8 @@ export interface LLMTool {
  * Tool call from LLM response
  */
 export interface LLMToolCall {
+	/** Provider-generated ID used to pair the call with its result. */
+	id: string
 	name: string
 	arguments: Record<string, unknown>
 }

@@ -22,6 +22,8 @@
  */
 
 const FRONTMATTER_RE = /^---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)/
+const MAX_TAGS = 100
+const MAX_TAG_LENGTH = 128
 
 /**
  * Normalise a single tag string: trim whitespace, strip surrounding
@@ -103,9 +105,10 @@ export function parseTags(content: string): string[] {
 	const out: string[] = []
 	for (const raw of rawTags) {
 		const tag = normalizeTag(raw)
-		if (!tag || seen.has(tag)) continue
+		if (!tag || tag.length > MAX_TAG_LENGTH || seen.has(tag)) continue
 		seen.add(tag)
 		out.push(tag)
+		if (out.length >= MAX_TAGS) break
 	}
 	return out
 }

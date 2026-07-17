@@ -28,6 +28,7 @@ export interface FiredReminder {
 }
 
 const REMINDERS_INDEX_PATH = 'reminders/index.json'
+const MAX_REMINDERS = 100
 
 /**
  * Load all reminders
@@ -36,9 +37,15 @@ export async function listReminders(storage: R2Storage): Promise<Reminder[]> {
 	const file = await storage.read(REMINDERS_INDEX_PATH)
 	if (!file) return []
 	try {
-		return JSON.parse(file.content)
-	} catch {
-		return []
+		const parsed = JSON.parse(file.content) as unknown
+		if (!Array.isArray(parsed) || parsed.length > MAX_REMINDERS || !parsed.every(isReminder)) {
+			throw new Error('invalid shape')
+		}
+		return parsed
+	} catch (error) {
+		throw new Error(
+			`Reminder index is corrupted: ${error instanceof Error ? error.message : String(error)}`
+		)
 	}
 }
 
@@ -56,10 +63,14 @@ export async function scheduleReminder(
 	storage: R2Storage,
 	reminder: Omit<Reminder, 'createdAt'>
 ): Promise<Reminder> {
+	validateReminderExpression(reminder)
 	const reminders = await listReminders(storage)
 
 	// Remove existing reminder with same ID
 	const filtered = reminders.filter((r) => r.id !== reminder.id)
+	if (filtered.length >= MAX_REMINDERS) {
+		throw new Error(`Cannot schedule more than ${MAX_REMINDERS} reminders`)
+	}
 
 	const newReminder: Reminder = {
 		...reminder,
@@ -138,11 +149,11 @@ function shouldCronFire(expression: string, lastFired: string | undefined, now: 
 	const [minute, hour, dayOfMonth, month, dayOfWeek] = parts
 
 	// Check if current time matches cron expression
-	if (!matchesCronField(minute, now.getUTCMinutes())) return false
-	if (!matchesCronField(hour, now.getUTCHours())) return false
-	if (!matchesCronField(dayOfMonth, now.getUTCDate())) return false
-	if (!matchesCronField(month, now.getUTCMonth() + 1)) return false
-	if (!matchesCronField(dayOfWeek, now.getUTCDay())) return false
+	if (!matchesCronField(minute, now.getUTCMinutes(), 0, 59)) return false
+	if (!matchesCronField(hour, now.getUTCHours(), 0, 23)) return false
+	if (!matchesCronField(dayOfMonth, now.getUTCDate(), 1, 31)) return false
+	if (!matchesCronField(month, now.getUTCMonth() + 1, 1, 12)) return false
+	if (!matchesCronField(dayOfWeek, now.getUTCDay(), 0, 6)) return false
 
 	// Check we haven't fired in the current minute
 	if (lastFired) {
@@ -162,28 +173,96 @@ function shouldCronFire(expression: string, lastFired: string | undefined, now: 
 /**
  * Check if a value matches a cron field
  */
-function matchesCronField(field: string, value: number): boolean {
+function matchesCronField(field: string, value: number, min: number, max: number): boolean {
 	if (field === '*') return true
 
-	// Handle */N (every N)
 	if (field.startsWith('*/')) {
-		const interval = Number.parseInt(field.slice(2), 10)
-		return value % interval === 0
+		const interval = Number(field.slice(2))
+		return Number.isInteger(interval) && interval > 0 && value % interval === 0
 	}
 
-	// Handle comma-separated values
 	if (field.includes(',')) {
-		return field.split(',').some((f) => matchesCronField(f.trim(), value))
+		return field.split(',').some((item) => matchesCronField(item.trim(), value, min, max))
 	}
 
-	// Handle ranges (e.g., 1-5)
 	if (field.includes('-')) {
-		const [start, end] = field.split('-').map((n) => Number.parseInt(n, 10))
-		return value >= start && value <= end
+		const range = field.split('-')
+		if (range.length !== 2) return false
+		const [start, end] = range.map(Number)
+		return (
+			Number.isInteger(start) &&
+			Number.isInteger(end) &&
+			start >= min &&
+			end <= max &&
+			start <= end &&
+			value >= start &&
+			value <= end
+		)
 	}
 
-	// Simple numeric match
-	return Number.parseInt(field, 10) === value
+	const expected = Number(field)
+	return Number.isInteger(expected) && expected >= min && expected <= max && expected === value
+}
+
+function validateReminderExpression(reminder: Omit<Reminder, 'createdAt'>): void {
+	if (reminder.type === 'once') {
+		if (!Number.isFinite(Date.parse(reminder.expression))) {
+			throw new Error('One-shot reminder expression must be a valid ISO datetime')
+		}
+		return
+	}
+
+	const parts = reminder.expression.trim().split(/\s+/)
+	const ranges: Array<[number, number]> = [
+		[0, 59],
+		[0, 23],
+		[1, 31],
+		[1, 12],
+		[0, 6],
+	]
+	if (
+		parts.length !== 5 ||
+		parts.some((field, index) => !cronFieldIsValid(field, ranges[index][0], ranges[index][1]))
+	) {
+		throw new Error('Cron reminder expression must contain five valid UTC cron fields')
+	}
+}
+
+function cronFieldIsValid(field: string, min: number, max: number): boolean {
+	if (field === '*') return true
+	if (field.startsWith('*/')) {
+		const interval = Number(field.slice(2))
+		return Number.isInteger(interval) && interval > 0 && interval <= max - min + 1
+	}
+	if (field.includes(',')) {
+		const items = field.split(',')
+		return items.length > 1 && items.every((item) => cronFieldIsValid(item.trim(), min, max))
+	}
+	if (field.includes('-')) {
+		const range = field.split('-')
+		if (range.length !== 2) return false
+		const [start, end] = range.map(Number)
+		return (
+			Number.isInteger(start) && Number.isInteger(end) && start >= min && end <= max && start <= end
+		)
+	}
+	const value = Number(field)
+	return Number.isInteger(value) && value >= min && value <= max
+}
+
+function isReminder(value: unknown): value is Reminder {
+	if (!value || typeof value !== 'object') return false
+	const candidate = value as Partial<Reminder>
+	return (
+		typeof candidate.id === 'string' &&
+		(candidate.type === 'once' || candidate.type === 'cron') &&
+		typeof candidate.expression === 'string' &&
+		typeof candidate.description === 'string' &&
+		typeof candidate.payload === 'string' &&
+		typeof candidate.createdAt === 'string' &&
+		(candidate.lastFired === undefined || typeof candidate.lastFired === 'string') &&
+		(candidate.model === undefined || typeof candidate.model === 'string')
+	)
 }
 
 /**

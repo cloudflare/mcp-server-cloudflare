@@ -45,6 +45,17 @@ export async function generateEmbedding(ai: AiRunner, text: string): Promise<Emb
 	if (!vector || vector.length === 0) {
 		throw new Error('Empty embedding vector received')
 	}
+	if (vector.length !== EMBEDDING_DIMENSIONS) {
+		throw new Error(
+			`Embedding dimension mismatch: expected ${EMBEDDING_DIMENSIONS}, got ${vector.length}`
+		)
+	}
+	let norm = 0
+	for (const value of vector) {
+		if (!Number.isFinite(value)) throw new Error('Embedding contains non-finite values')
+		norm += value * value
+	}
+	if (norm === 0) throw new Error('Embedding has zero norm')
 
 	return {
 		vector,

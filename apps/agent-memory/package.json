@@ -11,7 +11,7 @@
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
 		"types": "wrangler types",
-		"test": "vitest"
+		"test": "vitest run"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.16.11",

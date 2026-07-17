@@ -74,13 +74,13 @@ function instructions(accountSuffix: string): string {
 	return `Agent Memory — persistent, semantically-searchable memory for AI agents.
 
 Store markdown notes, patterns, and learnings; retrieve them by meaning with
-\`search\`. Files live in an R2 bucket in *your own* Cloudflare account and
-embeddings run on *your* Workers AI, so all storage and AI spend is billed to
-you. The optional \`run_reflection\` tool uses an LLM to tidy and consolidate
-your memory; it is opt-out via \`set_config\`.${accountSuffix}`
+\`search\`. Files and their index are shared at the selected Cloudflare account
+boundary. R2 storage and Workers AI inference are billed to that account. The
+optional \`run_reflection\` tool applies low-risk fixes and stages substantive
+changes for review; it is opt-out via \`set_config\`.${accountSuffix}`
 }
 
-// R2 object storage + Workers AI both run in the user's account via the
+// R2 object storage + Workers AI both run in the selected account via the
 // Cloudflare REST API, so we request the scopes that grant them.
 const AgentMemoryScopes = {
 	...RequiredScopes,

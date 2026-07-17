@@ -1,23 +1,25 @@
 /**
- * Tool Executor for Agentic Reflection
- *
- * Executes tool calls from the LLM and manages side effects.
- * Proposed edits are staged for review; auto-apply fixes are immediate.
+ * Executes the bounded tools available to the reflection models.
+ * Substantive edits are staged; only explicitly low-risk fixes are immediate.
  */
+
+import { contentHash } from '../content-hash'
+import { indexWrite } from '../search/index-write'
+import { isManagedMemoryPath, validateMemoryPath } from '../storage/r2'
 
 import type { LLMToolCall } from '../llm/types'
 import type { MemoryIndexClient } from '../search/client'
 import type { R2Storage } from '../storage/r2'
 
-/** A proposed edit that requires human review */
 export interface ProposedEdit {
 	path: string
 	action: 'replace' | 'append' | 'delete' | 'create'
 	content?: string
 	reason: string
+	/** Hash of the source content inspected by reflection, for safe apply. */
+	expectedContentHash?: string
 }
 
-/** An auto-applied fix (already done) */
 export interface AutoAppliedFix {
 	path: string
 	fixType: 'typo' | 'whitespace' | 'newline' | 'duplicate' | 'formatting'
@@ -26,13 +28,11 @@ export interface AutoAppliedFix {
 	reason: string
 }
 
-/** An issue flagged for deep analysis */
 export interface FlaggedIssue {
 	path: string
 	issue: string
 }
 
-/** Context for tool execution */
 export interface ToolExecutionContext {
 	storage: R2Storage
 	index: MemoryIndexClient
@@ -41,14 +41,16 @@ export interface ToolExecutionContext {
 	flaggedIssues: FlaggedIssue[]
 }
 
-/** Result of a tool execution */
 export interface ToolResult {
 	success: boolean
 	result?: unknown
 	error?: string
 }
 
-/** Execute a reflection tool call */
+const EDIT_ACTIONS = ['replace', 'append', 'delete', 'create'] as const
+const FIX_TYPES = ['typo', 'whitespace', 'newline', 'duplicate', 'formatting'] as const
+const MAX_REFLECTION_ITEMS = 100
+
 export async function executeReflectionTool(
 	toolCall: LLMToolCall,
 	context: ToolExecutionContext
@@ -58,260 +60,317 @@ export async function executeReflectionTool(
 	try {
 		switch (name) {
 			case 'searchMemory':
-				return executeSearch(args as { query: string; limit?: number }, context)
-
+				return await executeSearch(args as { query?: unknown; limit?: unknown }, context)
 			case 'readFile':
-				return executeRead(args as { path: string }, context)
-
+				return await executeRead(args as { path?: unknown }, context)
 			case 'listFiles':
-				return executeList(args as { path: string; recursive?: boolean }, context)
-
+				return await executeList(args as { path?: unknown; recursive?: unknown }, context)
 			case 'getBacklinks':
-				return executeGetBacklinks(args as { target: string }, context)
-
+				return await executeGetBacklinks(args as { target?: unknown }, context)
 			case 'proposeEdit':
-				return executePropose(args as unknown as ProposedEdit, context)
-
+				return await executePropose(args, context)
 			case 'autoApply':
-				return executeAutoApply(
-					args as {
-						path: string
-						fixType: AutoAppliedFix['fixType']
-						oldText?: string
-						newText?: string
-						reason: string
-					},
-					context
-				)
-
+				return await executeAutoApply(args, context)
 			case 'flagForDeepAnalysis':
-				return executeFlagForDeepAnalysis(args as unknown as FlaggedIssue, context)
-
+				return executeFlagForDeepAnalysis(args, context)
 			case 'finishReflection':
-				return { success: true, result: { finished: true, ...args } }
-
+				return executeFinishReflection(args)
 			case 'finishQuickScan':
-				return { success: true, result: { finished: true, phase: 'quick_scan', ...args } }
-
+				return executeFinishQuickScan(args)
 			default:
 				return { success: false, error: `Unknown tool: ${name}` }
 		}
-	} catch (e) {
+	} catch (error) {
 		return {
 			success: false,
-			error: `Tool execution failed: ${e instanceof Error ? e.message : String(e)}`,
+			error: `Tool execution failed: ${error instanceof Error ? error.message : String(error)}`,
 		}
 	}
 }
 
-/** Search memory using semantic search via the Durable Object index */
 async function executeSearch(
-	args: { query: string; limit?: number },
+	args: { query?: unknown; limit?: unknown },
 	context: ToolExecutionContext
 ): Promise<ToolResult> {
-	const limit = Math.min(args.limit ?? 5, 20)
+	if (typeof args.query !== 'string' || args.query.length < 1 || args.query.length > 8_000) {
+		return { success: false, error: 'query must be 1-8000 characters' }
+	}
+	const requestedLimit = args.limit ?? 5
+	if (!Number.isInteger(requestedLimit) || (requestedLimit as number) < 1) {
+		return { success: false, error: 'limit must be a positive integer' }
+	}
+	const limit = Math.min(requestedLimit as number, 20)
 
 	try {
-		const results = await context.index.search({ query: args.query, limit })
+		const results = await context.index.search({ query: args.query, limit, scope: 'memory' })
 		return {
 			success: true,
 			result: { query: args.query, matches: results, count: results.length },
 		}
-	} catch (e) {
-		return { success: false, error: `Search error: ${String(e)}` }
+	} catch (error) {
+		return { success: false, error: `Search error: ${String(error)}` }
 	}
 }
 
-/** Read a file from memory */
 async function executeRead(
-	args: { path: string },
+	args: { path?: unknown },
 	context: ToolExecutionContext
 ): Promise<ToolResult> {
-	const file = await context.storage.read(args.path)
+	const path = reflectionFilePath(args.path)
+	const file = await context.storage.read(path)
+	if (!file) return { success: false, error: `File not found: ${path}` }
 
-	if (!file) {
-		return { success: false, error: `File not found: ${args.path}` }
-	}
-
-	const maxLength = 15000
+	const maxLength = 15_000
 	const truncated = file.content.length > maxLength
 	const content = truncated
-		? `${file.content.slice(0, maxLength)}\n...[truncated, ${file.content.length - maxLength} bytes omitted]...`
+		? `${file.content.slice(0, maxLength)}\n...[truncated, ${file.content.length - maxLength} characters omitted]...`
 		: file.content
-
 	return {
 		success: true,
-		result: { path: args.path, content, size: file.size, updated_at: file.updated_at, truncated },
+		result: { path, content, size: file.size, updated_at: file.updated_at, truncated },
 	}
 }
 
-/** List files in a directory */
 async function executeList(
-	args: { path: string; recursive?: boolean },
+	args: { path?: unknown; recursive?: unknown },
 	context: ToolExecutionContext
 ): Promise<ToolResult> {
-	const files = await context.storage.list(args.path, args.recursive ?? false)
-
+	const path = reflectionDirectoryPath(args.path)
+	if (args.recursive !== undefined && typeof args.recursive !== 'boolean') {
+		return { success: false, error: 'recursive must be a boolean' }
+	}
+	const files = await context.storage.list(path, args.recursive ?? false)
 	return {
 		success: true,
 		result: {
-			path: args.path,
-			files: files.map((f) => ({ path: f.path, size: f.size, updated_at: f.updated_at })),
+			path,
+			files: files.map((file) => ({
+				path: file.path,
+				size: file.size,
+				updated_at: file.updated_at,
+			})),
 			count: files.length,
 		},
 	}
 }
 
-/** Look up which files reference a given wikilink target. */
 async function executeGetBacklinks(
-	args: { target: string },
+	args: { target?: unknown },
 	context: ToolExecutionContext
 ): Promise<ToolResult> {
-	if (!args.target) {
-		return { success: false, error: 'target is required' }
+	if (typeof args.target !== 'string' || args.target.length < 1 || args.target.length > 1_024) {
+		return { success: false, error: 'target must be 1-1024 characters' }
 	}
-
 	try {
 		const { backlinks } = await context.index.backlinks(args.target)
 		return {
 			success: true,
 			result: { target: args.target, backlinks, count: backlinks.length },
 		}
-	} catch (e) {
-		return { success: false, error: `Backlinks error: ${String(e)}` }
+	} catch (error) {
+		return { success: false, error: `Backlinks error: ${String(error)}` }
 	}
 }
 
-/** Stage a proposed edit for human review */
 async function executePropose(
-	args: ProposedEdit,
+	args: Record<string, unknown>,
 	context: ToolExecutionContext
 ): Promise<ToolResult> {
-	if (args.action !== 'create') {
-		const exists = await context.storage.read(args.path)
-		if (!exists && args.action !== 'delete') {
-			return { success: false, error: `File not found: ${args.path}` }
-		}
+	if (!EDIT_ACTIONS.includes(args.action as ProposedEdit['action'])) {
+		return { success: false, error: 'Invalid edit action' }
+	}
+	if (typeof args.reason !== 'string' || args.reason.length < 1 || args.reason.length > 2_000) {
+		return { success: false, error: 'reason must be 1-2000 characters' }
+	}
+	if (args.content !== undefined && typeof args.content !== 'string') {
+		return { success: false, error: 'content must be a string' }
+	}
+	if (typeof args.content === 'string' && args.content.length > 1_000_000) {
+		return { success: false, error: 'content exceeds 1000000 characters' }
+	}
+	if (context.proposedEdits.length >= MAX_REFLECTION_ITEMS) {
+		return { success: false, error: `Maximum ${MAX_REFLECTION_ITEMS} proposed edits` }
 	}
 
-	if (['create', 'replace', 'append'].includes(args.action) && !args.content) {
-		return { success: false, error: `Content required for ${args.action} action` }
+	const action = args.action as ProposedEdit['action']
+	const path = reflectionFilePath(args.path)
+	const existing = await context.storage.read(path)
+	if (action === 'create' && existing)
+		return { success: false, error: `File already exists: ${path}` }
+	if (action !== 'create' && !existing) return { success: false, error: `File not found: ${path}` }
+	if (action !== 'delete' && !args.content) {
+		return { success: false, error: `Content required for ${action} action` }
 	}
 
 	context.proposedEdits.push({
-		path: args.path,
-		action: args.action,
-		content: args.content,
+		path,
+		action,
+		content: args.content as string | undefined,
 		reason: args.reason,
+		expectedContentHash: existing ? await contentHash(existing.content) : undefined,
 	})
-
 	return {
 		success: true,
 		result: {
-			message: `Edit staged: ${args.action} ${args.path}`,
+			message: `Edit staged: ${action} ${path}`,
 			totalProposed: context.proposedEdits.length,
 		},
 	}
 }
 
-/** Auto-apply a low-risk fix immediately */
 async function executeAutoApply(
-	args: {
-		path: string
-		fixType: AutoAppliedFix['fixType']
-		oldText?: string
-		newText?: string
-		reason: string
-	},
+	args: Record<string, unknown>,
 	context: ToolExecutionContext
 ): Promise<ToolResult> {
-	const file = await context.storage.read(args.path)
-	if (!file) {
-		return { success: false, error: `File not found: ${args.path}` }
+	if (!FIX_TYPES.includes(args.fixType as AutoAppliedFix['fixType'])) {
+		return { success: false, error: 'Invalid fix type' }
+	}
+	if (typeof args.reason !== 'string' || args.reason.length < 1 || args.reason.length > 2_000) {
+		return { success: false, error: 'reason must be 1-2000 characters' }
+	}
+	if (args.oldText !== undefined && typeof args.oldText !== 'string') {
+		return { success: false, error: 'oldText must be a string' }
+	}
+	if (args.newText !== undefined && typeof args.newText !== 'string') {
+		return { success: false, error: 'newText must be a string' }
+	}
+	if ((args.oldText as string | undefined)?.length && (args.oldText as string).length > 100_000) {
+		return { success: false, error: 'oldText is too large' }
+	}
+	if ((args.newText as string | undefined)?.length && (args.newText as string).length > 100_000) {
+		return { success: false, error: 'newText is too large' }
+	}
+	if (context.autoAppliedFixes.length >= MAX_REFLECTION_ITEMS) {
+		return { success: false, error: `Maximum ${MAX_REFLECTION_ITEMS} automatic fixes` }
 	}
 
-	let newContent = file.content
+	const fixType = args.fixType as AutoAppliedFix['fixType']
+	const oldText = args.oldText as string | undefined
+	const newText = args.newText as string | undefined
+	const path = reflectionFilePath(args.path)
+	const file = await context.storage.read(path)
+	if (!file) return { success: false, error: `File not found: ${path}` }
 
-	switch (args.fixType) {
+	let content = file.content
+	switch (fixType) {
 		case 'typo':
 		case 'whitespace':
-			if (!args.oldText || !args.newText) {
-				return { success: false, error: `oldText and newText required for ${args.fixType} fix` }
+			if (!oldText || newText === undefined) {
+				return { success: false, error: `oldText and newText required for ${fixType} fix` }
 			}
-			if (!file.content.includes(args.oldText)) {
-				return {
-					success: false,
-					error: `oldText not found in file: "${args.oldText.slice(0, 50)}..."`,
-				}
-			}
-			newContent = file.content.replace(args.oldText, args.newText)
+			if (!content.includes(oldText)) return { success: false, error: 'oldText not found in file' }
+			content = content.replace(oldText, newText)
 			break
-
 		case 'newline':
-			newContent = `${file.content.trimEnd()}\n`
+			content = `${content.trimEnd()}\n`
 			break
-
 		case 'duplicate':
-			if (!args.oldText) {
-				return { success: false, error: 'oldText required for duplicate fix' }
-			}
-			newContent = file.content.replace(args.oldText, args.newText ?? '')
+			if (!oldText) return { success: false, error: 'oldText required for duplicate fix' }
+			if (!content.includes(oldText)) return { success: false, error: 'oldText not found in file' }
+			content = content.replace(oldText, newText ?? '')
 			break
-
 		case 'formatting':
-			if (args.oldText && args.newText !== undefined) {
-				newContent = file.content.replace(args.oldText, args.newText)
+			if (!oldText || newText === undefined) {
+				return { success: false, error: 'oldText and newText required for formatting fix' }
 			}
+			if (!content.includes(oldText)) return { success: false, error: 'oldText not found in file' }
+			content = content.replace(oldText, newText)
 			break
 	}
 
-	if (newContent !== file.content) {
-		await context.storage.write(args.path, newContent)
+	if (content === file.content) {
+		return { success: false, error: `Proposed ${fixType} fix did not change the file` }
 	}
-
+	const writeResult = await indexWrite(context.index, context.storage, path, content, {
+		detectOverlaps: false,
+	})
 	context.autoAppliedFixes.push({
-		path: args.path,
-		fixType: args.fixType,
-		oldText: args.oldText,
-		newText: args.newText,
+		path,
+		fixType,
+		oldText,
+		newText,
 		reason: args.reason,
 	})
-
+	if (writeResult.embedding_error) {
+		context.flaggedIssues.push({
+			path,
+			issue: `Search indexing failed after an automatic fix: ${writeResult.embedding_error}. Run reindex before archiving this reflection.`,
+		})
+		return {
+			success: false,
+			error: `Fix was applied, but search indexing failed: ${writeResult.embedding_error}`,
+		}
+	}
 	return {
 		success: true,
 		result: {
-			message: `Auto-applied ${args.fixType} fix to ${args.path}`,
+			message: `Auto-applied ${fixType} fix to ${path}`,
 			totalAutoApplied: context.autoAppliedFixes.length,
 		},
 	}
 }
 
-/** Flag an issue for deep analysis */
-async function executeFlagForDeepAnalysis(
-	args: FlaggedIssue,
+function executeFlagForDeepAnalysis(
+	args: Record<string, unknown>,
 	context: ToolExecutionContext
-): Promise<ToolResult> {
-	context.flaggedIssues.push({ path: args.path, issue: args.issue })
-
+): ToolResult {
+	if (typeof args.issue !== 'string' || args.issue.length < 1 || args.issue.length > 2_000) {
+		return { success: false, error: 'issue must be 1-2000 characters' }
+	}
+	if (context.flaggedIssues.length >= MAX_REFLECTION_ITEMS) {
+		return { success: false, error: `Maximum ${MAX_REFLECTION_ITEMS} flagged issues` }
+	}
+	const path = reflectionFilePath(args.path)
+	context.flaggedIssues.push({ path, issue: args.issue })
 	return {
 		success: true,
 		result: {
-			message: `Flagged for deep analysis: ${args.path}`,
+			message: `Flagged for deep analysis: ${path}`,
 			totalFlagged: context.flaggedIssues.length,
 		},
 	}
 }
 
-/** Create a fresh execution context */
+function executeFinishReflection(args: Record<string, unknown>): ToolResult {
+	if (typeof args.summary !== 'string' || args.summary.length < 1 || args.summary.length > 2_000) {
+		return { success: false, error: 'summary must be 1-2000 characters' }
+	}
+	if (!nonNegativeInteger(args.proposedChanges) || !nonNegativeInteger(args.autoApplied)) {
+		return { success: false, error: 'finish counts must be non-negative integers' }
+	}
+	return { success: true, result: { finished: true, ...args } }
+}
+
+function executeFinishQuickScan(args: Record<string, unknown>): ToolResult {
+	if (!nonNegativeInteger(args.autoApplied) || !nonNegativeInteger(args.flaggedForDeepAnalysis)) {
+		return { success: false, error: 'finish counts must be non-negative integers' }
+	}
+	return { success: true, result: { finished: true, phase: 'quick_scan', ...args } }
+}
+
+function nonNegativeInteger(value: unknown): value is number {
+	return Number.isInteger(value) && (value as number) >= 0
+}
+
+function reflectionFilePath(value: unknown): string {
+	if (typeof value !== 'string') throw new Error('path is required')
+	const path = validateMemoryPath(value)
+	if (!path.startsWith('memory/') || isManagedMemoryPath(path)) {
+		throw new Error('Reflection may only access user-authored files under memory/')
+	}
+	return path
+}
+
+function reflectionDirectoryPath(value: unknown): string {
+	if (typeof value !== 'string') throw new Error('path is required')
+	const normalized = value.endsWith('/') ? value.slice(0, -1) : value
+	if (normalized === 'memory') return normalized
+	return reflectionFilePath(normalized)
+}
+
 export function createExecutionContext(
 	storage: R2Storage,
 	index: MemoryIndexClient
 ): ToolExecutionContext {
-	return {
-		storage,
-		index,
-		proposedEdits: [],
-		autoAppliedFixes: [],
-		flaggedIssues: [],
-	}
+	return { storage, index, proposedEdits: [], autoAppliedFixes: [], flaggedIssues: [] }
 }

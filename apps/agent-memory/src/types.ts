@@ -29,12 +29,6 @@ export interface SearchResult {
 	score: number
 }
 
-export interface FileVersion {
-	version_id: string
-	timestamp: string
-	size: number
-}
-
 export interface MemoryApi {
 	read(path: string): Promise<string | null>
 	list(path?: string): Promise<MemoryFileMetadata[]>

@@ -4,10 +4,11 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "agent-memory-dev",
+	"name": "mcp-cloudflare-agent-memory-dev",
 	"main": "src/agent-memory.app.ts",
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
+	"minify": true,
 	"migrations": [
 		{
 			"new_sqlite_classes": ["AgentMemoryMCP", "MemoryIndex"],
@@ -61,7 +62,7 @@
 	"env": {
 		"staging": {
 			"name": "mcp-cloudflare-agent-memory-staging",
-			"account_id": "<PLACEHOLDER_ACCOUNT_ID>",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "memory-staging.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
@@ -78,7 +79,7 @@
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",
-					"id": "<PLACEHOLDER_STAGING_KV_ID>"
+					"id": "a6ad24203a244d248f2fe1acfeb7b3a3"
 				}
 			],
 			"vars": {
@@ -96,7 +97,7 @@
 		},
 		"production": {
 			"name": "mcp-cloudflare-agent-memory-production",
-			"account_id": "<PLACEHOLDER_ACCOUNT_ID>",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "memory.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
@@ -113,7 +114,7 @@
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",
-					"id": "<PLACEHOLDER_PRODUCTION_KV_ID>"
+					"id": "753f27a19ef94d7dbd49de05588ca890"
 				}
 			],
 			"vars": {

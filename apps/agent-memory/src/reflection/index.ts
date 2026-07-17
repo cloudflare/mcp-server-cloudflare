@@ -2,8 +2,8 @@
  * Reflection orchestrator.
  *
  * In the managed multi-tenant deployment reflection is **on-demand and
- * opt-out** — there is no global cron sweeping every user's memory nightly
- * (that would be surprising, and would spend the user's AI budget without
+ * opt-out** — there is no global cron sweeping every account's memory nightly
+ * (that would be surprising, and would spend the account's AI budget without
  * them asking). It runs only when the user calls the `run_reflection` tool,
  * and only if they haven't disabled it in their config.
  *
@@ -14,7 +14,7 @@
 import { loadConfig } from '../config'
 import { sendWebhook } from '../webhook'
 import { runAgenticReflection } from './agentic'
-import { archiveReflection, writeStagedReflection } from './staging'
+import { archiveReflection, listPendingReflections, writeStagedReflection } from './staging'
 
 import type { UserContext } from '../user-context'
 import type { ReflectionChange } from '../webhook'
@@ -37,8 +37,8 @@ export interface ReflectionResult {
 }
 
 /**
- * Run a reflection for one user. Respects the per-user opt-out and fires the
- * configured webhook (if any) on completion.
+ * Run a reflection for one selected account. Respects its stored opt-out and
+ * fires the configured webhook (if any) on completion.
  */
 export async function runReflection(
 	userCtx: UserContext,
@@ -55,6 +55,29 @@ export async function runReflection(
 			skipped: true,
 			summary:
 				'Reflection is disabled in your config. Enable it with set_config { reflectionsEnabled: true }.',
+		}
+	}
+
+	// Do not spend more of the account's Workers AI allowance while an earlier
+	// reflection still needs a human decision.
+	const pending = await listPendingReflections(storage)
+	if (pending.length > 0) {
+		return {
+			success: true,
+			date,
+			skipped: true,
+			summary: `A pending reflection is awaiting review (${pending[0].date}). Apply or archive it before running another reflection.`,
+		}
+	}
+
+	const lockToken = crypto.randomUUID()
+	const { acquired } = await userCtx.index.acquireReflectionLock(lockToken, 15 * 60 * 1_000)
+	if (!acquired) {
+		return {
+			success: true,
+			date,
+			skipped: true,
+			summary: 'Another reflection is already running for this account.',
 		}
 	}
 
@@ -76,12 +99,13 @@ export async function runReflection(
 			const send = sendWebhook(
 				{ url: config.webhookUrl, headers: config.webhookHeaders },
 				{
-					event: 'reflection.completed',
+					event: result.success ? 'reflection.completed' : 'reflection.failed',
 					date,
 					summary: result.summary ?? 'Reflection complete — no issues found.',
 					quickFixes: result.quickFixes,
 					edits: result.edits,
 					failedEdits: result.failedEdits,
+					error: result.error,
 				}
 			)
 			// Don't block the tool response on webhook delivery when possible.
@@ -104,6 +128,18 @@ export async function runReflection(
 		}
 
 		return { success: false, date, error }
+	} finally {
+		try {
+			await userCtx.index.releaseReflectionLock(lockToken)
+		} catch (error) {
+			console.error(
+				JSON.stringify({
+					event: 'reflection_lock_release_failed',
+					date,
+					error: error instanceof Error ? error.message : String(error),
+				})
+			)
+		}
 	}
 }
 
@@ -119,46 +155,21 @@ async function runReflectionFlow(userCtx: UserContext, date: string): Promise<Re
 		modelFast: config.reflectionModelFast,
 	})
 
-	const hasChanges =
-		agenticResult.proposedEdits.length > 0 || agenticResult.autoAppliedFixes.length > 0
+	const quickFixes: ReflectionChange[] = agenticResult.autoAppliedFixes.map((fix) => ({
+		path: fix.path,
+		action: fix.fixType,
+		reason: fix.reason,
+	}))
+	const proposedEdits: ReflectionChange[] = agenticResult.proposedEdits.map((edit) => ({
+		path: edit.path,
+		action: edit.action,
+		reason: edit.reason,
+	}))
+	const needsReview =
+		agenticResult.success && (proposedEdits.length > 0 || agenticResult.flaggedIssues.length > 0)
 
-	// Auto-apply all proposed edits directly.
-	const appliedEdits: ReflectionChange[] = []
-	const failedEdits: string[] = []
-
-	for (const edit of agenticResult.proposedEdits) {
-		try {
-			switch (edit.action) {
-				case 'replace':
-				case 'create':
-					if (edit.content) await storage.write(edit.path, edit.content)
-					break
-				case 'append':
-					if (edit.content) {
-						const existing = await storage.read(edit.path)
-						const newContent = existing ? `${existing.content}\n${edit.content}` : edit.content
-						await storage.write(edit.path, newContent)
-					}
-					break
-				case 'delete':
-					await storage.delete(edit.path)
-					break
-			}
-			appliedEdits.push({ path: edit.path, action: edit.action, reason: edit.reason })
-		} catch (e) {
-			failedEdits.push(`${edit.action}: ${edit.path}`)
-			console.error(
-				JSON.stringify({
-					event: 'auto_apply_edit_failed',
-					path: edit.path,
-					action: edit.action,
-					error: e instanceof Error ? e.message : String(e),
-				})
-			)
-		}
-	}
-
-	// Write reflection record to archive (audit trail).
+	// Always retain an audit record. Substantive edits and unresolved findings
+	// stay pending for human review; quick-fix-only/no-op records are archived.
 	const stagedReflection: StagedReflection = {
 		date,
 		summary: agenticResult.summary || 'No summary provided.',
@@ -169,37 +180,40 @@ async function runReflectionFlow(userCtx: UserContext, date: string): Promise<Re
 		deepAnalysisIterations: agenticResult.deepAnalysisIterations,
 	}
 	const pendingPath = await writeStagedReflection(storage, stagedReflection)
-	await archiveReflection(storage, pendingPath)
+	if (!needsReview) {
+		await archiveReflection(storage, pendingPath)
+	}
 
 	await storage.write(LAST_REFLECTION_PATH, JSON.stringify({ timestamp: Date.now(), date }))
 
-	const quickFixes: ReflectionChange[] = agenticResult.autoAppliedFixes.map((f) => ({
-		path: f.path,
-		action: f.fixType,
-		reason: f.reason,
-	}))
-
-	let summary: string
-	if (!hasChanges) {
-		summary = 'Memory looks good — no issues found.'
-	} else {
-		const parts: string[] = []
-		if (quickFixes.length > 0) parts.push(`${quickFixes.length} quick fixes`)
-		if (appliedEdits.length > 0) parts.push(`${appliedEdits.length} edits`)
-		if (failedEdits.length > 0) parts.push(`${failedEdits.length} failed`)
-		summary = `Auto-applied ${parts.join(', ')}.`
-		if (agenticResult.summary) summary += `\n\n${agenticResult.summary}`
+	if (!agenticResult.success) {
+		return {
+			success: false,
+			date,
+			summary: `Reflection failed; substantive changes were archived for audit but cannot be applied.${agenticResult.error ? ` ${agenticResult.error}` : ''}`,
+			autoApplied: quickFixes.length,
+			proposed: 0,
+			quickFixes,
+			error: agenticResult.error,
+		}
 	}
 
+	const parts: string[] = []
+	if (quickFixes.length > 0) parts.push(`auto-applied ${quickFixes.length} quick fixes`)
+	if (proposedEdits.length > 0) parts.push(`staged ${proposedEdits.length} edits for review`)
+	if (agenticResult.flaggedIssues.length > 0) {
+		parts.push(`flagged ${agenticResult.flaggedIssues.length} issues for review`)
+	}
+	let summary = parts.length > 0 ? `${parts.join('; ')}.` : 'Memory looks good — no issues found.'
+	if (agenticResult.summary && parts.length > 0) summary += `\n\n${agenticResult.summary}`
+
 	return {
-		success: agenticResult.success,
+		success: true,
 		date,
 		summary,
-		autoApplied: quickFixes.length + appliedEdits.length,
-		proposed: 0,
+		autoApplied: quickFixes.length,
+		proposed: proposedEdits.length,
 		quickFixes,
-		edits: appliedEdits,
-		failedEdits: failedEdits.length > 0 ? failedEdits : undefined,
-		error: agenticResult.error,
+		edits: proposedEdits,
 	}
 }
