@@ -1,0 +1,67 @@
+apps/agent-memory/.gitignore
+  s_c8c5ff0fda0aef::t_4ca4568b4d5cfb 1-178
+apps/agent-memory/README.md
+  s_c8c5ff0fda0aef::t_72ae21714931f6 1-84
+apps/agent-memory/src/agent-memory.app.ts
+  s_c8c5ff0fda0aef::t_fb7b055a1b9855 1-119
+apps/agent-memory/src/ai/runner.ts
+  s_c8c5ff0fda0aef::t_40b4e08ed7a204 1-83
+apps/agent-memory/src/conversations.ts
+  s_c8c5ff0fda0aef::t_ce956a6d620af9 1-313
+apps/agent-memory/src/llm/types.ts
+  s_c8c5ff0fda0aef::t_821925fcc40cdf 1-83
+apps/agent-memory/src/llm/workers-ai.ts
+  s_c8c5ff0fda0aef::t_fb2fcd3d00aa57 1-296
+apps/agent-memory/src/reflection/agentic.ts
+  s_c8c5ff0fda0aef::t_2cdde70ca7283d 1-271
+apps/agent-memory/src/reflection/index.ts
+  s_c8c5ff0fda0aef::t_a1f8657ab8c124 1-205
+apps/agent-memory/src/reflection/staging.ts
+  s_c8c5ff0fda0aef::t_fd8e3cae573f8b 1-262
+apps/agent-memory/src/reflection/tools.ts
+  s_c8c5ff0fda0aef::t_2058f0301c6d2c 1-283
+apps/agent-memory/src/reminders.ts
+  s_c8c5ff0fda0aef::t_148f07c9c0d99a 1-195
+apps/agent-memory/src/search/client.ts
+  s_c8c5ff0fda0aef::t_5784399e2ebbd2 1-53
+apps/agent-memory/src/search/durable-object.ts
+  s_c8c5ff0fda0aef::t_1708f6e89e1865 1-276
+apps/agent-memory/src/search/embeddings.ts
+  s_c8c5ff0fda0aef::t_c397f3d811b861 1-75
+apps/agent-memory/src/search/hnsw.ts
+  s_c8c5ff0fda0aef::t_4388bdcc6f7d4a 1-363
+apps/agent-memory/src/search/index-write.ts
+  s_c8c5ff0fda0aef::t_2e73f8d13dbb2b 1-142
+apps/agent-memory/src/server.ts
+  s_c8c5ff0fda0aef::t_cf215d54757266 1-772
+apps/agent-memory/src/storage/r2.ts
+  s_c8c5ff0fda0aef::t_3797beaffd14de 1-166
+apps/agent-memory/src/tags.ts
+  s_c8c5ff0fda0aef::t_40f68b78eb8e0f 1-111
+apps/agent-memory/src/truncate.ts
+  s_c8c5ff0fda0aef::t_539d436a215a0e 1-99
+apps/agent-memory/src/user-context.ts
+  s_c8c5ff0fda0aef::t_43c820c610fab1 1-48
+apps/agent-memory/src/wikilinks.ts
+  s_c8c5ff0fda0aef::t_9a9529be57959d 1-74
+apps/agent-memory/worker-configuration.d.ts
+  s_c8c5ff0fda0aef::t_fb2086fc6d97d9 1-14425
+pnpm-lock.yaml
+  s_c8c5ff0fda0aef::t_e23ad29ae65dbd 52-88,6471,6478,7183,7798,7829,7836,7843,7848,7942,9102,9107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "991f750776e5f43243912c4a394af95032d49682",
+  "prompts": {},
+  "sessions": {
+    "s_c8c5ff0fda0aef": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_08fa0aab3ffeyIvoYTqElPB6Ay",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ruskin Constant <6400000+jonnyparris@users.noreply.github.com>"
+    }
+  }
+}
