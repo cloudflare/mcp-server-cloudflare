@@ -68,18 +68,15 @@ interface TypeDetailsResponse {
 // Define the structure of a single error
 const graphQLErrorSchema = z.object({
 	message: z.string(),
-	path: z.array(z.union([z.string(), z.number()])),
-	extensions: z.object({
-		code: z.string(),
-		timestamp: z.string(),
-		ray_id: z.string(),
-	}),
+	locations: z.array(z.object({ line: z.number(), column: z.number() })).nullish(),
+	path: z.array(z.union([z.string(), z.number()])).nullish(),
+	extensions: z.record(z.string(), z.unknown()).nullish(),
 })
 
 // Define the overall GraphQL response schema
 const graphQLResponseSchema = z.object({
-	data: z.union([z.record(z.string(), z.unknown()), z.null()]),
-	errors: z.union([z.array(graphQLErrorSchema), z.null()]),
+	data: z.union([z.record(z.string(), z.unknown()), z.null()]).nullish(),
+	errors: z.array(graphQLErrorSchema).nullish(),
 })
 
 /**
