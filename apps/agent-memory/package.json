@@ -1,0 +1,32 @@
+{
+	"name": "agent-memory",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"check:lint": "run-eslint-workers",
+		"check:types": "run-tsc",
+		"deploy": "run-wrangler-deploy",
+		"deploy:staging": "wrangler deploy --env staging",
+		"deploy:production": "wrangler deploy --env production",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"types": "wrangler types",
+		"test": "vitest run"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "0.16.11",
+		"@types/node": "22.15.17",
+		"typescript": "5.5.4",
+		"vitest": "4.1.8",
+		"wrangler": "4.96.0"
+	},
+	"dependencies": {
+		"@cloudflare/workers-oauth-provider": "0.7.0",
+		"@modelcontextprotocol/sdk": "1.29.0",
+		"@repo/mcp-common": "workspace:*",
+		"@repo/mcp-observability": "workspace:*",
+		"agents": "0.13.3",
+		"zod": "4.4.3"
+	},
+	"type": "module"
+}

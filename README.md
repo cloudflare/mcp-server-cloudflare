@@ -24,6 +24,7 @@ The following servers are included in this repository:
 | [**Cloudflare One CASB server**](/apps/cloudflare-one-casb)    | Quickly identify any security misconfigurations for SaaS applications to safeguard users & data | `https://casb.mcp.cloudflare.com/mcp`          |
 | [**GraphQL server**](/apps/graphql/)                           | Get analytics data using Cloudflare’s GraphQL API                                               | `https://graphql.mcp.cloudflare.com/mcp`       |
 | [**Cloudflare Blog server**](/apps/cloudflare-blog)            | Search and read posts from the Cloudflare Blog                                                  | `https://blog.mcp.cloudflare.com/mcp`          |
+| [**Agent Memory server**](/apps/agent-memory)                  | Persistent, searchable memory backed by the selected account's R2 and Workers AI                | `https://memory.mcp.cloudflare.com/mcp`        |
 
 ## Which Cloudflare MCP server should you use?
 

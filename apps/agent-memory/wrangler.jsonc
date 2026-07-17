@@ -1,0 +1,134 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "mcp-cloudflare-agent-memory-dev",
+	"main": "src/agent-memory.app.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"minify": true,
+	"migrations": [
+		{
+			"new_sqlite_classes": ["AgentMemoryMCP", "MemoryIndex"],
+			"tag": "v1"
+		}
+	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "AgentMemoryMCP",
+				"name": "MCP_OBJECT"
+			},
+			{
+				"class_name": "MemoryIndex",
+				"name": "MEMORY_INDEX"
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "AGENT_MEMORY_DEV_KV"
+		}
+	],
+	"observability": {
+		"enabled": true,
+		"traces": {
+			"enabled": true,
+			"head_sampling_rate": 0.1
+		}
+	},
+	"dev": {
+		"port": 8990
+	},
+	"vars": {
+		"ENVIRONMENT": "development",
+		"MCP_SERVER_NAME": "<PLACEHOLDER>",
+		"MCP_SERVER_VERSION": "<PLACEHOLDER>",
+		"CLOUDFLARE_CLIENT_ID": "<PLACEHOLDER>",
+		"CLOUDFLARE_CLIENT_SECRET": "<PLACEHOLDER>",
+		"AGENT_MEMORY_BUCKET_NAME": "agent-memory-mcp"
+	},
+	"workers_dev": false,
+	"preview_urls": false,
+	"analytics_engine_datasets": [
+		{
+			"binding": "MCP_METRICS",
+			"dataset": "mcp-metrics-dev"
+		}
+	],
+	"env": {
+		"staging": {
+			"name": "mcp-cloudflare-agent-memory-staging",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "memory-staging.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "AgentMemoryMCP",
+						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "MemoryIndex",
+						"name": "MEMORY_INDEX"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "a6ad24203a244d248f2fe1acfeb7b3a3"
+				}
+			],
+			"vars": {
+				"ENVIRONMENT": "staging",
+				"MCP_SERVER_NAME": "agent-memory-staging",
+				"MCP_SERVER_VERSION": "0.1.0",
+				"AGENT_MEMORY_BUCKET_NAME": "agent-memory-mcp"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-staging"
+				}
+			]
+		},
+		"production": {
+			"name": "mcp-cloudflare-agent-memory-production",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "memory.mcp.cloudflare.com", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "AgentMemoryMCP",
+						"name": "MCP_OBJECT"
+					},
+					{
+						"class_name": "MemoryIndex",
+						"name": "MEMORY_INDEX"
+					}
+				]
+			},
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "753f27a19ef94d7dbd49de05588ca890"
+				}
+			],
+			"vars": {
+				"ENVIRONMENT": "production",
+				"MCP_SERVER_NAME": "agent-memory",
+				"MCP_SERVER_VERSION": "0.1.0",
+				"AGENT_MEMORY_BUCKET_NAME": "agent-memory-mcp"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-production"
+				}
+			]
+		}
+	}
+}
