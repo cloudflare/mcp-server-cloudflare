@@ -128,7 +128,14 @@ function throwCombinedApiError(userStatus: number, accountsStatus: number): neve
 	}
 
 	if (statuses.includes(403)) {
-		throw new McpError('Insufficient permissions', 403, {
+		throw new McpError('Token lacks required user:read or account:read scope', 403, {
+			reportToSentry: false,
+			internalMessage: `Upstream user=${userStatus}, accounts=${accountsStatus}`,
+		})
+	}
+
+	if (statuses.includes(400)) {
+		throw new McpError('Access token appears malformed; reauthenticate and try again', 401, {
 			reportToSentry: false,
 			internalMessage: `Upstream user=${userStatus}, accounts=${accountsStatus}`,
 		})
@@ -168,9 +175,12 @@ export async function getUserAndAccounts(
 
 	// If both endpoints failed, use priority-based error classification
 	if (!userResponse.ok && !accountsResponse.ok) {
-		console.error(
-			`Cloudflare API error: user=${userResponse.status}, accounts=${accountsResponse.status}`
-		)
+		const message = `Cloudflare API error: user=${userResponse.status}, accounts=${accountsResponse.status}`
+		if (userResponse.status >= 500 || accountsResponse.status >= 500) {
+			console.error(message)
+		} else {
+			console.warn(message)
+		}
 		throwCombinedApiError(userResponse.status, accountsResponse.status)
 	}
 
@@ -191,7 +201,12 @@ export async function getUserAndAccounts(
 	} else if (userResponse.ok) {
 		// User succeeded but accounts failed — surface the accounts error
 		// (5xx should be reported, 4xx like 403 may indicate insufficient scopes)
-		console.error(`Cloudflare API /accounts failed with status ${accountsResponse.status}`)
+		const message = `Cloudflare API /accounts failed with status ${accountsResponse.status}`
+		if (accountsResponse.status >= 500) {
+			console.error(message)
+		} else {
+			console.warn(message)
+		}
 		throwUpstreamApiError(accountsResponse.status, 'Cloudflare API /accounts')
 	}
 
