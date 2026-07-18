@@ -92,7 +92,7 @@ If you see this message, Claude likely hit its context-length limit and stopped 
 To reduce the chance of running in to this issue:
 
 - Try to be specific, keep your queries concise.
-- If a single request calls multiple tools, try to to break it into several smaller tool calls to keep the responses short.
+- If a single request calls multiple tools, try to break it into several smaller tool calls to keep the responses short.
 
 ## Paid Features
 
