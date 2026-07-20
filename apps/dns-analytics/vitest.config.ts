@@ -9,6 +9,7 @@ export interface TestEnv extends Env {
 export default defineConfig({
 	plugins: [
 		cloudflareTest({
+			remoteBindings: false,
 			wrangler: { configPath: `${__dirname}/wrangler.jsonc` },
 			miniflare: {
 				bindings: {

@@ -2,6 +2,7 @@
 	"name": "graphql-mcp-server",
 	"version": "0.2.2",
 	"private": true,
+	"type": "module",
 	"scripts": {
 		"check:lint": "run-eslint-workers",
 		"check:types": "run-tsc",
@@ -12,16 +13,16 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@cloudflare/workers-oauth-provider": "0.7.0",
+		"@cloudflare/workers-oauth-provider": "catalog:",
 		"@hono/zod-validator": "0.4.3",
-		"@modelcontextprotocol/sdk": "1.29.0",
+		"@modelcontextprotocol/server": "catalog:",
 		"@repo/mcp-common": "workspace:*",
 		"@repo/mcp-observability": "workspace:*",
-		"agents": "0.13.3",
+		"agents": "catalog:",
 		"cloudflare": "4.2.0",
 		"hono": "4.7.6",
-		"zod": "4.4.3",
-		"lz-string": "1.5.0"
+		"lz-string": "1.5.0",
+		"zod": "4.4.3"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.16.11",

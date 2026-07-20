@@ -1,16 +1,14 @@
 import { z } from 'zod'
 
 import { fetchCloudflareApi } from '@repo/mcp-common/src/cloudflare-api'
-import { getProps } from '@repo/mcp-common/src/get-props'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
 import { getReader } from '../warp_diag_reader'
 
-import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js'
-import type { ZodRawShape } from 'zod'
-import type { AccountToolCallback } from '@repo/mcp-common/src/server'
-import type { CloudflareDEXMCP } from '../dex-analysis.app'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { Env } from '../dex-analysis.context'
 
-export function registerDEXTools(agent: CloudflareDEXMCP) {
+export function registerDEXTools(context: McpRegistrationContext<Env>) {
 	registerTool({
 		name: 'dex_test_statistics',
 		description: 'Analyze Cloudflare DEX Test Results by quartile given a Test ID',
@@ -21,7 +19,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		},
 		llmContext:
 			"The quartiles are sorted by 'resource fetch time' from LEAST performant in quartile 1 to MOST performant in quartile 4. For each quartile-based entry, it provides extensive information about the up-to-20 specific test results that are within that quartile of performance.",
-		agent,
+		context,
 		callback: async ({ accountId, accessToken, ...params }) => {
 			return await fetchCloudflareApi({
 				endpoint: `/dex/test-results/by-quartile?${new URLSearchParams({ ...(params as Record<string, string>) })}`,
@@ -40,7 +38,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 	registerTool({
 		name: 'dex_list_tests',
 		description: 'Retrieve a list of all Cloudflare DEX Tests configured.',
-		agent,
+		context,
 		schema: { page: pageParam },
 		callback: async ({ accountId, accessToken, page }) => {
 			return await fetchCloudflareApi({
@@ -72,7 +70,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 			to: timeEndParam,
 			interval: aggregationIntervalParam,
 		},
-		agent,
+		context,
 		callback: async ({ testId, accountId, accessToken, ...params }) => {
 			return await fetchCloudflareApi({
 				endpoint: `/dex/http-tests/${testId}?${new URLSearchParams({ ...(params as Record<string, string>) })}`,
@@ -103,7 +101,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 			timeEnd: timeEndParam,
 			interval: aggregationIntervalParam,
 		},
-		agent,
+		context,
 		callback: async ({ testId, accountId, accessToken, ...params }) => {
 			return await fetchCloudflareApi({
 				endpoint: `/dex/traceroute-tests/${testId}?${new URLSearchParams({ ...(params as Record<string, string>) })}`,
@@ -130,7 +128,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 			to: timeEndParam,
 			interval: aggregationIntervalParam,
 		},
-		agent,
+		context,
 		callback: async ({ testId, accountId, accessToken, ...params }) => {
 			return await fetchCloudflareApi({
 				endpoint: `/dex/traceroute-tests/${testId}/network-path?${new URLSearchParams({ ...(params as unknown as Record<string, string>) })}`,
@@ -156,7 +154,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 				.uuid()
 				.describe('The traceroute DEX Test Result ID to get network path details for.'),
 		},
-		agent,
+		context,
 		callback: async ({ testResultId, accountId, accessToken }) => {
 			return await fetchCloudflareApi({
 				endpoint: `/dex/traceroute-test-results/${testResultId}/network-path`,
@@ -182,7 +180,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 			page: pageParam,
 			search: z.string().optional().describe('Filter devices by name or email.'),
 		},
-		agent,
+		context,
 		callback: async ({ accountId, accessToken, ...params }) => {
 			return await fetchCloudflareApi({
 				endpoint: `/dex/commands/devices?${new URLSearchParams({ ...(params as unknown as Record<string, string>) })}&per_page=50`,
@@ -227,7 +225,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 				.default(5)
 				.describe('Limit on capture duration in minutes'),
 		},
-		agent,
+		context,
 		llmContext:
 			'If the request was successful, the capture has been initiated. You can poll the dex_list_remote_commands tool periodically to check on the completion status.',
 		callback: async ({ accountId, accessToken, device_id, user_email, ...command_args }) => {
@@ -272,7 +270,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 						"Essentially the same as running 'route get '' and collecting the results. This option may increase the time taken to collect the warp-diag"
 				),
 		},
-		agent,
+		context,
 		llmContext:
 			'If the request was successful, the diagnostic has been initiated. You can poll the dex_list_remote_commands tool periodically to check on the completion status.' +
 			'See https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/troubleshooting/warp-logs/ for more info on warp-diags',
@@ -307,7 +305,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		description:
 			'Retrieve a list of remote captures for device debugging, like PCAPs or WARP Diags.',
 		schema: { page: pageParam },
-		agent,
+		context,
 		callback: async ({ accountId, accessToken, page }) => {
 			return await fetchCloudflareApi({
 				endpoint: `/dex/commands?${new URLSearchParams({ page: String(page), per_page: `50` })}`,
@@ -338,7 +336,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 				),
 			colo: coloParam.optional(),
 		},
-		agent,
+		context,
 		callback: async ({ accountId, accessToken, ...params }) => {
 			return await fetchCloudflareApi({
 				endpoint: `/dex/fleet-status/live?${new URLSearchParams({ ...(params as unknown as Record<string, string>) })}`,
@@ -367,7 +365,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 				.describe('Filter results to WARP devices connected to a specific colo.'),
 			device_id: z.string().uuid().optional().describe('Filter results to a specific device.'),
 		},
-		agent,
+		context,
 		callback: async ({ accountId, accessToken, ...params }) => {
 			return await fetchCloudflareApi({
 				endpoint: `/dex/fleet-status/over-time?${new URLSearchParams({ ...(params as Record<string, string>) })}`,
@@ -412,7 +410,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 				.optional()
 				.describe('Filter results to devices with a specific WARP client version.'),
 		},
-		agent,
+		context,
 		callback: async ({ accountId, accessToken, ...params }) => {
 			return await fetchCloudflareApi({
 				endpoint: `/dex/fleet-status/devices?${new URLSearchParams({ ...(params as unknown as Record<string, string>) })}&per_page=50`,
@@ -455,7 +453,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 				),
 			type: z.enum(['config', 'toggle']).optional().describe('Optionally filter events by type.'),
 		},
-		agent,
+		context,
 		callback: async ({ accountId, accessToken, ...params }) => {
 			return await fetchCloudflareApi({
 				endpoint: `/dex/warp-change-events?${new URLSearchParams({ ...(params as unknown as Record<string, string>) })}&per_page=50`,
@@ -486,7 +484,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 						'Use `application-tests-usage` to sort by frequency seen in DEX test results. Omit to sort alphabetically.'
 				),
 		},
-		agent,
+		context,
 		callback: async ({ accountId, accessToken, ...params }) => {
 			return await fetchCloudflareApi({
 				endpoint: `/dex/colos?${new URLSearchParams({ ...(params as unknown as Record<string, string>) })}`,
@@ -521,9 +519,9 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 			'Use the dex_explore_remote_warp_diag_output tool for specific file paths to explore the file contents for analysis. ' +
 			'Hint: you can call dex_explore_remote_warp_diag_output multiple times in parallel if necessary to take advantage of in-memory caching for best performance.' +
 			'See https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/troubleshooting/warp-logs/ for more info on warp-diags',
-		agent,
+		context,
 		callback: async ({ accessToken, accountId, deviceId, commandId }) => {
-			const reader = await getReader({ accessToken, deviceId, commandId })
+			const reader = await getReader(context.env, { accessToken, deviceId, commandId })
 
 			return await reader.list({ accessToken, accountId, commandId, deviceId })
 		},
@@ -540,9 +538,9 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		},
 		llmContext:
 			'To avoid hitting conversation and memory limits, avoid outputting the whole contents of these files to the user unless specifically asked to. Instead prefer to show relevant snippets only.',
-		agent,
+		context,
 		callback: async ({ accessToken, accountId, deviceId, commandId, filepath }) => {
-			const reader = await getReader({ accessToken, deviceId, commandId })
+			const reader = await getReader(context.env, { accessToken, deviceId, commandId })
 
 			return await reader.read({ accessToken, accountId, deviceId, commandId, filepath })
 		},
@@ -560,7 +558,7 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 		},
 		llmContext:
 			'Detections with 0 occurences can be ruled out. Focus on detections with the highest severity.',
-		agent,
+		context,
 		callback: async ({ accessToken, accountId, command_id }) => {
 			return await fetchCloudflareApi({
 				endpoint: `/dex/commands/${command_id}/analysis`,
@@ -578,45 +576,40 @@ export function registerDEXTools(agent: CloudflareDEXMCP) {
 }
 
 // Helper to simplify tool registration by reducing boilerplate for accountId and accessToken
-const registerTool = <T extends ZodRawShape, U = unknown>({
+const registerTool = <T extends z.ZodRawShape, U = unknown>({
 	name,
 	description,
-	agent,
+	context,
 	callback,
-	schema = {},
+	schema,
 	llmContext = '',
 }: {
 	name: string
 	description: string
-	schema?: T | ToolAnnotations
+	schema: T
 	llmContext?: string
-	agent: CloudflareDEXMCP
-	callback: (
-		p: { extra: unknown; accountId: string; accessToken: string } & z.infer<z.ZodObject<T>>
-	) => Promise<U>
+	context: McpRegistrationContext<Env>
+	callback: (p: { accountId: string; accessToken: string } & z.output<z.ZodObject<T>>) => Promise<U>
 }) => {
-	agent.server.accountTool<T>(
+	context.server.accountTool(
 		name,
-		description,
-		schema as T,
-		(async (params, accountId, extra) => {
+		{
+			description,
+			inputSchema: z.object(schema),
+		},
+		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
-				const accessToken = props.accessToken
+				const props = requireRequestProps(context)
 				const res = await callback({
-					...(params as z.infer<z.ZodObject<T>>),
-					extra,
+					...params,
 					accountId,
-					accessToken,
+					accessToken: props.accessToken,
 				})
 				return {
 					content: [
 						{
 							type: 'text',
-							text: JSON.stringify({
-								data: res,
-								llmContext,
-							}),
+							text: JSON.stringify({ data: res, llmContext }),
 						},
 					],
 				}
@@ -633,7 +626,7 @@ const registerTool = <T extends ZodRawShape, U = unknown>({
 					isError: true,
 				}
 			}
-		}) as AccountToolCallback<T>
+		}
 	)
 }
 

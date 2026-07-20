@@ -34,6 +34,8 @@ connections, with Cloudflare OAuth built-in.
 
 It integrates tools powered by the [Cloudflare AutoRAG API](https://developers.cloudflare.com/autorag/) to allow you to access and query your account's AutoRAG instances.
 
+The authenticated `/mcp` endpoint creates a fresh SDK v2 server and request-scoped auth/account context for every request. OAuth grants and token validation remain durable security state, but the server exposes no legacy HTTP+SSE route and stores no MCP protocol session.
+
 ## 🔨 Available Tools
 
 Currently available tools:
@@ -43,6 +45,8 @@ Currently available tools:
 | `list_rags` | Lists AutoRAGs with pagination support                                           |
 | `search`    | Searches documents in a specified AutoRAG using a query (URL, title, or snippet) |
 | `ai_search` | Performs AI-powered search on documents in a specified AutoRAG                   |
+
+**Note:** These tools are account-scoped. Single-account credentials and account-scoped API tokens are detected automatically. If your credentials can access multiple accounts, pass `account_id` to the tool or set a `cf-account-id` request header in your MCP client configuration.
 
 ### Prompt Examples
 
@@ -54,7 +58,7 @@ Currently available tools:
 
 > The following setup documentation is retained for existing users. New users should follow the migration path to [`mcp.cloudflare.com/mcp`](https://mcp.cloudflare.com/mcp) documented above.
 
-If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://autorag.mcp.cloudflare.com`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
+If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://autorag.mcp.cloudflare.com/mcp`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
 
 If your client does not yet support remote MCP servers, you will need to set up its respective configuration file using mcp-remote (https://www.npmjs.com/package/mcp-remote) to specify which servers your client can access.
 

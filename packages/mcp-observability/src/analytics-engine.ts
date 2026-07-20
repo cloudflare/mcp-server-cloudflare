@@ -109,7 +109,7 @@ export abstract class MetricsEvent {
 
 export enum MetricsEventIndexIds {
 	AUTH_USER = 'auth_user',
-	SESSION_START = 'session_start',
+	MCP_REQUEST = 'mcp_request',
 	TOOL_CALL = 'tool_call',
 	CONTAINER_MANAGER = 'container_manager',
 }

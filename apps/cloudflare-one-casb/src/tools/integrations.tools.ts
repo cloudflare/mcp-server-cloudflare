@@ -10,23 +10,29 @@ import {
 	handleIntegrationById,
 	handleIntegrations,
 } from '@repo/mcp-common/src/api/cf1-integration.api'
-import { getProps } from '@repo/mcp-common/src/get-props'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 import {
 	assetCategoryTypeParam,
 	assetCategoryVendorParam,
 } from '@repo/mcp-common/src/types/cf1-integrations.types'
 
-import type { ToolDefinition } from '@repo/mcp-common/src/types/tools.types'
-import type { CASBMCP } from '../cf1-casb.app'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
 
 const PAGE_SIZE = 3
+
+type IntegrationToolDefinition = {
+	name: string
+	description: string
+	params: z.ZodRawShape
+	handler: (params: any) => Promise<unknown>
+}
 
 const integrationIdParam = z.string().describe('The UUID of the integration to analyze')
 const assetSearchTerm = z.string().describe('The search keyword for assets')
 const assetIdParam = z.string().describe('The UUID of the asset to analyze')
 const assetCategoryIdParam = z.string().describe('The UUID of the asset category to analyze')
 
-const toolDefinitions: Array<ToolDefinition<any>> = [
+const toolDefinitions: IntegrationToolDefinition[] = [
 	{
 		name: 'integration_by_id',
 		description: 'Analyze Cloudflare One Integration by ID',
@@ -237,32 +243,36 @@ const toolDefinitions: Array<ToolDefinition<any>> = [
 	},
 ]
 
-/**
- * Registers the logs analysis tool with the MCP server
- * @param agent The MCP server instance
- */
-export function registerIntegrationsTools(agent: CASBMCP) {
+/** Registers CASB tools with one request-scoped MCP server. */
+export function registerIntegrationsTools<Env>(context: McpRegistrationContext<Env>) {
 	toolDefinitions.forEach(({ name, description, params, handler }) => {
-		agent.server.accountTool(name, description, params, async (toolParams, accountId) => {
-			try {
-				const apiToken = getProps(agent).accessToken || ''
-				const result = await handler({ ...toolParams, accountId, apiToken })
-				return {
-					content: [{ type: 'text', text: JSON.stringify(result) }],
-				}
-			} catch (error) {
-				return {
-					content: [
-						{
-							type: 'text',
-							text: JSON.stringify({
-								error: `Error processing request: ${error instanceof Error ? error.message : 'Unknown error'}`,
-							}),
-						},
-					],
-					isError: true,
+		context.server.accountTool(
+			name,
+			{
+				description,
+				inputSchema: z.object(params),
+			},
+			async (toolParams, accountId) => {
+				try {
+					const apiToken = requireRequestProps(context).accessToken
+					const result = await handler({ ...toolParams, accountId, apiToken })
+					return {
+						content: [{ type: 'text', text: JSON.stringify(result) }],
+					}
+				} catch (error) {
+					return {
+						content: [
+							{
+								type: 'text',
+								text: JSON.stringify({
+									error: `Error processing request: ${error instanceof Error ? error.message : 'Unknown error'}`,
+								}),
+							},
+						],
+						isError: true,
+					}
 				}
 			}
-		})
+		)
 	})
 }

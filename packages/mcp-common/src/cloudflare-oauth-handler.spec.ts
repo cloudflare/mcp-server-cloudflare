@@ -1,4 +1,4 @@
-import { GrantType } from '@cloudflare/workers-oauth-provider'
+import { GrantType, OAuthError as ProviderOAuthError } from '@cloudflare/workers-oauth-provider'
 import { http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -6,7 +6,6 @@ import { refreshAuthToken } from './cloudflare-auth'
 import { getUserAndAccounts, handleTokenExchangeCallback } from './cloudflare-oauth-handler'
 import { McpError } from './mcp-error'
 import { server } from './test/msw-server'
-import { OAuthError } from './workers-oauth-utils'
 
 import type { TokenExchangeCallbackOptions } from '@cloudflare/workers-oauth-provider'
 
@@ -56,8 +55,8 @@ describe('handleTokenExchangeCallback', () => {
 				await handleTokenExchangeCallback(options, clientId, clientSecret)
 				expect.unreachable()
 			} catch (e) {
-				expect(e).toBeInstanceOf(OAuthError)
-				const err = e as OAuthError
+				expect(e).toBeInstanceOf(ProviderOAuthError)
+				const err = e as ProviderOAuthError
 				expect(err.code).toBe('invalid_grant')
 				expect(err.statusCode).toBe(400)
 				expect(err.description).toBe('Account tokens cannot be refreshed')
@@ -79,8 +78,8 @@ describe('handleTokenExchangeCallback', () => {
 				await handleTokenExchangeCallback(options, clientId, clientSecret)
 				expect.unreachable()
 			} catch (e) {
-				expect(e).toBeInstanceOf(OAuthError)
-				const err = e as OAuthError
+				expect(e).toBeInstanceOf(ProviderOAuthError)
+				const err = e as ProviderOAuthError
 				expect(err.code).toBe('invalid_grant')
 				expect(err.statusCode).toBe(400)
 				expect(err.description).toBe('No refresh token available for this grant')
@@ -137,8 +136,8 @@ describe('handleTokenExchangeCallback', () => {
 				await handleTokenExchangeCallback(options, clientId, clientSecret)
 				expect.unreachable()
 			} catch (e) {
-				expect(e).toBeInstanceOf(OAuthError)
-				const err = e as OAuthError
+				expect(e).toBeInstanceOf(ProviderOAuthError)
+				const err = e as ProviderOAuthError
 				expect(err.code).toBe('invalid_grant')
 				expect(err.statusCode).toBe(400)
 				expect(err.description).toBe('Authorization grant is invalid, expired, or revoked')
@@ -165,8 +164,8 @@ describe('handleTokenExchangeCallback', () => {
 				await handleTokenExchangeCallback(options, clientId, clientSecret)
 				expect.unreachable()
 			} catch (e) {
-				expect(e).toBeInstanceOf(OAuthError)
-				const err = e as OAuthError
+				expect(e).toBeInstanceOf(ProviderOAuthError)
+				const err = e as ProviderOAuthError
 				expect(err.code).toBe('server_error')
 				expect(err.statusCode).toBe(500)
 				expect(err.description).toBe('Upstream token service unavailable')
@@ -193,8 +192,8 @@ describe('handleTokenExchangeCallback', () => {
 				await handleTokenExchangeCallback(options, clientId, clientSecret)
 				expect.unreachable()
 			} catch (e) {
-				expect(e).toBeInstanceOf(OAuthError)
-				const err = e as OAuthError
+				expect(e).toBeInstanceOf(ProviderOAuthError)
+				const err = e as ProviderOAuthError
 				expect(err.code).toBe('temporarily_unavailable')
 				expect(err.statusCode).toBe(503)
 			}
@@ -220,8 +219,8 @@ describe('handleTokenExchangeCallback', () => {
 				await handleTokenExchangeCallback(options, clientId, clientSecret)
 				expect.unreachable()
 			} catch (e) {
-				expect(e).toBeInstanceOf(OAuthError)
-				const err = e as OAuthError
+				expect(e).toBeInstanceOf(ProviderOAuthError)
+				const err = e as ProviderOAuthError
 				expect(err.code).toBe('invalid_client')
 				expect(err.statusCode).toBe(401)
 			}
@@ -244,7 +243,7 @@ describe('handleTokenExchangeCallback', () => {
 				expect.unreachable()
 			} catch (e) {
 				expect(e).toBe(genericError)
-				expect(e).not.toBeInstanceOf(OAuthError)
+				expect(e).not.toBeInstanceOf(ProviderOAuthError)
 			}
 		})
 	})

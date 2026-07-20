@@ -5,6 +5,8 @@ connections, with Cloudflare OAuth built-in.
 
 It integrates tools powered by the [Cloudflare DEX API](https://developers.cloudflare.com/api/resources/zero_trust/subresources/dex/) to provide visibility into device, network, and application performance across your Zero Trust organization
 
+The authenticated `/mcp` endpoint creates a fresh SDK v2 server and request-scoped auth/account context for every request. OAuth remains durable security state, and `WarpDiagReader` remains an application cache for downloaded diagnostics; no MCP protocol session or SSE route is retained.
+
 ## 🔨 Available Tools
 
 Currently available tools:
@@ -45,7 +47,7 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 
 ## Access the remote MCP server from any MCP Client
 
-If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://dex.mcp.cloudflare.com`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
+If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://dex.mcp.cloudflare.com/mcp`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
 
 If your client does not yet support remote MCP servers, you will need to set up its respective configuration file using [mcp-remote](https://www.npmjs.com/package/mcp-remote) to specify which servers your client can access.
 

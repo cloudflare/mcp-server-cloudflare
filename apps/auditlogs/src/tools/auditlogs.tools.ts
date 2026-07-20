@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
 import { fetchCloudflareApi } from '@repo/mcp-common/src/cloudflare-api'
-import { getProps } from '@repo/mcp-common/src/get-props'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
-import type { AuditlogMCP } from '../auditlogs.app'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
 
 export const actionResults = z.enum(['success', 'failure', ''])
 export const actionTypes = z.enum(['create', 'delete', 'view', 'update', 'login'])
@@ -238,18 +238,20 @@ export async function handleGetAuditLogs(
  * @param accountId Cloudflare account ID
  * @param apiToken Cloudflare API token
  */
-export function registerAuditLogTools(agent: AuditlogMCP) {
+export function registerAuditLogTools<Env>(context: McpRegistrationContext<Env>) {
 	// Register the audit log tool by account
-	agent.server.accountTool(
+	context.server.accountTool(
 		'auditlogs_by_account_id',
-		`Find all audit logs (a list of who made what change when) for a Cloudflare Account by ID.
+		{
+			description: `Find all audit logs (a list of who made what change when) for a Cloudflare Account by ID.
 		This can be used to query activity on your Cloudflare account at a particular time.
 		Since and before are required to look at a slice of time and are dates with or without a time up to millisecond precision e.g YYYY-MM-DDTHH:mm:ss.sssZ.
 		There can be more than one page of results and they can be paginated using the returned cursor`,
-		auditLogsQuerySchema.shape,
+			inputSchema: z.object(auditLogsQuerySchema.shape),
+		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await handleGetAuditLogs(accountId, props.accessToken, params)
 				return {
 					content: [

@@ -1,12 +1,12 @@
 import { z } from 'zod'
 
 import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
-import { getProps } from '@repo/mcp-common/src/get-props'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
 import type { AccountGetParams } from 'cloudflare/resources/accounts/accounts.mjs'
 import type { ReportGetParams } from 'cloudflare/resources/dns/analytics.mjs'
 import type { ZoneGetParams } from 'cloudflare/resources/dns/settings.mjs'
-import type { DNSAnalyticsMCP } from '../dns-analytics.app'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
 
 function getStartDate(days: number) {
 	const today = new Date()
@@ -14,20 +14,20 @@ function getStartDate(days: number) {
 	return start_date.toISOString()
 }
 
-export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
+export function registerAnalyticTools<Env>(context: McpRegistrationContext<Env>) {
 	// Register DNS Report tool
-	agent.server.registerTool(
+	context.server.registerTool(
 		'dns_report',
 		{
 			description: 'Fetch the DNS Report for a given zone since a date',
-			inputSchema: {
+			inputSchema: z.object({
 				zone: z.string(),
 				days: z.number(),
-			},
+			}),
 		},
 		async ({ zone, days }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const start_date = getStartDate(days)
 				const params: ReportGetParams = {
@@ -61,13 +61,15 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 		}
 	)
 	// Register Account DNS Settings display tool
-	agent.server.accountTool(
+	context.server.accountTool(
 		'show_account_dns_settings',
-		'Show DNS settings for current account',
-		{},
+		{
+			description: 'Show DNS settings for current account',
+			inputSchema: z.object({}),
+		},
 		async (_args, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const params: AccountGetParams = {
 					account_id: accountId,
@@ -97,17 +99,17 @@ export function registerAnalyticTools(agent: DNSAnalyticsMCP) {
 		}
 	)
 	// Register Zone DNS Settings display tool
-	agent.server.registerTool(
+	context.server.registerTool(
 		'show_zone_dns_settings',
 		{
 			description: 'Show DNS settings for a zone',
-			inputSchema: {
+			inputSchema: z.object({
 				zone: z.string(),
-			},
+			}),
 		},
 		async ({ zone }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const params: ZoneGetParams = {
 					zone_id: zone,

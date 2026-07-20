@@ -1,20 +1,20 @@
-import type { McpAgent } from 'agents/mcp'
+import type { RequestHandler } from './api-token-mode'
 
-// Support both SSE and Streamable HTTP
-export function createApiHandler<
-	Env extends Cloudflare.Env,
-	T extends typeof McpAgent<Env, unknown, Record<string, unknown>>,
->(agent: T, opts?: { binding?: string }) {
+/**
+ * Restricts an exported stateless handler to its exact Streamable HTTP route.
+ * No compatibility transport route is provided.
+ */
+export function createApiHandler<Env>(
+	handler: RequestHandler<Env>,
+	options: { route?: string } = {}
+): RequestHandler<Env> {
+	const route = options.route ?? '/mcp'
 	return {
-		fetch: (req: Request, env: unknown, ctx: ExecutionContext) => {
-			const url = new URL(req.url)
-			if (url.pathname === '/sse' || url.pathname === '/sse/message') {
-				return agent.serveSSE('/sse', { binding: opts?.binding }).fetch(req, env, ctx)
+		fetch(req, env, ctx) {
+			if (new URL(req.url).pathname !== route) {
+				return new Response('Not found', { status: 404 })
 			}
-			if (url.pathname === '/mcp') {
-				return agent.serve('/mcp', { binding: opts?.binding }).fetch(req, env, ctx)
-			}
-			return new Response('Not found', { status: 404 })
+			return handler.fetch(req, env, ctx)
 		},
 	}
 }

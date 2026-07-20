@@ -1,94 +1,16 @@
-import OAuthProvider from '@cloudflare/workers-oauth-provider'
-import { McpAgent } from 'agents/mcp'
-
-import { AccountManager } from '@repo/mcp-common/src/account-manager'
-import { handleApiTokenMode, isApiTokenRequest } from '@repo/mcp-common/src/api-token-mode'
-import {
-	createAuthHandlers,
-	handleTokenExchangeCallback,
-} from '@repo/mcp-common/src/cloudflare-oauth-handler'
-import { getEnv } from '@repo/mcp-common/src/env'
-import { getProps } from '@repo/mcp-common/src/get-props'
+import { createApiHandler } from '@repo/mcp-common/src/api-handler'
+import { createCloudflareOAuthRouter } from '@repo/mcp-common/src/oauth-router'
 import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-ai-search.prompts'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { initSentryWithUser } from '@repo/mcp-common/src/sentry'
-import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
+import { createCloudflareMcpHandler } from '@repo/mcp-common/src/server'
 import { registerDocsTools } from '@repo/mcp-common/src/tools/docs-ai-search.tools'
 import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker.tools'
+import { MetricsTracker } from '@repo/mcp-observability'
 
-import { MetricsTracker } from '../../../packages/mcp-observability/src'
 import { registerObservabilityTools } from './tools/workers-observability.tools'
 
-import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './workers-observability.context'
-
-const env = getEnv<Env>()
-
-const metrics = new MetricsTracker(env.MCP_METRICS, {
-	name: env.MCP_SERVER_NAME,
-	version: env.MCP_SERVER_VERSION,
-})
-
-// Context from the auth process, encrypted & stored in the auth token
-// and provided to the DurableMCP as this.props
-type Props = AuthProps
-
-type State = Record<string, never>
-
-export class ObservabilityMCP extends McpAgent<Env, State, Props> {
-	_server: CloudflareMCPServer | undefined
-	set server(server: CloudflareMCPServer) {
-		this._server = server
-	}
-	get server(): CloudflareMCPServer {
-		if (!this._server) {
-			throw new Error('Tried to access server before it was initialized')
-		}
-
-		return this._server
-	}
-
-	async init() {
-		// TODO: Probably we'll want to track account tokens usage through an account identifier at some point
-		const props = getProps(this)
-		const userId = props.type === 'user_token' ? props.user.id : undefined
-		const sentry =
-			props.type === 'user_token' ? initSentryWithUser(env, this.ctx, props.user.id) : undefined
-		const accountManager = new AccountManager(props)
-
-		this.server = new CloudflareMCPServer({
-			userId,
-			wae: this.env.MCP_METRICS,
-			serverInfo: {
-				name: this.env.MCP_SERVER_NAME,
-				version: this.env.MCP_SERVER_VERSION,
-			},
-			sentry,
-			accountManager,
-			options: {
-				instructions:
-					`# Cloudflare Workers Observability Tool
-				* A cloudflare worker is a serverless function
-				* Workers Observability is the tool to inspect the logs for your cloudflare Worker
-				* Each log is a structured JSON payload with keys and values
-
-
-				This server allows you to analyze your Cloudflare Workers logs and metrics.
-				` + accountManager.instructionsSuffix(),
-			},
-		})
-
-		// Register Cloudflare Workers tools
-		registerWorkersTools(this)
-
-		// Register Cloudflare Workers logs tools
-		registerObservabilityTools(this)
-
-		// Add docs tools
-		registerDocsTools(this.server, this.env)
-		registerPrompts(this.server)
-	}
-}
 
 const ObservabilityScopes = {
 	...RequiredScopes,
@@ -98,32 +20,58 @@ const ObservabilityScopes = {
 	'workers_observability:read': 'See observability logs for your account',
 } as const
 
-export default {
-	fetch: async (req: Request, env: Env, ctx: ExecutionContext) => {
-		if (await isApiTokenRequest(req, env)) {
-			return await handleApiTokenMode(ObservabilityMCP, req, env, ctx)
-		}
-
-		return new OAuthProvider({
-			apiHandlers: {
-				'/mcp': ObservabilityMCP.serve('/mcp'),
-				'/sse': ObservabilityMCP.serveSSE('/sse'),
-			},
-			defaultHandler: createAuthHandlers({ scopes: ObservabilityScopes, metrics }),
-			authorizeEndpoint: '/oauth/authorize',
-			tokenEndpoint: '/token',
-			tokenExchangeCallback: (options) =>
-				handleTokenExchangeCallback(
-					options,
-					env.CLOUDFLARE_CLIENT_ID,
-					env.CLOUDFLARE_CLIENT_SECRET
-				),
-			// Cloudflare access token TTL
-			accessTokenTTL: 3600,
-			refreshTokenTTL: 2592000, // 30 days
-			// TODO: Remove after 2026-05-01 — all pre-0.4.0 grants will have expired by then
-			resourceMatchOriginOnly: true,
-			clientRegistrationEndpoint: '/register',
-		}).fetch(req, env, ctx)
-	},
+const allowedHostnames = [
+	'localhost',
+	'127.0.0.1',
+	'[::1]',
+	'observability-staging.mcp.cloudflare.com',
+	'observability.mcp.cloudflare.com',
+]
+const mcpRequestPolicy = {
+	allowedHostnames,
+	allowedOriginHostnames: [...allowedHostnames, 'playground.ai.cloudflare.com'],
 }
+
+export const mcpHandler = createCloudflareMcpHandler<Env>({
+	serverInfo: ({ env }) => ({
+		name: env.MCP_SERVER_NAME,
+		version: env.MCP_SERVER_VERSION,
+	}),
+	requireAuth: true,
+	serverOptions: {
+		instructions: `# Cloudflare Workers Observability Tool
+* A Cloudflare Worker is a serverless function
+* Workers Observability lets you inspect structured logs for your Cloudflare Workers
+
+This server allows you to analyze your Cloudflare Workers logs and metrics.`,
+	},
+	createSentry: ({ env, executionCtx, request, props }) =>
+		props?.type === 'user_token'
+			? initSentryWithUser(env, executionCtx, props.user.id, request)
+			: undefined,
+	createMetrics: ({ env }, serverInfo) => new MetricsTracker(env.MCP_METRICS, serverInfo),
+	register(context) {
+		registerWorkersTools(context)
+		registerObservabilityTools(context)
+		registerDocsTools(context)
+		registerPrompts(context)
+	},
+	handler: mcpRequestPolicy,
+})
+
+const apiHandler = createApiHandler(mcpHandler)
+
+export default {
+	fetch(request: Request, env: Env, ctx: ExecutionContext) {
+		const metrics = new MetricsTracker(env.MCP_METRICS, {
+			name: env.MCP_SERVER_NAME,
+			version: env.MCP_SERVER_VERSION,
+		})
+		return createCloudflareOAuthRouter({
+			apiHandler,
+			scopes: ObservabilityScopes,
+			metrics,
+			mcpRequestPolicy,
+		}).fetch(request, env, ctx)
+	},
+} satisfies ExportedHandler<Env>

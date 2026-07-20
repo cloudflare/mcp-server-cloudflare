@@ -1,7 +1,6 @@
 import { getUserAndAccounts } from './cloudflare-oauth-handler'
 
-import type { McpAgent } from 'agents/mcp'
-import type { AuthProps } from './cloudflare-oauth-handler'
+import type { AuthProps } from './auth-props'
 
 interface RequiredEnv {
 	DEV_CLOUDFLARE_API_TOKEN: string
@@ -9,8 +8,11 @@ interface RequiredEnv {
 	DEV_DISABLE_OAUTH: string
 }
 
+export interface RequestHandler<Env> {
+	fetch(req: Request, env: Env, ctx: ExecutionContext): Response | Promise<Response>
+}
+
 export async function isApiTokenRequest(req: Request, env: RequiredEnv) {
-	// shortcircuit for dev
 	if (env.DEV_CLOUDFLARE_API_TOKEN && env.DEV_DISABLE_OAUTH === 'true') {
 		return true
 	}
@@ -19,62 +21,65 @@ export async function isApiTokenRequest(req: Request, env: RequiredEnv) {
 	if (!authHeader) return false
 
 	const [type, token] = authHeader.split(' ')
-	if (type !== 'Bearer') return false
+	if (type !== 'Bearer' || !token) return false
 
-	// Return true only if the token was issued by the OAuthProvider.
-	// A token provisioned by the OAuthProvider has 3 parts, split by colons.
-	const codeParts = token.split(':')
-	return codeParts.length !== 3
+	// OAuth Provider tokens have the provider's user:grant:secret format.
+	return token.split(':').length !== 3
 }
 
-export async function handleApiTokenMode<
-	Env extends Cloudflare.Env,
-	T extends typeof McpAgent<Env, unknown, Record<string, unknown>>,
->(agent: T, req: Request, env: RequiredEnv, ctx: ExecutionContext) {
-	// Handle global API token case
-	let opts, token
-	// dev mode
+/** Validates an API token and returns the same request props shape as OAuth. */
+export async function getApiTokenProps(req: Request, env: RequiredEnv): Promise<AuthProps> {
+	let headers: HeadersInit | undefined
+	let token: string
+
 	if (env.DEV_CLOUDFLARE_API_TOKEN && env.DEV_DISABLE_OAUTH === 'true') {
-		opts = {
-			Authorization: `Bearer ${env.DEV_CLOUDFLARE_API_TOKEN}`,
-		}
 		token = env.DEV_CLOUDFLARE_API_TOKEN
-		// header mode
+		headers = { Authorization: `Bearer ${token}` }
 	} else {
 		const authHeader = req.headers.get('Authorization')
 		if (!authHeader) {
 			throw new Error('Authorization header is required')
 		}
 
-		const [type, tokenStr] = authHeader.split(' ')
-		if (type !== 'Bearer') {
+		const [type, tokenValue] = authHeader.split(' ')
+		if (type !== 'Bearer' || !tokenValue) {
 			throw new Error('Invalid authorization type, must be Bearer')
 		}
-		token = tokenStr
+		token = tokenValue
 	}
 
-	const { user, accounts } = await getUserAndAccounts(token, opts)
-
-	// `ExecutionContext.props` is typed readonly, but the agents runtime reads the props we set
-	// here before the request is served, so assign through a typed mutable view.
-	const ctxWithProps = ctx as { props: AuthProps }
-
-	// If user is null, handle API token mode
+	const { user, accounts } = await getUserAndAccounts(token, headers)
 	if (user === null) {
-		ctxWithProps.props = {
+		const account = accounts[0]
+		if (!account) {
+			throw new Error('API token cannot access a Cloudflare account')
+		}
+		return {
 			type: 'account_token',
 			accessToken: token,
-			// we always select the first account from the response,
-			// this assumes that account owned tokens can only access one account
-			account: accounts[0],
-		}
-	} else {
-		ctxWithProps.props = {
-			type: 'user_token',
-			accessToken: token,
-			user,
-			accounts,
+			account,
 		}
 	}
-	return agent.serve('/mcp').fetch(req, env, ctx)
+
+	return {
+		type: 'user_token',
+		accessToken: token,
+		user,
+		accounts,
+	}
+}
+
+/**
+ * Serves one API-token request through the same stateless handler as OAuth.
+ * Props live on this request's ExecutionContext only; no Agent or MCP session is used.
+ */
+export async function handleApiTokenMode<Env extends RequiredEnv>(
+	handler: RequestHandler<Env>,
+	req: Request,
+	env: Env,
+	ctx: ExecutionContext
+): Promise<Response> {
+	const props = await getApiTokenProps(req, env)
+	;(ctx as { props: AuthProps }).props = props
+	return handler.fetch(req, env, ctx)
 }

@@ -14,7 +14,7 @@
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
 		"types": "wrangler types",
-		"test": "vitest"
+		"test": "vitest run"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.16.11",
@@ -25,13 +25,13 @@
 		"wrangler": "4.96.0"
 	},
 	"dependencies": {
-		"@cloudflare/workers-oauth-provider": "0.7.0",
-		"@modelcontextprotocol/sdk": "1.29.0",
+		"@cloudflare/workers-oauth-provider": "catalog:",
+		"@modelcontextprotocol/server": "catalog:",
 		"@n8n/json-schema-to-zod": "1.1.0",
 		"@repo/eval-tools": "workspace:*",
 		"@repo/mcp-common": "workspace:*",
 		"@repo/mcp-observability": "workspace:*",
-		"agents": "0.13.3",
+		"agents": "catalog:",
 		"ai": "6.0.194",
 		"concurrently": "9.1.2",
 		"hono": "4.7.6",

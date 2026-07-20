@@ -2,7 +2,9 @@
 	"name": "demo-day",
 	"version": "0.1.14",
 	"private": true,
+	"type": "module",
 	"scripts": {
+		"check:lint": "run-eslint-workers",
 		"check:types": "run-tsc",
 		"deploy": "run-wrangler-deploy",
 		"dev": "wrangler dev",
@@ -11,10 +13,10 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "1.29.0",
+		"@modelcontextprotocol/server": "catalog:",
 		"@repo/mcp-common": "workspace:*",
 		"@repo/mcp-observability": "workspace:*",
-		"agents": "0.13.3",
+		"agents": "catalog:",
 		"zod": "4.4.3"
 	},
 	"devDependencies": {

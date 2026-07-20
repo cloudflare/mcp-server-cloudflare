@@ -81,11 +81,11 @@ Create a KV namespace.
 			}),
 		}
 
-		registerDocsTools(server as any, { AI: ai })
+		registerDocsTools({ server, env: { AI: ai } } as any)
 
 		const docsTool = registeredTools.get('search_cloudflare_documentation')
 		expect(docsTool?.options.outputSchema).toBeDefined()
-		expect(docsTool?.options.outputSchema.results).toBeDefined()
+		expect(docsTool?.options.outputSchema.shape.results).toBeDefined()
 
 		const response = await docsTool?.handler({ query: 'workers kv binding example' })
 

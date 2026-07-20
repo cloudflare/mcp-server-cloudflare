@@ -16,6 +16,10 @@
 		{
 			"deleted_classes": ["UserDetails"],
 			"tag": "v2"
+		},
+		{
+			"deleted_classes": ["BuildsMCP"],
+			"tag": "v3"
 		}
 	],
 	"observability": {
@@ -24,14 +28,6 @@
 			"enabled": true,
 			"head_sampling_rate": 0.1
 		}
-	},
-	"durable_objects": {
-		"bindings": [
-			{
-				"class_name": "BuildsMCP",
-				"name": "MCP_OBJECT"
-			}
-		]
 	},
 	"kv_namespaces": [
 		{
@@ -62,14 +58,6 @@
 			"name": "mcp-cloudflare-workers-builds-staging",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "builds-staging.mcp.cloudflare.com", "custom_domain": true }],
-			"durable_objects": {
-				"bindings": [
-					{
-						"class_name": "BuildsMCP",
-						"name": "MCP_OBJECT"
-					}
-				]
-			},
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",
@@ -94,14 +82,6 @@
 			"name": "mcp-cloudflare-workers-builds-production",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "builds.mcp.cloudflare.com", "custom_domain": true }],
-			"durable_objects": {
-				"bindings": [
-					{
-						"class_name": "BuildsMCP",
-						"name": "MCP_OBJECT"
-					}
-				]
-			},
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",

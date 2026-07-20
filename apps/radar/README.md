@@ -18,6 +18,8 @@ All new work should move to the unified server:
 
 That server uses [Code Mode](https://blog.cloudflare.com/code-mode-mcp/) — two generic tools (`search` and `execute`) that give agents access to the full Cloudflare API through code execution. It supports both OAuth (connect to the URL and authorize) and Cloudflare API tokens (send as a bearer token). See [`cloudflare/mcp`](https://github.com/cloudflare/mcp) for details.
 
+Until retirement, this server’s authenticated `/mcp` endpoint creates a fresh SDK v2 server and request-scoped auth/account context for every request. OAuth remains durable security state, but no MCP protocol session, SSE route, or protocol Durable Object is retained.
+
 The tools below still function. No new features will be added. Please migrate at your earliest convenience.
 
 ---
@@ -202,7 +204,7 @@ Currently available tools:
 
 ## Access the remote MCP server from any MCP Client
 
-If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://radar.mcp.cloudflare.com`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
+If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://radar.mcp.cloudflare.com/mcp`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
 
 If your client does not yet support remote MCP servers, you will need to set up its respective configuration file using [mcp-remote](https://www.npmjs.com/package/mcp-remote) to specify which servers your client can access.
 

@@ -1,8 +1,7 @@
 import { z } from 'zod'
 
 import { getCloudflareClient } from '../cloudflare-api'
-import { getProps } from '../get-props'
-import { type CloudflareMcpAgent } from '../types/cloudflare-mcp-agent.types'
+import { requireRequestProps } from '../request-context'
 import {
 	D1DatabaseNameParam,
 	D1DatabasePrimaryLocationHintParam,
@@ -11,22 +10,26 @@ import {
 } from '../types/d1.types'
 import { PaginationPageParam, PaginationPerPageParam } from '../types/shared.types'
 
-export function registerD1Tools(agent: CloudflareMcpAgent) {
-	agent.server.accountTool(
+import type { McpRegistrationContext } from '../request-context'
+
+export function registerD1Tools<Env>(context: McpRegistrationContext<Env>) {
+	context.server.accountTool(
 		'd1_databases_list',
-		'List all of the D1 databases in your Cloudflare account',
 		{
-			name: D1DatabaseNameParam.nullable().optional(),
-			page: PaginationPageParam,
-			per_page: PaginationPerPageParam,
-		},
-		{
-			title: 'List D1 databases',
-			readOnlyHint: true,
+			description: 'List all of the D1 databases in your Cloudflare account',
+			inputSchema: z.object({
+				name: D1DatabaseNameParam.nullable().optional(),
+				page: PaginationPageParam,
+				per_page: PaginationPerPageParam,
+			}),
+			annotations: {
+				title: 'List D1 databases',
+				readOnlyHint: true,
+			},
 		},
 		async ({ name, page, per_page }, account_id) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const listResponse = await client.d1.database.list({
 					account_id,
@@ -60,21 +63,23 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.server.accountTool(
 		'd1_database_create',
-		'Create a new D1 database in your Cloudflare account',
 		{
-			name: D1DatabaseNameParam,
-			primary_location_hint: D1DatabasePrimaryLocationHintParam.nullable().optional(),
-		},
-		{
-			title: 'Create D1 database',
-			readOnlyHint: false,
-			destructiveHint: false,
+			description: 'Create a new D1 database in your Cloudflare account',
+			inputSchema: z.object({
+				name: D1DatabaseNameParam,
+				primary_location_hint: D1DatabasePrimaryLocationHintParam.nullable().optional(),
+			}),
+			annotations: {
+				title: 'Create D1 database',
+				readOnlyHint: false,
+				destructiveHint: false,
+			},
 		},
 		async ({ name, primary_location_hint }, account_id) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const d1Database = await client.d1.database.create({
 					account_id,
@@ -104,18 +109,20 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.server.accountTool(
 		'd1_database_delete',
-		'Delete a d1 database in your Cloudflare account',
-		{ database_id: z.string() },
 		{
-			title: 'Delete D1 database',
-			readOnlyHint: false,
-			destructiveHint: true,
+			description: 'Delete a d1 database in your Cloudflare account',
+			inputSchema: z.object({ database_id: z.string() }),
+			annotations: {
+				title: 'Delete D1 database',
+				readOnlyHint: false,
+				destructiveHint: true,
+			},
 		},
 		async ({ database_id }, account_id) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const deleteResponse = await client.d1.database.delete(database_id, {
 					account_id,
@@ -142,17 +149,19 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.server.accountTool(
 		'd1_database_get',
-		'Get a D1 database in your Cloudflare account',
-		{ database_id: z.string() },
 		{
-			title: 'Get D1 database',
-			readOnlyHint: true,
+			description: 'Get a D1 database in your Cloudflare account',
+			inputSchema: z.object({ database_id: z.string() }),
+			annotations: {
+				title: 'Get D1 database',
+				readOnlyHint: true,
+			},
 		},
 		async ({ database_id }, account_id) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const d1Database = await client.d1.database.get(database_id, {
 					account_id,
@@ -180,22 +189,24 @@ export function registerD1Tools(agent: CloudflareMcpAgent) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.server.accountTool(
 		'd1_database_query',
-		'Query a D1 database in your Cloudflare account',
 		{
-			database_id: z.string(),
-			sql: D1DatabaseQuerySqlParam,
-			params: D1DatabaseQueryParamsParam.nullable(),
-		},
-		{
-			title: 'Query D1 database',
-			readOnlyHint: false,
-			destructiveHint: false,
+			description: 'Query a D1 database in your Cloudflare account',
+			inputSchema: z.object({
+				database_id: z.string(),
+				sql: D1DatabaseQuerySqlParam,
+				params: D1DatabaseQueryParamsParam.nullable(),
+			}),
+			annotations: {
+				title: 'Query D1 database',
+				readOnlyHint: false,
+				destructiveHint: false,
+			},
 		},
 		async ({ database_id, sql, params }, account_id) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const queryResult = await client.d1.database.query(database_id, {
 					account_id,

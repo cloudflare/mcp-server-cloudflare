@@ -1,9 +1,10 @@
 import * as LZString from 'lz-string'
 import { z } from 'zod'
 
-import { getProps } from '@repo/mcp-common/src/get-props'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
-import type { GraphQLMCP } from '../graphql.app'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { Env } from '../graphql.context'
 
 // GraphQL API endpoint
 const CLOUDFLARE_GRAPHQL_ENDPOINT = 'https://api.cloudflare.com/client/v4/graphql'
@@ -436,11 +437,12 @@ async function searchGraphQLSchema(
  * Registers GraphQL tools with the MCP server
  * @param agent The MCP agent instance
  */
-export function registerGraphQLTools(agent: GraphQLMCP) {
+export function registerGraphQLTools(context: McpRegistrationContext<Env>) {
 	// Tool to search the GraphQL schema for types, fields, and enum values matching a keyword
-	agent.server.accountTool(
+	context.server.accountTool(
 		'graphql_schema_search',
-		`Search the Cloudflare GraphQL API schema for types, fields, and enum values matching a keyword
+		{
+			description: `Search the Cloudflare GraphQL API schema for types, fields, and enum values matching a keyword
 
 		Use this tool when:
 
@@ -460,26 +462,27 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 
 		This tool searches the Cloudflare GraphQL API schema for any schema elements (such as object types, field names, or enum options) that match a given keyword. It returns schema fragments and definitions to assist in constructing valid and precise GraphQL queries.
 		`,
-		{
-			keyword: z.string().describe('The keyword to search for in the schema'),
-			maxDetailsToFetch: z
-				.number()
-				.min(1)
-				.max(50)
-				.default(10)
-				.describe('Maximum number of types to fetch details for'),
-			includeInternalTypes: z
-				.boolean()
-				.default(false)
-				.describe(
-					'Whether to include internal types (those starting with __) in the search results'
-				),
-			onlyObjectTypes: z
-				.boolean()
-				.default(true)
-				.describe(
-					'Whether to only include OBJECT kind types in the search results with descriptions'
-				),
+			inputSchema: z.object({
+				keyword: z.string().describe('The keyword to search for in the schema'),
+				maxDetailsToFetch: z
+					.number()
+					.min(1)
+					.max(50)
+					.default(10)
+					.describe('Maximum number of types to fetch details for'),
+				includeInternalTypes: z
+					.boolean()
+					.default(false)
+					.describe(
+						'Whether to include internal types (those starting with __) in the search results'
+					),
+				onlyObjectTypes: z
+					.boolean()
+					.default(true)
+					.describe(
+						'Whether to only include OBJECT kind types in the search results with descriptions'
+					),
+			}),
 		},
 		async (params, accountId) => {
 			const {
@@ -490,7 +493,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 			} = params
 
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				// First fetch the schema overview
 				const schemaOverview = await fetchSchemaOverview(props.accessToken)
 
@@ -572,9 +575,10 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 	)
 
 	// Tool to fetch the GraphQL schema overview (high-level structure)
-	agent.server.accountTool(
+	context.server.accountTool(
 		'graphql_schema_overview',
-		`Fetch the high-level overview of the Cloudflare GraphQL API schema
+		{
+			description: `Fetch the high-level overview of the Cloudflare GraphQL API schema
 		
 		Use this tool when:
 
@@ -585,20 +589,21 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 
 		This tool returns a high-level summary of the Cloudflare GraphQL API schema. It provides a structured outline of API entry points, data models, and relationships to help guide query construction or system integration.
 		`,
-		{
-			pageSize: z
-				.number()
-				.min(10)
-				.max(1000)
-				.default(100)
-				.describe('Number of types to return per page'),
-			page: z.number().min(1).default(1).describe('Page number to fetch'),
+			inputSchema: z.object({
+				pageSize: z
+					.number()
+					.min(10)
+					.max(1000)
+					.default(100)
+					.describe('Number of types to return per page'),
+				page: z.number().min(1).default(1).describe('Page number to fetch'),
+			}),
 		},
 		async (params) => {
 			const { pageSize = 100, page = 1 } = params
 
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const schemaOverview = await fetchSchemaOverview(props.accessToken)
 
 				// Apply pagination to the types array
@@ -655,9 +660,10 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 	)
 
 	// Tool to fetch detailed information about a specific GraphQL type
-	agent.server.accountTool(
+	context.server.accountTool(
 		'graphql_type_details',
-		`Fetch detailed information about a specific GraphQL type (dataset)
+		{
+			description: `Fetch detailed information about a specific GraphQL type (dataset)
 
 		IMPORTANT: After exploring the schema, DO NOT generate overly complicated GraphQL queries that the user didn't explicitly ask for. Only include fields that were specifically requested.
 
@@ -673,24 +679,29 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 			- Do not add dimensions or additional fields unless explicitly requested
 			- When in doubt, ask the user for clarification rather than creating a complex query
 		`,
-		{
-			typeName: z
-				.string()
-				.describe('The type name (dataset) of the GraphQL type to fetch details for'),
-			fieldsPageSize: z
-				.number()
-				.min(5)
-				.max(500)
-				.default(50)
-				.describe('Number of fields to return per page'),
-			fieldsPage: z.number().min(1).default(1).describe('Page number for fields to fetch'),
-			enumValuesPageSize: z
-				.number()
-				.min(5)
-				.max(500)
-				.default(50)
-				.describe('Number of enum values to return per page'),
-			enumValuesPage: z.number().min(1).default(1).describe('Page number for enum values to fetch'),
+			inputSchema: z.object({
+				typeName: z
+					.string()
+					.describe('The type name (dataset) of the GraphQL type to fetch details for'),
+				fieldsPageSize: z
+					.number()
+					.min(5)
+					.max(500)
+					.default(50)
+					.describe('Number of fields to return per page'),
+				fieldsPage: z.number().min(1).default(1).describe('Page number for fields to fetch'),
+				enumValuesPageSize: z
+					.number()
+					.min(5)
+					.max(500)
+					.default(50)
+					.describe('Number of enum values to return per page'),
+				enumValuesPage: z
+					.number()
+					.min(1)
+					.default(1)
+					.describe('Page number for enum values to fetch'),
+			}),
 		},
 		async (params) => {
 			const {
@@ -702,7 +713,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 			} = params
 
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const typeDetails = await fetchTypeDetails(typeName, props.accessToken)
 
 				// Apply pagination to fields if they exist
@@ -780,27 +791,30 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 	)
 
 	// Tool to fetch the complete GraphQL schema (combines overview and important type details)
-	agent.server.accountTool(
+	context.server.accountTool(
 		'graphql_complete_schema',
-		'Fetch the complete Cloudflare GraphQL API schema (combines overview and important type details)',
 		{
-			typesPageSize: z
-				.number()
-				.min(10)
-				.max(500)
-				.default(100)
-				.describe('Number of types to return per page'),
-			typesPage: z.number().min(1).default(1).describe('Page number for types to fetch'),
-			includeRootTypeDetails: z
-				.boolean()
-				.default(true)
-				.describe('Whether to include detailed information about root types'),
-			maxTypeDetailsToFetch: z
-				.number()
-				.min(0)
-				.max(10)
-				.default(3)
-				.describe('Maximum number of important types to fetch details for'),
+			description:
+				'Fetch the complete Cloudflare GraphQL API schema (combines overview and important type details)',
+			inputSchema: z.object({
+				typesPageSize: z
+					.number()
+					.min(10)
+					.max(500)
+					.default(100)
+					.describe('Number of types to return per page'),
+				typesPage: z.number().min(1).default(1).describe('Page number for types to fetch'),
+				includeRootTypeDetails: z
+					.boolean()
+					.default(true)
+					.describe('Whether to include detailed information about root types'),
+				maxTypeDetailsToFetch: z
+					.number()
+					.min(0)
+					.max(10)
+					.default(3)
+					.describe('Maximum number of important types to fetch details for'),
+			}),
 		},
 		async (params) => {
 			const {
@@ -811,7 +825,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 			} = params
 
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				// First fetch the schema overview
 				const schemaOverview = await fetchSchemaOverview(props.accessToken)
 
@@ -925,9 +939,10 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 	)
 
 	// Tool to execute a GraphQL query
-	agent.server.accountTool(
+	context.server.accountTool(
 		'graphql_query',
-		`Execute a GraphQL query against the Cloudflare API
+		{
+			description: `Execute a GraphQL query against the Cloudflare API
 
 		IMPORTANT: ONLY execute the EXACT GraphQL query provided by the user. DO NOT generate complicated queries that the user didn't explicitly ask for.
 
@@ -948,13 +963,14 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 			- Always suggest including limits in queries (e.g., first: 10, limit: 20) to prevent response size issues.
 			- If a query fails due to size limits, advise the user to add or reduce limits in their query.
 		`,
-		{
-			query: z.string().describe('The GraphQL query to execute'),
-			variables: z.record(z.string(), z.any()).optional().describe('Variables for the query'),
+			inputSchema: z.object({
+				query: z.string().describe('The GraphQL query to execute'),
+				variables: z.record(z.string(), z.any()).optional().describe('Variables for the query'),
+			}),
 		},
 		async (params) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const { query, variables = {} } = params
 
 				// Execute the GraphQL query and get the raw result
@@ -1010,7 +1026,7 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 	)
 
 	// Tool to generate a GraphQL API Explorer link
-	agent.server.registerTool(
+	context.server.registerTool(
 		'graphql_api_explorer',
 		{
 			description: `Generate a Cloudflare GraphQL API Explorer link
@@ -1025,13 +1041,13 @@ export function registerGraphQLTools(agent: GraphQLMCP) {
 		The response includes a clickable Markdown link that users can click to open the query in Cloudflare's interactive GraphQL playground.
 		The original query and variables are also displayed for reference.
 		`,
-			inputSchema: {
+			inputSchema: z.object({
 				query: z.string().describe('The GraphQL query to include in the explorer link'),
 				variables: z
 					.record(z.string(), z.any())
 					.optional()
 					.describe('Variables for the query in JSON format'),
-			},
+			}),
 		},
 		async (params) => {
 			try {

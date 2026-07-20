@@ -5,6 +5,8 @@ connections, with Cloudflare OAuth built-in.
 
 It integrates tools powered by the [Cloudflare DNS Analytics API](https://developers.cloudflare.com/api/resources/dns/) to provide insights on DNS analytics and optimization.
 
+The authenticated `/mcp` endpoint creates a fresh SDK v2 server and request-scoped auth/account context for every request. OAuth grants and token validation remain durable security state, but the server exposes no legacy HTTP+SSE route and stores no MCP protocol session.
+
 ## 🔨 Available Tools
 
 Currently available tools:
@@ -15,6 +17,8 @@ Currently available tools:
 | **DNS Analytics**       | `dns_report`                | Fetch the DNS Report for a given zone over a given time frame. |
 | **Account DNS Setting** | `show_account_dns_settings` | Fetch the DNS setting for the current active account.          |
 | **Zone DNS Setting**    | `show_zone_dns_settings`    | Fetch the DNS setting for a given zone.                        |
+
+**Note:** Account-scoped tools detect single-account credentials and account-scoped API tokens automatically. If your credentials can access multiple accounts, pass `account_id` to the tool or set a `cf-account-id` request header in your MCP client configuration.
 
 This MCP server is still a work in progress, and we plan to add more tools in the future.
 
@@ -30,7 +34,7 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 
 ## Access the remote MCP server from any MCP Client
 
-If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://dns-analytics.mcp.cloudflare.com`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
+If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://dns-analytics.mcp.cloudflare.com/mcp`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
 
 If your client does not yet support remote MCP servers, you will need to set up its respective configuration file using [mcp-remote](https://www.npmjs.com/package/mcp-remote) to specify which servers your client can access.
 

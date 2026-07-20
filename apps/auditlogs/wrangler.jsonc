@@ -12,6 +12,10 @@
 		{
 			"new_sqlite_classes": ["AuditlogMCP"],
 			"tag": "v1"
+		},
+		{
+			"deleted_classes": ["AuditlogMCP"],
+			"tag": "v2"
 		}
 	],
 	"observability": {
@@ -20,14 +24,6 @@
 			"enabled": true,
 			"head_sampling_rate": 0.1
 		}
-	},
-	"durable_objects": {
-		"bindings": [
-			{
-				"class_name": "AuditlogMCP",
-				"name": "MCP_OBJECT"
-			}
-		]
 	},
 	"kv_namespaces": [
 		{
@@ -57,15 +53,12 @@
 		"staging": {
 			"name": "mcp-cloudflare-auditlogs-staging",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
-			"routes": [{ "pattern": "auditlogs-staging.mcp.cloudflare.com", "custom_domain": true }],
-			"durable_objects": {
-				"bindings": [
-					{
-						"class_name": "AuditlogMCP",
-						"name": "MCP_OBJECT"
-					}
-				]
-			},
+			"routes": [
+				{
+					"pattern": "auditlogs-staging.mcp.cloudflare.com",
+					"custom_domain": true
+				}
+			],
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",
@@ -87,15 +80,12 @@
 		"production": {
 			"name": "mcp-cloudflare-auditlogs-production",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
-			"routes": [{ "pattern": "auditlogs.mcp.cloudflare.com", "custom_domain": true }],
-			"durable_objects": {
-				"bindings": [
-					{
-						"class_name": "AuditlogMCP",
-						"name": "MCP_OBJECT"
-					}
-				]
-			},
+			"routes": [
+				{
+					"pattern": "auditlogs.mcp.cloudflare.com",
+					"custom_domain": true
+				}
+			],
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",

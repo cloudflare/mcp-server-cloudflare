@@ -12,7 +12,9 @@
 	},
 	"dependencies": {
 		"@cloudflare/vitest-pool-workers": "0.16.11",
-		"agents": "0.13.3",
+		"@modelcontextprotocol/client": "catalog:",
+		"@modelcontextprotocol/sdk": "catalog:",
+		"agents": "catalog:",
 		"ai": "6.0.194",
 		"ai-gateway-provider": "3.1.3",
 		"wrangler": "4.96.0",
