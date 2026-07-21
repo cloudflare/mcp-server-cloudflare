@@ -31,7 +31,7 @@ export interface McpRequestSeedContext<Env> {
 	readonly executionCtx: ExecutionContext
 	/** Bound Worker lifetime extension hook. */
 	readonly waitUntil: ExecutionContext['waitUntil']
-	/** SDK construction context, including protocol era and verified AuthInfo. */
+	/** SDK construction context, including protocol era and optional AuthInfo. */
 	readonly mcp: McpRequestContext
 }
 

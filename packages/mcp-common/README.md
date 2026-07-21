@@ -43,7 +43,7 @@ The registration callback receives one immutable `McpRegistrationContext` contai
 - an `AccountManager` derived from those props
 - the original `Request`
 - `ExecutionContext` and a bound `waitUntil`
-- SDK factory context (`era` and verified `AuthInfo`)
+- SDK factory context (`era` and optional caller-supplied `AuthInfo`)
 - request-local Sentry and metrics clients when configured
 - the fresh `CloudflareMCPServer`
 
@@ -53,6 +53,6 @@ Shared tools capture this context instead of a stateful server object. Account-s
 
 `createCloudflareOAuthRouter()` keeps OAuth grants, KV, credentials, refresh tokens, and API-token validation as application/security state while routing only `/mcp` to the stateless handler. It exposes no compatibility transport route.
 
-The OAuth Provider preview in the workspace catalog carries verified provider token metadata into the Agents preview. SDK callbacks receive standard `ctx.http.authInfo`; application props remain available in `McpRegistrationContext.props`. Do not log either raw token.
+The published OAuth Provider supplies validated application props through `ctx.props`; the Agents handler exposes those as `McpRegistrationContext.props`. SDK `ctx.http.authInfo` is optional and is present only when a compatible caller supplies it. Do not log raw tokens or authentication props.
 
 The default CORS allow-headers list includes `cf-account-id`, `MCP-Protocol-Version`, `Mcp-Method`, and `Mcp-Name`. Browser deployments must configure explicit Host and Origin hostname allowlists for their domains. Authenticated deployments pass those same lists as `createCloudflareOAuthRouter({ mcpRequestPolicy: ... })`, which rejects invalid MCP Host/Origin values before authentication and lets the MCP handler own `/mcp` preflights.

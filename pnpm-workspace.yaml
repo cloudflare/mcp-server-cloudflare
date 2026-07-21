@@ -2,12 +2,10 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
-# MCP packages are intentionally centralized while the v2 SDK is in beta. The
-# Agents and OAuth Provider previews are coupled: Agents consumes the provider's
-# verified request metadata bridge to populate standard SDK v2 AuthInfo. SDK v1 is
-# retained only for eval-tools' non-server Agents client legacy interoperability.
+# MCP packages are intentionally centralized while the v2 SDK is in beta. SDK v1
+# is retained only for eval-tools' non-server Agents client legacy interoperability.
 catalog:
-  '@cloudflare/workers-oauth-provider': 'https://pkg.pr.new/cloudflare/workers-oauth-provider/@cloudflare/workers-oauth-provider@236'
+  '@cloudflare/workers-oauth-provider': '0.7.0'
   '@modelcontextprotocol/client': '2.0.0-beta.4'
   '@modelcontextprotocol/sdk': '1.29.0'
   '@modelcontextprotocol/server': '2.0.0-beta.4'
