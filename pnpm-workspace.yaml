@@ -1,3 +1,12 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# MCP packages are intentionally centralized while the v2 SDK is in beta. SDK v1
+# is retained only for eval-tools' non-server Agents client legacy interoperability.
+catalog:
+  '@cloudflare/workers-oauth-provider': '0.8.2'
+  '@modelcontextprotocol/client': '2.0.0-beta.4'
+  '@modelcontextprotocol/sdk': '1.29.0'
+  '@modelcontextprotocol/server': '2.0.0-beta.4'
+  agents: 'https://pkg.pr.new/agents@1557'

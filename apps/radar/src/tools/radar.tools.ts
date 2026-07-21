@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
-import { getProps } from '@repo/mcp-common/src/get-props'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 import {
 	PaginationLimitParam,
 	PaginationOffsetParam,
@@ -128,7 +128,8 @@ import {
 } from '../types/radar'
 import { resolveAndInvoke } from '../utils'
 
-import type { RadarMCP } from '../radar.app'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
+import type { Env } from '../radar.context'
 
 const RADAR_API_BASE = 'https://api.cloudflare.com/client/v4/radar'
 
@@ -184,21 +185,21 @@ async function fetchRadarApi(
 	return data.result
 }
 
-export function registerRadarTools(agent: RadarMCP) {
-	agent.server.registerTool(
+export function registerRadarTools(context: McpRegistrationContext<Env>) {
+	context.registerTool(
 		'list_autonomous_systems',
 		{
 			description: 'List Autonomous Systems',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				offset: PaginationOffsetParam,
 				location: LocationParam.optional(),
 				orderBy: AsOrderByParam,
-			},
+			}),
 		},
 		async ({ limit, offset, location, orderBy }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await client.radar.entities.asns.list({
 					limit,
@@ -230,17 +231,17 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_as_details',
 		{
 			description: 'Get Autonomous System details by ASN',
-			inputSchema: {
+			inputSchema: z.object({
 				asn: AsnParam,
-			},
+			}),
 		},
 		async ({ asn }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await client.radar.entities.asns.get(asn)
 
@@ -267,18 +268,18 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_ip_details',
 		{
 			description:
 				'Get IP address information including full ASN details (name, country, population estimates from APNIC).',
-			inputSchema: {
+			inputSchema: z.object({
 				ip: IpParam,
-			},
+			}),
 		},
 		async ({ ip }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				// Fetch both IP details and ASN details in parallel
 				const [ipResult, asnResult] = await Promise.all([
@@ -312,11 +313,11 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_traffic_anomalies',
 		{
 			description: 'Get traffic anomalies and outages',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				offset: PaginationOffsetParam,
 				asn: AsnParam.optional(),
@@ -324,11 +325,11 @@ export function registerRadarTools(agent: RadarMCP) {
 				dateRange: DateRangeParam.optional(),
 				dateStart: DateStartParam.optional(),
 				dateEnd: DateEndParam.optional(),
-			},
+			}),
 		},
 		async ({ limit, offset, asn, location, dateStart, dateEnd, dateRange }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await client.radar.trafficAnomalies.get({
 					limit,
@@ -364,19 +365,19 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_internet_services_ranking',
 		{
 			description: 'Get top Internet services',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				date: DateListParam.optional(),
 				serviceCategory: InternetServicesCategoryParam.optional(),
-			},
+			}),
 		},
 		async ({ limit, date, serviceCategory }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await client.radar.ranking.internetServices.top({
 					limit,
@@ -407,20 +408,20 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_domains_ranking',
 		{
 			description: 'Get top or trending domains',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				date: DateListParam.optional(),
 				location: LocationListParam.optional(),
 				rankingType: DomainRankingTypeParam.optional(),
-			},
+			}),
 		},
 		async ({ limit, date, location, rankingType }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await client.radar.ranking.top({
 					limit,
@@ -452,18 +453,18 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_domain_rank_details',
 		{
 			description: 'Get domain rank details',
-			inputSchema: {
+			inputSchema: z.object({
 				domain: DomainParam,
 				date: DateListParam.optional(),
-			},
+			}),
 		},
 		async ({ domain, date }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await client.radar.ranking.domain.get(domain, { date })
 
@@ -490,11 +491,11 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_http_data',
 		{
 			description: 'Retrieve HTTP traffic trends.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -504,7 +505,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				geoId: GeoIdArrayParam,
 				dimension: HttpDimensionParam,
 				normalization: HttpNormalizationParam,
-			},
+			}),
 		},
 		async ({
 			dateStart,
@@ -518,7 +519,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			normalization,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				const result = await fetchRadarApi(props.accessToken, `/http/${dimension}`, {
 					asn,
@@ -552,11 +553,11 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_dns_queries_data',
 		{
 			description: 'Retrieve trends in DNS queries to the 1.1.1.1 resolver.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -565,7 +566,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				location: LocationArrayParam,
 				dimension: DnsDimensionParam,
 				normalization: DnsNormalizationParam,
-			},
+			}),
 		},
 		async ({
 			dateStart,
@@ -578,7 +579,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			normalization,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				const result = await fetchRadarApi(props.accessToken, `/dns/${dimension}`, {
 					asn,
@@ -611,11 +612,11 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_l7_attack_data',
 		{
 			description: 'Retrieve application layer (L7) attack trends.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -624,7 +625,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				location: LocationArrayParam,
 				dimension: L7AttackDimensionParam,
 				normalization: AttackNormalizationParam,
-			},
+			}),
 		},
 		async ({
 			dateStart,
@@ -637,7 +638,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			normalization,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await resolveAndInvoke(client.radar.attacks.layer7, dimension, {
 					asn,
@@ -672,11 +673,11 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_l3_attack_data',
 		{
 			description: 'Retrieve network layer (L3/DDoS) attack trends.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -685,7 +686,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				location: LocationArrayParam,
 				dimension: L3AttackDimensionParam,
 				normalization: AttackNormalizationParam,
-			},
+			}),
 		},
 		async ({
 			dateStart,
@@ -698,7 +699,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			normalization,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await resolveAndInvoke(client.radar.attacks.layer3, dimension, {
 					asn,
@@ -733,20 +734,20 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_email_routing_data',
 		{
 			description: 'Retrieve Email Routing trends.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
 				dimension: EmailRoutingDimensionParam,
-			},
+			}),
 		},
 		async ({ dateStart, dateEnd, dateRange, dimension }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await resolveAndInvoke(client.radar.email.routing, dimension, {
 					dateRange,
@@ -777,20 +778,20 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_email_security_data',
 		{
 			description: 'Retrieve Email Security trends.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
 				dimension: EmailSecurityDimensionParam,
-			},
+			}),
 		},
 		async ({ dateStart, dateEnd, dateRange, dimension }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await resolveAndInvoke(client.radar.email.security, dimension, {
 					dateRange,
@@ -821,19 +822,19 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_internet_speed_data',
 		{
 			description:
 				'Retrieve summary of bandwidth, latency, jitter, and packet loss, from the previous 90 days of Cloudflare Speed Test.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateEnd: DateEndArrayParam.optional(),
 				asn: AsnArrayParam,
 				continent: ContinentArrayParam,
 				location: LocationArrayParam,
 				dimension: InternetSpeedDimensionParam,
 				orderBy: InternetSpeedOrderByParam.optional(),
-			},
+			}),
 		},
 		async ({ dateEnd, asn, location, continent, dimension, orderBy }) => {
 			if (orderBy && dimension === 'summary') {
@@ -841,7 +842,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			}
 
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await resolveAndInvoke(client.radar.quality.speed, dimension, {
 					asn,
@@ -874,12 +875,12 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_internet_quality_data',
 		{
 			description:
 				'Retrieves a summary or time series of bandwidth, latency, or DNS response time percentiles from the Radar Internet Quality Index (IQI).',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -888,11 +889,11 @@ export function registerRadarTools(agent: RadarMCP) {
 				location: LocationArrayParam,
 				format: z.enum(['summary', 'timeseriesGroups']),
 				metric: InternetQualityMetricParam,
-			},
+			}),
 		},
 		async ({ dateRange, dateStart, dateEnd, asn, location, continent, format, metric }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await client.radar.quality.iqi[format]({
 					asn,
@@ -927,12 +928,12 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_ai_data',
 		{
 			description:
 				'Retrieves AI-related data, including traffic from AI user agents, as well as popular models and model tasks specifically from Cloudflare Workers AI.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -941,7 +942,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				location: LocationArrayParam,
 				dimension: AiDimensionParam,
 				normalization: AiNormalizationParam,
-			},
+			}),
 		},
 		async ({
 			dateRange,
@@ -954,7 +955,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			normalization,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				const result = await fetchRadarApi(props.accessToken, `/ai/${dimension}`, {
 					asn,
@@ -992,12 +993,12 @@ export function registerRadarTools(agent: RadarMCP) {
 	// TODO: Replace with SDK when BGP hijacks/leaks endpoints work correctly in cloudflare SDK
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_hijacks',
 		{
 			description:
 				'Retrieve BGP hijack events. BGP hijacks occur when an AS announces routes it does not own, potentially redirecting traffic.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				offset: PaginationOffsetParam,
 				dateRange: DateRangeParam.optional(),
@@ -1012,7 +1013,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				maxConfidence: BgpMaxConfidenceParam,
 				sortBy: BgpSortByParam,
 				sortOrder: BgpSortOrderParam,
-			},
+			}),
 		},
 		async ({
 			limit,
@@ -1031,7 +1032,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			sortOrder,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/hijacks/events', {
 					page: offset ? Math.floor(offset / (limit || 10)) + 1 : 1,
 					per_page: limit,
@@ -1070,12 +1071,12 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_leaks',
 		{
 			description:
 				'Retrieve BGP route leak events. Route leaks occur when an AS improperly announces routes learned from one peer to another.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				offset: PaginationOffsetParam,
 				dateRange: DateRangeParam.optional(),
@@ -1086,7 +1087,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				involvedCountry: BgpInvolvedCountryParam,
 				sortBy: BgpSortByParam,
 				sortOrder: BgpSortOrderParam,
-			},
+			}),
 		},
 		async ({
 			limit,
@@ -1101,7 +1102,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			sortOrder,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/leaks/events', {
 					page: offset ? Math.floor(offset / (limit || 10)) + 1 : 1,
 					per_page: limit,
@@ -1136,19 +1137,19 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_route_stats',
 		{
 			description:
 				'Retrieve BGP routing table statistics including number of routes, origin ASes, and more.',
-			inputSchema: {
+			inputSchema: z.object({
 				asn: AsnParam.optional(),
 				location: LocationParam.optional(),
-			},
+			}),
 		},
 		async ({ asn, location }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await client.radar.bgp.routes.stats({
 					asn,
@@ -1181,12 +1182,12 @@ export function registerRadarTools(agent: RadarMCP) {
 	// TODO: Replace with SDK when bots endpoints are added to cloudflare SDK
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bots_data',
 		{
 			description:
 				'Retrieve bot traffic data including trends by bot name, operator, category, and kind. Covers AI crawlers, search engines, monitoring bots, and more.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -1200,7 +1201,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				botVerificationStatus: BotVerificationStatusParam,
 				dimension: BotsDimensionParam,
 				limitPerGroup: LimitPerGroupParam,
-			},
+			}),
 		},
 		async ({
 			dateRange,
@@ -1218,7 +1219,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			limitPerGroup,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				const endpoint = dimension === 'timeseries' ? '/bots/timeseries' : `/bots/${dimension}`
 
@@ -1263,12 +1264,12 @@ export function registerRadarTools(agent: RadarMCP) {
 	// TODO: Replace with SDK when CT endpoints are added to cloudflare SDK
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_certificate_transparency_data',
 		{
 			description:
 				'Retrieve Certificate Transparency (CT) log data. CT provides visibility into SSL/TLS certificates issued for domains, useful for security monitoring.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -1282,7 +1283,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				dimension: CtDimensionParam,
 				limitPerGroup: LimitPerGroupParam,
 				normalization: CtNormalizationParam,
-			},
+			}),
 		},
 		async ({
 			dateRange,
@@ -1300,7 +1301,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			normalization,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				const result = await fetchRadarApi(props.accessToken, `/ct/${dimension}`, {
 					dateRange,
@@ -1343,12 +1344,12 @@ export function registerRadarTools(agent: RadarMCP) {
 	// TODO: Replace with SDK when netflows endpoints support geoId in cloudflare SDK
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_netflows_data',
 		{
 			description:
 				'Retrieve NetFlows traffic data showing network traffic patterns. Supports filtering by ADM1 (administrative level 1, e.g., states/provinces) via geoId.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -1360,7 +1361,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				normalization: NetflowsNormalizationParam,
 				dimension: NetflowsDimensionParam,
 				limitPerGroup: LimitPerGroupParam,
-			},
+			}),
 		},
 		async ({
 			dateRange,
@@ -1376,7 +1377,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			limitPerGroup,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				const endpoint = `/netflows/${dimension}`
 
@@ -1419,19 +1420,19 @@ export function registerRadarTools(agent: RadarMCP) {
 	// TODO: Replace with SDK when origins endpoints are added to cloudflare SDK
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'list_origins',
 		{
 			description:
 				'List cloud provider origins (hyperscalers) available in Cloud Observatory. Returns Amazon (AWS), Google (GCP), Microsoft (Azure), and Oracle (OCI) with their available regions.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				offset: PaginationOffsetParam,
-			},
+			}),
 		},
 		async ({ limit, offset }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/origins', {
 					limit,
 					offset,
@@ -1458,18 +1459,18 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_origin_details',
 		{
 			description:
 				'Get details for a specific cloud provider origin, including all available regions.',
-			inputSchema: {
+			inputSchema: z.object({
 				slug: OriginSlugParam,
-			},
+			}),
 		},
 		async ({ slug }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, `/origins/${slug}`)
 
 				return {
@@ -1493,12 +1494,12 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_origins_data',
 		{
 			description:
 				'Retrieve cloud provider (AWS, GCP, Azure, OCI) performance metrics. Supports timeseries, summaries grouped by region/success_rate/percentile, and grouped timeseries.',
-			inputSchema: {
+			inputSchema: z.object({
 				dimension: OriginDataDimensionParam,
 				origin: OriginArrayParam,
 				metric: OriginMetricParam,
@@ -1508,7 +1509,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				region: OriginRegionParam,
 				limitPerGroup: LimitPerGroupParam,
 				normalization: OriginNormalizationParam,
-			},
+			}),
 		},
 		async ({
 			dimension,
@@ -1522,7 +1523,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			normalization,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				let endpoint: string
 				if (dimension === 'timeseries') {
@@ -1571,12 +1572,12 @@ export function registerRadarTools(agent: RadarMCP) {
 	// Robots.txt Tools
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_robots_txt_data',
 		{
 			description:
 				'Retrieve robots.txt analysis data. Shows how websites configure crawler access rules, particularly for AI crawlers. Useful for understanding web crawler policies across domains.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -1589,7 +1590,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				limitPerGroup: LimitPerGroupParam,
 				limit: PaginationLimitParam,
 				normalization: RobotsTxtNormalizationParam,
-			},
+			}),
 		},
 		async ({
 			dateRange,
@@ -1606,7 +1607,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			normalization,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				const endpoint = `/robots_txt/${dimension}`
 
@@ -1649,12 +1650,12 @@ export function registerRadarTools(agent: RadarMCP) {
 	// Bots Crawlers Tools
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bots_crawlers_data',
 		{
 			description:
 				'Retrieve web crawler HTTP request data. Shows crawler traffic patterns by client type, user agent, referrer, and industry. Useful for analyzing crawler behavior and traffic distribution.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -1665,7 +1666,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				industry: CrawlerIndustryParam,
 				clientType: CrawlerClientTypeParam,
 				limitPerGroup: LimitPerGroupParam,
-			},
+			}),
 		},
 		async ({
 			dateRange,
@@ -1680,7 +1681,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			limitPerGroup,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				const endpoint = `/bots/crawlers/${format}/${dimension}`
 
@@ -1716,12 +1717,12 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'list_bots',
 		{
 			description:
 				'List known bots with their details. Includes AI crawlers, search engines, monitoring bots, and more. Filter by category, operator, kind, or verification status.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				offset: PaginationOffsetParam,
 				botCategory: z
@@ -1751,11 +1752,11 @@ export function registerRadarTools(agent: RadarMCP) {
 					.enum(['VERIFIED'])
 					.optional()
 					.describe('Filter by verification status.'),
-			},
+			}),
 		},
 		async ({ limit, offset, botCategory, botOperator, kind, botVerificationStatus }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bots', {
 					limit,
 					offset,
@@ -1786,17 +1787,17 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bot_details',
 		{
 			description: 'Get detailed information about a specific bot by its slug identifier.',
-			inputSchema: {
+			inputSchema: z.object({
 				botSlug: SlugParam.describe('The bot slug identifier (e.g., "googlebot", "bingbot").'),
-			},
+			}),
 		},
 		async ({ botSlug }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, `/bots/${botSlug}`)
 
 				return {
@@ -1826,12 +1827,12 @@ export function registerRadarTools(agent: RadarMCP) {
 	// supports it on leaked_credential_checks v2 timeseries_groups.
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_leaked_credentials_data',
 		{
 			description:
 				'Retrieve trends in HTTP authentication requests and compromised credential detection. Shows distribution by compromised status and bot class.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -1841,7 +1842,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				botClass: LeakedCredentialsBotClassParam,
 				compromised: LeakedCredentialsCompromisedParam,
 				dimension: LeakedCredentialsDimensionParam,
-			},
+			}),
 		},
 		async ({
 			dateRange,
@@ -1855,7 +1856,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			dimension,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				let endpoint: string
 				if (dimension === 'timeseries') {
@@ -1900,12 +1901,12 @@ export function registerRadarTools(agent: RadarMCP) {
 	// AS112 Tools
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_as112_data',
 		{
 			description:
 				'Retrieve AS112 DNS sink hole data. AS112 handles reverse DNS lookups for private IP addresses (RFC 1918). Useful for analyzing DNS misconfiguration patterns.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -1915,7 +1916,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				protocol: As112ProtocolParam,
 				responseCode: As112ResponseCodeParam,
 				dimension: As112DimensionParam,
-			},
+			}),
 		},
 		async ({
 			dateRange,
@@ -1929,7 +1930,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			dimension,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				let endpoint: string
 				if (dimension === 'timeseries') {
@@ -1976,21 +1977,21 @@ export function registerRadarTools(agent: RadarMCP) {
 	// Geolocation Tools
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'list_geolocations',
 		{
 			description:
 				'List available geolocations (ADM1 - administrative divisions like states/provinces). Use this to find GeoNames IDs for filtering HTTP and NetFlows data by region.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				offset: PaginationOffsetParam,
 				geoId: z.string().optional().describe('Filter by specific GeoNames ID.'),
 				location: LocationParam.optional(),
-			},
+			}),
 		},
 		async ({ limit, offset, geoId, location }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/geolocations', {
 					limit,
 					offset,
@@ -2019,17 +2020,17 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_geolocation_details',
 		{
 			description: 'Get details for a specific geolocation by its GeoNames ID.',
-			inputSchema: {
+			inputSchema: z.object({
 				geoId: GeoIdParam,
-			},
+			}),
 		},
 		async ({ geoId }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, `/geolocations/${geoId}`)
 
 				return {
@@ -2057,12 +2058,12 @@ export function registerRadarTools(agent: RadarMCP) {
 	// TCP Resets/Timeouts Tools
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_tcp_resets_timeouts_data',
 		{
 			description:
 				'Retrieve TCP connection quality metrics including resets and timeouts. Useful for understanding connection reliability across networks and locations.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -2070,11 +2071,11 @@ export function registerRadarTools(agent: RadarMCP) {
 				continent: ContinentArrayParam,
 				location: LocationArrayParam,
 				dimension: TcpResetsTimeoutsDimensionParam,
-			},
+			}),
 		},
 		async ({ dateRange, dateStart, dateEnd, asn, continent, location, dimension }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				const endpoint =
 					dimension === 'summary'
@@ -2115,12 +2116,12 @@ export function registerRadarTools(agent: RadarMCP) {
 	// Annotations/Outages Tools
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_annotations',
 		{
 			description:
 				'Retrieve annotations including Internet events, outages, and anomalies from various Cloudflare data sources.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				offset: PaginationOffsetParam,
 				dateRange: DateRangeParam.optional(),
@@ -2130,7 +2131,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				eventType: AnnotationEventTypeParam,
 				asn: AsnParam.optional(),
 				location: LocationParam.optional(),
-			},
+			}),
 		},
 		async ({
 			limit,
@@ -2144,7 +2145,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			location,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/annotations', {
 					limit,
 					offset,
@@ -2178,12 +2179,12 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_outages',
 		{
 			description:
 				'Retrieve Internet outages and anomalies. Provides information about detected connectivity issues across ASes and locations.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				offset: PaginationOffsetParam,
 				dateRange: DateRangeParam.optional(),
@@ -2191,11 +2192,11 @@ export function registerRadarTools(agent: RadarMCP) {
 				dateEnd: DateEndParam.optional(),
 				asn: AsnParam.optional(),
 				location: LocationParam.optional(),
-			},
+			}),
 		},
 		async ({ limit, offset, dateRange, dateStart, dateEnd, asn, location }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/annotations/outages', {
 					limit,
 					offset,
@@ -2231,18 +2232,18 @@ export function registerRadarTools(agent: RadarMCP) {
 	// Certificate Transparency Authorities & Logs Tools
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'list_ct_authorities',
 		{
 			description: 'List Certificate Authorities (CAs) tracked in Certificate Transparency logs.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				offset: PaginationOffsetParam,
-			},
+			}),
 		},
 		async ({ limit, offset }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/ct/authorities', {
 					limit,
 					offset,
@@ -2269,19 +2270,19 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_ct_authority_details',
 		{
 			description: 'Get details for a specific Certificate Authority by its SHA256 fingerprint.',
-			inputSchema: {
+			inputSchema: z.object({
 				caSlug: Sha256FingerprintParam.describe(
 					'The Certificate Authority SHA256 fingerprint (64 hexadecimal characters).'
 				),
-			},
+			}),
 		},
 		async ({ caSlug }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, `/ct/authorities/${caSlug}`)
 
 				return {
@@ -2305,18 +2306,18 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'list_ct_logs',
 		{
 			description: 'List Certificate Transparency logs.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				offset: PaginationOffsetParam,
-			},
+			}),
 		},
 		async ({ limit, offset }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/ct/logs', {
 					limit,
 					offset,
@@ -2343,17 +2344,17 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_ct_log_details',
 		{
 			description: 'Get details for a specific Certificate Transparency log by its slug.',
-			inputSchema: {
+			inputSchema: z.object({
 				logSlug: SlugParam.describe('The Certificate Transparency log slug identifier.'),
-			},
+			}),
 		},
 		async ({ logSlug }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, `/ct/logs/${logSlug}`)
 
 				return {
@@ -2381,23 +2382,23 @@ export function registerRadarTools(agent: RadarMCP) {
 	// BGP Additional Tools
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_timeseries',
 		{
 			description:
 				'Retrieve BGP updates time series data. Shows BGP announcement and withdrawal patterns over time.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
 				asn: AsnArrayParam,
 				prefix: BgpPrefixArrayParam,
 				updateType: BgpUpdateTypeParam,
-			},
+			}),
 		},
 		async ({ dateRange, dateStart, dateEnd, asn, prefix, updateType }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/timeseries', {
 					dateRange,
 					dateStart,
@@ -2428,11 +2429,11 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_top_ases',
 		{
 			description: 'Get top Autonomous Systems by BGP update count.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
@@ -2440,11 +2441,11 @@ export function registerRadarTools(agent: RadarMCP) {
 				asn: AsnArrayParam,
 				prefix: BgpPrefixArrayParam,
 				updateType: BgpUpdateTypeParam,
-			},
+			}),
 		},
 		async ({ limit, dateRange, dateStart, dateEnd, asn, prefix, updateType }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/top/ases', {
 					limit,
 					dateRange,
@@ -2476,22 +2477,22 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_top_prefixes',
 		{
 			description: 'Get top IP prefixes by BGP update count.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
 				asn: AsnArrayParam,
 				updateType: BgpUpdateTypeParam,
-			},
+			}),
 		},
 		async ({ limit, dateRange, dateStart, dateEnd, asn, updateType }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/top/prefixes', {
 					limit,
 					dateRange,
@@ -2522,20 +2523,20 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_moas',
 		{
 			description:
 				'Get Multi-Origin AS (MOAS) prefixes. MOAS occurs when a prefix is announced by multiple ASes, which can indicate hijacking or legitimate anycast.',
-			inputSchema: {
+			inputSchema: z.object({
 				origin: BgpOriginParam,
 				prefix: BgpPrefixParam,
 				invalidOnly: BgpInvalidOnlyParam,
-			},
+			}),
 		},
 		async ({ origin, prefix, invalidOnly }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/routes/moas', {
 					origin,
 					prefix,
@@ -2563,21 +2564,21 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_pfx2as',
 		{
 			description:
 				'Get prefix-to-ASN mapping. Useful for looking up which AS announces a given IP prefix.',
-			inputSchema: {
+			inputSchema: z.object({
 				prefix: BgpPrefixParam,
 				origin: BgpOriginParam,
 				rpkiStatus: BgpRpkiStatusParam,
 				longestPrefixMatch: BgpLongestPrefixMatchParam,
-			},
+			}),
 		},
 		async ({ prefix, origin, rpkiStatus, longestPrefixMatch }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/routes/pfx2as', {
 					prefix,
 					origin,
@@ -2606,23 +2607,23 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_ip_space_timeseries',
 		{
 			description:
 				'Retrieve announced IP address space time series data. Shows the count of announced IPv4 /24s and IPv6 /48s over time. Essential for monitoring BGP route withdrawals, IPv6 address space changes, and detecting significant routing events by ASN or country.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
 				asn: AsnArrayParam,
 				location: LocationArrayParam,
 				ipVersion: BgpIpVersionParam,
-			},
+			}),
 		},
 		async ({ dateRange, dateStart, dateEnd, asn, location, ipVersion }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/ips/timeseries', {
 					dateRange,
 					dateStart,
@@ -2653,18 +2654,18 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_routes_realtime',
 		{
 			description:
 				'Get real-time BGP routes for a specific IP prefix using public route collectors (RouteViews and RIPE RIS). Shows current routing state including AS paths, RPKI validation status, and visibility across peers. Useful for troubleshooting routing issues and verifying route announcements.',
-			inputSchema: {
+			inputSchema: z.object({
 				prefix: BgpPrefixParam,
-			},
+			}),
 		},
 		async ({ prefix }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/routes/realtime', {
 					prefix,
 				})
@@ -2694,18 +2695,18 @@ export function registerRadarTools(agent: RadarMCP) {
 	// AS Sets and Relationships Tools
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_as_set',
 		{
 			description:
 				'Get IRR AS-SETs that an Autonomous System is a member of. AS-SETs are used in routing policies.',
-			inputSchema: {
+			inputSchema: z.object({
 				asn: AsnParam,
-			},
+			}),
 		},
 		async ({ asn }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, `/entities/asns/${asn}/as_set`)
 
 				return {
@@ -2729,12 +2730,12 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_as_relationships',
 		{
 			description:
 				'Get AS-level relationships for an Autonomous System. Shows peer, upstream, and downstream relationships with other ASes.',
-			inputSchema: {
+			inputSchema: z.object({
 				asn: AsnParam,
 				asn2: z
 					.number()
@@ -2742,11 +2743,11 @@ export function registerRadarTools(agent: RadarMCP) {
 					.positive()
 					.optional()
 					.describe('Optional second ASN to check specific relationship.'),
-			},
+			}),
 		},
 		async ({ asn, asn2 }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, `/entities/asns/${asn}/rel`, {
 					asn2,
 				})
@@ -2776,22 +2777,22 @@ export function registerRadarTools(agent: RadarMCP) {
 	// TLD Tools
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'list_tlds',
 		{
 			description:
 				'List top-level domains (TLDs) including generic, country-code, and sponsored TLDs. Filter by type or manager.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				offset: PaginationOffsetParam,
 				tldType: TldTypeParam,
 				manager: TldManagerParam,
 				tld: TldFilterParam,
-			},
+			}),
 		},
 		async ({ limit, offset, tldType, manager, tld }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/tlds', {
 					limit,
 					offset,
@@ -2821,17 +2822,17 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_tld_details',
 		{
 			description: 'Get detailed information about a specific top-level domain (TLD).',
-			inputSchema: {
+			inputSchema: z.object({
 				tld: TldParam,
-			},
+			}),
 		},
 		async ({ tld }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, `/tlds/${tld}`)
 
 				return {
@@ -2859,11 +2860,11 @@ export function registerRadarTools(agent: RadarMCP) {
 	// Ranking Timeseries Tool
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_domains_ranking_timeseries',
 		{
 			description: 'Get domain ranking timeseries data. Track how specific domains rank over time.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
@@ -2871,11 +2872,11 @@ export function registerRadarTools(agent: RadarMCP) {
 				domainCategory: DomainCategoryArrayParam,
 				location: LocationArrayParam,
 				limit: PaginationLimitParam,
-			},
+			}),
 		},
 		async ({ dateRange, dateStart, dateEnd, domains, domainCategory, location, limit }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/ranking/timeseries_groups', {
 					dateRange,
 					dateStart,
@@ -2911,23 +2912,23 @@ export function registerRadarTools(agent: RadarMCP) {
 	// Speed Histogram Tool
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_speed_histogram',
 		{
 			description:
 				'Get speed test histogram data. Shows distribution of speed test results for bandwidth, latency, or jitter.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateEnd: DateEndArrayParam.optional(),
 				asn: AsnArrayParam,
 				continent: ContinentArrayParam,
 				location: LocationArrayParam,
 				metric: SpeedHistogramMetricParam,
 				bucketSize: BucketSizeParam,
-			},
+			}),
 		},
 		async ({ dateEnd, asn, continent, location, metric, bucketSize }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/quality/speed/histogram', {
 					dateEnd,
 					asn,
@@ -2962,22 +2963,22 @@ export function registerRadarTools(agent: RadarMCP) {
 	// Internet Services Timeseries Tool
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_internet_services_timeseries',
 		{
 			description:
 				'Track internet service ranking changes over time. Useful for monitoring how services like ChatGPT, Google, etc. rank over time.',
-			inputSchema: {
+			inputSchema: z.object({
 				dateRange: DateRangeArrayParam.optional(),
 				dateStart: DateStartArrayParam.optional(),
 				dateEnd: DateEndArrayParam.optional(),
 				serviceCategory: InternetServicesCategoryParam.optional(),
 				limit: PaginationLimitParam,
-			},
+			}),
 		},
 		async ({ dateRange, dateStart, dateEnd, serviceCategory, limit }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(
 					props.accessToken,
 					'/ranking/internet_services/timeseries_groups',
@@ -3015,21 +3016,21 @@ export function registerRadarTools(agent: RadarMCP) {
 	// Outages by Location Tool
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_outages_by_location',
 		{
 			description:
 				'Get outage counts aggregated by location. Useful for identifying which countries have the most Internet outages.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				dateRange: DateRangeParam.optional(),
 				dateStart: DateStartParam.optional(),
 				dateEnd: DateEndParam.optional(),
-			},
+			}),
 		},
 		async ({ limit, dateRange, dateStart, dateEnd }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/annotations/outages/locations', {
 					limit,
 					dateRange,
@@ -3062,22 +3063,22 @@ export function registerRadarTools(agent: RadarMCP) {
 	// Traffic Anomalies by Location Tool
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_traffic_anomalies_by_location',
 		{
 			description:
 				'Get traffic anomalies aggregated by location. Shows which countries have the most detected outage signals, automatically detected by Radar.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				dateRange: DateRangeParam.optional(),
 				dateStart: DateStartParam.optional(),
 				dateEnd: DateEndParam.optional(),
 				status: TrafficAnomalyStatusParam,
-			},
+			}),
 		},
 		async ({ limit, dateRange, dateStart, dateEnd, status }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/traffic_anomalies/locations', {
 					limit,
 					dateRange,
@@ -3111,21 +3112,21 @@ export function registerRadarTools(agent: RadarMCP) {
 	// BGP Routing Table ASes Tool
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_routing_table_ases',
 		{
 			description:
 				'List all ASes in global routing tables with routing statistics (prefix counts, IPv4/IPv6 address count, RPKI validation status). Data comes from public BGP MRT archives.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				location: LocationParam.optional(),
 				sortBy: BgpRoutesAsesSortByParam,
 				sortOrder: BgpSortOrderParam,
-			},
+			}),
 		},
 		async ({ limit, location, sortBy, sortOrder }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/routes/ases', {
 					limit,
 					location,
@@ -3158,19 +3159,19 @@ export function registerRadarTools(agent: RadarMCP) {
 	// BGP Top ASes by Prefixes Tool
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_top_ases_by_prefixes',
 		{
 			description:
 				'Get top ASes ordered by announced prefix count. Useful for understanding which networks have the largest routing footprint. Data comes from public BGP MRT archives and updates every 2 hours.',
-			inputSchema: {
+			inputSchema: z.object({
 				limit: PaginationLimitParam,
 				country: LocationParam.optional().describe('Filter by country (alpha-2 code).'),
-			},
+			}),
 		},
 		async ({ limit, country }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/top/ases/prefixes', {
 					limit,
 					country,
@@ -3201,12 +3202,12 @@ export function registerRadarTools(agent: RadarMCP) {
 	// BGP RPKI ASPA Tools
 	// ============================================================
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_rpki_aspa_snapshot',
 		{
 			description:
 				'Retrieve a snapshot of current or historical RPKI ASPA (Autonomous System Provider Authorization) objects. ASPA objects define which ASNs are authorized upstream providers for a customer ASN, helping prevent route leaks and hijacks.',
-			inputSchema: {
+			inputSchema: z.object({
 				customerAsn: AspaCustomerAsnParam,
 				providerAsn: AspaProviderAsnParam,
 				rir: AspaRirParam,
@@ -3216,7 +3217,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				per_page: AspaPerPageParam,
 				sortBy: AspaSortByParam,
 				sortOrder: BgpSortOrderParam,
-			},
+			}),
 		},
 		async ({
 			customerAsn,
@@ -3230,7 +3231,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			sortOrder,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/rpki/aspa/snapshot', {
 					customerAsn,
 					providerAsn,
@@ -3264,12 +3265,12 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_rpki_aspa_changes',
 		{
 			description:
 				'Retrieve RPKI ASPA changes over time, including additions, removals, and modifications of ASPA objects.',
-			inputSchema: {
+			inputSchema: z.object({
 				customerAsn: AspaCustomerAsnParam,
 				providerAsn: AspaProviderAsnParam,
 				changeType: AspaChangeTypeParam,
@@ -3282,7 +3283,7 @@ export function registerRadarTools(agent: RadarMCP) {
 				sortOrder: BgpSortOrderParam,
 				page: AspaPageParam,
 				per_page: AspaPerPageParam,
-			},
+			}),
 		},
 		async ({
 			customerAsn,
@@ -3299,7 +3300,7 @@ export function registerRadarTools(agent: RadarMCP) {
 			per_page,
 		}) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/rpki/aspa/changes', {
 					customerAsn,
 					providerAsn,
@@ -3336,21 +3337,21 @@ export function registerRadarTools(agent: RadarMCP) {
 		}
 	)
 
-	agent.server.registerTool(
+	context.registerTool(
 		'get_bgp_rpki_aspa_timeseries',
 		{
 			description: 'Retrieve a timeseries of RPKI ASPA object counts over time.',
-			inputSchema: {
+			inputSchema: z.object({
 				rir: AspaRirParam,
 				location: LocationParam.optional().describe('Filter by country (alpha-2 code).'),
 				dateRange: DateRangeParam.optional(),
 				dateStart: DateStartParam.optional(),
 				dateEnd: DateEndParam.optional(),
-			},
+			}),
 		},
 		async ({ rir, location, dateRange, dateStart, dateEnd }) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await fetchRadarApi(props.accessToken, '/bgp/rpki/aspa/timeseries', {
 					rir,
 					location,

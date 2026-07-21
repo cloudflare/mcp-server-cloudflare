@@ -1,50 +1,25 @@
-import { McpAgent } from 'agents/mcp'
-
-import { getEnv } from '@repo/mcp-common/src/env'
-import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
-
-// The demo day MCP server isn't stateful, so we don't have state/props
-export type Props = never
-
-export type State = never
+import { createPublicMcpApp } from '@repo/mcp-common/src/mcp-app'
 
 export type Env = {
 	ENVIRONMENT: 'development' | 'staging' | 'production'
 	AUTORAG_NAME: 'cloudflare-docs-autorag'
 	MCP_SERVER_NAME: 'PLACEHOLDER'
 	MCP_SERVER_VERSION: 'PLACEHOLDER'
-	MCP_OBJECT: DurableObjectNamespace<CloudflareDemoDayMCP>
 	MCP_METRICS: AnalyticsEngineDataset
 	ASSETS: Fetcher
 }
 
-const env = getEnv<Env>()
-
-export class CloudflareDemoDayMCP extends McpAgent<Env, State, Props> {
-	server = new CloudflareMCPServer({
-		wae: env.MCP_METRICS,
-		serverInfo: {
-			name: env.MCP_SERVER_NAME,
-			version: env.MCP_SERVER_VERSION,
-		},
-	})
-
-	constructor(
-		public ctx: DurableObjectState,
-		public env: Env
-	) {
-		super(ctx, env)
-	}
-
-	async init() {
-		this.server.registerTool(
+const app = createPublicMcpApp<Env>({
+	serviceHostnames: ['demo-day.mcp.cloudflare.com'],
+	register(context) {
+		context.registerTool(
 			'mcp_demo_day_info',
 			{
 				description:
 					"Get information about Cloudflare's MCP Demo Day. Use this tool if the user asks about Cloudflare's MCP demo day",
 			},
 			async () => {
-				const res = await this.env.ASSETS.fetch('https://assets.local/index.html')
+				const res = await context.env.ASSETS.fetch('https://assets.local/index.html')
 				return {
 					content: [
 						{
@@ -63,7 +38,15 @@ export class CloudflareDemoDayMCP extends McpAgent<Env, State, Props> {
 				}
 			}
 		)
-	}
-}
+	},
+})
 
-export default CloudflareDemoDayMCP.mount('/sse')
+export const mcpHandler = app.mcpHandler
+
+export default {
+	fetch(request: Request, env: Env, ctx: ExecutionContext) {
+		const pathname = new URL(request.url).pathname
+		if (pathname === '/mcp') return mcpHandler.fetch(request, env, ctx)
+		return env.ASSETS.fetch(request)
+	},
+} satisfies ExportedHandler<Env>

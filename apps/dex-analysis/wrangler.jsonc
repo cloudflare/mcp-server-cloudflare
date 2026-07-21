@@ -15,6 +15,10 @@
 		{
 			"new_sqlite_classes": ["WarpDiagReader"],
 			"tag": "v2"
+		},
+		{
+			"deleted_classes": ["CloudflareDEXMCP"],
+			"tag": "v3"
 		}
 	],
 	"observability": {
@@ -26,10 +30,6 @@
 	},
 	"durable_objects": {
 		"bindings": [
-			{
-				"class_name": "CloudflareDEXMCP",
-				"name": "MCP_OBJECT"
-			},
 			{
 				"class_name": "WarpDiagReader",
 				"name": "WARP_DIAG_READER"
@@ -66,10 +66,6 @@
 			"durable_objects": {
 				"bindings": [
 					{
-						"class_name": "CloudflareDEXMCP",
-						"name": "MCP_OBJECT"
-					},
-					{
 						"class_name": "WarpDiagReader",
 						"name": "WARP_DIAG_READER"
 					}
@@ -97,10 +93,6 @@
 			"routes": [{ "pattern": "dex.mcp.cloudflare.com", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
-					{
-						"class_name": "CloudflareDEXMCP",
-						"name": "MCP_OBJECT"
-					},
 					{
 						"class_name": "WarpDiagReader",
 						"name": "WARP_DIAG_READER"

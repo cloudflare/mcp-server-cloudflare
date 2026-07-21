@@ -2,7 +2,9 @@
 	"name": "demo-day",
 	"version": "0.1.14",
 	"private": true,
+	"type": "module",
 	"scripts": {
+		"check:lint": "run-eslint-workers",
 		"check:types": "run-tsc",
 		"deploy": "run-wrangler-deploy",
 		"dev": "wrangler dev",
@@ -11,11 +13,7 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "1.29.0",
-		"@repo/mcp-common": "workspace:*",
-		"@repo/mcp-observability": "workspace:*",
-		"agents": "0.13.3",
-		"zod": "4.4.3"
+		"@repo/mcp-common": "workspace:*"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.16.11",

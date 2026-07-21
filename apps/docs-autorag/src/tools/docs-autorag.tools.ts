@@ -1,16 +1,17 @@
-import { type EmbeddedResource } from '@modelcontextprotocol/sdk/types.js'
+import { type EmbeddedResource } from '@modelcontextprotocol/server'
 import mime from 'mime'
 import { z } from 'zod'
 
-import type { CloudflareDocumentationMCP } from '../docs-autorag.app'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
+import type { Env } from '../docs-autorag.context'
 
 /**
  * Registers the docs search tool with the MCP server
- * @param agent The MCP server instance
+ * @param context The request-local registration context
  */
-export function registerDocsTools(agent: CloudflareDocumentationMCP) {
+export function registerDocsTools(context: McpRegistrationContext<Env>) {
 	// Register the worker logs analysis tool by worker name
-	agent.server.registerTool(
+	context.registerTool(
 		'search_cloudflare_documentation',
 		{
 			description: `Search the Cloudflare documentation.
@@ -23,7 +24,7 @@ export function registerDocsTools(agent: CloudflareDocumentationMCP) {
 
 		This tool returns a number of results from a vector database. These are embedded as resources in the response and are plaintext documents in a variety of formats.
 		`,
-			inputSchema: {
+			inputSchema: z.object({
 				// partially pulled from autorag query optimization example
 				query: z.string().describe(`Search query. The query should:
 1. Identify the core concepts and intent
@@ -42,11 +43,11 @@ export function registerDocsTools(agent: CloudflareDocumentationMCP) {
 					.default(10)
 					.optional()
 					.describe('The maximum number of results to return.'),
-			},
+			}),
 		},
 		async (params) => {
 			// we don't need "rewrite query" OR aiSearch because an LLM writes the query and formats the output for us.
-			const result = await agent.env.AI.autorag(agent.env.AUTORAG_NAME).search({
+			const result = await context.env.AI.autorag(context.env.AUTORAG_NAME).search({
 				query: params.query,
 				ranking_options: params.scoreThreshold
 					? {

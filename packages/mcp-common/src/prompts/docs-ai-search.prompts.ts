@@ -1,13 +1,15 @@
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import type { McpRegistrationContext } from '../registration-context'
 
 /**
- * Registers developer-platform-related prompts with the MCP server
- * @param server The MCP server instance
+ * Registers developer-platform-related prompts with one request-scoped server.
  */
-export function registerPrompts(server: McpServer) {
-	server.prompt(
+export function registerPrompts<Env>(context: McpRegistrationContext<Env>) {
+	context.registerPrompt(
 		'workers-prompt-full',
-		'Detailed prompt for generating Cloudflare Workers code (and other developer platform products) from https://developers.cloudflare.com/workers/prompt.txt',
+		{
+			description:
+				'Detailed prompt for generating Cloudflare Workers code (and other developer platform products) from https://developers.cloudflare.com/workers/prompt.txt',
+		},
 		async () => ({
 			messages: [
 				{

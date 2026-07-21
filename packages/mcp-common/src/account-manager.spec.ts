@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { AccountManager } from './account-manager'
 
-import type { AuthProps } from './cloudflare-oauth-handler'
+import type { AuthProps } from './auth-props'
 
 const accountTokenProps: AuthProps = {
 	type: 'account_token',

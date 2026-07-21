@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import type { McpRegistrationContext } from '../registration-context'
 
 interface RequiredEnv {
 	AI: Ai
@@ -11,11 +11,10 @@ interface RequiredEnv {
 const TOP_K = 10
 
 /**
- * Registers the docs search tool with the MCP server
- * @param server The MCP server instance
+ * Registers the docs search tool with one request-scoped server.
  */
-export function registerDocsTools(server: McpServer, env: RequiredEnv) {
-	server.registerTool(
+export function registerDocsTools<Env extends RequiredEnv>(context: McpRegistrationContext<Env>) {
+	context.registerTool(
 		'search_cloudflare_documentation',
 		{
 			description: `Search the Cloudflare documentation.
@@ -28,16 +27,16 @@ export function registerDocsTools(server: McpServer, env: RequiredEnv) {
 
 		Results are returned as semantically similar chunks to the query.
 		`,
-			inputSchema: {
+			inputSchema: z.object({
 				query: z.string(),
-			},
+			}),
 			annotations: {
 				title: 'Search Cloudflare docs',
 				readOnlyHint: true,
 			},
 		},
 		async ({ query }) => {
-			const results = await queryVectorize(env.AI, env.VECTORIZE, query, TOP_K)
+			const results = await queryVectorize(context.env.AI, context.env.VECTORIZE, query, TOP_K)
 			const resultsAsXml = results
 				.map((result) => {
 					return `<result>
@@ -57,11 +56,11 @@ ${result.text}
 
 	// Note: this is a tool instead of a prompt because
 	// prompt support is much less common than tools.
-	server.registerTool(
+	context.registerTool(
 		'migrate_pages_to_workers_guide',
 		{
 			description: `ALWAYS read this guide before migrating Pages projects to Workers.`,
-			inputSchema: {},
+			inputSchema: z.object({}),
 			annotations: {
 				title: 'Get Pages migration guide',
 				readOnlyHint: true,

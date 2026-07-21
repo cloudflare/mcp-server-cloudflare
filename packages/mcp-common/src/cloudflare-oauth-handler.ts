@@ -1,9 +1,11 @@
-import { GrantType } from '@cloudflare/workers-oauth-provider'
+import { GrantType, OAuthError as ProviderOAuthError } from '@cloudflare/workers-oauth-provider'
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
-import { AuthUser } from '../../mcp-observability/src'
+import { AuthUser } from '@repo/mcp-observability'
+
+import { AuthPropsSchema, CloudflareAccountsSchema, CloudflareUserSchema } from './auth-props'
 import {
 	generatePKCECodes,
 	getAuthorizationURL,
@@ -31,7 +33,8 @@ import type {
 	TokenExchangeCallbackResult,
 } from '@cloudflare/workers-oauth-provider'
 import type { Context } from 'hono'
-import type { MetricsTracker } from '../../mcp-observability/src'
+import type { MetricsTracker } from '@repo/mcp-observability'
+import type { AuthProps } from './auth-props'
 import type { BaseHonoContext } from './sentry'
 
 /**
@@ -72,32 +75,11 @@ const AuthQuery = z.object({
 	scope: z.string().describe('OAuth scopes granted'),
 })
 
-type UserSchema = z.infer<typeof UserSchema>
-const UserSchema = z.object({
-	id: z.string(),
-	email: z.string(),
-})
-const AccountSchema = z.object({
-	name: z.string(),
-	id: z.string(),
-})
-type AccountsSchema = z.infer<typeof AccountsSchema>
-const AccountsSchema = z.array(AccountSchema)
+type UserSchema = z.infer<typeof CloudflareUserSchema>
+type AccountsSchema = z.infer<typeof CloudflareAccountsSchema>
 
-const AccountAuthProps = z.object({
-	type: z.literal('account_token'),
-	accessToken: z.string(),
-	account: AccountSchema,
-})
-const UserAuthProps = z.object({
-	type: z.literal('user_token'),
-	accessToken: z.string(),
-	user: UserSchema,
-	accounts: AccountsSchema,
-	refreshToken: z.string().optional(),
-})
-export type AuthProps = z.infer<typeof AuthProps>
-const AuthProps = z.discriminatedUnion('type', [AccountAuthProps, UserAuthProps])
+export { AuthPropsSchema }
+export type { AuthProps } from './auth-props'
 
 /**
  * Throws an McpError for combined /user + /accounts failures.
@@ -179,7 +161,7 @@ export async function getUserAndAccounts(
 	if (accountsResponse.ok) {
 		try {
 			const json = await accountsResponse.json()
-			const parsed = V4Schema(AccountsSchema).safeParse(json)
+			const parsed = V4Schema(CloudflareAccountsSchema).safeParse(json)
 			if (parsed.success) {
 				accounts = parsed.data.result ?? []
 			} else {
@@ -200,7 +182,7 @@ export async function getUserAndAccounts(
 	if (userResponse.ok) {
 		try {
 			const json = await userResponse.json()
-			const parsed = V4Schema(UserSchema).safeParse(json)
+			const parsed = V4Schema(CloudflareUserSchema).safeParse(json)
 			if (parsed.success) {
 				user = parsed.data.result ?? null
 			} else {
@@ -274,13 +256,19 @@ export async function handleTokenExchangeCallback(
 ): Promise<TokenExchangeCallbackResult | undefined> {
 	// options.props contains the current props
 	if (options.grantType === GrantType.REFRESH_TOKEN) {
-		const props = AuthProps.parse(options.props)
+		const props = AuthPropsSchema.parse(options.props)
 		if (props.type === 'account_token') {
 			// Account tokens cannot be refreshed — this is a client error, not a server error
-			throw new OAuthError('invalid_grant', 'Account tokens cannot be refreshed', 400)
+			throw new ProviderOAuthError('invalid_grant', {
+				description: 'Account tokens cannot be refreshed',
+				statusCode: 400,
+			})
 		}
 		if (!props.refreshToken) {
-			throw new OAuthError('invalid_grant', 'No refresh token available for this grant', 400)
+			throw new ProviderOAuthError('invalid_grant', {
+				description: 'No refresh token available for this grant',
+				statusCode: 400,
+			})
 		}
 
 		// handle token refreshes — convert upstream McpErrors to OAuth-compliant errors
@@ -314,7 +302,10 @@ export async function handleTokenExchangeCallback(
 					oauthCode = 'invalid_grant'
 					httpStatus = 400
 				}
-				throw new OAuthError(oauthCode, e.message, httpStatus)
+				throw new ProviderOAuthError(oauthCode, {
+					description: e.message,
+					statusCode: httpStatus,
+				})
 			}
 			throw e
 		}

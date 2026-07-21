@@ -10,6 +10,10 @@
 		{
 			"new_sqlite_classes": ["CloudflareDemoDayMCP"],
 			"tag": "v1"
+		},
+		{
+			"deleted_classes": ["CloudflareDemoDayMCP"],
+			"tag": "v2"
 		}
 	],
 	"observability": {
@@ -18,14 +22,6 @@
 			"enabled": true,
 			"head_sampling_rate": 0.1
 		}
-	},
-	"durable_objects": {
-		"bindings": [
-			{
-				"class_name": "CloudflareDemoDayMCP",
-				"name": "MCP_OBJECT"
-			}
-		]
 	},
 	"assets": {
 		"directory": "./frontend",

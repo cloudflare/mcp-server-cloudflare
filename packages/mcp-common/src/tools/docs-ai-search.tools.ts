@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import type { McpRegistrationContext } from '../registration-context'
 
 interface RequiredEnv {
 	AI: Ai
@@ -47,11 +47,10 @@ const AiSearchResponseSchema = z.object({
 })
 
 /**
- * Registers the docs search tool with the MCP server using AI Search
- * @param server The MCP server instance
+ * Registers the docs search tool with one request-scoped server using AI Search.
  */
-export function registerDocsTools(server: McpServer, env: RequiredEnv) {
-	server.registerTool(
+export function registerDocsTools<Env extends RequiredEnv>(context: McpRegistrationContext<Env>) {
+	context.registerTool(
 		'search_cloudflare_documentation',
 		{
 			description: `Search the Cloudflare documentation.
@@ -64,10 +63,10 @@ export function registerDocsTools(server: McpServer, env: RequiredEnv) {
 
 		Results are returned as semantically similar chunks to the query.
 		`,
-			inputSchema: {
+			inputSchema: z.object({
 				query: z.string(),
-			},
-			outputSchema: {
+			}),
+			outputSchema: z.object({
 				results: z.array(
 					z.object({
 						similarity: z.number().describe('Similarity score from AI Search'),
@@ -77,7 +76,7 @@ export function registerDocsTools(server: McpServer, env: RequiredEnv) {
 						text: z.string().describe('Matching documentation chunk text'),
 					})
 				),
-			},
+			}),
 			annotations: {
 				title: 'Search Cloudflare docs',
 				readOnlyHint: true,
@@ -85,7 +84,7 @@ export function registerDocsTools(server: McpServer, env: RequiredEnv) {
 		},
 		async ({ query }) => {
 			const structuredContent: DocsSearchOutput = {
-				results: await queryAiSearch(env.AI, query),
+				results: await queryAiSearch(context.env.AI, query),
 			}
 			return {
 				content: [{ type: 'text', text: formatDocsResults(structuredContent.results) }],
@@ -96,11 +95,11 @@ export function registerDocsTools(server: McpServer, env: RequiredEnv) {
 
 	// Note: this is a tool instead of a prompt because
 	// prompt support is much less common than tools.
-	server.registerTool(
+	context.registerTool(
 		'migrate_pages_to_workers_guide',
 		{
 			description: `ALWAYS read this guide before migrating Pages projects to Workers.`,
-			inputSchema: {},
+			inputSchema: z.object({}),
 			annotations: {
 				title: 'Get Pages migration guide',
 				readOnlyHint: true,

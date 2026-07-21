@@ -2,4 +2,5 @@
 module.exports = {
 	root: true,
 	extends: ['@repo/eslint-config/default.cjs'],
+	ignorePatterns: ['frontend/**', 'worker-configuration.d.ts'],
 }

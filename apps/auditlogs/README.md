@@ -3,7 +3,9 @@
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP
 connections, with Cloudflare OAuth built-in.
 
-Audit logs summarize the history of changes made within your Cloudflare account. Audit logs include account level actions like zone configuration changes. The tool is powered by the [Audit Log API](https://developers.cloudflare.com/api/resources/accounts/subresources/logs/subresources/audit/methods/list/)
+Audit logs summarize the history of changes made within your Cloudflare account. Audit logs include account level actions like zone configuration changes. The tool is powered by the [Audit Log API](https://developers.cloudflare.com/api/resources/accounts/subresources/logs/subresources/audit/methods/list/).
+
+The authenticated `/mcp` endpoint creates a fresh SDK v2 server and request-scoped auth/account context for every request. OAuth grants and token validation remain durable security state, but the server exposes no legacy HTTP+SSE route and stores no MCP protocol session.
 
 ## 🔨 Available Tools
 
@@ -12,6 +14,8 @@ Currently available tools:
 | **Category**   | **Tool**                  | **Description**                                                                                  |
 | -------------- | ------------------------- | ------------------------------------------------------------------------------------------------ |
 | **Audit Logs** | `auditlogs_by_account_id` | Fetches the history of changes between within your Cloudflare account over a specific time range |
+
+**Note:** This tool is account-scoped. Single-account credentials and account-scoped API tokens are detected automatically. If your credentials can access multiple accounts, pass `account_id` to the tool or set a `cf-account-id` request header in your MCP client configuration.
 
 ### Prompt Examples
 

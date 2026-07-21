@@ -1,5 +1,3 @@
-import type { WorkersBindingsMCP } from './bindings.app'
-
 export interface Env {
 	OAUTH_KV: KVNamespace
 	MCP_COOKIE_ENCRYPTION_KEY: string
@@ -8,7 +6,6 @@ export interface Env {
 	MCP_SERVER_VERSION: string
 	CLOUDFLARE_CLIENT_ID: string
 	CLOUDFLARE_CLIENT_SECRET: string
-	MCP_OBJECT: DurableObjectNamespace<WorkersBindingsMCP>
 	MCP_METRICS: AnalyticsEngineDataset
 	CLOUDFLARE_API_TOKEN: string
 	OPENAI_API_KEY: string

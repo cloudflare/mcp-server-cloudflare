@@ -1,87 +1,14 @@
-import OAuthProvider from '@cloudflare/workers-oauth-provider'
-import { McpAgent } from 'agents/mcp'
-
-import { AccountManager } from '@repo/mcp-common/src/account-manager'
-import { handleApiTokenMode, isApiTokenRequest } from '@repo/mcp-common/src/api-token-mode'
-import {
-	createAuthHandlers,
-	handleTokenExchangeCallback,
-} from '@repo/mcp-common/src/cloudflare-oauth-handler'
-import { getEnv } from '@repo/mcp-common/src/env'
-import { getProps } from '@repo/mcp-common/src/get-props'
+import { createAuthenticatedMcpApp } from '@repo/mcp-common/src/mcp-app'
 import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-ai-search.prompts'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
-import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerD1Tools } from '@repo/mcp-common/src/tools/d1.tools'
 import { registerDocsTools } from '@repo/mcp-common/src/tools/docs-ai-search.tools'
 import { registerHyperdriveTools } from '@repo/mcp-common/src/tools/hyperdrive.tools'
 import { registerKVTools } from '@repo/mcp-common/src/tools/kv_namespace.tools'
 import { registerR2BucketTools } from '@repo/mcp-common/src/tools/r2_bucket.tools'
 import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker.tools'
-import { MetricsTracker } from '@repo/mcp-observability'
 
-import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './bindings.context'
-
-const env = getEnv<Env>()
-
-const metrics = new MetricsTracker(env.MCP_METRICS, {
-	name: env.MCP_SERVER_NAME,
-	version: env.MCP_SERVER_VERSION,
-})
-
-export type WorkersBindingsMCPState = Record<string, never>
-
-// Context from the auth process, encrypted & stored in the auth token
-// and provided to the DurableMCP as this.props
-type Props = AuthProps
-
-export class WorkersBindingsMCP extends McpAgent<Env, WorkersBindingsMCPState, Props> {
-	_server: CloudflareMCPServer | undefined
-	set server(server: CloudflareMCPServer) {
-		this._server = server
-	}
-
-	get server(): CloudflareMCPServer {
-		if (!this._server) {
-			throw new Error('Tried to access server before it was initialized')
-		}
-
-		return this._server
-	}
-
-	constructor(ctx: DurableObjectState, env: Env) {
-		super(ctx, env)
-	}
-
-	async init() {
-		// TODO: Probably we'll want to track account tokens usage through an account identifier at some point
-		const props = getProps(this)
-		const userId = props.type === 'user_token' ? props.user.id : undefined
-		const accountManager = new AccountManager(props)
-
-		this.server = new CloudflareMCPServer({
-			userId,
-			wae: this.env.MCP_METRICS,
-			serverInfo: {
-				name: this.env.MCP_SERVER_NAME,
-				version: this.env.MCP_SERVER_VERSION,
-			},
-			accountManager,
-			options: { instructions: accountManager.instructionsSuffix() },
-		})
-
-		registerKVTools(this)
-		registerWorkersTools(this)
-		registerR2BucketTools(this)
-		registerD1Tools(this)
-		registerHyperdriveTools(this)
-
-		// Add docs tools
-		registerDocsTools(this.server, this.env)
-		registerPrompts(this.server)
-	}
-}
 
 const BindingsScopes = {
 	...RequiredScopes,
@@ -91,33 +18,20 @@ const BindingsScopes = {
 	'd1:write': 'Create, read, and write to D1 databases',
 } as const
 
-export default {
-	fetch: async (req: Request, env: Env, ctx: ExecutionContext) => {
-		if (await isApiTokenRequest(req, env)) {
-			console.log('is token mode')
-			return await handleApiTokenMode(WorkersBindingsMCP, req, env, ctx)
-		}
-
-		return new OAuthProvider({
-			apiHandlers: {
-				'/mcp': WorkersBindingsMCP.serve('/mcp'),
-				'/sse': WorkersBindingsMCP.serveSSE('/sse'),
-			},
-			defaultHandler: createAuthHandlers({ scopes: BindingsScopes, metrics }),
-			authorizeEndpoint: '/oauth/authorize',
-			tokenEndpoint: '/token',
-			tokenExchangeCallback: (options) =>
-				handleTokenExchangeCallback(
-					options,
-					env.CLOUDFLARE_CLIENT_ID,
-					env.CLOUDFLARE_CLIENT_SECRET
-				),
-			// Cloudflare access token TTL
-			accessTokenTTL: 3600,
-			refreshTokenTTL: 2592000, // 30 days
-			// TODO: Remove after 2026-05-01 — all pre-0.4.0 grants will have expired by then
-			resourceMatchOriginOnly: true,
-			clientRegistrationEndpoint: '/register',
-		}).fetch(req, env, ctx)
+const app = createAuthenticatedMcpApp<Env>({
+	serviceHostnames: ['bindings-staging.mcp.cloudflare.com', 'bindings.mcp.cloudflare.com'],
+	scopes: BindingsScopes,
+	register(context) {
+		registerKVTools(context)
+		registerWorkersTools(context)
+		registerR2BucketTools(context)
+		registerD1Tools(context)
+		registerHyperdriveTools(context)
+		registerDocsTools(context)
+		registerPrompts(context)
 	},
-}
+})
+
+export const mcpHandler = app.mcpHandler
+
+export default app.worker

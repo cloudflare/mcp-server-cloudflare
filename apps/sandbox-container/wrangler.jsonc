@@ -16,10 +16,6 @@
 	"durable_objects": {
 		"bindings": [
 			{
-				"class_name": "ContainerMcpAgent",
-				"name": "MCP_OBJECT"
-			},
-			{
 				"class_name": "ContainerManager",
 				"name": "CONTAINER_MANAGER"
 			},
@@ -37,6 +33,10 @@
 		{
 			"new_sqlite_classes": ["UserContainer"],
 			"tag": "v2"
+		},
+		{
+			"deleted_classes": ["ContainerMcpAgent"],
+			"tag": "v3"
 		}
 	],
 	"observability": {
@@ -94,10 +94,6 @@
 			"durable_objects": {
 				"bindings": [
 					{
-						"class_name": "ContainerMcpAgent",
-						"name": "MCP_OBJECT"
-					},
-					{
 						"class_name": "ContainerManager",
 						"name": "CONTAINER_MANAGER"
 					},
@@ -146,10 +142,6 @@
 			],
 			"durable_objects": {
 				"bindings": [
-					{
-						"class_name": "ContainerMcpAgent",
-						"name": "MCP_OBJECT"
-					},
 					{
 						"class_name": "ContainerManager",
 						"name": "CONTAINER_MANAGER"

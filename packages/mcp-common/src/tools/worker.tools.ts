@@ -7,37 +7,39 @@ import {
 } from '../api/workers.api'
 import { getCloudflareClient } from '../cloudflare-api'
 import { fmt } from '../format'
-import { getProps } from '../get-props'
+import { requireRequestProps } from '../request-context'
 
-import type { CloudflareMcpAgent } from '../types/cloudflare-mcp-agent.types'
+import type { McpRegistrationContext } from '../registration-context'
 
 /**
  * Registers the workers tools with the MCP server
- * @param server The MCP server instance
+ * @param context The request-local registration context
  * @param accountId Cloudflare account ID
  * @param apiToken Cloudflare API token
  */
 // Define the scriptName parameter schema
 const workerNameParam = z.string().describe('The name of the worker script to retrieve')
 
-export function registerWorkersTools(agent: CloudflareMcpAgent) {
+export function registerWorkersTools<Env>(context: McpRegistrationContext<Env>) {
 	// Tool to list all workers
-	agent.server.accountTool(
+	context.accountTool(
 		'workers_list',
-		fmt.trim(`
+		{
+			description: fmt.trim(`
 			List all Workers in your Cloudflare account.
 
 			If you only need details of a single Worker, use workers_get_worker.
 		`),
-		{},
-		{
-			title: 'List Workers',
-			readOnlyHint: true,
-			destructiveHint: false,
+			inputSchema: z.object({}),
+			annotations: {
+				title: 'List Workers',
+				readOnlyHint: true,
+				destructiveHint: false,
+			},
 		},
 		async (_params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const results = await handleWorkersList({
 					client: getCloudflareClient(props.accessToken),
 					accountId,
@@ -70,7 +72,7 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 					],
 				}
 			} catch (e) {
-				agent.server.recordError(e)
+				context.recordError(e)
 				return {
 					content: [
 						{
@@ -85,20 +87,22 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 	)
 
 	// Tool to get a specific worker's script details
-	agent.server.accountTool(
+	context.accountTool(
 		'workers_get_worker',
-		'Get the details of the Cloudflare Worker.',
 		{
-			scriptName: workerNameParam,
-		},
-		{
-			title: 'Get Worker details',
-			readOnlyHint: true,
-			destructiveHint: false,
+			description: 'Get the details of the Cloudflare Worker.',
+			inputSchema: z.object({
+				scriptName: workerNameParam,
+			}),
+			annotations: {
+				title: 'Get Worker details',
+				readOnlyHint: true,
+				destructiveHint: false,
+			},
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const { scriptName } = params
 				const res = await handleGetWorkersService({
 					apiToken: props.accessToken,
@@ -131,7 +135,7 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 					],
 				}
 			} catch (e) {
-				agent.server.recordError(e)
+				context.recordError(e)
 				return {
 					content: [
 						{
@@ -146,18 +150,21 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 	)
 
 	// Tool to get a specific worker's script content
-	agent.server.accountTool(
+	context.accountTool(
 		'workers_get_worker_code',
-		'Get the source code of a Cloudflare Worker. Note: This may be a bundled version of the worker.',
-		{ scriptName: workerNameParam },
 		{
-			title: 'Get Worker code',
-			readOnlyHint: true,
-			destructiveHint: false,
+			description:
+				'Get the source code of a Cloudflare Worker. Note: This may be a bundled version of the worker.',
+			inputSchema: z.object({ scriptName: workerNameParam }),
+			annotations: {
+				title: 'Get Worker code',
+				readOnlyHint: true,
+				destructiveHint: false,
+			},
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const { scriptName } = params
 				const scriptContent = await handleWorkerScriptDownload({
 					client: getCloudflareClient(props.accessToken),
@@ -173,7 +180,7 @@ export function registerWorkersTools(agent: CloudflareMcpAgent) {
 					],
 				}
 			} catch (e) {
-				agent.server.recordError(e)
+				context.recordError(e)
 				return {
 					content: [
 						{

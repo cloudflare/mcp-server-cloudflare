@@ -1,9 +1,10 @@
 import { z } from 'zod'
 
 import { fetchCloudflareApi } from '@repo/mcp-common/src/cloudflare-api'
-import { getProps } from '@repo/mcp-common/src/get-props'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
-import type { LogsMCP } from '../logpush.app'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
+import type { Env } from '../logpush.context'
 
 const zJobIdentifier = z.number().int().min(1).optional().describe('Unique id of the job.')
 const zEnabled = z.boolean().optional().describe('Flag that indicates if the job is enabled.')
@@ -96,15 +97,16 @@ export async function handleGetAccountLogPushJobs(
 
 /**
  * Registers the logs analysis tool with the MCP server
- * @param server The MCP server instance
+ * @param context The request-local registration context
  * @param accountId Cloudflare account ID
  * @param apiToken Cloudflare API token
  */
-export function registerLogsTools(agent: LogsMCP) {
+export function registerLogsTools(context: McpRegistrationContext<Env>) {
 	// Register the worker logs analysis tool by worker name
-	agent.server.accountTool(
+	context.accountTool(
 		'logpush_jobs_by_account_id',
-		`All Logpush jobs by Account ID.
+		{
+			description: `All Logpush jobs by Account ID.
 
 		You should use this tool when:
 		- You have questions or wish to request information about their Cloudflare Logpush jobs by account
@@ -112,10 +114,11 @@ export function registerLogsTools(agent: LogsMCP) {
 
 		This tool returns at most the first 100 jobs.
 		`,
-		{},
+			inputSchema: z.object({}),
+		},
 		async (_args, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const result = await handleGetAccountLogPushJobs(accountId, props.accessToken)
 				return {
 					content: [
@@ -128,7 +131,7 @@ export function registerLogsTools(agent: LogsMCP) {
 					],
 				}
 			} catch (e) {
-				agent.server.recordError(e)
+				context.recordError(e)
 				return {
 					content: [
 						{

@@ -6,6 +6,8 @@ connections, with Cloudflare OAuth built-in.
 It integrates tools powered by [Workers Observability](https://developers.cloudflare.com/workers/observability/) to debug
 and get insight into your Workers' logs and analytics.
 
+The authenticated `/mcp` endpoint creates a fresh SDK v2 server and request-scoped auth/account context for every request. OAuth and application search bindings remain durable application/security state, but no MCP protocol session, SSE route, or protocol Durable Object is retained.
+
 ## 🔨 Available Tools
 
 Currently available tools:
@@ -28,7 +30,7 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 
 ## Access the remote MCP server from any MCP Client
 
-If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://observability.mcp.cloudflare.com`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
+If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://observability.mcp.cloudflare.com/mcp`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
 
 If your client does not yet support remote MCP servers, you will need to set up its respective configuration file using [mcp-remote](https://www.npmjs.com/package/mcp-remote) to specify which servers your client can access.
 

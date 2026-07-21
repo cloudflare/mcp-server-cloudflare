@@ -1,134 +1,22 @@
-import OAuthProvider from '@cloudflare/workers-oauth-provider'
-import { McpAgent } from 'agents/mcp'
-
-import { AccountManager } from '@repo/mcp-common/src/account-manager'
-import { handleApiTokenMode, isApiTokenRequest } from '@repo/mcp-common/src/api-token-mode'
-import {
-	createAuthHandlers,
-	handleTokenExchangeCallback,
-} from '@repo/mcp-common/src/cloudflare-oauth-handler'
-import { getEnv } from '@repo/mcp-common/src/env'
 import { fmt } from '@repo/mcp-common/src/format'
-import { getProps } from '@repo/mcp-common/src/get-props'
+import { createAuthenticatedMcpApp } from '@repo/mcp-common/src/mcp-app'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { initSentryWithUser } from '@repo/mcp-common/src/sentry'
-import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker.tools'
 
-import { MetricsTracker } from '../../../packages/mcp-observability/src'
 import { registerBuildsTools } from './tools/workers-builds.tools'
 
-import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './workers-builds.context'
 
-const env = getEnv<Env>()
+export const BUILDS_INSTRUCTIONS = fmt.trim(`
+	# Cloudflare Workers Builds Tool
+	* A Cloudflare Worker is a serverless function.
+	* Workers Builds is a CI/CD system for building and deploying your Worker whenever you push code to GitHub or GitLab.
 
-const metrics = new MetricsTracker(env.MCP_METRICS, {
-	name: env.MCP_SERVER_NAME,
-	version: env.MCP_SERVER_VERSION,
-})
+	This server lets you view and debug Cloudflare Workers Builds for Workers (not Cloudflare Pages).
 
-// Context from the auth process, encrypted & stored in the auth token
-// and provided to the DurableMCP as this.props
-type Props = AuthProps
-
-type State = {
-	activeBuildUUID: string | null
-	activeWorkerId: string | null
-}
-
-export class BuildsMCP extends McpAgent<Env, State, Props> {
-	_server: CloudflareMCPServer | undefined
-	set server(server: CloudflareMCPServer) {
-		this._server = server
-	}
-	get server(): CloudflareMCPServer {
-		if (!this._server) {
-			throw new Error('Tried to access server before it was initialized')
-		}
-		return this._server
-	}
-
-	async init() {
-		// TODO: Probably we'll want to track account tokens usage through an account identifier at some point
-		const props = getProps(this)
-		const userId = props.type === 'user_token' ? props.user.id : undefined
-		const sentry =
-			props.type === 'user_token' ? initSentryWithUser(env, this.ctx, props.user.id) : undefined
-		const accountManager = new AccountManager(props)
-
-		this.server = new CloudflareMCPServer({
-			userId,
-			wae: this.env.MCP_METRICS,
-			serverInfo: {
-				name: this.env.MCP_SERVER_NAME,
-				version: this.env.MCP_SERVER_VERSION,
-			},
-			sentry,
-			accountManager,
-			options: {
-				instructions:
-					fmt.trim(`
-					# Cloudflare Workers Builds Tool
-					* A Cloudflare Worker is a serverless function
-					* Workers Builds is a CI/CD system for building and deploying your Worker whenever you push code to GitHub/GitLab.
-
-					This server allows you to view and debug Cloudflare Workers Builds for your Workers (NOT Cloudflare Pages).
-
-					To get started, you can list your Workers (workers_list) and set an active Worker (workers_builds_set_active_worker).
-					You can then list the builds for your Worker (workers_builds_list_builds) and set an active build (workers_builds_set_active_build).
-					Once you have an active build, you can view the logs (workers_builds_get_build_logs).
-				`) + accountManager.instructionsSuffix(),
-			},
-		})
-
-		// Register Cloudflare Workers tools
-		registerWorkersTools(this)
-
-		// Register Cloudflare Workers logs tools
-		registerBuildsTools(this)
-	}
-
-	async getActiveBuildUUID(): Promise<string | null> {
-		try {
-			return this.state.activeBuildUUID
-		} catch (e) {
-			this.server.recordError(e)
-			return null
-		}
-	}
-
-	async setActiveBuildUUID(buildUUID: string | null): Promise<void> {
-		try {
-			this.setState({
-				...this.state,
-				activeBuildUUID: buildUUID,
-			})
-		} catch (e) {
-			this.server.recordError(e)
-		}
-	}
-
-	async getActiveWorkerId(): Promise<string | null> {
-		try {
-			return this.state.activeWorkerId
-		} catch (e) {
-			this.server.recordError(e)
-			return null
-		}
-	}
-
-	async setActiveWorkerId(workerId: string | null): Promise<void> {
-		try {
-			this.setState({
-				...this.state,
-				activeWorkerId: workerId,
-			})
-		} catch (e) {
-			this.server.recordError(e)
-		}
-	}
-}
+	Start by listing Workers with workers_list. Pass the selected Worker's ID explicitly as workerId to workers_builds_list_builds. Pass a build UUID explicitly to workers_builds_get_build or workers_builds_get_build_logs.
+`)
 
 const BuildsScopes = {
 	...RequiredScopes,
@@ -139,32 +27,20 @@ const BuildsScopes = {
 		'See and change Cloudflare Workers Builds data such as builds, build configuration, and logs.',
 } as const
 
-export default {
-	fetch: async (req: Request, env: Env, ctx: ExecutionContext) => {
-		if (await isApiTokenRequest(req, env)) {
-			return await handleApiTokenMode(BuildsMCP, req, env, ctx)
-		}
-
-		return new OAuthProvider({
-			apiHandlers: {
-				'/mcp': BuildsMCP.serve('/mcp'),
-				'/sse': BuildsMCP.serveSSE('/sse'),
-			},
-			defaultHandler: createAuthHandlers({ scopes: BuildsScopes, metrics }),
-			authorizeEndpoint: '/oauth/authorize',
-			tokenEndpoint: '/token',
-			tokenExchangeCallback: (options) =>
-				handleTokenExchangeCallback(
-					options,
-					env.CLOUDFLARE_CLIENT_ID,
-					env.CLOUDFLARE_CLIENT_SECRET
-				),
-			// Cloudflare access token TTL
-			accessTokenTTL: 3600,
-			refreshTokenTTL: 2592000, // 30 days
-			// TODO: Remove after 2026-05-01 — all pre-0.4.0 grants will have expired by then
-			resourceMatchOriginOnly: true,
-			clientRegistrationEndpoint: '/register',
-		}).fetch(req, env, ctx)
+const app = createAuthenticatedMcpApp<Env>({
+	serviceHostnames: ['builds-staging.mcp.cloudflare.com', 'builds.mcp.cloudflare.com'],
+	scopes: BuildsScopes,
+	serverOptions: { instructions: BUILDS_INSTRUCTIONS },
+	createSentry: ({ env, executionCtx, request, props }) =>
+		props?.type === 'user_token'
+			? initSentryWithUser(env, executionCtx, props.user.id, request)
+			: undefined,
+	register(context) {
+		registerWorkersTools(context)
+		registerBuildsTools(context)
 	},
-}
+})
+
+export const mcpHandler = app.mcpHandler
+
+export default app.worker

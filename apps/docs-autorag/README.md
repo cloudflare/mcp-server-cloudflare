@@ -2,6 +2,8 @@
 
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP connections. It connects to an autorag instance (in this case, Cloudflare docs)
 
+The `/mcp` endpoint creates a fresh SDK v2 server for every request, keeps the default stateless 2025 compatibility fallback, and exposes no MCP protocol session, SSE route, or protocol Durable Object.
+
 To run this server, you'll need access to an autorag instance which has indexed the contents of cloudflare-docs: https://github.com/cloudflare/cloudflare-docs/
 
 The Cloudflare account this worker is deployed on already has this Autorag instance setup and indexed.
