@@ -1,0 +1,131 @@
+apps/ai-gateway/src/ai-gateway.app.ts
+  s_e0b9f423686126::t_200b7164eebc26 1,14-16,20,22
+apps/ai-gateway/src/tools/ai-gateway.tools.ts
+  s_e0b9f423686126::t_dd9a52cb5692f4 9,12,56,98,139,180
+apps/auditlogs/src/auditlogs.app.ts
+  s_e0b9f423686126::t_fca1073bb209d1 1,14-16,20,22
+apps/auditlogs/src/tools/auditlogs.tools.ts
+  s_e0b9f423686126::t_9bf83aca1c45c6 6,237,243
+apps/autorag/src/autorag.app.ts
+  s_e0b9f423686126::t_bbce588f3a4b0c 1,42-44,49,51
+apps/autorag/src/tools/autorag.tools.ts
+  s_e0b9f423686126::t_daf59446ef2acb 8,11,62,119
+apps/browser-rendering/src/browser.app.ts
+  s_e0b9f423686126::t_7fa60062e206c2 1,14-16,20,22
+apps/browser-rendering/src/tools/browser.tools.ts
+  s_e0b9f423686126::t_d92a11be564a81 6,9,50,92,146,196,246,295,346,393,446,484,522,562
+apps/cloudflare-blog/src/cloudflare-blog.app.ts
+  s_e0b9f423686126::t_9f2fd5b6e2874b 1,7-8,12-14
+apps/cloudflare-blog/src/tools/blog.tools.ts
+  s_e0b9f423686126::t_1c4b052e45edac 11,38,132,182,220
+apps/cloudflare-one-casb/src/cf1-casb.app.ts
+  s_e0b9f423686126::t_a9a6b256efdf14 1,14-16,20,22
+apps/cloudflare-one-casb/src/tools/integrations.tools.ts
+  s_e0b9f423686126::t_59852c565d9940 19,249
+apps/demo-day/package.json
+  s_e0b9f423686126::t_91b21f6b564abf 16
+apps/dex-analysis/src/dex-analysis.app.ts
+  s_e0b9f423686126::t_cd2a10c7247cab 1,17-19,23,25
+apps/dex-analysis/src/tools/dex-analysis.tools.ts
+  s_e0b9f423686126::t_c8d891cc882bd3 8,594
+apps/dns-analytics/src/dns-analytics.app.ts
+  s_e0b9f423686126::t_c1647567d93677 1,18-23,31,33
+apps/dns-analytics/src/tools/dex-analytics.tools.ts
+  s_e0b9f423686126::t_da9e4dfbab5eda 9,19,64,102
+apps/docs-ai-search/package.json
+  s_e0b9f423686126::t_aa015d0d495590 15
+apps/docs-ai-search/src/docs-ai-search.app.ts
+  s_e0b9f423686126::t_7b61218e100bef 1,8-9,17-19
+apps/docs-autorag/src/docs-autorag.app.ts
+  s_e0b9f423686126::t_e1b96ac2253adf 1,7-8,12-14
+apps/docs-autorag/src/tools/docs-autorag.tools.ts
+  s_e0b9f423686126::t_9e43c824cac8c9 5,10,14
+apps/docs-vectorize/package.json
+  s_e0b9f423686126::t_91e6d5b63a5e24 15
+apps/docs-vectorize/src/docs-vectorize.app.ts
+  s_e0b9f423686126::t_2f5da15455409a 1,8-12,20-22
+apps/graphql/src/graphql.app.ts
+  s_e0b9f423686126::t_0f3c3e5c9da82d 1,16-18,29,31
+apps/graphql/src/tools/graphql.tools.ts
+  s_e0b9f423686126::t_cdc662bb4f4842 6,438,442,578,663,794,942,1029
+apps/logpush/src/logpush.app.ts
+  s_e0b9f423686126::t_c0c302f031bf40 1,15-17,21,23
+apps/logpush/src/tools/logpush.tools.ts
+  s_e0b9f423686126::t_5fa86555e5af9c 6,100,106,134
+apps/radar/src/radar.app.ts
+  s_e0b9f423686126::t_49ee133dd473ff 1,40-42,52,54
+apps/radar/src/tools/radar.tools.ts
+  s_e0b9f423686126::t_65ddc693517cbc 131,189,234,271,316,368,411,456,494,556,615,676,737,781,825,878,931,996,1074,1140,1185,1267,1347,1423,1462,1497,1575,1653,1720,1790,1830,1904,1980,2023,2061,2119,2182,2235,2273,2309,2347,2385,2432,2480,2526,2567,2610,2657,2698,2733,2780,2825,2863,2915,2966,3019,3066,3115,3162,3205,3268,3340
+apps/radar/src/tools/url-scanner.tools.ts
+  s_e0b9f423686126::t_9d0015c414d886 15,22,72,134,197,253
+apps/sandbox-container/server/container-tools.ts
+  s_e0b9f423686126::t_8b38bdcf9ce226 8,23,52,60,72,85,102,126
+apps/sandbox-container/server/sandbox.server.app.ts
+  s_e0b9f423686126::t_e44a91d92e302c 1,18-20,25,27
+apps/workers-bindings/package.json
+  s_e0b9f423686126::t_e56b6e8c3d835e 35
+apps/workers-bindings/src/bindings.app.ts
+  s_e0b9f423686126::t_063de8c3798761 1,21-23,35,37
+apps/workers-builds/src/tools/workers-builds.tools.ts
+  s_e0b9f423686126::t_36adc79a169e09 7,12,77,130
+apps/workers-builds/src/workers-builds.app.ts
+  s_e0b9f423686126::t_c4049a18e21502 2,30-32,44,46
+apps/workers-observability/src/tools/workers-observability.tools.ts
+  s_e0b9f423686126::t_317e4c7269a090 17,35,196,244
+apps/workers-observability/src/workers-observability.app.ts
+  s_e0b9f423686126::t_c2be2ecafd8791 1,20-25,45,47
+packages/mcp-common/src/mcp-app.ts
+  s_e0b9f423686126::t_81bbed1dd35068 1-116
+packages/mcp-common/src/prompts/docs-ai-search.prompts.ts
+  s_e0b9f423686126::t_bb5f8fafd9272a 1,7
+packages/mcp-common/src/prompts/docs-vectorize.prompts.ts
+  s_e0b9f423686126::t_760d69397e4bb5 1,7
+packages/mcp-common/src/server.spec.ts
+  s_eefe28a0275aa8::t_f3f672cbcabf65 9,139-140,142,261-262,298-299,324-325,353-368,370,407,430-431,436-460,471
+packages/mcp-common/src/server.ts
+  s_e0b9f423686126::t_cf797cf2ee6187 1,4,7-9,11-12,14-16,20-21,23,42-48,50-52,55,69,72-81,84,86,89,94,104,111,154-171,173-178,180-193,197-209,211
+packages/mcp-common/src/tools/d1.tools.ts
+  s_e0b9f423686126::t_801f640556a913 13,16,66,112,152,192
+packages/mcp-common/src/tools/docs-ai-search.tools.ts
+  s_e0b9f423686126::t_6e46432be11b1c 3,53,98
+packages/mcp-common/src/tools/docs-vectorize.tools.ts
+  s_e0b9f423686126::t_d3ded9340da38c 3,17,59
+packages/mcp-common/src/tools/hyperdrive.tools.ts
+  s_e0b9f423686126::t_aa2597067894d0 22,37,94,137,181
+packages/mcp-common/src/tools/kv_namespace.tools.ts
+  s_e0b9f423686126::t_a0af3b8f8e2260 11,25,84,127,170,219
+packages/mcp-common/src/tools/r2_bucket.tools.ts
+  s_e0b9f423686126::t_c1aaa95a4b047a 14,17,71,112,149
+packages/mcp-common/src/tools/worker.tools.ts
+  s_e0b9f423686126::t_dae4aab6a4df76 12,16,25,75,90,138,153,183
+packages/mcp-common/src/tools/zone.tools.ts
+  s_e0b9f423686126::t_ea69a5bfd08ef9 7,11,80
+packages/tools/src/stateless-migration.spec.ts
+  s_eefe28a0275aa8::t_e60a9152430b1f 97-118,150-187
+pnpm-lock.yaml
+  s_e0b9f423686126::t_55a02c584841cf 641,1284-1285,2383,3427,5736,5759,6774
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "e434ba9a477dc5c60c052e51db3d25b7fd5cb2d3",
+  "prompts": {},
+  "sessions": {
+    "s_e0b9f423686126": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019f8033-abc7-749a-a944-8cf7bb5b97d6",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_eefe28a0275aa8": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019f7fed-c755-7b56-a459-1d14b58038b8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
