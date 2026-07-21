@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { fetchCloudflareApi } from '@repo/mcp-common/src/cloudflare-api'
 import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 
 export const actionResults = z.enum(['success', 'failure', ''])
 export const actionTypes = z.enum(['create', 'delete', 'view', 'update', 'login'])
@@ -234,13 +234,13 @@ export async function handleGetAuditLogs(
 
 /**
  * Registers the audit log tool with the MCP server
- * @param server The MCP server instance
+ * @param context The request-local registration context
  * @param accountId Cloudflare account ID
  * @param apiToken Cloudflare API token
  */
 export function registerAuditLogTools<Env>(context: McpRegistrationContext<Env>) {
 	// Register the audit log tool by account
-	context.server.accountTool(
+	context.accountTool(
 		'auditlogs_by_account_id',
 		{
 			description: `Find all audit logs (a list of who made what change when) for a Cloudflare Account by ID.

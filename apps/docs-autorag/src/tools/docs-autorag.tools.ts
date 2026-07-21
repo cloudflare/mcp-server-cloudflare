@@ -2,16 +2,16 @@ import { type EmbeddedResource } from '@modelcontextprotocol/server'
 import mime from 'mime'
 import { z } from 'zod'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 import type { Env } from '../docs-autorag.context'
 
 /**
  * Registers the docs search tool with the MCP server
- * @param agent The MCP server instance
+ * @param context The request-local registration context
  */
 export function registerDocsTools(context: McpRegistrationContext<Env>) {
 	// Register the worker logs analysis tool by worker name
-	context.server.registerTool(
+	context.registerTool(
 		'search_cloudflare_documentation',
 		{
 			description: `Search the Cloudflare documentation.

@@ -19,7 +19,7 @@ import {
 	HyperdriveOriginUserSchema,
 } from '../types/hyperdrive.types'
 
-import type { McpRegistrationContext } from '../request-context'
+import type { McpRegistrationContext } from '../registration-context'
 
 export const HYPERDRIVE_TOOLS = {
 	hyperdrive_configs_list: 'hyperdrive_configs_list',
@@ -34,7 +34,7 @@ export function registerHyperdriveTools<Env>(context: McpRegistrationContext<Env
 	/**
 	 * Tool to list Hyperdrive configurations.
 	 */
-	context.server.accountTool(
+	context.accountTool(
 		HYPERDRIVE_TOOLS.hyperdrive_configs_list,
 		{
 			description: 'List Hyperdrive configurations in your Cloudflare account',
@@ -91,7 +91,7 @@ export function registerHyperdriveTools<Env>(context: McpRegistrationContext<Env
 	/**
 	 * Tool to delete a Hyperdrive configuration.
 	 */
-	context.server.accountTool(
+	context.accountTool(
 		HYPERDRIVE_TOOLS.hyperdrive_config_delete,
 		{
 			description: 'Delete a Hyperdrive configuration in your Cloudflare account',
@@ -134,7 +134,7 @@ export function registerHyperdriveTools<Env>(context: McpRegistrationContext<Env
 	/**
 	 * Tool to get a specific Hyperdrive configuration.
 	 */
-	context.server.accountTool(
+	context.accountTool(
 		HYPERDRIVE_TOOLS.hyperdrive_config_get,
 		{
 			description: 'Get details of a specific Hyperdrive configuration in your Cloudflare account',
@@ -178,7 +178,7 @@ export function registerHyperdriveTools<Env>(context: McpRegistrationContext<Env
 	/**
 	 * Tool to edit (PATCH) a Hyperdrive configuration.
 	 */
-	context.server.accountTool(
+	context.accountTool(
 		HYPERDRIVE_TOOLS.hyperdrive_config_edit,
 		{
 			description: 'Edit (patch) a Hyperdrive configuration in your Cloudflare account',

@@ -5,7 +5,7 @@ import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
 import { getReader } from '../warp_diag_reader'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 import type { Env } from '../dex-analysis.context'
 
 export function registerDEXTools(context: McpRegistrationContext<Env>) {
@@ -591,7 +591,7 @@ const registerTool = <T extends z.ZodRawShape, U = unknown>({
 	context: McpRegistrationContext<Env>
 	callback: (p: { accountId: string; accessToken: string } & z.output<z.ZodObject<T>>) => Promise<U>
 }) => {
-	context.server.accountTool(
+	context.accountTool(
 		name,
 		{
 			description,

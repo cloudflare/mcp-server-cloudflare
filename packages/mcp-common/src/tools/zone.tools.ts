@@ -4,11 +4,11 @@ import { handleZonesList } from '../api/zone.api'
 import { getCloudflareClient } from '../cloudflare-api'
 import { requireRequestProps } from '../request-context'
 
-import type { McpRegistrationContext } from '../request-context'
+import type { McpRegistrationContext } from '../registration-context'
 
 export function registerZoneTools<Env>(context: McpRegistrationContext<Env>) {
 	// Tool to list all zones under an account
-	context.server.accountTool(
+	context.accountTool(
 		'zones_list',
 		{
 			description: 'List all zones under a Cloudflare account',
@@ -77,7 +77,7 @@ export function registerZoneTools<Env>(context: McpRegistrationContext<Env>) {
 	)
 
 	// Tool to get zone details by ID
-	context.server.accountTool(
+	context.accountTool(
 		'zone_details',
 		{
 			description: 'Get details for a specific Cloudflare zone',

@@ -1,5 +1,4 @@
-import { createCloudflareMcpHandler } from '@repo/mcp-common/src/server'
-import { MetricsTracker } from '@repo/mcp-observability'
+import { createPublicMcpApp } from '@repo/mcp-common/src/mcp-app'
 
 export type Env = {
 	ENVIRONMENT: 'development' | 'staging' | 'production'
@@ -10,16 +9,10 @@ export type Env = {
 	ASSETS: Fetcher
 }
 
-const allowedHostnames = ['localhost', '127.0.0.1', '[::1]', 'demo-day.mcp.cloudflare.com']
-
-export const mcpHandler = createCloudflareMcpHandler<Env>({
-	serverInfo: ({ env }) => ({
-		name: env.MCP_SERVER_NAME,
-		version: env.MCP_SERVER_VERSION,
-	}),
-	createMetrics: ({ env }, serverInfo) => new MetricsTracker(env.MCP_METRICS, serverInfo),
+const app = createPublicMcpApp<Env>({
+	serviceHostnames: ['demo-day.mcp.cloudflare.com'],
 	register(context) {
-		context.server.registerTool(
+		context.registerTool(
 			'mcp_demo_day_info',
 			{
 				description:
@@ -46,11 +39,9 @@ export const mcpHandler = createCloudflareMcpHandler<Env>({
 			}
 		)
 	},
-	handler: {
-		allowedHostnames,
-		allowedOriginHostnames: [...allowedHostnames, 'playground.ai.cloudflare.com'],
-	},
 })
+
+export const mcpHandler = app.mcpHandler
 
 export default {
 	fetch(request: Request, env: Env, ctx: ExecutionContext) {

@@ -16,7 +16,7 @@ import {
 	assetCategoryVendorParam,
 } from '@repo/mcp-common/src/types/cf1-integrations.types'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 
 const PAGE_SIZE = 3
 
@@ -246,7 +246,7 @@ const toolDefinitions: IntegrationToolDefinition[] = [
 /** Registers CASB tools with one request-scoped MCP server. */
 export function registerIntegrationsTools<Env>(context: McpRegistrationContext<Env>) {
 	toolDefinitions.forEach(({ name, description, params, handler }) => {
-		context.server.accountTool(
+		context.accountTool(
 			name,
 			{
 				description,

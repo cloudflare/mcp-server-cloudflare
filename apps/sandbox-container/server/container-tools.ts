@@ -5,7 +5,7 @@ import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 import { ExecParams, FilePathParam, FileWrite } from '../shared/schema'
 import { stripProtocolFromFilePath } from './utils'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 import type { Env } from './sandbox.server.context'
 import type { UserContainer } from './userContainer'
 
@@ -20,7 +20,7 @@ function getUserContainer(context: McpRegistrationContext<Env>): DurableObjectSt
 
 /** Registers request-local protocol handlers backed by the preserved per-user container DO. */
 export function registerContainerTools(context: McpRegistrationContext<Env>) {
-	context.server.registerTool(
+	context.registerTool(
 		'container_initialize',
 		{
 			description: `Start or restart the container.
@@ -49,7 +49,7 @@ Use this tool to initialize a container before running any Python or Node.js cod
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'container_ping',
 		{ description: 'Ping the container for liveliness. Use this to check if it is running.' },
 		async () => ({
@@ -57,7 +57,7 @@ Use this tool to initialize a container before running any Python or Node.js cod
 		})
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'container_exec',
 		{
 			description: `Run a command in a container and return stdout.
@@ -69,7 +69,7 @@ If necessary, set a timeout. To debug, stream back standard error. For Python, a
 		})
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'container_file_delete',
 		{
 			description: 'Delete a file in the working directory.',
@@ -82,7 +82,7 @@ If necessary, set a timeout. To debug, stream back standard error. For Python, a
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'container_file_write',
 		{
 			description:
@@ -99,7 +99,7 @@ If necessary, set a timeout. To debug, stream back standard error. For Python, a
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'container_files_list',
 		{
 			description: 'List the working-directory file tree.',
@@ -123,7 +123,7 @@ If necessary, set a timeout. To debug, stream back standard error. For Python, a
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'container_file_read',
 		{
 			description:

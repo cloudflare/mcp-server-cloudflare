@@ -3,10 +3,10 @@ import { z } from 'zod'
 import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
 import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 
 export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) {
-	context.server.accountTool(
+	context.accountTool(
 		'get_url_html_content',
 		{
 			description: 'Get page HTML content',
@@ -47,7 +47,7 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'get_url_markdown',
 		{
 			description: 'Get page converted into Markdown',
@@ -89,7 +89,7 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'get_url_screenshot',
 		{
 			description: 'Get page screenshot',
@@ -143,7 +143,7 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'get_url_pdf',
 		{
 			description: 'Render a page to PDF',
@@ -193,7 +193,7 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'get_url_snapshot',
 		{
 			description: 'Get page HTML content and a screenshot in a single call',
@@ -243,7 +243,7 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'scrape_url_elements',
 		{
 			description: 'Scrape elements from a page by CSS selector',
@@ -292,7 +292,7 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'get_url_json',
 		{
 			description:
@@ -343,7 +343,7 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'get_url_links',
 		{
 			description: 'Get the list of links on a page',
@@ -390,7 +390,7 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'start_crawl',
 		{
 			description:
@@ -443,7 +443,7 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'get_crawl_result',
 		{
 			description: 'Get the status and records of a crawl job started with start_crawl',
@@ -481,7 +481,7 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'cancel_crawl',
 		{
 			description: 'Cancel a running crawl job',
@@ -519,7 +519,7 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'list_browser_sessions',
 		{
 			description: 'List active Browser Run sessions for the account',
@@ -559,7 +559,7 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'kill_browser_session',
 		{
 			description: 'Close (kill) a Browser Run session by its session ID',

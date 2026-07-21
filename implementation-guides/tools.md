@@ -13,9 +13,9 @@ Tools let an MCP client perform actions beyond generating text. They can:
 
 ## Request-scoped registration
 
-Every HTTP request creates a fresh SDK v2 server. Tool registrars receive an `McpRegistrationContext` containing that request's server, validated auth props, environment bindings, account manager, request, execution context, `waitUntil`, Sentry client, and metrics.
+Every MCP request creates a fresh SDK v2 server. Tool registrars receive an `McpRegistrationContext` containing validated auth props, environment bindings, the request, execution context, `waitUntil`, and the SDK request context. It exposes registration methods rather than the raw SDK server, so shared metrics, error reporting, and account selection cannot be bypassed accidentally.
 
-Register general tools with `context.server.registerTool()`. Register anything that needs a Cloudflare account ID with `context.server.accountTool()`, which resolves the account and passes its ID to the handler.
+Register general tools with `context.registerTool()`. Register anything that needs a Cloudflare account ID with `context.accountTool()`, which resolves the account and passes its ID to the handler.
 
 Account-ID resolution, in priority order:
 
@@ -31,10 +31,10 @@ import { z } from 'zod'
 import { getCloudflareClient } from '../cloudflare-api'
 import { requireRequestProps } from '../request-context'
 
-import type { McpRegistrationContext } from '../request-context'
+import type { McpRegistrationContext } from '../registration-context'
 
 export function registerMyServiceTools<Env>(context: McpRegistrationContext<Env>) {
-	context.server.accountTool(
+	context.accountTool(
 		'tool_name',
 		{
 			description: 'Detailed description used by the model to choose this tool.',
@@ -66,7 +66,7 @@ export function registerMyServiceTools<Env>(context: McpRegistrationContext<Env>
 					],
 				}
 			} catch (error) {
-				context.server.recordError(error)
+				context.recordError(error)
 				return {
 					content: [
 						{
@@ -80,7 +80,7 @@ export function registerMyServiceTools<Env>(context: McpRegistrationContext<Env>
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'non_account_tool',
 		{
 			description: 'A tool that does not need a Cloudflare account ID.',
@@ -114,7 +114,7 @@ export function registerMyServiceTools<Env>(context: McpRegistrationContext<Env>
 - Use explicit parameters for every target; do not depend on a previous call or MCP session.
 - Treat `context` as request-local and never store it globally.
 - Use Zod schemas for input validation.
-- Return clear errors and record unexpected failures with `context.server.recordError`.
+- Return clear errors and record unexpected failures with `context.recordError`.
 - Mark read-only or destructive behavior accurately with tool annotations.
 - Keep authentication, account selection, and environment bindings request-scoped.
 - Preserve genuine application state only where the product requires it; do not use protocol Durable Objects or transport replay state.

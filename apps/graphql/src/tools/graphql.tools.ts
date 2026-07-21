@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 import type { Env } from '../graphql.context'
 
 // GraphQL API endpoint
@@ -435,11 +435,11 @@ async function searchGraphQLSchema(
 
 /**
  * Registers GraphQL tools with the MCP server
- * @param agent The MCP agent instance
+ * @param context The request-local registration context
  */
 export function registerGraphQLTools(context: McpRegistrationContext<Env>) {
 	// Tool to search the GraphQL schema for types, fields, and enum values matching a keyword
-	context.server.accountTool(
+	context.accountTool(
 		'graphql_schema_search',
 		{
 			description: `Search the Cloudflare GraphQL API schema for types, fields, and enum values matching a keyword
@@ -575,7 +575,7 @@ export function registerGraphQLTools(context: McpRegistrationContext<Env>) {
 	)
 
 	// Tool to fetch the GraphQL schema overview (high-level structure)
-	context.server.accountTool(
+	context.accountTool(
 		'graphql_schema_overview',
 		{
 			description: `Fetch the high-level overview of the Cloudflare GraphQL API schema
@@ -660,7 +660,7 @@ export function registerGraphQLTools(context: McpRegistrationContext<Env>) {
 	)
 
 	// Tool to fetch detailed information about a specific GraphQL type
-	context.server.accountTool(
+	context.accountTool(
 		'graphql_type_details',
 		{
 			description: `Fetch detailed information about a specific GraphQL type (dataset)
@@ -791,7 +791,7 @@ export function registerGraphQLTools(context: McpRegistrationContext<Env>) {
 	)
 
 	// Tool to fetch the complete GraphQL schema (combines overview and important type details)
-	context.server.accountTool(
+	context.accountTool(
 		'graphql_complete_schema',
 		{
 			description:
@@ -939,7 +939,7 @@ export function registerGraphQLTools(context: McpRegistrationContext<Env>) {
 	)
 
 	// Tool to execute a GraphQL query
-	context.server.accountTool(
+	context.accountTool(
 		'graphql_query',
 		{
 			description: `Execute a GraphQL query against the Cloudflare API
@@ -1026,7 +1026,7 @@ export function registerGraphQLTools(context: McpRegistrationContext<Env>) {
 	)
 
 	// Tool to generate a GraphQL API Explorer link
-	context.server.registerTool(
+	context.registerTool(
 		'graphql_api_explorer',
 		{
 			description: `Generate a Cloudflare GraphQL API Explorer link

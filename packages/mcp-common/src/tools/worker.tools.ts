@@ -9,11 +9,11 @@ import { getCloudflareClient } from '../cloudflare-api'
 import { fmt } from '../format'
 import { requireRequestProps } from '../request-context'
 
-import type { McpRegistrationContext } from '../request-context'
+import type { McpRegistrationContext } from '../registration-context'
 
 /**
  * Registers the workers tools with the MCP server
- * @param server The MCP server instance
+ * @param context The request-local registration context
  * @param accountId Cloudflare account ID
  * @param apiToken Cloudflare API token
  */
@@ -22,7 +22,7 @@ const workerNameParam = z.string().describe('The name of the worker script to re
 
 export function registerWorkersTools<Env>(context: McpRegistrationContext<Env>) {
 	// Tool to list all workers
-	context.server.accountTool(
+	context.accountTool(
 		'workers_list',
 		{
 			description: fmt.trim(`
@@ -72,7 +72,7 @@ export function registerWorkersTools<Env>(context: McpRegistrationContext<Env>) 
 					],
 				}
 			} catch (e) {
-				context.server.recordError(e)
+				context.recordError(e)
 				return {
 					content: [
 						{
@@ -87,7 +87,7 @@ export function registerWorkersTools<Env>(context: McpRegistrationContext<Env>) 
 	)
 
 	// Tool to get a specific worker's script details
-	context.server.accountTool(
+	context.accountTool(
 		'workers_get_worker',
 		{
 			description: 'Get the details of the Cloudflare Worker.',
@@ -135,7 +135,7 @@ export function registerWorkersTools<Env>(context: McpRegistrationContext<Env>) 
 					],
 				}
 			} catch (e) {
-				context.server.recordError(e)
+				context.recordError(e)
 				return {
 					content: [
 						{
@@ -150,7 +150,7 @@ export function registerWorkersTools<Env>(context: McpRegistrationContext<Env>) 
 	)
 
 	// Tool to get a specific worker's script content
-	context.server.accountTool(
+	context.accountTool(
 		'workers_get_worker_code',
 		{
 			description:
@@ -180,7 +180,7 @@ export function registerWorkersTools<Env>(context: McpRegistrationContext<Env>) 
 					],
 				}
 			} catch (e) {
-				context.server.recordError(e)
+				context.recordError(e)
 				return {
 					content: [
 						{

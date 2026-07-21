@@ -128,7 +128,7 @@ import {
 } from '../types/radar'
 import { resolveAndInvoke } from '../utils'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 import type { Env } from '../radar.context'
 
 const RADAR_API_BASE = 'https://api.cloudflare.com/client/v4/radar'
@@ -186,7 +186,7 @@ async function fetchRadarApi(
 }
 
 export function registerRadarTools(context: McpRegistrationContext<Env>) {
-	context.server.registerTool(
+	context.registerTool(
 		'list_autonomous_systems',
 		{
 			description: 'List Autonomous Systems',
@@ -231,7 +231,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_as_details',
 		{
 			description: 'Get Autonomous System details by ASN',
@@ -268,7 +268,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_ip_details',
 		{
 			description:
@@ -313,7 +313,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_traffic_anomalies',
 		{
 			description: 'Get traffic anomalies and outages',
@@ -365,7 +365,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_internet_services_ranking',
 		{
 			description: 'Get top Internet services',
@@ -408,7 +408,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_domains_ranking',
 		{
 			description: 'Get top or trending domains',
@@ -453,7 +453,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_domain_rank_details',
 		{
 			description: 'Get domain rank details',
@@ -491,7 +491,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_http_data',
 		{
 			description: 'Retrieve HTTP traffic trends.',
@@ -553,7 +553,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_dns_queries_data',
 		{
 			description: 'Retrieve trends in DNS queries to the 1.1.1.1 resolver.',
@@ -612,7 +612,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_l7_attack_data',
 		{
 			description: 'Retrieve application layer (L7) attack trends.',
@@ -673,7 +673,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_l3_attack_data',
 		{
 			description: 'Retrieve network layer (L3/DDoS) attack trends.',
@@ -734,7 +734,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_email_routing_data',
 		{
 			description: 'Retrieve Email Routing trends.',
@@ -778,7 +778,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_email_security_data',
 		{
 			description: 'Retrieve Email Security trends.',
@@ -822,7 +822,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_internet_speed_data',
 		{
 			description:
@@ -875,7 +875,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_internet_quality_data',
 		{
 			description:
@@ -928,7 +928,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_ai_data',
 		{
 			description:
@@ -993,7 +993,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// TODO: Replace with SDK when BGP hijacks/leaks endpoints work correctly in cloudflare SDK
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_hijacks',
 		{
 			description:
@@ -1071,7 +1071,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_leaks',
 		{
 			description:
@@ -1137,7 +1137,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_route_stats',
 		{
 			description:
@@ -1182,7 +1182,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// TODO: Replace with SDK when bots endpoints are added to cloudflare SDK
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bots_data',
 		{
 			description:
@@ -1264,7 +1264,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// TODO: Replace with SDK when CT endpoints are added to cloudflare SDK
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_certificate_transparency_data',
 		{
 			description:
@@ -1344,7 +1344,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// TODO: Replace with SDK when netflows endpoints support geoId in cloudflare SDK
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_netflows_data',
 		{
 			description:
@@ -1420,7 +1420,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// TODO: Replace with SDK when origins endpoints are added to cloudflare SDK
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'list_origins',
 		{
 			description:
@@ -1459,7 +1459,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_origin_details',
 		{
 			description:
@@ -1494,7 +1494,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_origins_data',
 		{
 			description:
@@ -1572,7 +1572,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// Robots.txt Tools
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_robots_txt_data',
 		{
 			description:
@@ -1650,7 +1650,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// Bots Crawlers Tools
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bots_crawlers_data',
 		{
 			description:
@@ -1717,7 +1717,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'list_bots',
 		{
 			description:
@@ -1787,7 +1787,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bot_details',
 		{
 			description: 'Get detailed information about a specific bot by its slug identifier.',
@@ -1827,7 +1827,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// supports it on leaked_credential_checks v2 timeseries_groups.
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_leaked_credentials_data',
 		{
 			description:
@@ -1901,7 +1901,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// AS112 Tools
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_as112_data',
 		{
 			description:
@@ -1977,7 +1977,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// Geolocation Tools
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'list_geolocations',
 		{
 			description:
@@ -2020,7 +2020,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_geolocation_details',
 		{
 			description: 'Get details for a specific geolocation by its GeoNames ID.',
@@ -2058,7 +2058,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// TCP Resets/Timeouts Tools
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_tcp_resets_timeouts_data',
 		{
 			description:
@@ -2116,7 +2116,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// Annotations/Outages Tools
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_annotations',
 		{
 			description:
@@ -2179,7 +2179,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_outages',
 		{
 			description:
@@ -2232,7 +2232,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// Certificate Transparency Authorities & Logs Tools
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'list_ct_authorities',
 		{
 			description: 'List Certificate Authorities (CAs) tracked in Certificate Transparency logs.',
@@ -2270,7 +2270,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_ct_authority_details',
 		{
 			description: 'Get details for a specific Certificate Authority by its SHA256 fingerprint.',
@@ -2306,7 +2306,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'list_ct_logs',
 		{
 			description: 'List Certificate Transparency logs.',
@@ -2344,7 +2344,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_ct_log_details',
 		{
 			description: 'Get details for a specific Certificate Transparency log by its slug.',
@@ -2382,7 +2382,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// BGP Additional Tools
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_timeseries',
 		{
 			description:
@@ -2429,7 +2429,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_top_ases',
 		{
 			description: 'Get top Autonomous Systems by BGP update count.',
@@ -2477,7 +2477,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_top_prefixes',
 		{
 			description: 'Get top IP prefixes by BGP update count.',
@@ -2523,7 +2523,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_moas',
 		{
 			description:
@@ -2564,7 +2564,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_pfx2as',
 		{
 			description:
@@ -2607,7 +2607,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_ip_space_timeseries',
 		{
 			description:
@@ -2654,7 +2654,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_routes_realtime',
 		{
 			description:
@@ -2695,7 +2695,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// AS Sets and Relationships Tools
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_as_set',
 		{
 			description:
@@ -2730,7 +2730,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_as_relationships',
 		{
 			description:
@@ -2777,7 +2777,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// TLD Tools
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'list_tlds',
 		{
 			description:
@@ -2822,7 +2822,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_tld_details',
 		{
 			description: 'Get detailed information about a specific top-level domain (TLD).',
@@ -2860,7 +2860,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// Ranking Timeseries Tool
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_domains_ranking_timeseries',
 		{
 			description: 'Get domain ranking timeseries data. Track how specific domains rank over time.',
@@ -2912,7 +2912,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// Speed Histogram Tool
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_speed_histogram',
 		{
 			description:
@@ -2963,7 +2963,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// Internet Services Timeseries Tool
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_internet_services_timeseries',
 		{
 			description:
@@ -3016,7 +3016,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// Outages by Location Tool
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_outages_by_location',
 		{
 			description:
@@ -3063,7 +3063,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// Traffic Anomalies by Location Tool
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_traffic_anomalies_by_location',
 		{
 			description:
@@ -3112,7 +3112,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// BGP Routing Table ASes Tool
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_routing_table_ases',
 		{
 			description:
@@ -3159,7 +3159,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// BGP Top ASes by Prefixes Tool
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_top_ases_by_prefixes',
 		{
 			description:
@@ -3202,7 +3202,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 	// BGP RPKI ASPA Tools
 	// ============================================================
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_rpki_aspa_snapshot',
 		{
 			description:
@@ -3265,7 +3265,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_rpki_aspa_changes',
 		{
 			description:
@@ -3337,7 +3337,7 @@ export function registerRadarTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_bgp_rpki_aspa_timeseries',
 		{
 			description: 'Retrieve a timeseries of RPKI ASPA object counts over time.',

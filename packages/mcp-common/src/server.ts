@@ -1,151 +1,26 @@
-import {
-	hostHeaderValidationResponse,
-	McpServer,
-	ProtocolError,
-	ProtocolErrorCode,
-} from '@modelcontextprotocol/server'
+import { hostHeaderValidationResponse, McpServer } from '@modelcontextprotocol/server'
 import { createMcpHandler as createAgentsMcpHandler } from 'agents/mcp'
 
-import { McpRequest, ToolCall } from '@repo/mcp-observability'
+import { McpRequest } from '@repo/mcp-observability'
 
 import { AccountManager } from './account-manager'
-import { buildAccountTool } from './account-tool'
-import { McpError } from './mcp-error'
-import {
-	getRequestAuthProps,
-	getRequestUserId,
-	getWorkerRequestScope,
-	runWithWorkerRequest,
-} from './request-context'
+import { AuthPropsSchema } from './auth-props'
+import { createRegistrationContext } from './registration-context'
+import { getRequestUserId } from './request-context'
 
-import type {
-	Implementation,
-	McpServerFactory,
-	RegisteredTool,
-	ServerOptions,
-	StandardSchemaWithJSON,
-	ToolAnnotations,
-} from '@modelcontextprotocol/server'
-import type { CreateStatelessMcpHandlerOptions, StatelessMcpHandler } from 'agents/mcp'
-import type { z } from 'zod'
+import type { Implementation, McpServerFactory, ServerOptions } from '@modelcontextprotocol/server'
+import type { CreateStatelessMcpHandlerOptions } from 'agents/mcp'
 import type { MetricsTracker } from '@repo/mcp-observability'
-import type { AccountToolCallback } from './account-tool'
-import type { McpRegistrationContext, McpRequestSeedContext } from './request-context'
+import type { AuthProps } from './auth-props'
+import type { McpRegistrationContext } from './registration-context'
+import type { McpRequestSeedContext } from './request-context'
 import type { SentryClient } from './sentry'
 
 export type { AccountToolCallback } from './account-tool'
-export type { McpRegistrationContext, McpRequestSeedContext } from './request-context'
+export type { McpRegistrationContext } from './registration-context'
+export type { McpRequestSeedContext } from './request-context'
 
-export interface CloudflareMCPServerOptions {
-	serverInfo: Implementation
-	request: Request
-	metrics?: MetricsTracker
-	userId?: string
-	sentry?: SentryClient
-	accountManager?: AccountManager
-	options?: ServerOptions
-}
-
-/**
- * SDK v2 server used for one stateless request. It adds request-local account
- * selection, error reporting, and tool metrics without introducing protocol state.
- */
-export class CloudflareMCPServer extends McpServer {
-	readonly request: Request
-	private readonly metrics?: MetricsTracker
-	private readonly sentry?: SentryClient
-	private readonly accountManager?: AccountManager
-	private readonly userId?: string
-
-	constructor({
-		serverInfo,
-		request,
-		metrics,
-		userId,
-		sentry,
-		accountManager,
-		options,
-	}: CloudflareMCPServerOptions) {
-		const accountInstructions = accountManager?.instructionsSuffix() ?? ''
-		const instructions = `${options?.instructions ?? ''}${accountInstructions}` || undefined
-		super(serverInfo, { ...options, ...(instructions !== undefined && { instructions }) })
-		this.request = request
-		this.metrics = metrics
-		this.sentry = sentry
-		this.accountManager = accountManager
-		this.userId = userId
-
-		this.server.onerror = (error) => this.recordError(error)
-
-		const registerTool = this.registerTool.bind(this) as (
-			name: string,
-			config: Record<string, unknown>,
-			callback: (...args: unknown[]) => unknown
-		) => RegisteredTool
-
-		this.registerTool = ((
-			name: string,
-			config: Record<string, unknown>,
-			callback: (...args: unknown[]) => unknown
-		) => registerTool(name, config, this.trackTool(name, callback))) as typeof this.registerTool
-	}
-
-	/**
-	 * Registers an account-scoped tool. Account selection is resolved from this
-	 * request only: auth-pinned account, then `cf-account-id`, then `account_id`.
-	 */
-	accountTool<Shape extends z.ZodRawShape>(
-		name: string,
-		config: {
-			title?: string
-			description?: string
-			inputSchema: z.ZodObject<Shape>
-			outputSchema?: StandardSchemaWithJSON
-			annotations?: ToolAnnotations
-			icons?: Array<{ src: string; mimeType?: string; sizes?: string[] }>
-			_meta?: Record<string, unknown>
-		},
-		handler: AccountToolCallback<Shape>
-	): RegisteredTool {
-		if (!this.accountManager) {
-			throw new Error(`accountTool("${name}") requires authenticated request props`)
-		}
-
-		const { inputSchema, callback } = buildAccountTool(
-			this.accountManager,
-			this.request,
-			config.inputSchema,
-			handler
-		)
-		return this.registerTool(name, { ...config, inputSchema }, callback)
-	}
-
-	recordError(error: unknown): void {
-		this.sentry?.recordError(error)
-	}
-
-	private trackTool(name: string, callback: (...args: unknown[]) => unknown) {
-		return async (...args: unknown[]) => {
-			try {
-				const result = await callback(...args)
-				this.metrics?.logEvent(new ToolCall({ toolName: name, userId: this.userId }))
-				return result
-			} catch (error) {
-				this.recordError(error)
-				this.metrics?.logEvent(
-					new ToolCall({
-						toolName: name,
-						userId: this.userId,
-						errorCode: toolErrorCode(error),
-					})
-				)
-				throw error
-			}
-		}
-	}
-}
-
-export interface CloudflareMCPServerFactoryOptions<Env> {
+export interface CloudflareMcpServerFactoryOptions<Env> {
 	serverInfo:
 		| Implementation
 		| ((context: McpRequestSeedContext<Env>) => Implementation | Promise<Implementation>)
@@ -164,18 +39,24 @@ export interface CloudflareMCPServerFactoryOptions<Env> {
 	register: (context: McpRegistrationContext<Env>) => void | Promise<void>
 }
 
+interface WorkerRequest<Env> {
+	env: Env
+	rawProps: unknown
+	request: Request
+	executionCtx: ExecutionContext
+}
+
 /** Creates the fresh SDK v2 server factory shared by modern and stateless 2025 requests. */
-export function createCloudflareMcpServerFactory<Env>(
-	options: CloudflareMCPServerFactoryOptions<Env>
+function createCloudflareMcpServerFactory<Env>(
+	options: CloudflareMcpServerFactoryOptions<Env>,
+	worker: WorkerRequest<Env>
 ): McpServerFactory {
 	return async (mcp) => {
-		const worker = getWorkerRequestScope<Env>()
-		const props = getRequestAuthProps(options.requireAuth ?? false)
+		const props = parseRequestAuthProps(worker.rawProps, options.requireAuth ?? false)
 		const accountManager = props ? new AccountManager(props) : undefined
 		const seed: McpRequestSeedContext<Env> = {
 			env: worker.env,
 			props,
-			accountManager,
 			request: mcp.requestInfo ?? worker.request,
 			executionCtx: worker.executionCtx,
 			waitUntil: worker.executionCtx.waitUntil.bind(worker.executionCtx),
@@ -185,26 +66,32 @@ export function createCloudflareMcpServerFactory<Env>(
 		try {
 			const serverInfo = await resolveOption(options.serverInfo, seed)
 			const metrics = await options.createMetrics?.(seed, serverInfo)
-			const serverOptions = options.serverOptions
+			const configuredOptions = options.serverOptions
 				? await resolveOption(options.serverOptions, seed)
 				: undefined
-			const server = new CloudflareMCPServer({
-				serverInfo,
-				request: seed.request,
-				metrics,
-				userId: getRequestUserId(props),
-				sentry,
-				accountManager,
-				options: serverOptions,
+			const accountInstructions = accountManager?.instructionsSuffix() ?? ''
+			const instructions =
+				`${configuredOptions?.instructions ?? ''}${accountInstructions}` || undefined
+			const server = new McpServer(serverInfo, {
+				...configuredOptions,
+				...(instructions !== undefined && { instructions }),
 			})
+			const userId = getRequestUserId(props)
+			const context = createRegistrationContext(seed, server, {
+				accountManager,
+				metrics,
+				sentry,
+				userId,
+			})
+
 			metrics?.logEvent(
 				new McpRequest({
-					userId: getRequestUserId(props),
+					userId,
 					clientId: mcp.authInfo?.clientId,
 					protocolEra: mcp.era,
 				})
 			)
-			await options.register({ ...seed, server, sentry, metrics })
+			await options.register(context)
 			return server
 		} catch (error) {
 			sentry?.recordError(error)
@@ -214,15 +101,14 @@ export function createCloudflareMcpServerFactory<Env>(
 }
 
 export interface CreateCloudflareMcpHandlerOptions<Env>
-	extends CloudflareMCPServerFactoryOptions<Env> {
+	extends CloudflareMcpServerFactoryOptions<Env> {
 	handler?: Omit<CreateStatelessMcpHandlerOptions, 'legacy'> & {
 		/** Optional DNS-rebinding allowlist. Values are hostnames without ports. */
 		allowedHostnames?: string[]
 	}
 }
 
-export type CloudflareMcpHandler<Env> = Omit<StatelessMcpHandler, 'fetch'> & {
-	(request: Request, env: Env, ctx: ExecutionContext): Promise<Response>
+export interface CloudflareMcpHandler<Env> {
 	fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response>
 }
 
@@ -263,53 +149,66 @@ export function createCloudflareMcpHandler<Env>(
 					exposeHeaders: 'MCP-Protocol-Version',
 					...corsOptions,
 				}
-	const inner = createAgentsMcpHandler(createCloudflareMcpServerFactory(factoryOptions), {
-		...agentsOptions,
-		corsOptions: resolvedCors,
-	})
 	const route = agentsOptions.route ?? '/mcp'
 
-	const fetch = async (request: Request, env: Env, ctx: ExecutionContext) => {
-		if (allowedHostnames) {
-			const rejection = hostHeaderValidationResponse(request, allowedHostnames)
-			if (rejection) return withCors(rejection, resolvedCors)
-		}
-		const isMcpRoute = new URL(request.url).pathname === route
-		if (isMcpRoute && request.method !== 'POST' && request.method !== 'OPTIONS') {
-			return withCors(
-				new Response('Method Not Allowed', {
-					status: 405,
-					headers: { Allow: 'POST, OPTIONS' },
+	return {
+		async fetch(request, env, ctx) {
+			if (allowedHostnames) {
+				const rejection = hostHeaderValidationResponse(request, allowedHostnames)
+				if (rejection) return withCors(rejection, resolvedCors)
+			}
+			if (new URL(request.url).pathname !== route) {
+				return withCors(new Response('Not Found', { status: 404 }), resolvedCors)
+			}
+			if (request.method !== 'POST' && request.method !== 'OPTIONS') {
+				return withCors(
+					new Response('Method Not Allowed', {
+						status: 405,
+						headers: { Allow: 'POST, OPTIONS' },
+					}),
+					resolvedCors
+				)
+			}
+
+			let boundedRequest = request
+			if (request.method === 'POST') {
+				const bounded = await bufferMcpRequestWithinLimit(request)
+				if (bounded instanceof Response) return withCors(bounded, resolvedCors)
+				boundedRequest = bounded
+			}
+
+			const handler = createAgentsMcpHandler(
+				createCloudflareMcpServerFactory(factoryOptions, {
+					env,
+					rawProps: handlerOptions.authContext?.props ?? ctx.props,
+					request: boundedRequest,
+					executionCtx: ctx,
 				}),
-				resolvedCors
+				{
+					...agentsOptions,
+					corsOptions: resolvedCors,
+				}
 			)
-		}
-
-		let boundedRequest = request
-		if (isMcpRoute && request.method === 'POST') {
-			const bounded = await bufferMcpRequestWithinLimit(request)
-			if (bounded instanceof Response) return withCors(bounded, resolvedCors)
-			boundedRequest = bounded
-		}
-
-		return runWithWorkerRequest({ env, request: boundedRequest, executionCtx: ctx }, () =>
-			inner(boundedRequest, env, ctx)
-		)
+			return handler(boundedRequest, env, ctx)
+		},
 	}
-
-	return Object.assign(fetch, {
-		fetch,
-		close: inner.close,
-		notify: inner.notify,
-		bus: inner.bus,
-	}) as CloudflareMcpHandler<Env>
 }
 
-function toolErrorCode(error: unknown): number {
-	if (error instanceof McpError || error instanceof ProtocolError) {
-		return error.code
+function parseRequestAuthProps(rawProps: unknown, required: boolean): AuthProps | undefined {
+	const hasProps =
+		rawProps !== undefined &&
+		rawProps !== null &&
+		(typeof rawProps !== 'object' || Object.keys(rawProps).length > 0)
+	if (!hasProps) {
+		if (required) throw new Error('Authenticated request props are required')
+		return undefined
 	}
-	return ProtocolErrorCode.InternalError
+
+	const parsed = AuthPropsSchema.safeParse(rawProps)
+	if (!parsed.success) {
+		throw new Error('Invalid authenticated request props', { cause: parsed.error })
+	}
+	return parsed.data
 }
 
 async function resolveOption<Context, Value>(

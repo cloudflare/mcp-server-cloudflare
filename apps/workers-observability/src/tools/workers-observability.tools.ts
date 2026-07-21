@@ -14,7 +14,7 @@ import {
 	zValuesRequest,
 } from '@repo/mcp-common/src/types/workers-logs.types'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 import type { Env } from '../workers-observability.context'
 
 type Tags = {
@@ -32,7 +32,7 @@ type Tags = {
 export function registerObservabilityTools(context: McpRegistrationContext<Env>) {
 	const logger = new WorkersLogger<Tags>()
 	// Register the worker logs analysis tool by worker name
-	context.server.accountTool(
+	context.accountTool(
 		'query_worker_observability',
 		{
 			description: `Query the Workers Observability API to analyze logs and metrics from your Cloudflare Workers.
@@ -193,7 +193,7 @@ This tool provides three primary views of your Worker data:
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'observability_keys',
 		{
 			description: `Find keys in the Workers Observability Data
@@ -241,7 +241,7 @@ This tool provides three primary views of your Worker data:
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'observability_values',
 		{
 			description: `Find values in the Workers Observability Data.

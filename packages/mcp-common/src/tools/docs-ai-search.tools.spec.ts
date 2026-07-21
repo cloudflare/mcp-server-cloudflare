@@ -75,13 +75,11 @@ Create a KV namespace.
 	it('registers outputSchema and returns structuredContent', async () => {
 		const { ai } = makeAi(aiSearchResponse)
 		const registeredTools = new Map<string, { options: any; handler: any }>()
-		const server = {
-			registerTool: vi.fn((name: string, options: any, handler: any) => {
-				registeredTools.set(name, { options, handler })
-			}),
-		}
+		const registerTool = vi.fn((name: string, options: any, handler: any) => {
+			registeredTools.set(name, { options, handler })
+		})
 
-		registerDocsTools({ server, env: { AI: ai } } as any)
+		registerDocsTools({ registerTool, env: { AI: ai } } as any)
 
 		const docsTool = registeredTools.get('search_cloudflare_documentation')
 		expect(docsTool?.options.outputSchema).toBeDefined()

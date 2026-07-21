@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import type { McpRegistrationContext } from '../request-context'
+import type { McpRegistrationContext } from '../registration-context'
 
 interface RequiredEnv {
 	AI: Ai
@@ -14,7 +14,7 @@ const TOP_K = 10
  * Registers the docs search tool with one request-scoped server.
  */
 export function registerDocsTools<Env extends RequiredEnv>(context: McpRegistrationContext<Env>) {
-	context.server.registerTool(
+	context.registerTool(
 		'search_cloudflare_documentation',
 		{
 			description: `Search the Cloudflare documentation.
@@ -56,7 +56,7 @@ ${result.text}
 
 	// Note: this is a tool instead of a prompt because
 	// prompt support is much less common than tools.
-	context.server.registerTool(
+	context.registerTool(
 		'migrate_pages_to_workers_guide',
 		{
 			description: `ALWAYS read this guide before migrating Pages projects to Workers.`,

@@ -6,10 +6,10 @@ import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 import { GatewayIdParam, ListLogsParams, LogIdParam, pageParam, perPageParam } from '../types'
 
 import type { LogListParams } from 'cloudflare/resources/ai-gateway'
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 
 export function registerAIGatewayTools<Env>(context: McpRegistrationContext<Env>) {
-	context.server.accountTool(
+	context.accountTool(
 		'list_gateways',
 		{
 			description: 'List Gateways',
@@ -53,7 +53,7 @@ export function registerAIGatewayTools<Env>(context: McpRegistrationContext<Env>
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'list_logs',
 		{
 			description: 'List Logs',
@@ -95,7 +95,7 @@ export function registerAIGatewayTools<Env>(context: McpRegistrationContext<Env>
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'get_log_details',
 		{
 			description: 'Get a single Log details',
@@ -136,7 +136,7 @@ export function registerAIGatewayTools<Env>(context: McpRegistrationContext<Env>
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'get_log_request_body',
 		{
 			description: 'Get Log Request Body',
@@ -177,7 +177,7 @@ export function registerAIGatewayTools<Env>(context: McpRegistrationContext<Env>
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'get_log_response_body',
 		{
 			description: 'Get Log Response Body',

@@ -6,7 +6,7 @@ import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 import type { AccountGetParams } from 'cloudflare/resources/accounts/accounts.mjs'
 import type { ReportGetParams } from 'cloudflare/resources/dns/analytics.mjs'
 import type { ZoneGetParams } from 'cloudflare/resources/dns/settings.mjs'
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 
 function getStartDate(days: number) {
 	const today = new Date()
@@ -16,7 +16,7 @@ function getStartDate(days: number) {
 
 export function registerAnalyticTools<Env>(context: McpRegistrationContext<Env>) {
 	// Register DNS Report tool
-	context.server.registerTool(
+	context.registerTool(
 		'dns_report',
 		{
 			description: 'Fetch the DNS Report for a given zone since a date',
@@ -61,7 +61,7 @@ export function registerAnalyticTools<Env>(context: McpRegistrationContext<Env>)
 		}
 	)
 	// Register Account DNS Settings display tool
-	context.server.accountTool(
+	context.accountTool(
 		'show_account_dns_settings',
 		{
 			description: 'Show DNS settings for current account',
@@ -99,7 +99,7 @@ export function registerAnalyticTools<Env>(context: McpRegistrationContext<Env>)
 		}
 	)
 	// Register Zone DNS Settings display tool
-	context.server.registerTool(
+	context.registerTool(
 		'show_zone_dns_settings',
 		{
 			description: 'Show DNS settings for a zone',

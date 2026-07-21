@@ -1,10 +1,10 @@
-import type { McpRegistrationContext } from '../request-context'
+import type { McpRegistrationContext } from '../registration-context'
 
 /**
  * Registers developer-platform-related prompts with one request-scoped server.
  */
 export function registerPrompts<Env>(context: McpRegistrationContext<Env>) {
-	context.server.registerPrompt(
+	context.registerPrompt(
 		'workers-prompt-full',
 		{
 			description:

@@ -6,7 +6,7 @@ import { createCloudflareMcpHandler } from './server'
 import type { AuthInfo, ServerContext } from '@modelcontextprotocol/server'
 import type { MetricsEvent, MetricsTracker } from '@repo/mcp-observability'
 import type { AuthProps } from './auth-props'
-import type { McpRegistrationContext } from './request-context'
+import type { McpRegistrationContext } from './registration-context'
 import type { SentryClient } from './sentry'
 
 const VERIFIED_OAUTH_CONTEXT = Symbol.for('cloudflare.workers-oauth-provider.verified-context.v1')
@@ -136,10 +136,10 @@ describe('shared stateless MCP foundation', () => {
 		const instances = new Set<object>()
 		const handler = createCloudflareMcpHandler<TestEnv>({
 			serverInfo: { name: 'foundation', version: '1.0.0' },
-			register({ server }) {
-				instances.add(server)
+			register(context) {
+				instances.add(context)
 				let calls = 0
-				server.registerTool('counter', { inputSchema: z.object({}) }, async () => ({
+				context.registerTool('counter', { inputSchema: z.object({}) }, async () => ({
 					content: [{ type: 'text', text: String(++calls) }],
 				}))
 			},
@@ -258,8 +258,8 @@ describe('shared stateless MCP foundation', () => {
 	it('rejects modern envelope/header mismatches before dispatch', async () => {
 		const handler = createCloudflareMcpHandler<TestEnv>({
 			serverInfo: { name: 'header-validation', version: '1.0.0' },
-			register({ server }) {
-				server.registerTool('ping', { inputSchema: z.object({}) }, async () => ({
+			register(context) {
+				context.registerTool('ping', { inputSchema: z.object({}) }, async () => ({
 					content: [{ type: 'text', text: 'pong' }],
 				}))
 			},
@@ -295,8 +295,8 @@ describe('shared stateless MCP foundation', () => {
 		const handler = createCloudflareMcpHandler<TestEnv>({
 			serverInfo: { name: 'metrics', version: '1.0.0' },
 			createMetrics: () => metrics,
-			register({ server }) {
-				server.registerTool('ping', { inputSchema: z.object({}) }, async () => ({
+			register(context) {
+				context.registerTool('ping', { inputSchema: z.object({}) }, async () => ({
 					content: [{ type: 'text', text: 'pong' }],
 				}))
 			},
@@ -321,8 +321,8 @@ describe('shared stateless MCP foundation', () => {
 		const handler = createCloudflareMcpHandler<TestEnv>({
 			serverInfo: { name: 'sentry', version: '1.0.0' },
 			createSentry: () => sentry,
-			register({ server }) {
-				server.registerTool('fail', { inputSchema: z.object({}) }, async () => {
+			register(context) {
+				context.registerTool('fail', { inputSchema: z.object({}) }, async () => {
 					throw new Error('request-local failure')
 				})
 			},
@@ -350,29 +350,24 @@ describe('shared stateless MCP foundation', () => {
 			register(context) {
 				contexts.push(context)
 				const call = calls++
-				context.server.accountTool(
-					'identity',
-					{ inputSchema: z.object({}) },
-					async (_args, accountId) => {
-						markStarted[call]()
-						await gates[call]
-						context.waitUntil(Promise.resolve())
-						return {
-							content: [
-								{
-									type: 'text',
-									text: JSON.stringify({
-										accountId,
-										requestLabel: context.env.requestLabel,
-										header: context.request.headers.get('x-request-label'),
-										userId:
-											context.props?.type === 'user_token' ? context.props.user.id : undefined,
-									}),
-								},
-							],
-						}
+				context.accountTool('identity', { inputSchema: z.object({}) }, async (_args, accountId) => {
+					markStarted[call]()
+					await gates[call]
+					context.waitUntil(Promise.resolve())
+					return {
+						content: [
+							{
+								type: 'text',
+								text: JSON.stringify({
+									accountId,
+									requestLabel: context.env.requestLabel,
+									header: context.request.headers.get('x-request-label'),
+									userId: context.props?.type === 'user_token' ? context.props.user.id : undefined,
+								}),
+							},
+						],
 					}
-				)
+				})
 			},
 		})
 
@@ -409,7 +404,7 @@ describe('shared stateless MCP foundation', () => {
 		)
 
 		await Promise.all(started)
-		// Release in reverse order to force the AsyncLocalStorage scopes to overlap.
+		// Release in reverse order to force the request-local callbacks to overlap.
 		release[1]()
 		release[0]()
 		const documents = await Promise.all(pending).then((responses) =>
@@ -432,9 +427,35 @@ describe('shared stateless MCP foundation', () => {
 			},
 		])
 		expect(contexts).toHaveLength(2)
-		expect(contexts[0]?.server).not.toBe(contexts[1]?.server)
+		expect(contexts[0]).not.toBe(contexts[1])
+		expect(contexts[0]?.registerTool).not.toBe(contexts[1]?.registerTool)
 		expect(contexts[0]?.request).not.toBe(contexts[1]?.request)
 		expect(waitUntilLabels.sort()).toEqual(['ctx-0', 'ctx-1'])
+	})
+
+	it('honors explicit handler auth context when Worker props are absent', async () => {
+		let factoryProps: AuthProps | undefined
+		const handler = createCloudflareMcpHandler<TestEnv>({
+			serverInfo: { name: 'explicit-auth', version: '1.0.0' },
+			requireAuth: true,
+			handler: { authContext: { props: { ...multiAccountProps } } },
+			register(context) {
+				factoryProps = context.props
+				context.registerTool('auth', { inputSchema: z.object({}) }, async () => ({
+					content: [{ type: 'text', text: context.props?.type ?? 'none' }],
+				}))
+			},
+		})
+
+		const response = await handler.fetch(
+			modernRequest('tools/call', { name: 'auth', arguments: {} }),
+			{ requestLabel: 'explicit-auth' },
+			executionContext()
+		)
+
+		expect(response.status).toBe(200)
+		expect(textResult(await responseDocument(response))).toBe('user_token')
+		expect(factoryProps).toEqual(multiAccountProps)
 	})
 
 	it('bridges verified OAuth AuthInfo while keeping application props request-scoped', async () => {
@@ -447,7 +468,7 @@ describe('shared stateless MCP foundation', () => {
 			register(context) {
 				factoryAuth = context.mcp.authInfo
 				factoryProps = context.props
-				context.server.registerTool(
+				context.registerTool(
 					'auth',
 					{ inputSchema: z.object({}) },
 					async (_args, ctx: ServerContext) => {

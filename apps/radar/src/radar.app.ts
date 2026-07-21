@@ -1,8 +1,5 @@
-import { createApiHandler } from '@repo/mcp-common/src/api-handler'
-import { createCloudflareOAuthRouter } from '@repo/mcp-common/src/oauth-router'
+import { createAuthenticatedMcpApp } from '@repo/mcp-common/src/mcp-app'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
-import { createCloudflareMcpHandler } from '@repo/mcp-common/src/server'
-import { MetricsTracker } from '@repo/mcp-observability'
 
 import { BASE_INSTRUCTIONS } from './radar.context'
 import { registerRadarTools } from './tools/radar.tools'
@@ -40,48 +37,18 @@ const RadarScopes = {
 	'url_scanner:write': 'Grants write level access to URL Scanner',
 } as const
 
-const allowedHostnames = [
-	'localhost',
-	'127.0.0.1',
-	'[::1]',
-	'radar-staging.mcp.cloudflare.com',
-	'radar.mcp.cloudflare.com',
-]
-const mcpRequestPolicy = {
-	allowedHostnames,
-	allowedOriginHostnames: [...allowedHostnames, 'playground.ai.cloudflare.com'],
-}
-
-export const mcpHandler = createCloudflareMcpHandler<Env>({
-	serverInfo: ({ env }) => ({
-		name: env.MCP_SERVER_NAME,
-		version: env.MCP_SERVER_VERSION,
-	}),
-	requireAuth: true,
+const app = createAuthenticatedMcpApp<Env>({
+	serviceHostnames: ['radar-staging.mcp.cloudflare.com', 'radar.mcp.cloudflare.com'],
+	scopes: RadarScopes,
 	serverOptions: {
 		instructions: `${DEPRECATION_INSTRUCTIONS}\n\n---\n\n${BASE_INSTRUCTIONS}`,
 	},
-	createMetrics: ({ env }, serverInfo) => new MetricsTracker(env.MCP_METRICS, serverInfo),
 	register(context) {
 		registerRadarTools(context)
 		registerUrlScannerTools(context)
 	},
-	handler: mcpRequestPolicy,
 })
 
-const apiHandler = createApiHandler(mcpHandler)
+export const mcpHandler = app.mcpHandler
 
-export default {
-	fetch(request: Request, env: Env, ctx: ExecutionContext) {
-		const metrics = new MetricsTracker(env.MCP_METRICS, {
-			name: env.MCP_SERVER_NAME,
-			version: env.MCP_SERVER_VERSION,
-		})
-		return createCloudflareOAuthRouter({
-			apiHandler,
-			scopes: RadarScopes,
-			metrics,
-			mcpRequestPolicy,
-		}).fetch(request, env, ctx)
-	},
-} satisfies ExportedHandler<Env>
+export default app.worker

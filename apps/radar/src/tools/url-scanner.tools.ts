@@ -12,14 +12,14 @@ import {
 	UrlParam,
 } from '../types/url-scanner'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 import type { Env } from '../radar.context'
 
 const URLSCANNER_API_BASE = 'https://api.cloudflare.com/client/v4/accounts'
 
 export function registerUrlScannerTools(context: McpRegistrationContext<Env>) {
 	// Search URL scans
-	context.server.accountTool(
+	context.accountTool(
 		'search_url_scans',
 		{
 			description:
@@ -69,7 +69,7 @@ export function registerUrlScannerTools(context: McpRegistrationContext<Env>) {
 	)
 
 	// Create URL scan
-	context.server.accountTool(
+	context.accountTool(
 		'create_url_scan',
 		{
 			description:
@@ -131,7 +131,7 @@ export function registerUrlScannerTools(context: McpRegistrationContext<Env>) {
 	)
 
 	// Get URL scan result
-	context.server.accountTool(
+	context.accountTool(
 		'get_url_scan',
 		{
 			description:
@@ -194,7 +194,7 @@ export function registerUrlScannerTools(context: McpRegistrationContext<Env>) {
 	)
 
 	// Get scan screenshot
-	context.server.accountTool(
+	context.accountTool(
 		'get_url_scan_screenshot',
 		{
 			description: 'Get the screenshot URL for a completed scan.',
@@ -250,7 +250,7 @@ export function registerUrlScannerTools(context: McpRegistrationContext<Env>) {
 	)
 
 	// Get scan HAR
-	context.server.accountTool(
+	context.accountTool(
 		'get_url_scan_har',
 		{
 			description:

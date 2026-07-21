@@ -2,57 +2,61 @@
 
 Shared stateless MCP SDK v2 infrastructure for the Cloudflare MCP Workers.
 
-## Server lifecycle
+## Application assembly
 
-`createCloudflareMcpHandler()` wraps the Agents preview `createMcpHandler(factory)` API. It creates a fresh `@modelcontextprotocol/server` instance for every modern request and every request handled by the default stateless 2025 fallback.
+Use `createPublicMcpApp()` or `createAuthenticatedMcpApp()` for application entrypoints. These modules centralize the invariants shared by every deployment:
+
+- server name and version from `MCP_SERVER_NAME` and `MCP_SERVER_VERSION`
+- request and tool metrics through `MCP_METRICS`
+- localhost Host/Origin policy
+- the Cloudflare MCP playground Origin policy
+- a fresh SDK v2 server for every request
+- the default stateless 2025 compatibility path
+- OAuth and API-token routing for authenticated applications
 
 ```ts
-import { z } from 'zod'
+import { createAuthenticatedMcpApp } from '@repo/mcp-common/src/mcp-app'
 
-import { createCloudflareMcpHandler } from '@repo/mcp-common/src/server'
-
-const handler = createCloudflareMcpHandler<Env>({
-	serverInfo: ({ env }) => ({
-		name: env.MCP_SERVER_NAME,
-		version: env.MCP_SERVER_VERSION,
-	}),
-	requireAuth: true,
+const app = createAuthenticatedMcpApp<Env>({
+	serviceHostnames: ['example-staging.mcp.cloudflare.com', 'example.mcp.cloudflare.com'],
+	scopes: ExampleScopes,
 	register(context) {
-		context.server.registerTool('whoami', { inputSchema: z.object({}) }, async () => ({
+		context.registerTool('whoami', { inputSchema: z.object({}) }, async () => ({
 			content: [{ type: 'text', text: context.props?.type ?? 'anonymous' }],
 		}))
 	},
-	handler: {
-		allowedHostnames: ['mcp.example.com'],
-		allowedOriginHostnames: ['app.example.com'],
-		corsOptions: { origin: 'https://app.example.com' },
-	},
 })
 
-export default handler
+export const mcpHandler = app.mcpHandler
+export default app.worker
 ```
 
-Do not construct a global MCP server. Do not set `legacy: 'reject'`: the default `legacy: 'stateless'` fallback is part of the migration contract. The shared handler accepts only `POST` and CORS `OPTIONS` on the MCP route; standalone stream and session-deletion methods return `405`. MCP request bodies are capped at 4 MiB before SDK parsing, and OAuth resources use strict path-aware matching.
+`mcpHandler` is exposed separately for transport-contract tests that bypass OAuth routing. Applications with a genuine custom route, such as an asset fallback, can call it directly from their own Worker `fetch` implementation.
 
-## Request context
+For lower-level use, `createCloudflareMcpHandler()` accepts explicit server metadata, observability factories, and HTTP policy. Do not construct a global MCP server. Do not set `legacy: 'reject'`: the default `legacy: 'stateless'` fallback is part of the migration contract.
 
-The registration callback receives one immutable `McpRegistrationContext` containing:
+The shared handler accepts only `POST` and CORS `OPTIONS` on the MCP route. Standalone stream and session-deletion methods return `405`. MCP request bodies are capped at 4 MiB before SDK parsing, and OAuth resources use strict path-aware matching.
+
+## Request registration context
+
+The registration callback receives one request-local `McpRegistrationContext` containing:
 
 - Worker `env`
 - validated auth `props`
-- an `AccountManager` derived from those props
 - the original `Request`
 - `ExecutionContext` and a bound `waitUntil`
-- SDK factory context (`era` and optional caller-supplied `AuthInfo`)
-- request-local Sentry and metrics clients when configured
-- the fresh `CloudflareMCPServer`
+- SDK request context (`era` and optional caller-supplied `AuthInfo`)
+- tracked `registerTool()` and `accountTool()` methods
+- `registerPrompt()` and `recordError()` methods
 
-Shared tools capture this context instead of a stateful server object. Account-scoped tools use `context.server.accountTool()` with a `z.object(...)` input schema. Account selection is resolved anew on every request: auth-pinned account, then `cf-account-id`, then the `account_id` argument.
+The raw SDK server stays private. This prevents application registration code from bypassing shared tool metrics, error reporting, or account selection accidentally.
+
+Shared tools capture the registration context instead of a stateful server object. Account-scoped tools use `context.accountTool()` with a `z.object(...)` input schema. Account selection is resolved anew on every request: auth-pinned account, then `cf-account-id`, then the `account_id` argument.
 
 ## Authentication routing
 
-`createCloudflareOAuthRouter()` keeps OAuth grants, KV, credentials, refresh tokens, and API-token validation as application/security state while routing only `/mcp` to the stateless handler. It exposes no compatibility transport route.
+`createAuthenticatedMcpApp()` composes `createCloudflareOAuthRouter()` internally. OAuth grants, KV, credentials, refresh tokens, and API-token validation remain application/security state; only MCP protocol sessions are removed. No compatibility transport route is exposed.
 
 The published OAuth Provider supplies validated application props through `ctx.props`; the Agents handler exposes those as `McpRegistrationContext.props`. SDK `ctx.http.authInfo` is optional and is present only when a compatible caller supplies it. Do not log raw tokens or authentication props.
 
-The default CORS allow-headers list includes `cf-account-id`, `MCP-Protocol-Version`, `Mcp-Method`, and `Mcp-Name`. Browser deployments must configure explicit Host and Origin hostname allowlists for their domains. Authenticated deployments pass those same lists as `createCloudflareOAuthRouter({ mcpRequestPolicy: ... })`, which rejects invalid MCP Host/Origin values before authentication and lets the MCP handler own `/mcp` preflights.
+The default CORS allow-headers list includes `cf-account-id`, `MCP-Protocol-Version`, `Mcp-Method`, and `Mcp-Name`. Browser deployments use the canonical explicit Host and Origin allowlists assembled from each application's `serviceHostnames`.

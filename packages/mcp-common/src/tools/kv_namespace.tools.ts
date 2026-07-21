@@ -8,7 +8,7 @@ import {
 	KvNamespaceTitleSchema,
 } from '../types/kv_namespace.types'
 
-import type { McpRegistrationContext } from '../request-context'
+import type { McpRegistrationContext } from '../registration-context'
 
 export const KV_NAMESPACE_TOOLS = {
 	kv_namespaces_list: 'kv_namespaces_list',
@@ -22,7 +22,7 @@ export function registerKVTools<Env>(context: McpRegistrationContext<Env>) {
 	/**
 	 * Tool to list KV namespaces.
 	 */
-	context.server.accountTool(
+	context.accountTool(
 		KV_NAMESPACE_TOOLS.kv_namespaces_list,
 		{
 			description: `
@@ -81,7 +81,7 @@ export function registerKVTools<Env>(context: McpRegistrationContext<Env>) {
 	/**
 	 * Tool to create a KV namespace.
 	 */
-	context.server.accountTool(
+	context.accountTool(
 		KV_NAMESPACE_TOOLS.kv_namespace_create,
 		{
 			description: 'Create a new kv namespace in your Cloudflare account',
@@ -124,7 +124,7 @@ export function registerKVTools<Env>(context: McpRegistrationContext<Env>) {
 	/**
 	 * Tool to delete a KV namespace.
 	 */
-	context.server.accountTool(
+	context.accountTool(
 		KV_NAMESPACE_TOOLS.kv_namespace_delete,
 		{
 			description: 'Delete a kv namespace in your Cloudflare account',
@@ -167,7 +167,7 @@ export function registerKVTools<Env>(context: McpRegistrationContext<Env>) {
 	/**
 	 * Tool to get details of a specific KV namespace.
 	 */
-	context.server.accountTool(
+	context.accountTool(
 		KV_NAMESPACE_TOOLS.kv_namespace_get,
 		{
 			description: `Get details of a kv namespace in your Cloudflare account.
@@ -216,7 +216,7 @@ export function registerKVTools<Env>(context: McpRegistrationContext<Env>) {
 	/**
 	 * Tool to update the title of a KV namespace.
 	 */
-	context.server.accountTool(
+	context.accountTool(
 		KV_NAMESPACE_TOOLS.kv_namespace_update,
 		{
 			description: 'Update the title of a kv namespace in your Cloudflare account',

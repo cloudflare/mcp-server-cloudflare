@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { fetchCloudflareApi } from '@repo/mcp-common/src/cloudflare-api'
 import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 import type { Env } from '../logpush.context'
 
 const zJobIdentifier = z.number().int().min(1).optional().describe('Unique id of the job.')
@@ -97,13 +97,13 @@ export async function handleGetAccountLogPushJobs(
 
 /**
  * Registers the logs analysis tool with the MCP server
- * @param server The MCP server instance
+ * @param context The request-local registration context
  * @param accountId Cloudflare account ID
  * @param apiToken Cloudflare API token
  */
 export function registerLogsTools(context: McpRegistrationContext<Env>) {
 	// Register the worker logs analysis tool by worker name
-	context.server.accountTool(
+	context.accountTool(
 		'logpush_jobs_by_account_id',
 		{
 			description: `All Logpush jobs by Account ID.
@@ -131,7 +131,7 @@ export function registerLogsTools(context: McpRegistrationContext<Env>) {
 					],
 				}
 			} catch (e) {
-				context.server.recordError(e)
+				context.recordError(e)
 				return {
 					content: [
 						{

@@ -10,10 +10,10 @@ import {
 } from '../types/d1.types'
 import { PaginationPageParam, PaginationPerPageParam } from '../types/shared.types'
 
-import type { McpRegistrationContext } from '../request-context'
+import type { McpRegistrationContext } from '../registration-context'
 
 export function registerD1Tools<Env>(context: McpRegistrationContext<Env>) {
-	context.server.accountTool(
+	context.accountTool(
 		'd1_databases_list',
 		{
 			description: 'List all of the D1 databases in your Cloudflare account',
@@ -63,7 +63,7 @@ export function registerD1Tools<Env>(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'd1_database_create',
 		{
 			description: 'Create a new D1 database in your Cloudflare account',
@@ -109,7 +109,7 @@ export function registerD1Tools<Env>(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'd1_database_delete',
 		{
 			description: 'Delete a d1 database in your Cloudflare account',
@@ -149,7 +149,7 @@ export function registerD1Tools<Env>(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'd1_database_get',
 		{
 			description: 'Get a D1 database in your Cloudflare account',
@@ -189,7 +189,7 @@ export function registerD1Tools<Env>(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'd1_database_query',
 		{
 			description: 'Query a D1 database in your Cloudflare account',

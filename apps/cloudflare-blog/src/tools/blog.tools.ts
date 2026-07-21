@@ -8,7 +8,7 @@ import {
 	BlogSearchQueryParam,
 } from '../types/blog.types'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 
 interface RequiredEnv {
 	BLOG_BASE_URL: string
@@ -35,7 +35,7 @@ export function registerBlogTools<Env extends RequiredEnv>(context: McpRegistrat
 
 	// ---- search_posts -------------------------------------------------------
 
-	context.server.registerTool(
+	context.registerTool(
 		'search_posts',
 		{
 			description: `Search the Cloudflare Blog using semantic search.
@@ -129,7 +129,7 @@ Examples of good queries:
 
 	// ---- list_posts ---------------------------------------------------------
 
-	context.server.registerTool(
+	context.registerTool(
 		'list_posts',
 		{
 			description: `List Cloudflare Blog posts in reverse chronological order.
@@ -179,7 +179,7 @@ Optionally filter by tag. Use the returned nextCursor to paginate through result
 
 	// ---- get_post -----------------------------------------------------------
 
-	context.server.registerTool(
+	context.registerTool(
 		'get_post',
 		{
 			description: `Get a single Cloudflare Blog post by slug, including its full HTML content.
@@ -217,7 +217,7 @@ Use the slug from a list_posts or search_posts result.`,
 
 	// ---- list_tags ----------------------------------------------------------
 
-	context.server.registerTool(
+	context.registerTool(
 		'list_tags',
 		{
 			description: `List all tags used on the Cloudflare Blog.

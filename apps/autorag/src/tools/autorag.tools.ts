@@ -5,10 +5,10 @@ import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
 import { pageParam, perPageParam } from '../types'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 
 export function registerAutoRAGTools<Env>(context: McpRegistrationContext<Env>) {
-	context.server.accountTool(
+	context.accountTool(
 		'list_rags',
 		{
 			description: 'List AutoRAGs (vector stores)',
@@ -59,7 +59,7 @@ export function registerAutoRAGTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'search',
 		{
 			description: 'Search Documents using AutoRAG (vector store)',
@@ -116,7 +116,7 @@ export function registerAutoRAGTools<Env>(context: McpRegistrationContext<Env>) 
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'ai_search',
 		{
 			description: 'AI Search Documents using AutoRAG (vector store)',

@@ -94,6 +94,28 @@ const appMigrations: Record<string, Migration[]> = {
 	],
 }
 
+const mcpEntrypoints: Record<string, string> = {
+	'ai-gateway': 'src/ai-gateway.app.ts',
+	auditlogs: 'src/auditlogs.app.ts',
+	autorag: 'src/autorag.app.ts',
+	'browser-rendering': 'src/browser.app.ts',
+	'cloudflare-blog': 'src/cloudflare-blog.app.ts',
+	'cloudflare-one-casb': 'src/cf1-casb.app.ts',
+	'demo-day': 'src/demo-day.app.ts',
+	'dex-analysis': 'src/dex-analysis.app.ts',
+	'dns-analytics': 'src/dns-analytics.app.ts',
+	'docs-ai-search': 'src/docs-ai-search.app.ts',
+	'docs-autorag': 'src/docs-autorag.app.ts',
+	'docs-vectorize': 'src/docs-vectorize.app.ts',
+	graphql: 'src/graphql.app.ts',
+	logpush: 'src/logpush.app.ts',
+	radar: 'src/radar.app.ts',
+	'sandbox-container': 'server/sandbox.server.app.ts',
+	'workers-bindings': 'src/bindings.app.ts',
+	'workers-builds': 'src/workers-builds.app.ts',
+	'workers-observability': 'src/workers-observability.app.ts',
+}
+
 function wranglerPath(app: string): string {
 	return path.join(root, 'apps', app, app === 'demo-day' ? 'wrangler.json' : 'wrangler.jsonc')
 }
@@ -125,6 +147,44 @@ function extractArrayProperty<T>(source: string, property: string): T[] {
 }
 
 describe('stateless migration repository contract', () => {
+	it('assembles all MCP entrypoints through the canonical app modules', () => {
+		expect(Object.keys(mcpEntrypoints)).toHaveLength(19)
+		expect(Object.keys(mcpEntrypoints).sort()).toEqual(Object.keys(appMigrations).sort())
+
+		for (const [app, entrypoint] of Object.entries(mcpEntrypoints)) {
+			const source = fs.readFileSync(path.join(root, 'apps', app, entrypoint), 'utf8')
+			expect(source, app).toMatch(/create(?:Authenticated|Public)McpApp/)
+			expect(source, app).not.toMatch(
+				/createCloudflareMcpHandler|createCloudflareOAuthRouter|createApiHandler|new MetricsTracker/
+			)
+		}
+	})
+
+	it('keeps observability and account selection inside the registration seam', () => {
+		const commonSource = path.join(root, 'packages', 'mcp-common', 'src')
+		expect(fs.existsSync(path.join(commonSource, 'api-handler.ts'))).toBe(false)
+		expect(fs.readFileSync(path.join(commonSource, 'request-context.ts'), 'utf8')).not.toContain(
+			'AsyncLocalStorage'
+		)
+		expect(fs.readFileSync(path.join(commonSource, 'server.ts'), 'utf8')).not.toMatch(
+			/class CloudflareMCPServer|this\.registerTool/
+		)
+
+		const sourceDirectories = new Set([
+			commonSource,
+			...Object.entries(mcpEntrypoints).map(([app, entrypoint]) =>
+				path.join(root, 'apps', app, path.dirname(entrypoint))
+			),
+		])
+		for (const directory of sourceDirectories) {
+			for (const file of fs.readdirSync(directory, { recursive: true, encoding: 'utf8' })) {
+				if (!file.endsWith('.ts') || file.endsWith('.spec.ts')) continue
+				const source = fs.readFileSync(path.join(directory, file), 'utf8')
+				expect(source, file).not.toContain('context.server.')
+			}
+		}
+	})
+
 	it('keeps every deployed Durable Object migration append-only and appends protocol-class deletions', () => {
 		expect(Object.keys(appMigrations)).toHaveLength(19)
 		for (const [app, expected] of Object.entries(appMigrations)) {

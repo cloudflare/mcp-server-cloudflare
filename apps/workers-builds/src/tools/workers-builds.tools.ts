@@ -4,12 +4,12 @@ import { getBuild, getBuildLogs, listBuilds } from '@repo/mcp-common/src/api/wor
 import { fmt } from '@repo/mcp-common/src/format'
 import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
-import type { McpRegistrationContext } from '@repo/mcp-common/src/request-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 import type { Env } from '../workers-builds.context'
 
 /** Registers stateless Workers Builds tools. Every target is explicit in the call. */
 export function registerBuildsTools(context: McpRegistrationContext<Env>) {
-	context.server.accountTool(
+	context.accountTool(
 		'workers_builds_list_builds',
 		{
 			description: fmt.trim(`
@@ -74,7 +74,7 @@ export function registerBuildsTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'workers_builds_get_build',
 		{
 			description: fmt.trim(`
@@ -127,7 +127,7 @@ export function registerBuildsTools(context: McpRegistrationContext<Env>) {
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'workers_builds_get_build_logs',
 		{
 			description: 'Get logs for a Cloudflare Workers build by its explicit UUID.',

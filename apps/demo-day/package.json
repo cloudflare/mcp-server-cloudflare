@@ -13,11 +13,7 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/server": "catalog:",
-		"@repo/mcp-common": "workspace:*",
-		"@repo/mcp-observability": "workspace:*",
-		"agents": "catalog:",
-		"zod": "4.4.3"
+		"@repo/mcp-common": "workspace:*"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.16.11",

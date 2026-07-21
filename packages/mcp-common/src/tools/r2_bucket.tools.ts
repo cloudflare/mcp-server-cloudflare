@@ -11,10 +11,10 @@ import {
 } from '../types/r2_bucket.types'
 import { PaginationPerPageParam } from '../types/shared.types'
 
-import type { McpRegistrationContext } from '../request-context'
+import type { McpRegistrationContext } from '../registration-context'
 
 export function registerR2BucketTools<Env>(context: McpRegistrationContext<Env>) {
-	context.server.accountTool(
+	context.accountTool(
 		'r2_buckets_list',
 		{
 			description: 'List r2 buckets in your Cloudflare account',
@@ -68,7 +68,7 @@ export function registerR2BucketTools<Env>(context: McpRegistrationContext<Env>)
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'r2_bucket_create',
 		{
 			description: 'Create a new r2 bucket in your Cloudflare account',
@@ -109,7 +109,7 @@ export function registerR2BucketTools<Env>(context: McpRegistrationContext<Env>)
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'r2_bucket_get',
 		{
 			description: 'Get details about a specific R2 bucket',
@@ -146,7 +146,7 @@ export function registerR2BucketTools<Env>(context: McpRegistrationContext<Env>)
 		}
 	)
 
-	context.server.accountTool(
+	context.accountTool(
 		'r2_bucket_delete',
 		{
 			description: 'Delete an R2 bucket',

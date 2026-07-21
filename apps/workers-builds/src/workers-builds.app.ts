@@ -1,11 +1,8 @@
-import { createApiHandler } from '@repo/mcp-common/src/api-handler'
 import { fmt } from '@repo/mcp-common/src/format'
-import { createCloudflareOAuthRouter } from '@repo/mcp-common/src/oauth-router'
+import { createAuthenticatedMcpApp } from '@repo/mcp-common/src/mcp-app'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { initSentryWithUser } from '@repo/mcp-common/src/sentry'
-import { createCloudflareMcpHandler } from '@repo/mcp-common/src/server'
 import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker.tools'
-import { MetricsTracker } from '@repo/mcp-observability'
 
 import { registerBuildsTools } from './tools/workers-builds.tools'
 
@@ -30,50 +27,20 @@ const BuildsScopes = {
 		'See and change Cloudflare Workers Builds data such as builds, build configuration, and logs.',
 } as const
 
-const allowedHostnames = [
-	'localhost',
-	'127.0.0.1',
-	'[::1]',
-	'builds-staging.mcp.cloudflare.com',
-	'builds.mcp.cloudflare.com',
-]
-const mcpRequestPolicy = {
-	allowedHostnames,
-	allowedOriginHostnames: [...allowedHostnames, 'playground.ai.cloudflare.com'],
-}
-
-export const mcpHandler = createCloudflareMcpHandler<Env>({
-	serverInfo: ({ env }) => ({
-		name: env.MCP_SERVER_NAME,
-		version: env.MCP_SERVER_VERSION,
-	}),
-	requireAuth: true,
+const app = createAuthenticatedMcpApp<Env>({
+	serviceHostnames: ['builds-staging.mcp.cloudflare.com', 'builds.mcp.cloudflare.com'],
+	scopes: BuildsScopes,
 	serverOptions: { instructions: BUILDS_INSTRUCTIONS },
 	createSentry: ({ env, executionCtx, request, props }) =>
 		props?.type === 'user_token'
 			? initSentryWithUser(env, executionCtx, props.user.id, request)
 			: undefined,
-	createMetrics: ({ env }, serverInfo) => new MetricsTracker(env.MCP_METRICS, serverInfo),
 	register(context) {
 		registerWorkersTools(context)
 		registerBuildsTools(context)
 	},
-	handler: mcpRequestPolicy,
 })
 
-const apiHandler = createApiHandler(mcpHandler)
+export const mcpHandler = app.mcpHandler
 
-export default {
-	fetch(request: Request, env: Env, ctx: ExecutionContext) {
-		const metrics = new MetricsTracker(env.MCP_METRICS, {
-			name: env.MCP_SERVER_NAME,
-			version: env.MCP_SERVER_VERSION,
-		})
-		return createCloudflareOAuthRouter({
-			apiHandler,
-			scopes: BuildsScopes,
-			metrics,
-			mcpRequestPolicy,
-		}).fetch(request, env, ctx)
-	},
-} satisfies ExportedHandler<Env>
+export default app.worker

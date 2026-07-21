@@ -25,19 +25,14 @@
 		"wrangler": "4.96.0"
 	},
 	"dependencies": {
-		"@cloudflare/workers-oauth-provider": "catalog:",
-		"@modelcontextprotocol/server": "catalog:",
 		"@n8n/json-schema-to-zod": "1.1.0",
 		"@repo/eval-tools": "workspace:*",
 		"@repo/mcp-common": "workspace:*",
-		"@repo/mcp-observability": "workspace:*",
 		"agents": "catalog:",
 		"ai": "6.0.194",
 		"concurrently": "9.1.2",
-		"hono": "4.7.6",
 		"start-server-and-test": "2.0.11",
-		"vitest-evals": "0.1.4",
-		"zod": "4.4.3"
+		"vitest-evals": "0.1.4"
 	},
 	"type": "module"
 }

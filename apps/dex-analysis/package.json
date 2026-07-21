@@ -13,14 +13,7 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@cloudflare/workers-oauth-provider": "catalog:",
-		"@hono/zod-validator": "0.4.3",
-		"@modelcontextprotocol/server": "catalog:",
 		"@repo/mcp-common": "workspace:*",
-		"@repo/mcp-observability": "workspace:*",
-		"agents": "catalog:",
-		"cloudflare": "4.2.0",
-		"hono": "4.7.6",
 		"jszip": "3.10.1",
 		"zod": "4.4.3"
 	},
