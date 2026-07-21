@@ -23,4 +23,4 @@
 '@repo/eval-tools': patch
 ---
 
-Migrate all MCP servers to fresh SDK v2 factories with default stateless 2025 compatibility, request-scoped auth/context, and no live protocol Durable Object or SSE session state. Preserve append-only Durable Object migration history while explicitly deleting retired protocol classes, preserve application/security state, require exact OAuth resource matching, bound MCP request bodies, and require explicit Workers Builds identifiers.
+Migrate all MCP servers to fresh SDK v2 factories with default stateless 2025 compatibility, request-scoped auth/context, and no live protocol Durable Object or SSE session state. Preserve append-only Durable Object migration history while explicitly deleting retired protocol classes, preserve application/security state, upgrade the OAuth provider to 0.8.2 with exact resource matching, bound MCP request bodies, and require explicit Workers Builds identifiers.
