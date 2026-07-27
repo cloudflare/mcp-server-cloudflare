@@ -1,14 +1,10 @@
 import { z } from 'zod'
 
-import {
-	LIBRARY_BY_INSTANCE,
-	StackSearchQueryParam,
-	toPublicLibrary,
-	type StackLibrary,
-} from '../types/stack.types'
+import { LIBRARY_BY_INSTANCE, StackSearchQueryParam, toPublicLibrary } from '../types/stack.types'
 
-import type { AiSearchChunk, AiSearchNamespace } from '../stack-mcp.context'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import type { AiSearchChunk, AiSearchNamespace } from '../stack-mcp.context'
+import type { StackLibrary } from '../types/stack.types'
 
 const MAX_RESULTS = 10
 

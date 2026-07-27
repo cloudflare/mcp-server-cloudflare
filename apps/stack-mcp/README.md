@@ -6,10 +6,10 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) s
 
 The server exposes two read-only tools, one to discover what's available and one to search it:
 
-| Tool             | Description                                                                                     |
-| ---------------- | ----------------------------------------------------------------------------------------------- |
-| `list_libraries` | List the documentation libraries this server can search (slug, name, source, description).      |
-| `search_docs`    | Search across the stack (or one `library`), returning cited doc chunks with their source URLs.  |
+| Tool             | Description                                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------------- |
+| `list_libraries` | List the documentation libraries this server can search (slug, name, source, description).     |
+| `search_docs`    | Search across the stack (or one `library`), returning cited doc chunks with their source URLs. |
 
 ## 📚 Libraries
 

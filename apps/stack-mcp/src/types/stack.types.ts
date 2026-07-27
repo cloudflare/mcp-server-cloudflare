@@ -70,7 +70,8 @@ export const STACK_LIBRARIES: StackLibrary[] = [
 		instanceId: 'opennext-js-org',
 		name: 'OpenNext',
 		source: 'opennext.js.org',
-		description: 'OpenNext, for deploying Next.js apps to Cloudflare and other serverless platforms.',
+		description:
+			'OpenNext, for deploying Next.js apps to Cloudflare and other serverless platforms.',
 	},
 	{
 		slug: 'replicate',
