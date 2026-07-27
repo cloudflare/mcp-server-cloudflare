@@ -113,7 +113,7 @@ Cite the returned source URLs in your answer. Searches the whole stack by defaul
 				const retrieval = { max_num_results: MAX_RESULTS }
 				// Reranking is always on: it re-orders retrieved chunks for relevance.
 				const reranking = { enabled: true }
-				let results: ReturnType<typeof toResult>[]
+				let results: Array<ReturnType<typeof toResult>>
 
 				if (library) {
 					const lib = bySlug.get(library)
