@@ -52,6 +52,25 @@ describe('docs AI Search tools', () => {
 		])
 	})
 
+	it('keeps absolute documentation URLs from AI Search unchanged', async () => {
+		const { ai } = makeAi({
+			...aiSearchResponse,
+			data: [
+				{
+					...aiSearchResponse.data[0],
+					filename:
+						'https://developers.cloudflare.com/agents/model-context-protocol/protocol/transport/index.mdx',
+				},
+			],
+		})
+
+		const [result] = await queryAiSearch(ai, 'remote MCP transport')
+
+		expect(result?.url).toBe(
+			'https://developers.cloudflare.com/agents/model-context-protocol/protocol/transport/'
+		)
+	})
+
 	it('formats unstructured content as XML-style result blocks', () => {
 		expect(
 			formatDocsResults([

@@ -165,12 +165,8 @@ ${result.text}
 }
 
 function sourceToUrl(filename: string): string {
-	// Convert filename to URL format
-	// Example: "workers/configuration/index.md" -> "https://developers.cloudflare.com/workers/configuration/"
-	return (
-		'https://developers.cloudflare.com/' +
-		filename.replace(/index\.mdx?$/, '').replace(/\.mdx?$/, '')
-	)
+	const path = filename.replace(/index\.mdx?$/, '').replace(/\.mdx?$/, '')
+	return new URL(path, 'https://developers.cloudflare.com/').href
 }
 
 function extractTitle(filename: string): string {
