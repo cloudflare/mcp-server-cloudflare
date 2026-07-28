@@ -30,9 +30,11 @@
 		"@repo/mcp-common": "workspace:*",
 		"agents": "catalog:",
 		"ai": "6.0.194",
+		"cloudflare": "4.2.0",
 		"concurrently": "9.1.2",
 		"start-server-and-test": "2.0.11",
-		"vitest-evals": "0.1.4"
+		"vitest-evals": "0.1.4",
+		"zod": "4.4.3"
 	},
 	"type": "module"
 }

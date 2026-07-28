@@ -1,8 +1,9 @@
 import { z } from 'zod'
 
-import { getBuild, getBuildLogs, listBuilds } from '@repo/mcp-common/src/api/workers-builds.api'
 import { fmt } from '@repo/mcp-common/src/format'
 import { requireRequestProps } from '@repo/mcp-common/src/request-context'
+
+import { getBuild, getBuildLogs, listBuilds } from '../api/workers-builds.api'
 
 import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 import type { Env } from '../workers-builds.context'

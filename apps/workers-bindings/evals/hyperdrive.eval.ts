@@ -4,8 +4,8 @@ import { describeEval } from 'vitest-evals'
 import { runTask } from '@repo/eval-tools/src/runTask'
 import { checkFactuality } from '@repo/eval-tools/src/scorers'
 import { eachModel } from '@repo/eval-tools/src/test-models'
-import { HYPERDRIVE_TOOLS } from '@repo/mcp-common/src/tools/hyperdrive.tools'
 
+import { HYPERDRIVE_TOOLS } from '../src/tools/hyperdrive.tools'
 import { initializeClient } from './utils' // Assuming utils.ts will exist here
 
 // TODO: Add test for creating hyperdrive config with the following params once we can securely pass parameters to the tool. See: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/382

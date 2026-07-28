@@ -1,12 +1,13 @@
 import { env } from 'cloudflare:workers'
 
-import { fetchCloudflareApi } from '../cloudflare-api'
+import { fetchCloudflareApi } from '@repo/mcp-common/src/cloudflare-api'
+import { V4Schema } from '@repo/mcp-common/src/v4-api'
+
 import {
 	zKeysResponse,
 	zReturnedQueryRunResult,
 	zValuesResponse,
 } from '../types/workers-logs.types'
-import { V4Schema } from '../v4-api'
 
 import type { z } from 'zod'
 import type { zKeysRequest, zQueryRunRequest, zValuesRequest } from '../types/workers-logs.types'

@@ -1,7 +1,8 @@
 import { z } from 'zod'
 
-import { getCloudflareClient } from '../cloudflare-api'
-import { requireRequestProps } from '../request-context'
+import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
+
 import {
 	HyperdriveCachingDisabledSchema,
 	HyperdriveCachingMaxAgeSchema,
@@ -19,7 +20,7 @@ import {
 	HyperdriveOriginUserSchema,
 } from '../types/hyperdrive.types'
 
-import type { McpRegistrationContext } from '../registration-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 
 export const HYPERDRIVE_TOOLS = {
 	hyperdrive_configs_list: 'hyperdrive_configs_list',

@@ -1,8 +1,8 @@
 import { z } from 'zod'
 
-import { handleZonesList } from '../api/zone.api'
 import { getCloudflareClient } from '../cloudflare-api'
 import { requireRequestProps } from '../request-context'
+import { handleZonesList } from './zone.api'
 
 import type { McpRegistrationContext } from '../registration-context'
 

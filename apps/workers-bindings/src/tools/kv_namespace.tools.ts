@@ -1,14 +1,15 @@
 import { z } from 'zod'
 
-import { getCloudflareClient } from '../cloudflare-api'
-import { requireRequestProps } from '../request-context'
+import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
+
 import {
 	KvNamespaceIdSchema,
 	KvNamespacesListParamsSchema,
 	KvNamespaceTitleSchema,
 } from '../types/kv_namespace.types'
 
-import type { McpRegistrationContext } from '../registration-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 
 export const KV_NAMESPACE_TOOLS = {
 	kv_namespaces_list: 'kv_namespaces_list',

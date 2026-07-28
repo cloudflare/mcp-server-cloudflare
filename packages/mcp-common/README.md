@@ -2,6 +2,18 @@
 
 Shared stateless MCP SDK v2 infrastructure for the Cloudflare MCP Workers.
 
+## Package boundary
+
+`mcp-common` owns behavior that every server needs: stateless transport assembly, OAuth and API-token routing, request-scoped auth/account context, metrics, Sentry integration, and Cloudflare API error handling.
+
+Product-specific tool registrars, schemas, and API adapters live in their owning app. Modules reused by multiple apps are explicit under `src/shared-tools` and `src/shared-prompts`:
+
+- documentation search is shared by Docs AI Search, Workers Bindings, and Workers Observability
+- Workers tools are shared by Workers Bindings, Workers Builds, and Workers Observability
+- zone tools are shared by DNS Analytics and GraphQL
+
+The separate `@repo/tools` package contains monorepo command-line scripts for linting, typechecking, releases, and deployment. It does not contain MCP tools.
+
 ## Application assembly
 
 Use `createPublicMcpApp()` or `createAuthenticatedMcpApp()` for application entrypoints. These modules centralize the invariants shared by every deployment:

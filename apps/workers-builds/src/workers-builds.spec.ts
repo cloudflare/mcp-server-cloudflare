@@ -13,7 +13,7 @@ const { listBuildsMock, getBuildMock, getBuildLogsMock } = vi.hoisted(() => ({
 	getBuildLogsMock: vi.fn(),
 }))
 
-vi.mock('@repo/mcp-common/src/api/workers-builds.api', () => ({
+vi.mock('./api/workers-builds.api', () => ({
 	listBuilds: listBuildsMock,
 	getBuild: getBuildMock,
 	getBuildLogs: getBuildLogsMock,

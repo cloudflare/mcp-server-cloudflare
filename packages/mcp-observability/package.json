@@ -6,17 +6,16 @@
 	"type": "module",
 	"main": "./src/index.ts",
 	"scripts": {
-		"types": "wrangler types"
+		"check:types": "run-tsc"
 	},
 	"directories": {
 		"bin": "bin"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/server": "catalog:",
-		"wrangler": "4.96.0",
-		"zod": "4.4.3"
+		"@modelcontextprotocol/server": "catalog:"
 	},
 	"devDependencies": {
+		"@repo/tools": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "22.15.17"
 	}

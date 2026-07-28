@@ -1,9 +1,9 @@
 import { createAuthenticatedMcpApp } from '@repo/mcp-common/src/mcp-app'
-import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-ai-search.prompts'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { initSentryWithUser } from '@repo/mcp-common/src/sentry'
-import { registerDocsTools } from '@repo/mcp-common/src/tools/docs-ai-search.tools'
-import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker.tools'
+import { registerPrompts } from '@repo/mcp-common/src/shared-prompts/docs-ai-search.prompts'
+import { registerDocsTools } from '@repo/mcp-common/src/shared-tools/docs-ai-search.tools'
+import { registerWorkersTools } from '@repo/mcp-common/src/shared-tools/worker.tools'
 
 import { registerObservabilityTools } from './tools/workers-observability.tools'
 

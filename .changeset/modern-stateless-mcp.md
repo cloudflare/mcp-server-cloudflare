@@ -10,7 +10,6 @@
 'dns-analytics': patch
 'docs-ai-search': patch
 'docs-autorag': patch
-'docs-vectorize': patch
 'graphql-mcp-server': patch
 'logpush': patch
 'cloudflare-radar-mcp-server': patch

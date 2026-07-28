@@ -1,16 +1,17 @@
 import { z } from 'zod'
 
-import { getCloudflareClient } from '../cloudflare-api'
-import { requireRequestProps } from '../request-context'
+import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
+import { PaginationPageParam, PaginationPerPageParam } from '@repo/mcp-common/src/pagination'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
+
 import {
 	D1DatabaseNameParam,
 	D1DatabasePrimaryLocationHintParam,
 	D1DatabaseQueryParamsParam,
 	D1DatabaseQuerySqlParam,
 } from '../types/d1.types'
-import { PaginationPageParam, PaginationPerPageParam } from '../types/shared.types'
 
-import type { McpRegistrationContext } from '../registration-context'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 
 export function registerD1Tools<Env>(context: McpRegistrationContext<Env>) {
 	context.accountTool(

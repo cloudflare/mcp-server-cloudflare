@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { nowISO, parseRelativeTime } from '../utils'
+import { nowISO, parseRelativeTime } from '@repo/mcp-common/src/utils'
 
 export const numericalOperations = ['eq', 'neq', 'gt', 'gte', 'lt', 'lte'] as const
 

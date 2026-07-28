@@ -1,7 +1,7 @@
 import { createAuthenticatedMcpApp } from '@repo/mcp-common/src/mcp-app'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { initSentry } from '@repo/mcp-common/src/sentry'
-import { registerZoneTools } from '@repo/mcp-common/src/tools/zone.tools'
+import { registerZoneTools } from '@repo/mcp-common/src/shared-tools/zone.tools'
 
 import { registerAnalyticTools } from './tools/dex-analytics.tools'
 

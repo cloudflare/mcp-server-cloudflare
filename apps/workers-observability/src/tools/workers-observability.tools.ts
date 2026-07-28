@@ -2,17 +2,14 @@ import { writeToString } from '@fast-csv/format'
 import { WorkersLogger } from 'workers-tagged-logger'
 import { z } from 'zod'
 
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
+
 import {
 	handleWorkerLogsKeys,
 	handleWorkerLogsValues,
 	queryWorkersObservability,
-} from '@repo/mcp-common/src/api/workers-observability.api'
-import { requireRequestProps } from '@repo/mcp-common/src/request-context'
-import {
-	zKeysRequest,
-	zQueryRunRequest,
-	zValuesRequest,
-} from '@repo/mcp-common/src/types/workers-logs.types'
+} from '../api/workers-observability.api'
+import { zKeysRequest, zQueryRunRequest, zValuesRequest } from '../types/workers-logs.types'
 
 import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 import type { Env } from '../workers-observability.context'

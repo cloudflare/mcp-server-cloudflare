@@ -4,8 +4,8 @@ import { describeEval } from 'vitest-evals'
 import { runTask } from '@repo/eval-tools/src/runTask'
 import { checkFactuality } from '@repo/eval-tools/src/scorers'
 import { eachModel } from '@repo/eval-tools/src/test-models'
-import { KV_NAMESPACE_TOOLS } from '@repo/mcp-common/src/tools/kv_namespace.tools'
 
+import { KV_NAMESPACE_TOOLS } from '../src/tools/kv_namespace.tools'
 import { initializeClient } from './utils' // Assuming utils.ts will exist here
 
 eachModel('$modelName', ({ model }) => {

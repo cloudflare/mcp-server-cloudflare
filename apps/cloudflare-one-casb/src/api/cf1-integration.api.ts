@@ -1,4 +1,6 @@
-import { fetchCloudflareApi } from '../cloudflare-api'
+import { fetchCloudflareApi } from '@repo/mcp-common/src/cloudflare-api'
+import { V4Schema } from '@repo/mcp-common/src/v4-api'
+
 import {
 	AssetCategoriesResponse,
 	AssetDetail,
@@ -6,7 +8,6 @@ import {
 	IntegrationResponse,
 	IntegrationsResponse,
 } from '../types/cf1-integrations.types'
-import { V4Schema } from '../v4-api'
 
 import type { z } from 'zod'
 import type {

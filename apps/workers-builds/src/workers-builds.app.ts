@@ -2,7 +2,7 @@ import { fmt } from '@repo/mcp-common/src/format'
 import { createAuthenticatedMcpApp } from '@repo/mcp-common/src/mcp-app'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
 import { initSentryWithUser } from '@repo/mcp-common/src/sentry'
-import { registerWorkersTools } from '@repo/mcp-common/src/tools/worker.tools'
+import { registerWorkersTools } from '@repo/mcp-common/src/shared-tools/worker.tools'
 
 import { registerBuildsTools } from './tools/workers-builds.tools'
 

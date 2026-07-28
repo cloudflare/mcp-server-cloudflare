@@ -1,7 +1,7 @@
 import { createPublicMcpApp } from '@repo/mcp-common/src/mcp-app'
-import { registerPrompts } from '@repo/mcp-common/src/prompts/docs-ai-search.prompts'
 import { initSentry } from '@repo/mcp-common/src/sentry'
-import { registerDocsTools } from '@repo/mcp-common/src/tools/docs-ai-search.tools'
+import { registerPrompts } from '@repo/mcp-common/src/shared-prompts/docs-ai-search.prompts'
+import { registerDocsTools } from '@repo/mcp-common/src/shared-tools/docs-ai-search.tools'
 
 import type { Env } from './docs-ai-search.context'
 

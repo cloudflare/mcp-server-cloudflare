@@ -1,13 +1,13 @@
 import { z } from 'zod'
 
+import { getCloudflareClient } from '../cloudflare-api'
+import { fmt } from '../format'
+import { requireRequestProps } from '../request-context'
 import {
 	handleGetWorkersService,
 	handleWorkerScriptDownload,
 	handleWorkersList,
-} from '../api/workers.api'
-import { getCloudflareClient } from '../cloudflare-api'
-import { fmt } from '../format'
-import { requireRequestProps } from '../request-context'
+} from './workers.api'
 
 import type { McpRegistrationContext } from '../registration-context'
 
