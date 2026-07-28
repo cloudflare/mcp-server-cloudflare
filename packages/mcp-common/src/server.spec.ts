@@ -1,3 +1,4 @@
+import { SERVER_INFO_META_KEY } from '@modelcontextprotocol/server'
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
@@ -151,7 +152,9 @@ describe('shared stateless MCP foundation', () => {
 		expect(await responseDocument(discover)).toMatchObject({
 			result: {
 				supportedVersions: ['2026-07-28'],
-				serverInfo: { name: 'foundation', version: '1.0.0' },
+				_meta: {
+					[SERVER_INFO_META_KEY]: { name: 'foundation', version: '1.0.0' },
+				},
 			},
 		})
 

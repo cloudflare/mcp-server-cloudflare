@@ -33,9 +33,9 @@ export default app.worker
 
 `mcpHandler` is exposed separately for transport-contract tests that bypass OAuth routing. Applications with a genuine custom route, such as an asset fallback, can call it directly from their own Worker `fetch` implementation.
 
-For lower-level use, `createCloudflareMcpHandler()` accepts explicit server metadata, observability factories, and HTTP policy. Do not construct a global MCP server. Do not set `legacy: 'reject'`: the default `legacy: 'stateless'` fallback is part of the migration contract.
+For lower-level use, `createCloudflareMcpHandler()` accepts explicit server metadata, observability factories, and HTTP policy. It delegates protocol routing, CORS, Host/Origin validation, and legacy compatibility to `createMcpHandler()` from the isolated `agents/mcp/server` entry point. Do not construct a global MCP server. Do not set `legacy: 'reject'`: the default `legacy: 'stateless'` fallback is part of the migration contract.
 
-The shared handler accepts only `POST` and CORS `OPTIONS` on the MCP route. Standalone stream and session-deletion methods return `405`. MCP request bodies are capped at 4 MiB before SDK parsing, and OAuth resources use strict path-aware matching.
+The shared handler serves `POST` and CORS `OPTIONS` on the MCP route. The SDK returns `405` for stateless legacy stream and session-deletion requests. MCP request bodies are capped at 4 MiB before SDK parsing, and OAuth resources use strict path-aware matching.
 
 ## Request registration context
 

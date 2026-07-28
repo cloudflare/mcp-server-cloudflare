@@ -1,5 +1,5 @@
-import { hostHeaderValidationResponse, McpServer } from '@modelcontextprotocol/server'
-import { createMcpHandler as createAgentsMcpHandler } from 'agents/mcp'
+import { McpServer } from '@modelcontextprotocol/server'
+import { createMcpHandler } from 'agents/mcp/server'
 
 import { McpRequest } from '@repo/mcp-observability'
 
@@ -9,7 +9,7 @@ import { createRegistrationContext } from './registration-context'
 import { getRequestUserId } from './request-context'
 
 import type { Implementation, McpServerFactory, ServerOptions } from '@modelcontextprotocol/server'
-import type { CreateStatelessMcpHandlerOptions } from 'agents/mcp'
+import type { CreateMcpHandlerOptions } from 'agents/mcp/server'
 import type { MetricsTracker } from '@repo/mcp-observability'
 import type { AuthProps } from './auth-props'
 import type { McpRegistrationContext } from './registration-context'
@@ -102,10 +102,7 @@ function createCloudflareMcpServerFactory<Env>(
 
 export interface CreateCloudflareMcpHandlerOptions<Env>
 	extends CloudflareMcpServerFactoryOptions<Env> {
-	handler?: Omit<CreateStatelessMcpHandlerOptions, 'legacy'> & {
-		/** Optional DNS-rebinding allowlist. Values are hostnames without ports. */
-		allowedHostnames?: string[]
-	}
+	handler?: Omit<CreateMcpHandlerOptions, 'legacy'>
 }
 
 export interface CloudflareMcpHandler<Env> {
@@ -139,7 +136,7 @@ export function createCloudflareMcpHandler<Env>(
 			'createCloudflareMcpHandler always uses the default stateless 2025 fallback; do not set legacy'
 		)
 	}
-	const { allowedHostnames, corsOptions, ...agentsOptions } = handlerOptions
+	const { corsOptions, ...handlerPolicy } = handlerOptions
 	const resolvedCors =
 		corsOptions === false
 			? false
@@ -149,35 +146,18 @@ export function createCloudflareMcpHandler<Env>(
 					exposeHeaders: 'MCP-Protocol-Version',
 					...corsOptions,
 				}
-	const route = agentsOptions.route ?? '/mcp'
+	const route = handlerPolicy.route ?? '/mcp'
 
 	return {
 		async fetch(request, env, ctx) {
-			if (allowedHostnames) {
-				const rejection = hostHeaderValidationResponse(request, allowedHostnames)
-				if (rejection) return withCors(rejection, resolvedCors)
-			}
-			if (new URL(request.url).pathname !== route) {
-				return withCors(new Response('Not Found', { status: 404 }), resolvedCors)
-			}
-			if (request.method !== 'POST' && request.method !== 'OPTIONS') {
-				return withCors(
-					new Response('Method Not Allowed', {
-						status: 405,
-						headers: { Allow: 'POST, OPTIONS' },
-					}),
-					resolvedCors
-				)
-			}
-
 			let boundedRequest = request
-			if (request.method === 'POST') {
+			if (new URL(request.url).pathname === route && request.method === 'POST') {
 				const bounded = await bufferMcpRequestWithinLimit(request)
 				if (bounded instanceof Response) return withCors(bounded, resolvedCors)
 				boundedRequest = bounded
 			}
 
-			const handler = createAgentsMcpHandler(
+			return createMcpHandler(
 				createCloudflareMcpServerFactory(factoryOptions, {
 					env,
 					rawProps: handlerOptions.authContext?.props ?? ctx.props,
@@ -185,11 +165,10 @@ export function createCloudflareMcpHandler<Env>(
 					executionCtx: ctx,
 				}),
 				{
-					...agentsOptions,
+					...handlerPolicy,
 					corsOptions: resolvedCors,
 				}
-			)
-			return handler(boundedRequest, env, ctx)
+			)(boundedRequest, env, ctx)
 		},
 	}
 }
