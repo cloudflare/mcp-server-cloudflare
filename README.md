@@ -11,7 +11,6 @@ The following servers are included in this repository:
 | Server Name                                                    | Description                                                                                     | Server URL                                     |
 | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------- |
 | [**Documentation server**](/apps/docs-ai-search)               | Get up-to-date reference information on Cloudflare                                              | `https://docs.mcp.cloudflare.com/mcp`          |
-| [**Documentation AutoRAG server**](/apps/docs-autorag)         | Search Cloudflare documentation through AutoRAG                                                 | `https://docs-autorag.mcp.cloudflare.com/mcp`  |
 | [**Workers Bindings server**](/apps/workers-bindings)          | Build Workers applications with storage, AI, and compute primitives                             | `https://bindings.mcp.cloudflare.com/mcp`      |
 | [**Workers Builds server**](/apps/workers-builds)              | Get insights and manage your Cloudflare Workers Builds                                          | `https://builds.mcp.cloudflare.com/mcp`        |
 | [**Observability server**](/apps/workers-observability)        | Debug and get insight into your application's logs and analytics                                | `https://observability.mcp.cloudflare.com/mcp` |

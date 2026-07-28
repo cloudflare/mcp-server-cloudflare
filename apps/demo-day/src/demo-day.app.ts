@@ -2,7 +2,6 @@ import { createPublicMcpApp } from '@repo/mcp-common/src/mcp-app'
 
 export type Env = {
 	ENVIRONMENT: 'development' | 'staging' | 'production'
-	AUTORAG_NAME: 'cloudflare-docs-autorag'
 	MCP_SERVER_NAME: 'PLACEHOLDER'
 	MCP_SERVER_VERSION: 'PLACEHOLDER'
 	MCP_METRICS: AnalyticsEngineDataset
