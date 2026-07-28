@@ -1,0 +1,19 @@
+packages/mcp-common/src/server.ts
+  s_193e81be9e81fd::t_3e59b9d9530d90 2,54,104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "fbd7de0f84e1d536d58da91c09c550edf3f4a036",
+  "prompts": {},
+  "sessions": {
+    "s_193e81be9e81fd": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019fa976-4d1d-7eb9-8ab0-ed7a0fb11a63",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
