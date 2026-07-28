@@ -170,18 +170,21 @@ function sourceToUrl(filename: string): string {
 }
 
 function extractTitle(filename: string): string {
-	// Extract a reasonable title from the filename
-	// Example: "workers/configuration/index.md" -> "Configuration"
-	const parts = filename.replace(/\.mdx?$/, '').split('/')
-	const lastPart = parts[parts.length - 1]
-
-	if (lastPart === 'index') {
-		// Use the parent directory name if filename is index
-		return parts[parts.length - 2] || 'Documentation'
+	let source = filename
+	try {
+		source = new URL(filename).pathname
+	} catch {
+		// Relative source path.
 	}
-
-	// Convert kebab-case or snake_case to title case
-	return lastPart.replace(/[-_]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
+	const parts = source
+		.replace(/\/+$/, '')
+		.replace(/\.mdx?$/, '')
+		.split('/')
+		.filter(Boolean)
+	const lastPart = parts.at(-1)
+	if (lastPart === 'index') return parts.at(-2) || 'Documentation'
+	if (!lastPart) return 'Documentation'
+	return lastPart.replace(/[-_]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
 
 /**

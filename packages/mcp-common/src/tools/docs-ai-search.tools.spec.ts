@@ -66,9 +66,10 @@ describe('docs AI Search tools', () => {
 
 		const [result] = await queryAiSearch(ai, 'remote MCP transport')
 
-		expect(result?.url).toBe(
-			'https://developers.cloudflare.com/agents/model-context-protocol/protocol/transport/'
-		)
+		expect(result).toMatchObject({
+			url: 'https://developers.cloudflare.com/agents/model-context-protocol/protocol/transport/',
+			title: 'transport',
+		})
 	})
 
 	it('formats unstructured content as XML-style result blocks', () => {
