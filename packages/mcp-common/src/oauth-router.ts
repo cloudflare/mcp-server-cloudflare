@@ -19,11 +19,13 @@ export interface CloudflareOAuthEnv extends Cloudflare.Env {
 	DEV_DISABLE_OAUTH: string
 }
 
+const MCP_ROUTES = ['/mcp', '/sse']
+
 export interface CreateCloudflareOAuthRouterOptions<Env extends CloudflareOAuthEnv> {
 	apiHandler: RequestHandler<Env>
 	scopes: Record<string, string>
 	metrics: MetricsTracker
-	/** MCP Host/Origin policy enforced before the OAuth Provider handles `/mcp`. */
+	/** MCP Host/Origin policy enforced before the OAuth Provider handles either MCP URL. */
 	mcpRequestPolicy: {
 		allowedHostnames: string[]
 		allowedOriginHostnames: string[]
@@ -42,9 +44,9 @@ export interface CreateCloudflareOAuthRouterOptions<Env extends CloudflareOAuthE
 }
 
 /**
- * Routes OAuth grants, API-token validation, and `/mcp` through one stateless API
- * handler. OAuth grants and KV remain durable application/security state; only MCP
- * protocol sessions are removed.
+ * Routes OAuth grants, API-token validation, and both MCP URLs through one
+ * stateless API handler. `/sse` is only a URL alias for the same Streamable HTTP
+ * handler as `/mcp`; OAuth grants and KV remain durable application/security state.
  */
 export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 	apiHandler,
@@ -61,7 +63,7 @@ export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 	const defaultHandler = createAuthHandlers({ scopes, metrics })
 	return {
 		async fetch(request, env, ctx) {
-			if (new URL(request.url).pathname === '/mcp') {
+			if (MCP_ROUTES.includes(new URL(request.url).pathname)) {
 				const hostRejection = hostHeaderValidationResponse(
 					request,
 					mcpRequestPolicy.allowedHostnames
@@ -89,7 +91,7 @@ export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 				accessTokenTTL: 3600,
 				refreshTokenTTL: 2_592_000,
 				...provider,
-				apiRoute: '/mcp',
+				apiRoute: MCP_ROUTES,
 				apiHandler,
 				defaultHandler,
 				authorizeEndpoint: '/oauth/authorize',

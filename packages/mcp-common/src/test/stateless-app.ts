@@ -162,18 +162,35 @@ export function testStatelessMcpApp<Env>({
 			expect((await policyHandler.fetch(badOrigin, env, context(false))).status).toBe(403)
 		})
 
-		it('exposes neither a compatibility SSE route nor an MCP Durable Object binding', async () => {
-			const routeHandler = authenticatedWorker ?? handler
-			const response = await routeHandler.fetch(
-				new Request(new URL('/sse', url), {
+		it('serves /sse through the same modern and legacy stateless transport', async () => {
+			const routeHandler = authenticated ? handler : (authenticatedWorker ?? handler)
+			const alias = new URL('/sse', url).href
+			const modern = await routeHandler.fetch(
+				modernRequest(alias, 'server/discover'),
+				env,
+				context()
+			)
+			const legacy = await routeHandler.fetch(legacyInitializeRequest(alias), env, context())
+			const oldSse = await routeHandler.fetch(
+				new Request(alias, {
 					method: 'GET',
-					headers: { Host: new URL(url).hostname },
+					headers: { Accept: 'text/event-stream', Host: new URL(url).hostname },
 				}),
 				env,
-				context(false)
+				context()
 			)
 
-			expect(response.status).toBe(404)
+			expect(modern.status).toBe(200)
+			expect(modern.headers.get('mcp-session-id')).toBeNull()
+			expect(await responseDocument(modern)).toMatchObject({
+				result: { supportedVersions: ['2026-07-28'] },
+			})
+			expect(legacy.status).toBe(200)
+			expect(legacy.headers.get('mcp-session-id')).toBeNull()
+			expect(await responseDocument(legacy)).toMatchObject({
+				result: { protocolVersion: '2025-11-25' },
+			})
+			expect(oldSse.status).toBe(405)
 			expect('MCP_OBJECT' in (env as object)).toBe(false)
 		})
 	})

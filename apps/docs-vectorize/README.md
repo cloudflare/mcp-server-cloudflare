@@ -4,7 +4,7 @@ This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introdu
 
 The Cloudflare account this worker is deployed on already has this Vectorize DB setup and indexed.
 
-The `/mcp` endpoint creates a fresh SDK v2 server for every request. It supports modern MCP requests and the default stateless 2025 compatibility path; it does not expose a legacy HTTP+SSE endpoint or keep MCP protocol sessions. This public documentation server does not require authentication.
+The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server for every request. `/sse` is not the deprecated HTTP+SSE transport. The handler supports modern MCP requests and stateless 2025 compatibility without an MCP protocol session. This public documentation server does not require authentication.
 
 ## 🔨 Available Tools
 

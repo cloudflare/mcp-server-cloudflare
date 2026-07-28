@@ -6,7 +6,7 @@ connections, with Cloudflare OAuth built-in.
 It integrates tools powered by [Workers Observability](https://developers.cloudflare.com/workers/observability/) to debug
 and get insight into your Workers' logs and analytics.
 
-The authenticated `/mcp` endpoint creates a fresh SDK v2 server and request-scoped auth/account context for every request. OAuth and application search bindings remain durable application/security state, but no MCP protocol session, SSE route, or protocol Durable Object is retained.
+The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth/account context for every request. `/sse` is not the deprecated HTTP+SSE transport. OAuth and application search bindings remain durable application/security state; no MCP protocol session or protocol Durable Object is retained.
 
 ## 🔨 Available Tools
 

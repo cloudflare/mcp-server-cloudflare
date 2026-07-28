@@ -5,7 +5,7 @@ connections, with Cloudflare OAuth built-in.
 
 It integrates tools for managing resources in the Cloudflare Workers Platform, which you can connect to your Worker via [Bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/).
 
-The authenticated `/mcp` endpoint creates a fresh SDK v2 server and request-scoped auth/account context for every request. OAuth and product bindings remain application/security state, but no MCP protocol session, SSE route, or protocol Durable Object is retained.
+The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth/account context for every request. `/sse` is not the deprecated HTTP+SSE transport. OAuth and product bindings remain application/security state; no MCP protocol session or protocol Durable Object is retained.
 
 ## 🔨 Available Tools
 

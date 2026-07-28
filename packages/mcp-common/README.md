@@ -12,6 +12,7 @@ Use `createPublicMcpApp()` or `createAuthenticatedMcpApp()` for application entr
 - the Cloudflare MCP playground Origin policy
 - a fresh SDK v2 server for every request
 - the default stateless 2025 compatibility path
+- the `/sse` URL alias for the same Streamable HTTP handler as `/mcp`
 - OAuth and API-token routing for authenticated applications
 
 ```ts
@@ -35,7 +36,7 @@ export default app.worker
 
 For lower-level use, `createCloudflareMcpHandler()` accepts explicit server metadata, observability factories, and HTTP policy. It delegates protocol routing, CORS, Host/Origin validation, and legacy compatibility to `createMcpHandler()` from the isolated `agents/mcp/server` entry point. Do not construct a global MCP server. Do not set `legacy: 'reject'`: the default `legacy: 'stateless'` fallback is part of the migration contract.
 
-The shared handler serves `POST` and CORS `OPTIONS` on the MCP route. The SDK returns `405` for stateless legacy stream and session-deletion requests. MCP request bodies are capped at 4 MiB before SDK parsing, and OAuth resources use strict path-aware matching.
+The shared handler serves `POST` and CORS `OPTIONS` on `/mcp` and `/sse`. The latter is a URL alias, not the deprecated HTTP+SSE transport. The SDK returns `405` for stateless legacy stream and session-deletion requests. MCP request bodies are capped at 4 MiB before SDK parsing, and OAuth resources use strict path-aware matching.
 
 ## Request registration context
 
@@ -55,8 +56,8 @@ Shared tools capture the registration context instead of a stateful server objec
 
 ## Authentication routing
 
-`createAuthenticatedMcpApp()` composes `createCloudflareOAuthRouter()` internally. OAuth grants, KV, credentials, refresh tokens, and API-token validation remain application/security state; only MCP protocol sessions are removed. No compatibility transport route is exposed.
+`createAuthenticatedMcpApp()` composes `createCloudflareOAuthRouter()` internally. OAuth grants, KV, credentials, refresh tokens, and API-token validation remain application/security state; only MCP protocol sessions are removed. `/mcp` and `/sse` use the same handler while retaining exact path-aware OAuth resource matching.
 
-The published OAuth Provider supplies validated application props through `ctx.props`; the Agents handler exposes those as `McpRegistrationContext.props`. SDK `ctx.http.authInfo` is optional and is present only when a compatible caller supplies it. Do not log raw tokens or authentication props.
+The Agents handler exposes OAuth Provider application props through `getMcpAuthContext()` and the shared factory validates them before setting `McpRegistrationContext.props`. SDK `ctx.http.authInfo` is optional and is present only when a compatible caller supplies it. Do not log raw tokens or authentication props.
 
 The default CORS allow-headers list includes `cf-account-id`, `MCP-Protocol-Version`, `Mcp-Method`, and `Mcp-Name`. Browser deployments use the canonical explicit Host and Origin allowlists assembled from each application's `serviceHostnames`.

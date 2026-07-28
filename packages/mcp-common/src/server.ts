@@ -1,5 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/server'
-import { createMcpHandler } from 'agents/mcp/server'
+import { createMcpHandler, getMcpAuthContext } from 'agents/mcp/server'
 
 import { McpRequest } from '@repo/mcp-observability'
 
@@ -41,7 +41,6 @@ export interface CloudflareMcpServerFactoryOptions<Env> {
 
 interface WorkerRequest<Env> {
 	env: Env
-	rawProps: unknown
 	request: Request
 	executionCtx: ExecutionContext
 }
@@ -52,7 +51,7 @@ function createCloudflareMcpServerFactory<Env>(
 	worker: WorkerRequest<Env>
 ): McpServerFactory {
 	return async (mcp) => {
-		const props = parseRequestAuthProps(worker.rawProps, options.requireAuth ?? false)
+		const props = parseRequestAuthProps(getMcpAuthContext()?.props, options.requireAuth ?? false)
 		const accountManager = props ? new AccountManager(props) : undefined
 		const seed: McpRequestSeedContext<Env> = {
 			env: worker.env,
@@ -110,6 +109,7 @@ export interface CloudflareMcpHandler<Env> {
 }
 
 const MAX_MCP_REQUEST_BODY_BYTES = 4 * 1024 * 1024
+const LEGACY_MCP_ROUTE_ALIAS = '/sse'
 
 const DEFAULT_CORS_HEADERS = [
 	'Content-Type',
@@ -125,7 +125,8 @@ const DEFAULT_CORS_HEADERS = [
  * Creates the Worker entry point for a fresh request-scoped SDK v2 factory.
  *
  * The Agents/upstream default `legacy: "stateless"` is deliberately preserved;
- * this wrapper never changes it to `"reject"`.
+ * this wrapper never changes it to `"reject"`. The historical `/sse` URL is
+ * served by the same stateless handler and is not the deprecated HTTP+SSE transport.
  */
 export function createCloudflareMcpHandler<Env>(
 	options: CreateCloudflareMcpHandlerOptions<Env>
@@ -146,12 +147,14 @@ export function createCloudflareMcpHandler<Env>(
 					exposeHeaders: 'MCP-Protocol-Version',
 					...corsOptions,
 				}
-	const route = handlerPolicy.route ?? '/mcp'
+	const canonicalRoute = handlerPolicy.route ?? '/mcp'
 
 	return {
 		async fetch(request, env, ctx) {
+			const pathname = new URL(request.url).pathname
+			const requestRoute = pathname === LEGACY_MCP_ROUTE_ALIAS ? pathname : canonicalRoute
 			let boundedRequest = request
-			if (new URL(request.url).pathname === route && request.method === 'POST') {
+			if (pathname === requestRoute && request.method === 'POST') {
 				const bounded = await bufferMcpRequestWithinLimit(request)
 				if (bounded instanceof Response) return withCors(bounded, resolvedCors)
 				boundedRequest = bounded
@@ -160,12 +163,12 @@ export function createCloudflareMcpHandler<Env>(
 			return createMcpHandler(
 				createCloudflareMcpServerFactory(factoryOptions, {
 					env,
-					rawProps: handlerOptions.authContext?.props ?? ctx.props,
 					request: boundedRequest,
 					executionCtx: ctx,
 				}),
 				{
 					...handlerPolicy,
+					route: requestRoute,
 					corsOptions: resolvedCors,
 				}
 			)(boundedRequest, env, ctx)

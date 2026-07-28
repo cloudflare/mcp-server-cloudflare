@@ -35,8 +35,8 @@ function executionContext(): ExecutionContext {
 	} as ExecutionContext
 }
 
-function toolRequest(token: string) {
-	return new Request(endpoint, {
+function toolRequest(token: string, url = endpoint) {
+	return new Request(url, {
 		method: 'POST',
 		headers: {
 			Authorization: `Bearer ${token}`,
@@ -125,6 +125,22 @@ describe('AI Gateway exported Worker authentication', () => {
 	it('bridges a provider-validated OAuth token into a fresh SDK server and real tool call', async () => {
 		const token = await issueOAuthToken(endpoint)
 		const response = await worker.fetch(toolRequest(token), testEnv, executionContext())
+		const document = await responseDocument(response)
+
+		expect(response.status).toBe(200)
+		expect(response.headers.get('mcp-session-id')).toBeNull()
+		expect(document.result.content[0].text).toContain('oauth-account:oauth-upstream-token')
+		expect(getCloudflareClientMock).toHaveBeenCalledWith('oauth-upstream-token')
+	})
+
+	it('serves the /sse URL through the same stateless handler with path-bound OAuth', async () => {
+		const sseEndpoint = 'https://ai-gateway.mcp.cloudflare.com/sse'
+		const token = await issueOAuthToken(sseEndpoint)
+		const response = await worker.fetch(
+			toolRequest(token, sseEndpoint),
+			testEnv,
+			executionContext()
+		)
 		const document = await responseDocument(response)
 
 		expect(response.status).toBe(200)

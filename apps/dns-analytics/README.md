@@ -5,7 +5,7 @@ connections, with Cloudflare OAuth built-in.
 
 It integrates tools powered by the [Cloudflare DNS Analytics API](https://developers.cloudflare.com/api/resources/dns/) to provide insights on DNS analytics and optimization.
 
-The authenticated `/mcp` endpoint creates a fresh SDK v2 server and request-scoped auth/account context for every request. OAuth grants and token validation remain durable security state, but the server exposes no legacy HTTP+SSE route and stores no MCP protocol session.
+The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth/account context for every request. `/sse` is not the deprecated HTTP+SSE transport. OAuth grants and token validation remain durable security state; the server stores no MCP protocol session.
 
 ## 🔨 Available Tools
 

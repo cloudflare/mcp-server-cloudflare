@@ -46,7 +46,9 @@ export const mcpHandler = app.mcpHandler
 export default {
 	fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		const pathname = new URL(request.url).pathname
-		if (pathname === '/mcp') return mcpHandler.fetch(request, env, ctx)
+		if (pathname === '/mcp' || pathname === '/sse') {
+			return mcpHandler.fetch(request, env, ctx)
+		}
 		return env.ASSETS.fetch(request)
 	},
 } satisfies ExportedHandler<Env>

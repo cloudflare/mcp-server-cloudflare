@@ -4,7 +4,7 @@ This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introdu
 
 It integrates tools for running a sandbox container with your MCP client. With this server you can allow your LLM to run arbitrary code, such as Node or Python, in a secure, sandboxed environment.
 
-The authenticated `/mcp` endpoint creates a fresh SDK v2 server for every request. `UserContainer` and `ContainerManager` remain application Durable Objects for per-user container lifecycle and capacity management; there is no MCP protocol session, SSE route, or protocol Durable Object.
+The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server for every request. `/sse` is not the deprecated HTTP+SSE transport. `UserContainer` and `ContainerManager` remain application Durable Objects for per-user container lifecycle and capacity management; there is no MCP protocol session or protocol Durable Object.
 
 ## Tools
 

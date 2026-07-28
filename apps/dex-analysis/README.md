@@ -5,7 +5,7 @@ connections, with Cloudflare OAuth built-in.
 
 It integrates tools powered by the [Cloudflare DEX API](https://developers.cloudflare.com/api/resources/zero_trust/subresources/dex/) to provide visibility into device, network, and application performance across your Zero Trust organization
 
-The authenticated `/mcp` endpoint creates a fresh SDK v2 server and request-scoped auth/account context for every request. OAuth remains durable security state, and `WarpDiagReader` remains an application cache for downloaded diagnostics; no MCP protocol session or SSE route is retained.
+The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth/account context for every request. `/sse` is not the deprecated HTTP+SSE transport. OAuth remains durable security state, and `WarpDiagReader` remains an application cache for downloaded diagnostics; no MCP protocol session is retained.
 
 ## 🔨 Available Tools
 
