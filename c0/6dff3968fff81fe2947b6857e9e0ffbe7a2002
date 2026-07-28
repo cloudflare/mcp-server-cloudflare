@@ -1,0 +1,29 @@
+pnpm-lock.yaml
+  s_193e81be9e81fd::t_67a4b597b05c23 13-14,16-17,19-20,22-23,366,533,597,747,750,753,790,796,845,1875-1876,1879-1880,1883-1884,1893-1894,2443-2444,2447-2451,2455,2464-2465,6191,6193,6201,6205,6229,6231,6738,6742-6744
+pnpm-workspace.yaml
+  s_2ce1e639f3d2d9::t_83aac38015d7a0 5-7,10-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "c06dff3968fff81fe2947b6857e9e0ffbe7a2002",
+  "prompts": {},
+  "sessions": {
+    "s_193e81be9e81fd": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019fa976-4d1d-7eb9-8ab0-ed7a0fb11a63",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_2ce1e639f3d2d9": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019fa8ba-f894-7a3a-8984-8167dfd0eb46",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
