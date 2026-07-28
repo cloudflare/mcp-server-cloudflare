@@ -1,0 +1,71 @@
+README.md
+  s_193e81be9e81fd::t_44c29949ca134d 11-30
+apps/cloudflare-one-casb/src/api/cf1-integration.api.ts
+  s_193e81be9e81fd::t_ebf4f07769e7a9 1-3
+apps/cloudflare-one-casb/src/tools/integrations.tools.ts
+  s_193e81be9e81fd::t_a152072382dc87 3-4,14-15
+apps/dns-analytics/src/dns-analytics.app.ts
+  s_193e81be9e81fd::t_a6c48e1238283c 4
+apps/docs-ai-search/src/docs-ai-search.app.ts
+  s_193e81be9e81fd::t_86c3e3e3a5a7f7 3-4
+apps/graphql/src/graphql.app.ts
+  s_193e81be9e81fd::t_ee923f8765b032 4
+apps/radar/src/tools/radar.tools.ts
+  s_193e81be9e81fd::t_b2e2e8e6d5ae2e 4
+apps/workers-bindings/evals/hyperdrive.eval.ts
+  s_193e81be9e81fd::t_ee4ccc68a464a7 8
+apps/workers-bindings/evals/kv_namespaces.eval.ts
+  s_193e81be9e81fd::t_d1dc97e5e0ddaa 8
+apps/workers-bindings/package.json
+  s_193e81be9e81fd::t_3179435e91eb91 33,36-37
+apps/workers-bindings/src/bindings.app.ts
+  s_193e81be9e81fd::t_3be12fa23ef97d 3-10
+apps/workers-bindings/src/tools/d1.tools.ts
+  s_193e81be9e81fd::t_24934eda937c13 3-6,14
+apps/workers-bindings/src/tools/hyperdrive.tools.ts
+  s_193e81be9e81fd::t_a4005d8d8883f6 3-5,23
+apps/workers-bindings/src/tools/kv_namespace.tools.ts
+  s_193e81be9e81fd::t_61a1438c10da57 3-5,12
+apps/workers-bindings/src/tools/r2_bucket.tools.ts
+  s_193e81be9e81fd::t_1d452cc85a7564 3-6,15
+apps/workers-builds/src/api/workers-builds.api.ts
+  s_193e81be9e81fd::t_0826c9a945f1cc 1-3
+apps/workers-builds/src/tools/workers-builds.tools.ts
+  s_193e81be9e81fd::t_c6c316cf6a1a3c 6-7
+apps/workers-builds/src/workers-builds.app.ts
+  s_193e81be9e81fd::t_857f6f37638d62 5
+apps/workers-builds/src/workers-builds.spec.ts
+  s_193e81be9e81fd::t_1e58fd2eb7f741 16
+apps/workers-observability/src/api/workers-observability.api.ts
+  s_193e81be9e81fd::t_8a3845d1db3a39 3-5
+apps/workers-observability/src/tools/workers-observability.tools.ts
+  s_193e81be9e81fd::t_9d3a8fe5212f24 5-6,11-12
+apps/workers-observability/src/types/workers-logs.types.ts
+  s_193e81be9e81fd::t_ef972ea5df5798 3
+apps/workers-observability/src/workers-observability.app.ts
+  s_193e81be9e81fd::t_765d5195d374ef 4-6
+packages/mcp-common/src/shared-tools/worker.tools.ts
+  s_193e81be9e81fd::t_4482ca99c33eae 3-5,10
+packages/mcp-common/src/shared-tools/workers.api.ts
+  s_193e81be9e81fd::t_a2b778b3072c35 3
+packages/mcp-common/src/shared-tools/zone.tools.ts
+  s_193e81be9e81fd::t_f64aeacdf9b6e2 5
+pnpm-lock.yaml
+  s_193e81be9e81fd::t_c0da0a741457f8 576-578,588-590,828-830
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "4fd761110663bde8664d5029fb283a9aca43d17c",
+  "prompts": {},
+  "sessions": {
+    "s_193e81be9e81fd": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019fa976-4d1d-7eb9-8ab0-ed7a0fb11a63",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
