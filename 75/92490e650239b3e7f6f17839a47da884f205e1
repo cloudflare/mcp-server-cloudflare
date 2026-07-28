@@ -1,0 +1,19 @@
+packages/mcp-common/src/tools/docs-ai-search.tools.ts
+  s_193e81be9e81fd::t_821eb6e159e84e 173-177,179-187
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "7592490e650239b3e7f6f17839a47da884f205e1",
+  "prompts": {},
+  "sessions": {
+    "s_193e81be9e81fd": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019fa976-4d1d-7eb9-8ab0-ed7a0fb11a63",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
