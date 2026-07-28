@@ -70,6 +70,6 @@ Shared tools capture the registration context instead of a stateful server objec
 
 `createAuthenticatedMcpApp()` composes `createCloudflareOAuthRouter()` internally. OAuth grants, KV, credentials, refresh tokens, and API-token validation remain application/security state; only MCP protocol sessions are removed. `/mcp` and `/sse` use the same handler while retaining exact path-aware OAuth resource matching.
 
-The Agents handler exposes OAuth Provider application props through `getMcpAuthContext()` and the shared factory validates them before setting `McpRegistrationContext.props`. SDK `ctx.http.authInfo` is optional and is present only when a compatible caller supplies it. Do not log raw tokens or authentication props.
+Workers OAuth Provider and API-token routing populate `ExecutionContext.props`. The request-scoped server factory reads and validates `ctx.props` before setting `McpRegistrationContext.props`. SDK `ctx.http.authInfo` is optional and is present only when a compatible caller supplies it. Do not log raw tokens or authentication props.
 
 The default CORS allow-headers list includes `cf-account-id`, `MCP-Protocol-Version`, `Mcp-Method`, and `Mcp-Name`. Browser deployments use the canonical explicit Host and Origin allowlists assembled from each application's `serviceHostnames`.

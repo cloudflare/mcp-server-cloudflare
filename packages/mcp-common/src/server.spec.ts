@@ -436,31 +436,6 @@ describe('shared stateless MCP foundation', () => {
 		expect(waitUntilLabels.sort()).toEqual(['ctx-0', 'ctx-1'])
 	})
 
-	it('honors explicit handler auth context when Worker props are absent', async () => {
-		let factoryProps: AuthProps | undefined
-		const handler = createCloudflareMcpHandler<TestEnv>({
-			serverInfo: { name: 'explicit-auth', version: '1.0.0' },
-			requireAuth: true,
-			handler: { authContext: { props: { ...multiAccountProps } } },
-			register(context) {
-				factoryProps = context.props
-				context.registerTool('auth', { inputSchema: z.object({}) }, async () => ({
-					content: [{ type: 'text', text: context.props?.type ?? 'none' }],
-				}))
-			},
-		})
-
-		const response = await handler.fetch(
-			modernRequest('tools/call', { name: 'auth', arguments: {} }),
-			{ requestLabel: 'explicit-auth' },
-			executionContext()
-		)
-
-		expect(response.status).toBe(200)
-		expect(textResult(await responseDocument(response))).toBe('user_token')
-		expect(factoryProps).toEqual(multiAccountProps)
-	})
-
 	it('bridges verified OAuth AuthInfo while keeping application props request-scoped', async () => {
 		let factoryAuth: AuthInfo | undefined
 		let toolAuth: AuthInfo | undefined

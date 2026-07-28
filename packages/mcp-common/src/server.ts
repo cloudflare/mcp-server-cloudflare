@@ -1,5 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/server'
-import { createMcpHandler, getMcpAuthContext } from 'agents/mcp/server'
+import { createMcpHandler } from 'agents/mcp/server'
 
 import { McpRequest } from '@repo/mcp-observability'
 
@@ -51,7 +51,7 @@ function createCloudflareMcpServerFactory<Env>(
 	worker: WorkerRequest<Env>
 ): McpServerFactory {
 	return async (mcp) => {
-		const props = parseRequestAuthProps(getMcpAuthContext()?.props, options.requireAuth ?? false)
+		const props = parseRequestAuthProps(worker.executionCtx.props, options.requireAuth ?? false)
 		const accountManager = props ? new AccountManager(props) : undefined
 		const seed: McpRequestSeedContext<Env> = {
 			env: worker.env,
@@ -101,7 +101,7 @@ function createCloudflareMcpServerFactory<Env>(
 
 export interface CreateCloudflareMcpHandlerOptions<Env>
 	extends CloudflareMcpServerFactoryOptions<Env> {
-	handler?: Omit<CreateMcpHandlerOptions, 'legacy'>
+	handler?: Omit<CreateMcpHandlerOptions, 'authContext' | 'legacy'>
 }
 
 export interface CloudflareMcpHandler<Env> {
