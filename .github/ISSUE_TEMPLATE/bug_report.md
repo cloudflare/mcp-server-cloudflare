@@ -10,7 +10,6 @@ assignees: ''
 **Client Information**
  - LLM Client: [e.g. Claude Desktop, claude.ai, Cursor, VSCode]
  - Client Config: [e.g. claude_desktop_config.json or screenshot of client configuration UI]
- - Connection Method: [e.g. direct server URL or client integration]
  - MCP Server: [e.g. https://observability.mcp.cloudflare.com, https://docs.mcp.cloudflare.com]
  - Prompt: [if applicable, add the prompt used]
 
