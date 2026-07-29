@@ -1,0 +1,21 @@
+packages/mcp-common/src/cloudflare-oauth-handler.spec.ts
+  s_3f5cf64aba87b4::t_959f1c1101887e 374-390
+packages/mcp-common/src/cloudflare-oauth-handler.ts
+  s_3f5cf64aba87b4::t_3704b97ca40616 113-120,160-165,186-191
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "d029b8a4b4f6a8c6e1101b51711cebc6b10b27d5",
+  "prompts": {},
+  "sessions": {
+    "s_3f5cf64aba87b4": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019fad47-5547-7f5c-854f-49672cda3974",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
