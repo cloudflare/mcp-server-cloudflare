@@ -1,0 +1,51 @@
+.github/ISSUE_TEMPLATE/bug_report.md
+  s_3f5cf64aba87b4::t_b32ffea080dcf8 13
+README.md
+  s_3f5cf64aba87b4::t_a0ed86b9442744 56-58
+apps/ai-gateway/README.md
+  s_3f5cf64aba87b4::t_d083e25c929dd6 33,35
+apps/auditlogs/README.md
+  s_3f5cf64aba87b4::t_1d25cc31ecd064 25,27
+apps/autorag/README.md
+  s_3f5cf64aba87b4::t_5cf7eb1e0ad1b9 57,61
+apps/browser-rendering/README.md
+  s_3f5cf64aba87b4::t_f9635889f9a6aa 46,48
+apps/dex-analysis/README.md
+  s_3f5cf64aba87b4::t_9a8414e39bece3 48,50
+apps/dns-analytics/README.md
+  s_3f5cf64aba87b4::t_e08f30eddf6689 35,37
+apps/docs-ai-search/README.md
+  s_3f5cf64aba87b4::t_35690ef5e67e33 23,25
+apps/graphql/README.md
+  s_3f5cf64aba87b4::t_fea21866392d61 28,30
+apps/logpush/README.md
+  s_3f5cf64aba87b4::t_cba14dda9b5c9b 26,28
+apps/radar/README.md
+  s_3f5cf64aba87b4::t_36714b92f35642 205,207
+apps/sandbox-container/CONTRIBUTING.md
+  s_3f5cf64aba87b4::t_e2c10e492905c2 29
+apps/sandbox-container/README.md
+  s_3f5cf64aba87b4::t_c45d7287ca59d4 29,31
+apps/workers-bindings/README.md
+  s_3f5cf64aba87b4::t_7aa1e466a92509 65,67
+apps/workers-builds/README.md
+  s_3f5cf64aba87b4::t_6cbf3901ad37a0 29,31
+apps/workers-observability/README.md
+  s_3f5cf64aba87b4::t_ca2632f23f811e 31,33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "ba90a9ebc56a964f3bd4180c037a94cf26cf9382",
+  "prompts": {},
+  "sessions": {
+    "s_3f5cf64aba87b4": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019fad47-5547-7f5c-854f-49672cda3974",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
