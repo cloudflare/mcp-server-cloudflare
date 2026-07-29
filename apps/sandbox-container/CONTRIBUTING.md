@@ -26,19 +26,4 @@ Note: Temporary files created through files tool calls are stored in the workdir
 npx https://prerelease-registry.devprod.cloudflare.dev/workers-sdk/runs/14387504770/npm-package-wrangler-8740 deploy
 ```
 
-3. Add to your Claude config. If using with Claude, you'll need to disable WARP:
-
-```
-{
-    "mcpServers": {
-        "container": {
-            "command": "npx",
-            "args": [
-                "mcp-remote",
-                // this is my deployed instance
-                "https://container-starter-2.cmsparks.workers.dev/mcp"
-            ]
-        }
-    }
-}
-```
+3. Connect an MCP client directly to your deployed `/mcp` URL. If you use Claude Desktop, disable WARP first.

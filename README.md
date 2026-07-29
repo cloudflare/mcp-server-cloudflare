@@ -53,26 +53,9 @@ Use the **domain-specific servers** in this repository when:
 
 Learn more about the Code Mode server here: [`cloudflare/mcp`](https://github.com/cloudflare/mcp).
 
-## Access the remote MCP server from any MCP client
+## Connect to an MCP server
 
-If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL directly within its interface (e.g. [Cloudflare AI Playground](https://playground.ai.cloudflare.com/))
-
-If your client does not yet support remote MCP servers, you will need to set up its respective configuration file using mcp-remote (https://www.npmjs.com/package/mcp-remote) to specify which servers your client can access.
-
-```json
-{
-	"mcpServers": {
-		"cloudflare-observability": {
-			"command": "npx",
-			"args": ["mcp-remote", "https://observability.mcp.cloudflare.com/mcp"]
-		},
-		"cloudflare-bindings": {
-			"command": "npx",
-			"args": ["mcp-remote", "https://bindings.mcp.cloudflare.com/mcp"]
-		}
-	}
-}
-```
+Connect any MCP client with remote-server support directly to a URL in the table above. [Cloudflare AI Playground](https://playground.ai.cloudflare.com/) also accepts server URLs in its interface.
 
 ## Using Cloudflare's MCP servers from the OpenAI Responses API
 

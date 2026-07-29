@@ -25,23 +25,6 @@ Currently available tools:
 - `Can you generate a link to the Cloudflare GraphQL API Explorer with a pre-populated query and variables?`
 - `I need to monitor HTTP requests and responses for a specific domain. Can you help me with that using the Cloudflare GraphQL API?`
 
-## Access the remote MCP server from Claude Desktop
+## Connect to the MCP server
 
-If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://graphql.mcp.cloudflare.com/mcp`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
-
-If your client does not yet support remote MCP servers, you will need to set up its respective configuration file using [mcp-remote](https://www.npmjs.com/package/mcp-remote) to specify which servers your client can access.
-
-Replace the content with the following configuration:
-
-```json
-{
-	"mcpServers": {
-		"cloudflare": {
-			"command": "npx",
-			"args": ["mcp-remote", "https://graphql.mcp.cloudflare.com/mcp"]
-		}
-	}
-}
-```
-
-Once you've set up your configuration file, restart MCP client and a browser window will open showing your OAuth login page. Proceed through the authentication flow to grant the client access to your MCP server. After you grant access, the tools will become available for you to use.
+Connect your MCP client directly to `https://graphql.mcp.cloudflare.com/mcp`. If prompted, complete the Cloudflare OAuth flow in your browser. The tools become available after authorization.
