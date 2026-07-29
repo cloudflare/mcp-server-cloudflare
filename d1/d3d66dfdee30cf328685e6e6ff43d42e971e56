@@ -1,0 +1,35 @@
+apps/ai-gateway/src/auth-integration.spec.ts
+  s_3f5cf64aba87b4::t_4368b9e6d3af40 188,190,195-198
+packages/mcp-common/src/cloudflare-oauth-handler.spec.ts
+  s_3f5cf64aba87b4::t_1cab9236f605a5 320-322,340
+  s_3f5cf64aba87b4::t_959f1c1101887e 323,333,343,359,420-436
+  s_3f5cf64aba87b4::t_99c757e67ddd70 324-325,334,344,361
+  s_3f5cf64aba87b4::t_f7b3a5cef1d6d2 317-319
+  s_3f5cf64aba87b4::t_e43ee0d1f3fc79 326-328,330-332
+  s_3f5cf64aba87b4::t_8176fdcef94cd9 335-339
+  s_3f5cf64aba87b4::t_17c15577ff8289 341-342
+  s_3f5cf64aba87b4::t_4e6fcfe99795c4 345-347,356-358
+  s_3f5cf64aba87b4::t_0f564329677fb0 360
+  s_3f5cf64aba87b4::t_214c2a63006bc1 362
+packages/mcp-common/src/api-token-mode.ts
+  s_3f5cf64aba87b4::t_354c6e762b7249 2,5,17-22,34-36,61,92-98,102-136
+packages/mcp-common/src/cloudflare-oauth-handler.ts
+  s_3f5cf64aba87b4::t_3704b97ca40616 88-89,100,106-107,113,117,119,122-128,130,134-143,146-147,155-156,159-162,164,175-185,187-197,214,217-225,228,233,235,257
+  s_3f5cf64aba87b4::t_55d64c04596a0c 15,57,84-87,91-97,226-227,229-232,234,252-254,258-261,268-269,306-307
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "d1d3d66dfdee30cf328685e6e6ff43d42e971e56",
+  "prompts": {},
+  "sessions": {
+    "s_3f5cf64aba87b4": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019fad47-5547-7f5c-854f-49672cda3974",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
