@@ -1,0 +1,130 @@
+version: "1"
+description: "Cloudflare MCP — recommended policy. Rate limits on writes, blocks destructive operations, reads allowed freely."
+default: allow
+
+tools:
+  # Destructive tools — blocked by default
+  # These permanently destroy databases, storage buckets, and KV namespaces.
+  # Uncomment and add rate limits if you need them.
+  kv_namespace_delete:
+    rules:
+      - action: deny
+        on_deny: "KV namespace deletion blocked by policy — remove this rule if you need to delete namespaces"
+
+  r2_bucket_delete:
+    rules:
+      - action: deny
+        on_deny: "R2 bucket deletion blocked by policy — remove this rule if you need to delete buckets"
+
+  d1_database_delete:
+    rules:
+      - action: deny
+        on_deny: "D1 database deletion blocked by policy — remove this rule if you need to delete databases"
+
+  hyperdrive_config_delete:
+    rules:
+      - action: deny
+        on_deny: "Hyperdrive config deletion blocked by policy — remove this rule if you need to delete configs"
+
+  container_file_delete:
+    rules:
+      - action: deny
+        on_deny: "Container file deletion blocked by policy"
+
+  # Write tools — moderate rate limits
+  kv_namespace_create:
+    rules:
+      - name: "burst-limit"
+        rate_limit: "5/minute"
+        on_deny: "Slow down — max 5 KV namespace creations per minute"
+      - name: "hourly-cap"
+        rate_limit: "20/hour"
+        on_deny: "Max 20 KV namespace creations per hour"
+
+  r2_bucket_create:
+    rules:
+      - name: "burst-limit"
+        rate_limit: "3/minute"
+        on_deny: "Slow down — max 3 R2 bucket creations per minute"
+      - name: "hourly-cap"
+        rate_limit: "10/hour"
+        on_deny: "Max 10 R2 bucket creations per hour"
+
+  d1_database_create:
+    rules:
+      - name: "burst-limit"
+        rate_limit: "3/minute"
+        on_deny: "Slow down — max 3 D1 database creations per minute"
+      - name: "hourly-cap"
+        rate_limit: "10/hour"
+        on_deny: "Max 10 D1 database creations per hour"
+
+  hyperdrive_config_create:
+    rules:
+      - name: "burst-limit"
+        rate_limit: "3/minute"
+        on_deny: "Slow down — max 3 Hyperdrive config creations per minute"
+      - name: "hourly-cap"
+        rate_limit: "10/hour"
+        on_deny: "Max 10 Hyperdrive config creations per hour"
+
+  hyperdrive_config_edit:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "10/hour"
+        on_deny: "Max 10 Hyperdrive config edits per hour"
+
+  kv_namespace_update:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "20/hour"
+        on_deny: "Max 20 KV namespace updates per hour"
+
+  set_active_account:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "10/hour"
+        on_deny: "Max 10 account switches per hour"
+
+  # Container tools — rate limited
+  container_exec:
+    rules:
+      - name: "burst-limit"
+        rate_limit: "10/minute"
+        on_deny: "Slow down — max 10 container commands per minute"
+      - name: "hourly-cap"
+        rate_limit: "60/hour"
+        on_deny: "Max 60 container commands per hour"
+
+  container_file_write:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "30/hour"
+        on_deny: "Max 30 container file writes per hour"
+
+  # D1 queries — rate limited to prevent runaway queries
+  d1_database_query:
+    rules:
+      - name: "burst-limit"
+        rate_limit: "10/minute"
+        on_deny: "Slow down — max 10 D1 queries per minute"
+      - name: "hourly-cap"
+        rate_limit: "120/hour"
+        on_deny: "Max 120 D1 queries per hour"
+
+  # GraphQL queries — rate limited
+  graphql_query:
+    rules:
+      - name: "burst-limit"
+        rate_limit: "10/minute"
+        on_deny: "Slow down — max 10 GraphQL queries per minute"
+      - name: "hourly-cap"
+        rate_limit: "60/hour"
+        on_deny: "Max 60 GraphQL queries per hour"
+
+  # Global safety net
+  "*":
+    rules:
+      - name: "global-rate-limit"
+        rate_limit: "60/minute"
+        on_deny: "Global rate limit — max 60 tool calls per minute across all Cloudflare tools"
