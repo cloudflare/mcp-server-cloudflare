@@ -525,6 +525,34 @@ importers:
         specifier: 4.96.0
         version: 4.96.0(@cloudflare/workers-types@4.20250416.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
+  apps/stack-mcp:
+    dependencies:
+      '@repo/mcp-common':
+        specifier: workspace:*
+        version: link:../../packages/mcp-common
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@cloudflare/vitest-pool-workers':
+        specifier: 0.16.11
+        version: 0.16.11(@cloudflare/workers-types@4.20250416.0)(@vitest/runner@4.1.8)(@vitest/snapshot@4.1.8)(bufferutil@4.0.9)(utf-8-validate@5.0.10)(vitest@4.1.8)
+      '@types/node':
+        specifier: 22.15.17
+        version: 22.15.17
+      prettier:
+        specifier: 3.5.3
+        version: 3.5.3
+      typescript:
+        specifier: 5.5.4
+        version: 5.5.4
+      vitest:
+        specifier: 4.1.8
+        version: 4.1.8(@opentelemetry/api@1.9.0)(@types/node@22.15.17)(@vitest/ui@4.1.8)(msw@2.14.6(@types/node@22.15.17)(typescript@5.5.4))(vite@6.3.4(@types/node@22.15.17)(lightningcss@1.29.2)(tsx@4.19.3)(yaml@2.9.0))
+      wrangler:
+        specifier: 4.96.0
+        version: 4.96.0(@cloudflare/workers-types@4.20250416.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+
   apps/workers-bindings:
     dependencies:
       '@n8n/json-schema-to-zod':
@@ -6115,7 +6143,7 @@ snapshots:
   '@jridgewell/trace-mapping@0.3.9':
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
-      '@jridgewell/sourcemap-codec': 1.5.0
+      '@jridgewell/sourcemap-codec': 1.5.5
 
   '@kamilkisiela/fast-url-parser@1.1.4': {}
 
