@@ -1,10 +1,13 @@
 import { env } from 'cloudflare:test'
+import { http, HttpResponse } from 'msw'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { server } from '@repo/mcp-common/src/test/msw-server'
 import { testStatelessMcpApp } from '@repo/mcp-common/src/test/stateless-app'
 
 import worker, { mcpHandler } from './graphql.app'
 
+import type { JsonBodyType } from 'msw'
 import type { Env } from './graphql.context'
 
 testStatelessMcpApp<Env>({
@@ -68,14 +71,38 @@ async function responseDocument(response: Response): Promise<Record<string, any>
 	return JSON.parse(data)
 }
 
-function mockGraphQLResponse(body: unknown) {
-	const fetchMock = vi.fn(async () => Response.json(body))
-	vi.stubGlobal('fetch', fetchMock)
-	return fetchMock
+const GRAPHQL_ENDPOINT = 'https://api.cloudflare.com/client/v4/graphql'
+
+function mockGraphQLResponse(
+	body: JsonBodyType,
+	expectedRequest: {
+		query: string | RegExp
+		variables?: Record<string, unknown>
+	}
+) {
+	server.use(
+		http.post(GRAPHQL_ENDPOINT, async ({ request }) => {
+			expect(request.headers.get('Authorization')).toBe('Bearer graphql-token')
+			expect(request.headers.get('Content-Type')).toBe('application/json')
+
+			const requestBody = (await request.json()) as Record<string, unknown>
+			if (typeof expectedRequest.query === 'string') {
+				expect(requestBody.query).toBe(expectedRequest.query)
+			} else {
+				expect(requestBody.query).toMatch(expectedRequest.query)
+			}
+			if ('variables' in expectedRequest) {
+				expect(requestBody.variables).toEqual(expectedRequest.variables)
+			} else {
+				expect(requestBody).not.toHaveProperty('variables')
+			}
+
+			return HttpResponse.json(body)
+		})
+	)
 }
 
 afterEach(() => {
-	vi.unstubAllGlobals()
 	vi.restoreAllMocks()
 })
 
@@ -120,11 +147,12 @@ describe('GraphQL API response handling', () => {
 			},
 		},
 	])('returns an API error with $name instead of a Zod error', async ({ body, message }) => {
-		mockGraphQLResponse(body)
+		const query = 'query { missing }'
+		mockGraphQLResponse(body, { query, variables: {} })
 		vi.spyOn(console, 'warn').mockImplementation(() => {})
 
 		const response = await mcpHandler.fetch(
-			toolCall('graphql_query', { query: 'query { missing }' }),
+			toolCall('graphql_query', { query }),
 			env as unknown as Env,
 			context()
 		)
@@ -138,10 +166,13 @@ describe('GraphQL API response handling', () => {
 	})
 
 	it('accepts a successful response that omits errors', async () => {
-		mockGraphQLResponse({ data: { viewer: { zones: [] } } })
+		const query =
+			'query Zones($zoneTag: String!) { viewer { zones(filter: { zoneTag: $zoneTag }) { zoneTag } } }'
+		const variables = { zoneTag: 'zone-1' }
+		mockGraphQLResponse({ data: { viewer: { zones: [] } } }, { query, variables })
 
 		const response = await mcpHandler.fetch(
-			toolCall('graphql_query', { query: 'query { viewer { zones { zoneTag } } }' }),
+			toolCall('graphql_query', { query, variables }),
 			env as unknown as Env,
 			context()
 		)
@@ -152,14 +183,18 @@ describe('GraphQL API response handling', () => {
 	})
 
 	it('passes through an unrecognized response shape instead of throwing', async () => {
-		mockGraphQLResponse({
-			data: null,
-			errors: [{ message: 'upstream-specific error', extensions: ['custom', 'shape'] }],
-		})
+		const query = 'query { viewer { zones { zoneTag } } }'
+		mockGraphQLResponse(
+			{
+				data: null,
+				errors: [{ message: 'upstream-specific error', extensions: ['custom', 'shape'] }],
+			},
+			{ query, variables: {} }
+		)
 		vi.spyOn(console, 'warn').mockImplementation(() => {})
 
 		const response = await mcpHandler.fetch(
-			toolCall('graphql_query', { query: 'query { viewer { zones { zoneTag } } }' }),
+			toolCall('graphql_query', { query }),
 			env as unknown as Env,
 			context()
 		)
@@ -172,10 +207,13 @@ describe('GraphQL API response handling', () => {
 	})
 
 	it('surfaces path-less API errors from schema requests', async () => {
-		mockGraphQLResponse({
-			data: null,
-			errors: [{ message: 'not authorized to inspect the schema', path: null }],
-		})
+		mockGraphQLResponse(
+			{
+				data: null,
+				errors: [{ message: 'not authorized to inspect the schema', path: null }],
+			},
+			{ query: /query SchemaOverview/ }
+		)
 		vi.spyOn(console, 'warn').mockImplementation(() => {})
 
 		const response = await mcpHandler.fetch(
