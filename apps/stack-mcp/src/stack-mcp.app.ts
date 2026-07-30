@@ -4,7 +4,7 @@ import { getEnv } from '@repo/mcp-common/src/env'
 import { CloudflareMCPServer } from '@repo/mcp-common/src/server'
 
 import { registerStackTools } from './tools/stack.tools'
-import { resolveLibraries } from './types/stack.types'
+import { resolveLibraries, STACK_LIBRARIES, toPublicLibrary } from './types/stack.types'
 
 import type { Env } from './stack-mcp.context'
 
@@ -48,6 +48,14 @@ export default {
 			const server = createMcpServer(env, ctx, req)
 			const mcpHandler = createMcpHandler(server)
 			return mcpHandler(req, env, ctx)
+		}
+		if (url.pathname === '/libraries') {
+			// Public catalog for UI pickers (e.g. the Workers AI Playground). Fetched
+			// cross-origin from the browser, so it needs permissive CORS.
+			return Response.json(
+				{ libraries: STACK_LIBRARIES.map(toPublicLibrary) },
+				{ headers: { 'access-control-allow-origin': '*' } }
+			)
 		}
 		return new Response('Not found', { status: 404 })
 	},
