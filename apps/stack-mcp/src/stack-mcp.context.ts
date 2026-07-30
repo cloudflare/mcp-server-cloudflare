@@ -1,6 +1,6 @@
 /**
  * Minimal typings for the AI Search namespace binding (`ai_search_namespaces`).
- * Hand-written so the prototype typechecks regardless of the wrangler version's
+ * Hand-written so this typechecks regardless of the wrangler version's
  * runtime types for this (beta) binding.
  */
 export interface AiSearchChunk {
@@ -42,7 +42,7 @@ export interface AiSearchInstance {
 export interface AiSearchNamespace {
 	/** Get a single instance handle within the bound namespace. */
 	get(name: string): AiSearchInstance
-	/** Search across multiple instances in the bound namespace (requires instance_ids, 1–10). */
+	/** Search across multiple instances in the bound namespace (requires instance_ids, 1-10). */
 	search(params: {
 		query: string
 		ai_search_options: {
