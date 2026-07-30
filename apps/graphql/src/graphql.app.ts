@@ -7,6 +7,9 @@ import { registerGraphQLTools } from './tools/graphql.tools'
 
 import type { Env } from './graphql.context'
 
+export const DEPRECATION_INSTRUCTIONS =
+	'DEPRECATED: Use the Cloudflare API MCP server at https://mcp.cloudflare.com/mcp instead; it supports the GraphQL Analytics API.'
+
 const GraphQLScopes = {
 	...RequiredScopes,
 	'account:read': 'See your account info such as account details, analytics, and memberships.',
@@ -16,6 +19,7 @@ const GraphQLScopes = {
 const app = createAuthenticatedMcpApp<Env>({
 	serviceHostnames: ['graphql-staging.mcp.cloudflare.com', 'graphql.mcp.cloudflare.com'],
 	scopes: GraphQLScopes,
+	serverOptions: { instructions: DEPRECATION_INSTRUCTIONS },
 	createSentry: ({ env, executionCtx, request, props }) =>
 		props?.type === 'user_token'
 			? initSentryWithUser(env, executionCtx, props.user.id, request)

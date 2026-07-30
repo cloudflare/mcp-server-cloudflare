@@ -148,18 +148,6 @@
 		{
 			"url": "https://blog.mcp.cloudflare.com/mcp",
 			"type": "streamable-http"
-		},
-		{
-			"url": "https://graphql.mcp.cloudflare.com/mcp",
-			"type": "streamable-http",
-			"headers": [
-				{
-					"name": "Authorization",
-					"description": "Optional Cloudflare API key for authentication if not using OAuth. Can use User or Account owned tokens as a Bearer token.",
-					"is_required": false,
-					"is_secret": true
-				}
-			]
 		}
 	]
 }

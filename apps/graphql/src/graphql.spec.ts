@@ -5,7 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { server } from '@repo/mcp-common/src/test/msw-server'
 import { testStatelessMcpApp } from '@repo/mcp-common/src/test/stateless-app'
 
-import worker, { mcpHandler } from './graphql.app'
+import worker, { DEPRECATION_INSTRUCTIONS, mcpHandler } from './graphql.app'
+import { validateGraphQLResponse } from './tools/graphql.tools'
 
 import type { JsonBodyType } from 'msw'
 import type { Env } from './graphql.context'
@@ -60,6 +61,27 @@ function toolCall(name: string, arguments_: Record<string, unknown>) {
 	})
 }
 
+function initializeRequest() {
+	return new Request('https://graphql.mcp.cloudflare.com/mcp', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Accept: 'application/json, text/event-stream',
+			Host: 'graphql.mcp.cloudflare.com',
+		},
+		body: JSON.stringify({
+			jsonrpc: '2.0',
+			id: 'graphql-initialize',
+			method: 'initialize',
+			params: {
+				protocolVersion: '2025-11-25',
+				capabilities: {},
+				clientInfo: { name: 'graphql-test', version: '1.0.0' },
+			},
+		}),
+	})
+}
+
 async function responseDocument(response: Response): Promise<Record<string, any>> {
 	const text = await response.text()
 	if (response.headers.get('content-type')?.includes('application/json')) return JSON.parse(text)
@@ -104,6 +126,74 @@ function mockGraphQLResponse(
 
 afterEach(() => {
 	vi.restoreAllMocks()
+})
+
+describe('GraphQL server deprecation', () => {
+	it('advertises the Cloudflare API MCP server in its initialize instructions', async () => {
+		const response = await mcpHandler.fetch(initializeRequest(), env as unknown as Env, context())
+		const document = await responseDocument(response)
+
+		expect(response.status).toBe(200)
+		expect(document.result.instructions).toBe(DEPRECATION_INSTRUCTIONS)
+		expect(document.result.instructions).toContain('https://mcp.cloudflare.com/mcp')
+	})
+})
+
+describe('GraphQL response validation', () => {
+	it('accepts the response fields and constraints defined by GraphQL', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+		const response = {
+			data: { viewer: null },
+			errors: [
+				{
+					message: 'A field returned a partial result',
+					locations: [{ line: 1, column: 2 }],
+					path: ['viewer', 0],
+					extensions: { code: 'partial' },
+				},
+			],
+			extensions: { traceId: 'test-trace' },
+		}
+
+		expect(validateGraphQLResponse(response)).toBe(response)
+		expect(warn).not.toHaveBeenCalled()
+	})
+
+	it('tolerates null optional fields returned by Cloudflare', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+		const responses = [
+			{ data: { viewer: null }, errors: null },
+			{
+				data: null,
+				errors: [{ message: 'not authorized', locations: null, path: null, extensions: null }],
+			},
+		]
+
+		for (const response of responses) expect(validateGraphQLResponse(response)).toBe(response)
+		expect(warn).not.toHaveBeenCalled()
+	})
+
+	it.each([
+		{ name: 'neither data nor errors', response: {} },
+		{ name: 'an empty errors list', response: { errors: [] } },
+		{
+			name: 'a non-positive source location',
+			response: { errors: [{ message: 'invalid', locations: [{ line: 0, column: 1 }] }] },
+		},
+		{
+			name: 'a negative path index',
+			response: { data: null, errors: [{ message: 'invalid', path: ['viewer', -1] }] },
+		},
+		{
+			name: 'an empty path segment',
+			response: { data: null, errors: [{ message: 'invalid', path: [''] }] },
+		},
+	])('warns about a response with $name while preserving it', ({ response }) => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+		expect(validateGraphQLResponse(response)).toBe(response)
+		expect(warn).toHaveBeenCalledOnce()
+	})
 })
 
 describe('GraphQL API response handling', () => {

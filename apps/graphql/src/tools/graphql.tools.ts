@@ -66,26 +66,39 @@ interface TypeDetailsResponse {
 	}
 }
 
-// Define GraphQL errors according to the optional fields in the GraphQL specification.
-const graphQLErrorSchema = z.object({
-	message: z.string(),
-	locations: z
-		.array(
-			z.object({
-				line: z.number(),
-				column: z.number(),
-			})
-		)
-		.nullish(),
-	path: z.array(z.union([z.string(), z.number()])).nullish(),
-	extensions: z.record(z.string(), z.unknown()).nullish(),
-})
+const graphQLLocationSchema = z
+	.object({
+		line: z.number().int().positive(),
+		column: z.number().int().positive(),
+	})
+	.strict()
 
-// Both data and errors may be omitted depending on the result of the GraphQL request.
-const graphQLResponseSchema = z.object({
-	data: z.record(z.string(), z.unknown()).nullish(),
-	errors: z.array(graphQLErrorSchema).nullish(),
-})
+const graphQLPathSegmentSchema = z.union([z.string().min(1), z.number().int().nonnegative()])
+
+// GraphQL requires only `message`. Cloudflare also returns null for some optional fields,
+// so tolerate null as well as the omission defined by the specification.
+const graphQLErrorSchema = z
+	.object({
+		message: z.string(),
+		locations: z.array(graphQLLocationSchema).nonempty().nullish(),
+		path: z.array(graphQLPathSegmentSchema).nonempty().nullish(),
+		extensions: z.record(z.string(), z.unknown()).nullish(),
+	})
+	.strict()
+
+const graphQLResponseSchema = z
+	.object({
+		data: z.record(z.string(), z.unknown()).nullable().optional(),
+		// GraphQL omits `errors` on success. Cloudflare may return null instead.
+		errors: z.array(graphQLErrorSchema).nonempty().nullable().optional(),
+		extensions: z.record(z.string(), z.unknown()).optional(),
+	})
+	.strict()
+	.refine(
+		(response) =>
+			'data' in response || (Array.isArray(response.errors) && response.errors.length > 0),
+		{ message: 'A GraphQL response must contain data or at least one error' }
+	)
 
 type GraphQLResponse = z.infer<typeof graphQLResponseSchema>
 
