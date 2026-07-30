@@ -1,5 +1,11 @@
 # stack-mcp
 
+## 0.1.3
+
+### Patch Changes
+
+- cf04d31: Rename the search tool from `search_docs` to `search_dev_stack`, and rewrite both tool descriptions.
+
 ## 0.1.2
 
 ### Patch Changes
