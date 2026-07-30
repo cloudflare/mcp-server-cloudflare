@@ -1,6 +1,6 @@
 {
 	"name": "docs-ai-search",
-	"version": "0.4.10",
+	"version": "0.4.11",
 	"private": true,
 	"scripts": {
 		"check:lint": "run-eslint-workers",

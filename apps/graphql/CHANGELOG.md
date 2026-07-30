@@ -1,5 +1,17 @@
 # graphql-mcp-server
 
+## 0.2.4
+
+### Patch Changes
+
+- 5ff4529: Deprecate the dedicated GraphQL MCP server in favor of the Cloudflare API MCP server at https://mcp.cloudflare.com/mcp. The replacement supports GraphQL queries, variables, and schema introspection through Code Mode.
+
+  The existing tools continue to work for now. The server exposes the migration notice through MCP instructions and is no longer advertised in the root server list or `server.json`.
+
+- 5ff4529: Surface GraphQL API errors with optional paths and extensions instead of throwing Zod validation errors, and pass through unrecognized upstream response shapes.
+- Updated dependencies [4e1e6ab]
+  - @repo/mcp-common@0.20.8
+
 ## 0.2.3
 
 ### Patch Changes
