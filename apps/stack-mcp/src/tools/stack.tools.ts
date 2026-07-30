@@ -52,9 +52,9 @@ export function registerStackTools<Env extends RequiredEnv>(context: McpRegistra
 	context.registerTool(
 		'list_libraries',
 		{
-			description: `List the tools whose documentation this server can search (${names}), with each one's slug, name, source site, and a short description.
+			description: `List the libraries search_dev_stack has docs for (${names}), each with its slug, name, source, and description.
 
-Use it to check whether a tool is covered, or to get the exact \`library\` slug for search_docs. You do not need to call it first: searching without a \`library\` already covers the whole stack.`,
+Use it to check coverage or to get a \`library\` slug for search_dev_stack. You do not need to call it first: searching without a \`library\` already covers the whole stack.`,
 			inputSchema: z.object({}),
 			outputSchema: z.object({
 				libraries: z.array(
@@ -85,13 +85,11 @@ Use it to check whether a tool is covered, or to get the exact \`library\` slug 
 	)
 
 	context.registerTool(
-		'search_docs',
+		'search_dev_stack',
 		{
-			description: `Search current documentation for the tools in this developer stack (${names}) and get back the most relevant excerpts, each with a source link.
+			description: `Search current documentation for the tools you build with (${names}) and get relevant excerpts with source links.
 
-Reach for this whenever you are answering a question about, or writing code that uses, any of these tools. They change often, so your built-in knowledge of their APIs, configuration, and defaults is frequently out of date. Retrieve the docs instead of relying on memory, and ground the code you generate in what you find.
-
-Cite the returned source URLs in your answer. Searches the whole stack by default; set \`library\` to one slug (from list_libraries) to focus on a single tool.`,
+Whenever you are building or prototyping anything, start here: search to find the right tools for the job and their current usage, then build from what you find. Use even when you think you know the answer because your training data may not reflect recent changes. Prefer this over web search for library docs. Cite the source URLs. Omit \`library\` to search the whole stack, or set one slug to focus.`,
 			inputSchema: z.object({
 				query: StackSearchQueryParam,
 				library: z

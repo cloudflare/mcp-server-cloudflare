@@ -6,10 +6,10 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) s
 
 The server exposes two read-only tools, one to discover what's available and one to search it:
 
-| Tool             | Description                                                                                    |
-| ---------------- | ---------------------------------------------------------------------------------------------- |
-| `list_libraries` | List the documentation libraries this server can search (slug, name, source, description).     |
-| `search_docs`    | Search across the stack (or one `library`), returning cited doc chunks with their source URLs. |
+| Tool               | Description                                                                                    |
+| ------------------ | ---------------------------------------------------------------------------------------------- |
+| `list_libraries`   | List the documentation libraries this server can search (slug, name, source, description).     |
+| `search_dev_stack` | Search across the stack (or one `library`), returning cited doc chunks with their source URLs. |
 
 ## 📚 Libraries
 
@@ -36,7 +36,7 @@ The `/mcp` endpoint accepts a `libs` query param to scope the server to a subset
 https://stack.mcp.cloudflare.com/mcp?libs=cloudflare,hono,vite
 ```
 
-When scoped, `list_libraries` and `search_docs` (including its `library` enum) only expose the selected libraries, and cross-stack search is limited to them. Unknown slugs are ignored, and an empty or all-invalid `libs` falls back to the whole stack.
+When scoped, `list_libraries` and `search_dev_stack` (including its `library` enum) only expose the selected libraries, and cross-stack search is limited to them. Unknown slugs are ignored, and an empty or all-invalid `libs` falls back to the whole stack.
 
 Scoping is read from the connection URL on every request, so it applies whether the client connects to `/mcp` or the `/sse` alias.
 

@@ -11,6 +11,6 @@ testStatelessMcpApp<Env>({
 	handler: mcpHandler,
 	env: env as unknown as Env,
 	url: 'https://stack.mcp.cloudflare.com',
-	expectedTools: ['list_libraries', 'search_docs'],
-	requiredToolInputs: { search_docs: ['query'] },
+	expectedTools: ['list_libraries', 'search_dev_stack'],
+	requiredToolInputs: { search_dev_stack: ['query'] },
 })
