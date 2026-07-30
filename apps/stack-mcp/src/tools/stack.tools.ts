@@ -1,8 +1,13 @@
 import { z } from 'zod'
 
-import { LIBRARY_BY_INSTANCE, StackSearchQueryParam, toPublicLibrary } from '../types/stack.types'
+import {
+	LIBRARY_BY_INSTANCE,
+	resolveLibraries,
+	StackSearchQueryParam,
+	toPublicLibrary,
+} from '../types/stack.types'
 
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 import type { AiSearchChunk, AiSearchNamespace } from '../stack-mcp.context'
 import type { StackLibrary } from '../types/stack.types'
 
@@ -30,23 +35,28 @@ function toResult(chunk: AiSearchChunk, fallback?: StackLibrary) {
 }
 
 /**
- * Registers the Developer Stack tools, scoped to `allowed` (the subset selected
- * via the `?libs=` URL param, or the whole stack when unscoped).
+ * Registers the Developer Stack tools for one request. The stack is scoped to the
+ * subset selected via the `?libs=` URL param (or the whole stack when unscoped),
+ * read from the request URL so both `/mcp` and `/sse` honor it.
  */
-export function registerStackTools(server: McpServer, env: RequiredEnv, allowed: StackLibrary[]) {
+export function registerStackTools<Env extends RequiredEnv>(context: McpRegistrationContext<Env>) {
+	const env = context.env
+	const libsParam = new URL(context.request.url).searchParams.get('libs')
+	const allowed = resolveLibraries(libsParam)
+
 	const allowedSlugs = allowed.map((l) => l.slug) as [string, ...string[]]
 	const allowedIds = allowed.map((l) => l.instanceId)
 	const bySlug = new Map(allowed.map((l) => [l.slug, l]))
 	const names = allowed.map((l) => l.name).join(', ')
 
-	server.registerTool(
+	context.registerTool(
 		'list_libraries',
 		{
 			description: `List the tools whose documentation this server can search (${names}), with each one's slug, name, source site, and a short description.
 
 Use it to check whether a tool is covered, or to get the exact \`library\` slug for search_docs. You do not need to call it first: searching without a \`library\` already covers the whole stack.`,
-			inputSchema: {},
-			outputSchema: {
+			inputSchema: z.object({}),
+			outputSchema: z.object({
 				libraries: z.array(
 					z.object({
 						slug: z.string(),
@@ -55,7 +65,7 @@ Use it to check whether a tool is covered, or to get the exact \`library\` slug 
 						description: z.string(),
 					})
 				),
-			},
+			}),
 			annotations: { title: 'List developer-stack libraries', readOnlyHint: true },
 		},
 		async () => {
@@ -74,7 +84,7 @@ Use it to check whether a tool is covered, or to get the exact \`library\` slug 
 		}
 	)
 
-	server.registerTool(
+	context.registerTool(
 		'search_docs',
 		{
 			description: `Search current documentation for the tools in this developer stack (${names}) and get back the most relevant excerpts, each with a source link.
@@ -82,7 +92,7 @@ Use it to check whether a tool is covered, or to get the exact \`library\` slug 
 Reach for this whenever you are answering a question about, or writing code that uses, any of these tools. They change often, so your built-in knowledge of their APIs, configuration, and defaults is frequently out of date. Retrieve the docs instead of relying on memory, and ground the code you generate in what you find.
 
 Cite the returned source URLs in your answer. Searches the whole stack by default; set \`library\` to one slug (from list_libraries) to focus on a single tool.`,
-			inputSchema: {
+			inputSchema: z.object({
 				query: StackSearchQueryParam,
 				library: z
 					.enum(allowedSlugs)
@@ -90,8 +100,8 @@ Cite the returned source URLs in your answer. Searches the whole stack by defaul
 					.describe(
 						'Optional. Restrict the search to a single library by its slug (from list_libraries). Omit to search the whole stack, which is usually best unless you already know the exact tool.'
 					),
-			},
-			outputSchema: {
+			}),
+			outputSchema: z.object({
 				results: z.array(
 					z.object({
 						url: z.string(),
@@ -101,7 +111,7 @@ Cite the returned source URLs in your answer. Searches the whole stack by defaul
 						library: z.string(),
 					})
 				),
-			},
+			}),
 			annotations: { title: 'Search developer-stack docs', readOnlyHint: true },
 		},
 		async ({ query, library }) => {

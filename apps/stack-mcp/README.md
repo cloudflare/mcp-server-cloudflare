@@ -38,11 +38,11 @@ https://stack.mcp.cloudflare.com/mcp?libs=cloudflare,hono,vite
 
 When scoped, `list_libraries` and `search_docs` (including its `library` enum) only expose the selected libraries, and cross-stack search is limited to them. Unknown slugs are ignored, and an empty or all-invalid `libs` falls back to the whole stack.
 
-Scoping applies to the streamable HTTP endpoint (`/mcp`) only. The legacy `/sse` transport always serves the whole stack, so point scoped clients at `/mcp` (the default for current MCP clients).
+Scoping is read from the connection URL on every request, so it applies whether the client connects to `/mcp` or the `/sse` alias.
 
 ## Access the remote MCP server
 
-Point any MCP client that supports remote servers at `https://stack.mcp.cloudflare.com/mcp` (streamable HTTP; `/sse` is also available for legacy clients). For clients without native remote support, use [`mcp-remote`](https://www.npmjs.com/package/mcp-remote).
+Point any MCP client that supports remote servers at `https://stack.mcp.cloudflare.com/mcp` (streamable HTTP; the `/sse` path is served by the same stateless transport for backward compatibility). For clients without native remote support, use [`mcp-remote`](https://www.npmjs.com/package/mcp-remote).
 
 ```json
 {

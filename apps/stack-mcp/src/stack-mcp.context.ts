@@ -1,5 +1,3 @@
-import type { CloudflareDevStackMCP } from './stack-mcp.app'
-
 /**
  * Minimal typings for the AI Search namespace binding (`ai_search_namespaces`).
  * Hand-written so the prototype typechecks regardless of the wrangler version's
@@ -59,7 +57,6 @@ export interface Env {
 	ENVIRONMENT: 'development' | 'staging' | 'production'
 	MCP_SERVER_NAME: string
 	MCP_SERVER_VERSION: string
-	MCP_OBJECT: DurableObjectNamespace<CloudflareDevStackMCP>
 	MCP_METRICS: AnalyticsEngineDataset
 	/** AI Search namespace binding, scoped to the `dev-stack` namespace. */
 	AI_SEARCH: AiSearchNamespace
