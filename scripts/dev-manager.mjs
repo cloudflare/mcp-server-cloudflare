@@ -21,6 +21,7 @@ const pnpmAvailable = spawnSync('pnpm', ['-v'], { stdio: 'ignore' }).status === 
 const pnpmRunner = pnpmAvailable ? ['pnpm', []] : ['corepack', ['pnpm']]
 
 const args = process.argv.slice(2)
+const useMiniflare = args.includes('--miniflare')
 const getArg = (flag) => {
 	const index = args.indexOf(flag)
 	if (index === -1) return null
@@ -284,7 +285,7 @@ async function startApp(app) {
 	const state = states.get(app.name)
 	if (state) states.set(app.name, { ...state, status: 'starting' })
 
-	const commands = createAppProcesses(app, app.port)
+	const commands = createAppProcesses(app, app.port, { useMiniflare })
 	const children = commands.map(([command, commandArgs], index) => spawnProcess(app.name, command, commandArgs, index))
 	appChildren.set(app.name, children)
 }
@@ -352,6 +353,7 @@ await new Promise((resolve, reject) => {
 })
 
 console.log(`Unified dashboard available at ${dashboardUrl}`)
+if (useMiniflare) console.log('Miniflare mode enabled for wrangler-based apps (--local).')
 console.log('Environment status:')
 for (const item of envStatus) {
 	console.log(`- ${item.key}: ${item.configured ? 'configured' : 'missing'}`)

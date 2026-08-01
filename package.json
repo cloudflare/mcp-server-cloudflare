@@ -16,6 +16,7 @@
 		"check:format": "prettier . --check --cache --ignore-unknown",
 		"check:turbo": "run-turbo check",
 		"dev": "node scripts/dev-manager.mjs",
+		"dev:miniflare": "node scripts/dev-manager.mjs --miniflare",
 		"dev:app": "node scripts/dev-manager.mjs --app",
 		"dev:list": "node scripts/dev-manager.mjs --list",
 		"dev:setup": "node scripts/setup-dev-environment.mjs",
