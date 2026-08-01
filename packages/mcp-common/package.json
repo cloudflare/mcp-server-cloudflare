@@ -18,13 +18,12 @@
 		"@repo/mcp-observability": "workspace:*",
 		"agents": "catalog:",
 		"cloudflare": "4.2.0",
-		"hono": "4.7.6",
+		"hono": "4.12.32",
 		"toucan-js": "4.1.1",
 		"zod": "4.4.3"
 	},
 	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "0.16.11",
-		"@repo/eslint-config": "workspace:*",
+		"@cloudflare/vitest-pool-workers": "0.18.6",
 		"@repo/tools": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@sentry/types": "8.9.2",
@@ -32,7 +31,7 @@
 		"@vitest/ui": "4.1.8",
 		"msw": "2.14.6",
 		"vitest": "4.1.8",
-		"wrangler": "4.96.0"
+		"wrangler": "4.118.0"
 	},
 	"type": "module"
 }

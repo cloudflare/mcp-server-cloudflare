@@ -1,26 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-args=(
-  --cache
-  --cache-strategy content
-  --cache-location ./node_modules/.cache/eslint
-  --max-warnings 1000
-  .
-)
+args=(.)
 
-if [[ ! -z "${FIX_ESLINT:-}" ]]; then
+if [[ -n "${FIX_OXLINT:-}" || -n "${FIX_ESLINT:-}" ]]; then
   args+=("--fix")
 fi
 
-if [[ ! -z "${GITHUB_ACTIONS:-}" ]]; then
-  args+=("--max-warnings=0")
-fi
-
-# get additional args
-while [[ $# -gt 0 ]]; do
-  args+=("$1")
-  shift
-done
-
-eslint "${args[@]}"
+oxlint "${args[@]}"
