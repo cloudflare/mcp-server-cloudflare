@@ -180,7 +180,8 @@ export function parseDotEnv(content) {
 	return output
 }
 
-export function createAppProcesses(app, port) {
+export function createAppProcesses(app, port, options = {}) {
+	const useMiniflare = Boolean(options.useMiniflare)
 	const commands = app.multiCommand ?? [app.command]
 	return commands.map((entry, index) => {
 		const [command, args] = entry
@@ -192,6 +193,9 @@ export function createAppProcesses(app, port) {
 				if (index === 1) baseArgs.push('--port', String(port))
 			} else {
 				baseArgs.push('--port', String(port))
+			}
+			if (useMiniflare && baseArgs.includes('wrangler') && baseArgs.includes('dev') && !baseArgs.includes('--local')) {
+				baseArgs.push('--local')
 			}
 		}
 		return [command, baseArgs]

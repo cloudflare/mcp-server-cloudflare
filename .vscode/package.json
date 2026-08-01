@@ -7,7 +7,7 @@
 		"deploy:prod": "pnpm run typecheck && npx wrangler deploy --env production",
 		"deploy:staging": "pnpm run typecheck && npx wrangler deploy --env staging",
 		"dev": "npx wrangler dev",
-		"lint": "eslint .",
+		"lint": "oxlint .",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -29,7 +29,6 @@
 		"workers-observability": "workspace:*"
 	},
 	"devDependencies": {
-		"@repo/eslint-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"typescript": "^5.5.4",
 		"wrangler": "^3.67.1"

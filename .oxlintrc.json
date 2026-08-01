@@ -1,11 +1,11 @@
 {
-	"$schema": "https://json.schemastore.org/oxlintrc.json",
+	"$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
 	"ignorePatterns": [
 		"**/node_modules/**",
 		"**/dist/**",
+		"**/dist2/**",
+		"**/.wrangler/**",
 		"**/coverage/**",
-		"**/.turbo/**",
-		"apps/demo-day/frontend/**",
-		"**/worker-configuration.d.ts"
+		"**/*.d.ts"
 	]
 }

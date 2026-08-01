@@ -1,20 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-args=(
-  --config
-  "$(git rev-parse --show-toplevel)/.oxlintrc.json"
-  .
-)
+args=(.)
 
-if [[ ! -z "${FIX_ESLINT:-}" ]]; then
-  args+=("--fix-suggestions")
+if [[ -n "${FIX_OXLINT:-}" || -n "${FIX_ESLINT:-}" ]]; then
+  args+=("--fix")
 fi
-
-# get additional args
-while [[ $# -gt 0 ]]; do
-  args+=("$1")
-  shift
-done
 
 oxlint "${args[@]}"

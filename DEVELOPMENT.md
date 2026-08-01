@@ -32,6 +32,7 @@ Open `http://127.0.0.1:8780` (or the printed reassigned port) to see:
 ## Root scripts
 
 - `pnpm dev` - start all MCP apps + unified dashboard
+- `pnpm dev:miniflare` - start all MCP apps + dashboard with Miniflare mode for wrangler apps
 - `pnpm dev:list` - list all available apps and default ports
 - `pnpm dev:app <name>` - start one app + dashboard
 - `pnpm dev:setup` - create `.env.development.local` from template
@@ -80,6 +81,7 @@ Common variables across the repo:
 Additional optional flags:
 
 - `DEV_DASHBOARD_PORT` (dashboard port override)
+- `DEV_USE_MINIFLARE` (optional marker to indicate Miniflare test mode in your local env file)
 - `DEV_DISABLE_OAUTH` (local convenience)
 - `ENVIRONMENT` (`dev` by default)
 - `BLOG_BASE_URL`, `SEARCH_BASE_URL` (cloudflare-blog)
@@ -98,6 +100,7 @@ Additional optional flags:
 ## Troubleshooting
 
 - **`pnpm dev` fails immediately with missing binaries**: run `pnpm install` and retry.
+- **need to verify local worker behavior**: run `pnpm dev:miniflare` to force `wrangler dev --local` where applicable.
 - **dashboard is on a different port**: your preferred port was occupied; use the printed URL.
 - **some apps show offline**: check the live log panel; app-specific credentials or APIs may be missing.
 - **Ctrl+C does not stop children**: run Ctrl+C once more; the manager sends SIGTERM to all child processes.

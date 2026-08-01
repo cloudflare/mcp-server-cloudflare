@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { assignPorts, parseDotEnv } from './apps.mjs'
+import { assignPorts, createAppProcesses, parseDotEnv } from './apps.mjs'
 
 describe('assignPorts', () => {
 	it('allocates unique ports and bumps occupied ports', async () => {
@@ -23,5 +23,25 @@ describe('parseDotEnv', () => {
 	it('parses key/value pairs and strips optional quotes', () => {
 		const env = parseDotEnv("A=1\nB='two'\nC=\"three\"\n# ignored\n")
 		assert.deepEqual(env, { A: '1', B: 'two', C: 'three' })
+	})
+})
+
+describe('createAppProcesses', () => {
+	it('adds --local for wrangler dev commands in miniflare mode', () => {
+		const app = {
+			name: 'ai-gateway',
+			command: ['pnpm', ['--dir', 'apps/ai-gateway', 'exec', 'wrangler', 'dev']],
+		}
+		const commands = createAppProcesses(app, 8810, { useMiniflare: true })
+		assert.equal(commands[0][1].includes('--local'), true)
+	})
+
+	it('does not add --local for non-wrangler commands in miniflare mode', () => {
+		const app = {
+			name: 'workers-builds',
+			command: ['pnpm', ['--dir', 'apps/workers-builds', 'dev', '--']],
+		}
+		const commands = createAppProcesses(app, 8811, { useMiniflare: true })
+		assert.equal(commands[0][1].includes('--local'), false)
 	})
 })

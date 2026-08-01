@@ -70,6 +70,32 @@ For example, to use the [Browser Run MCP server](https://github.com/cloudflare/m
 
 We're continuing to add more functionality to this remote MCP server repo. If you'd like to leave feedback, file a bug or provide a feature request, [please open an issue](https://github.com/cloudflare/mcp-server-cloudflare/issues/new/choose) on this repository
 
+## Repository structure
+
+- `apps/`: MCP server applications (one directory per server).
+- `packages/`: shared workspace packages (common runtime, tooling, observability, TypeScript presets).
+
+## Development workflows
+
+From the repository root:
+
+- `pnpm dev` runs Turbo-managed app development tasks.
+- `pnpm build` runs Turbo-managed build tasks.
+- `pnpm deploy` runs Turbo-managed deploy tasks.
+- `pnpm check` runs formatting, dependency consistency checks, lint/type checks, and tests.
+
+Linting and formatting are centralized at the repository root:
+
+- `.oxlintrc.json` for oxlint
+- `.prettierrc.json` for prettier
+
+## Dependency management
+
+This workspace uses `syncpack` for strict version consistency.
+
+- `pnpm check:deps` validates dependency version policy.
+- `pnpm update-deps` updates dependencies while preserving syncpack rules.
+
 ## Troubleshooting
 
 "Claude's response was interrupted ... "
