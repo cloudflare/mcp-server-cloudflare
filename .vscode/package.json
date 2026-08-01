@@ -1,0 +1,37 @@
+{
+	"name": "unified-mcp-server",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"deploy": "pnpm run deploy:prod",
+		"deploy:prod": "pnpm run typecheck && npx wrangler deploy --env production",
+		"deploy:staging": "pnpm run typecheck && npx wrangler deploy --env staging",
+		"dev": "npx wrangler dev",
+		"lint": "eslint .",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@repo/mcp-common": "workspace:*",
+		"ai-gateway": "workspace:*",
+		"auditlogs": "workspace:*",
+		"browser-rendering": "workspace:*",
+		"cloudflare-blog": "workspace:*",
+		"cloudflare-one-casb": "workspace:*",
+		"demo-day": "workspace:*",
+		"dex-analysis": "workspace:*",
+		"dns-analytics": "workspace:*",
+		"docs-ai-search": "workspace:*",
+		"logpush": "workspace:*",
+		"radar": "workspace:*",
+		"sandbox-container": "workspace:*",
+		"workers-bindings": "workspace:*",
+		"workers-builds": "workspace:*",
+		"workers-observability": "workspace:*"
+	},
+	"devDependencies": {
+		"@repo/eslint-config": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
+		"typescript": "^5.5.4",
+		"wrangler": "^3.67.1"
+	}
+}
