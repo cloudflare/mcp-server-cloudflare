@@ -8,6 +8,11 @@
 			"outputs": ["dist"],
 			"outputLogs": "new-only"
 		},
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": ["dist/**"],
+			"outputLogs": "new-only"
+		},
 		"check": {
 			"dependsOn": ["^check:types", "^check:lint", "check:types", "check:lint"],
 			"outputLogs": "new-only"
