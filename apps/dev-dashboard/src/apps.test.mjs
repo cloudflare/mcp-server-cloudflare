@@ -27,6 +27,7 @@ describe('parseDotEnv', () => {
 })
 
 describe('createAppProcesses', () => {
+<<<<<<< HEAD
 	it('uses per-process metadata for port and local wrangler args', () => {
 		const app = {
 			name: 'sandbox-container',
@@ -60,5 +61,23 @@ describe('createAppProcesses', () => {
 			name: 'TypeError',
 			message: 'Unsupported createAppProcesses options: useMiniflare',
 		})
+=======
+	it('adds --local for wrangler dev commands in miniflare mode', () => {
+		const app = {
+			name: 'ai-gateway',
+			command: ['pnpm', ['--dir', 'apps/ai-gateway', 'exec', 'wrangler', 'dev']],
+		}
+		const commands = createAppProcesses(app, 8810, { useMiniflare: true })
+		assert.equal(commands[0][1].includes('--local'), true)
+	})
+
+	it('does not add --local for non-wrangler commands in miniflare mode', () => {
+		const app = {
+			name: 'workers-builds',
+			command: ['pnpm', ['--dir', 'apps/workers-builds', 'dev', '--']],
+		}
+		const commands = createAppProcesses(app, 8811, { useMiniflare: true })
+		assert.equal(commands[0][1].includes('--local'), false)
+>>>>>>> origin/main
 	})
 })
