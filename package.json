@@ -15,9 +15,13 @@
 		"check:deps": "syncpack lint",
 		"check:format": "prettier . --check --cache --ignore-unknown",
 		"check:turbo": "run-turbo check",
+		"dev": "run-turbo dev",
+		"dev:app": "node scripts/dev-manager.mjs --app",
+		"dev:list": "node scripts/dev-manager.mjs --list",
+		"dev:setup": "node scripts/setup-dev-environment.mjs",
 		"deploy": "run-turbo deploy",
 		"deploy:prod": "wrangler deploy --env production",
-		"dev": "run-turbo dev",
+		"build": "run-turbo build",
 		"eval:ci": "run-turbo eval:ci",
 		"eval:dev": "run-turbo eval:dev",
 		"fix:deps": "run-fix-deps",
@@ -33,7 +37,6 @@
 		"typecheck": "run-turbo check:types",
 		"types": "wrangler types",
 		"update-deps": "syncpack update",
-		"build": "run-turbo build",
 		"dev:apps": "run-turbo dev --filter=./apps/*"
 	},
 	"dependencies": {
