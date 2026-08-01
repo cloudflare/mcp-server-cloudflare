@@ -285,11 +285,7 @@ async function startApp(app) {
 	const state = states.get(app.name)
 	if (state) states.set(app.name, { ...state, status: 'starting' })
 
-<<<<<<< HEAD
-	const commands = createAppProcesses(app, app.port, { wranglerDevMode: 'local' })
-=======
-	const commands = createAppProcesses(app, app.port, { useMiniflare })
->>>>>>> origin/main
+	const commands = createAppProcesses(app, app.port, { wranglerDevMode: useMiniflare ? 'local' : 'default' })
 	const children = commands.map(([command, commandArgs], index) => spawnProcess(app.name, command, commandArgs, index))
 	appChildren.set(app.name, children)
 }

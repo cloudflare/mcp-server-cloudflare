@@ -202,7 +202,6 @@ export function parseDotEnv(content) {
 	return output
 }
 
-<<<<<<< HEAD
 function normalizeCreateAppProcessOptions(options = {}) {
 	const { wranglerDevMode = 'default', ...unexpected } = options
 	const unexpectedKeys = Object.keys(unexpected)
@@ -217,15 +216,10 @@ function normalizeCreateAppProcessOptions(options = {}) {
 
 export function createAppProcesses(app, port, options = {}) {
 	const { wranglerDevMode } = normalizeCreateAppProcessOptions(options)
-=======
-export function createAppProcesses(app, port, options = {}) {
-	const useMiniflare = Boolean(options.useMiniflare)
->>>>>>> origin/main
 	const commands = app.multiCommand ?? [app.command]
 	return commands.map((entry, index) => {
 		const [command, args] = entry
 		const baseArgs = [...args]
-<<<<<<< HEAD
 		const processOptions = app.processOptions?.[index] ?? {}
 		if (command === 'pnpm' && processOptions.appendPort) {
 			baseArgs.push('--port', String(port))
@@ -233,19 +227,6 @@ export function createAppProcesses(app, port, options = {}) {
 		}
 		if (processOptions.supportsLocalWranglerDev && wranglerDevMode === 'local') {
 			baseArgs.push('--local')
-=======
-		if (command === 'pnpm') {
-			if (app.name === 'workers-builds') {
-				baseArgs.push('--port', String(port), '--strictPort')
-			} else if (app.name === 'sandbox-container') {
-				if (index === 1) baseArgs.push('--port', String(port))
-			} else {
-				baseArgs.push('--port', String(port))
-			}
-			if (useMiniflare && baseArgs.includes('wrangler') && baseArgs.includes('dev') && !baseArgs.includes('--local')) {
-				baseArgs.push('--local')
-			}
->>>>>>> origin/main
 		}
 		return [command, baseArgs]
 	})
