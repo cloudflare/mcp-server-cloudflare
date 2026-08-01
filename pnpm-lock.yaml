@@ -23,6 +23,7 @@ catalogs:
       version: 0.20.1
 
 overrides:
+  axios: 1.18.0
   '@cloudflare/workers-types': 5.20260730.1
   esbuild: 0.27.3
   oxfmt: 0.31.0
@@ -32,6 +33,7 @@ overrides:
   vitest: 4.1.8
   '@vitest/coverage-istanbul': 4.1.8
   '@vitest/ui': 4.1.8
+  ws: 8.21.0
   '@types/node': 22.15.17
 
 importers:
@@ -90,8 +92,8 @@ importers:
         specifier: 6.0.174
         version: 6.0.174(zod@4.4.3)
       axios:
-        specifier: 1.8.2
-        version: 1.8.2(debug@4.4.3)
+        specifier: 1.18.0
+        version: 1.18.0(debug@4.4.3)
       chalk:
         specifier: 5.3.0
         version: 5.3.0
@@ -126,8 +128,8 @@ importers:
         specifier: 7.14.2
         version: 7.14.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       ws:
-        specifier: ^8.18.1
-        version: 8.20.1
+        specifier: 8.21.0
+        version: 8.21.0
       zod:
         specifier: 4.4.3
         version: 4.4.3
@@ -4258,8 +4260,8 @@ packages:
   aws4fetch@1.0.20:
     resolution: {integrity: sha512-/djoAN709iY65ETD6LKCtyyEI04XIBP5xVvfmNxsEP0uJB5tyaGBztSryRr4HqMStr9R06PisQE7m9zDTXKu6g==}
 
-  axios@1.8.2:
-    resolution: {integrity: sha512-ls4GYBm5aig9vWx8AWDSGLpnpDQRtWAfrjU+EuytuODrFBkqesN2RkOQCBzrA1RQNHw1SmRMSDDDSwzNAYQ6Rg==}
+  axios@1.18.0:
+    resolution: {integrity: sha512-E32NzpYKp++W7XRe52rHiXV2ehxmh3wbdgO7MHeFM+vqxLBYHzt0ElkiImtOBxtOmyp0yoC8C6uESVV84Y2/hw==}
 
   b4a@1.8.1:
     resolution: {integrity: sha512-aiqre1Nr0B/6DgE2N5vwTc+2/oQZ4Wh1t4NznYY4E00y8LCt6NqdRv81so00oo27D8MVKTpUa/MwUUtBLXCoDw==}
@@ -7432,6 +7434,10 @@ packages:
   proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
 
+  proxy-from-env@2.1.0:
+    resolution: {integrity: sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==}
+    engines: {node: '>=10'}
+
   ps-tree@1.2.0:
     resolution: {integrity: sha512-0VnamPPYHl4uaU/nSFeZZpR21QAWRz+sRv4iW9+v/GS/J5U5iZB5BNN6J0RMoOvdx2gWM2+ZFMIm58q24e4UYA==}
     engines: {node: '>= 0.10'}
@@ -8940,30 +8946,6 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  ws@8.18.0:
-    resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
-  ws@8.20.1:
-    resolution: {integrity: sha512-It4dO0K5v//JtTXuPkfEOaI3uUN87iYPnqo/ZzqCoG3g8uhA66QUMs/SrM0YK7/NAu+r4LMh/9dq2A7k+rHs+w==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
   ws@8.21.0:
     resolution: {integrity: sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==}
     engines: {node: '>=10.0.0'}
@@ -9865,7 +9847,7 @@ snapshots:
       '@puppeteer/browsers': 2.2.4
       debug: 4.4.3(supports-color@5.5.0)
       devtools-protocol: 0.0.1299070
-      ws: 8.20.1
+      ws: 8.21.0
     transitivePeerDependencies:
       - bare-abort-controller
       - bare-buffer
@@ -9938,7 +9920,7 @@ snapshots:
       unenv: 2.0.0-rc.15
       vite: 6.3.4(@types/node@22.15.17)(terser@5.49.0)(tsx@4.22.4)(yaml@2.9.0)
       wrangler: 4.96.0(@cloudflare/workers-types@4.20260702.1)
-      ws: 8.18.0
+      ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
       - rollup
@@ -12411,21 +12393,25 @@ snapshots:
 
   aws4fetch@1.0.20: {}
 
-  axios@1.8.2(debug@4.4.0):
+  axios@1.18.0(debug@4.4.0):
     dependencies:
       follow-redirects: 1.16.0(debug@4.4.0)
       form-data: 4.0.6
-      proxy-from-env: 1.1.0
+      https-proxy-agent: 5.0.1
+      proxy-from-env: 2.1.0
     transitivePeerDependencies:
       - debug
+      - supports-color
 
-  axios@1.8.2(debug@4.4.3):
+  axios@1.18.0(debug@4.4.3):
     dependencies:
       follow-redirects: 1.16.0(debug@4.4.3)
       form-data: 4.0.6
-      proxy-from-env: 1.1.0
+      https-proxy-agent: 5.0.1
+      proxy-from-env: 2.1.0
     transitivePeerDependencies:
       - debug
+      - supports-color
 
   b4a@1.8.1: {}
 
@@ -14623,7 +14609,7 @@ snapshots:
       whatwg-encoding: 3.1.1
       whatwg-mimetype: 4.0.0
       whatwg-url: 14.2.0
-      ws: 8.20.1
+      ws: 8.21.0
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -14955,7 +14941,7 @@ snapshots:
       stoppable: 1.1.0
       undici: 5.29.0
       workerd: 1.20250428.0
-      ws: 8.18.0
+      ws: 8.21.0
       youch: 3.3.4
       zod: 3.22.3
     transitivePeerDependencies:
@@ -14968,7 +14954,7 @@ snapshots:
       sharp: 0.34.5
       undici: 7.24.8
       workerd: 1.20260529.1
-      ws: 8.20.1
+      ws: 8.21.0
       youch: 4.1.0-beta.10
     transitivePeerDependencies:
       - bufferutil
@@ -15803,6 +15789,8 @@ snapshots:
       - supports-color
 
   proxy-from-env@1.1.0: {}
+
+  proxy-from-env@2.1.0: {}
 
   ps-tree@1.2.0:
     dependencies:
@@ -17328,13 +17316,14 @@ snapshots:
 
   wait-on@8.0.3(debug@4.4.0):
     dependencies:
-      axios: 1.8.2(debug@4.4.0)
+      axios: 1.18.0(debug@4.4.0)
       joi: 17.13.4
       lodash: 4.18.1
       minimist: 1.2.8
       rxjs: 7.8.2
     transitivePeerDependencies:
       - debug
+      - supports-color
 
   walk-back@5.1.2: {}
 
@@ -17638,10 +17627,6 @@ snapshots:
       strip-ansi: 7.2.0
 
   wrappy@1.0.2: {}
-
-  ws@8.18.0: {}
-
-  ws@8.20.1: {}
 
   ws@8.21.0: {}
 
