@@ -496,6 +496,8 @@ importers:
         specifier: 4.96.0
         version: 4.96.0(@cloudflare/workers-types@4.20260702.1)
 
+  apps/dev-dashboard: {}
+
   apps/dex-analysis:
     dependencies:
       '@repo/mcp-common':
