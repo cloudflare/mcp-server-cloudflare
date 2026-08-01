@@ -284,7 +284,7 @@ async function startApp(app) {
 	const state = states.get(app.name)
 	if (state) states.set(app.name, { ...state, status: 'starting' })
 
-	const commands = createAppProcesses(app, app.port)
+	const commands = createAppProcesses(app, app.port, { wranglerDevMode: 'local' })
 	const children = commands.map(([command, commandArgs], index) => spawnProcess(app.name, command, commandArgs, index))
 	appChildren.set(app.name, children)
 }

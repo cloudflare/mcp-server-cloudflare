@@ -1,5 +1,10 @@
 import net from 'node:net'
 
+const WRANGLER_DEV_PROCESS = {
+	appendPort: true,
+	supportsLocalWranglerDev: true,
+}
+
 export const REQUIRED_ENV_VARS = [
 	'CLOUDFLARE_ACCOUNT_ID',
 	'CLOUDFLARE_API_TOKEN',
@@ -36,6 +41,7 @@ export const APPS = [
 		description: 'Get up-to-date reference information on Cloudflare',
 		features: ['Cloudflare docs search', 'Reference lookups'],
 		command: ['pnpm', ['--dir', 'apps/docs-ai-search', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8801,
 	},
 	{
@@ -43,6 +49,7 @@ export const APPS = [
 		description: 'Build Workers applications with storage, AI, and compute primitives',
 		features: ['Workers bindings guidance', 'Storage + AI primitives'],
 		command: ['pnpm', ['--dir', 'apps/workers-bindings', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8802,
 	},
 	{
@@ -50,14 +57,15 @@ export const APPS = [
 		description: 'Get insights and manage your Cloudflare Workers Builds',
 		features: ['Build history', 'Build status and diagnostics'],
 		command: ['pnpm', ['--dir', 'apps/workers-builds', 'dev', '--']],
+		processOptions: [{ appendPort: true, strictPort: true }],
 		defaultPort: 8803,
-		portFlag: '--port',
 	},
 	{
 		name: 'workers-observability',
 		description: "Debug and inspect your application's logs and analytics",
 		features: ['Logs analytics', 'Application observability'],
 		command: ['pnpm', ['--dir', 'apps/workers-observability', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8804,
 	},
 	{
@@ -68,6 +76,7 @@ export const APPS = [
 			['pnpm', ['--dir', 'apps/sandbox-container', 'exec', 'tsx', 'container/sandbox.container.app.ts']],
 			['pnpm', ['--dir', 'apps/sandbox-container', 'exec', 'wrangler', 'dev', '--var', 'ENVIRONMENT:dev']],
 		],
+		processOptions: [{}, WRANGLER_DEV_PROCESS],
 		defaultPort: 8805,
 	},
 	{
@@ -75,6 +84,7 @@ export const APPS = [
 		description: 'Fetch web pages, convert to markdown, and take screenshots',
 		features: ['Web fetch', 'Screenshots and rendering'],
 		command: ['pnpm', ['--dir', 'apps/browser-rendering', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8806,
 	},
 	{
@@ -82,6 +92,7 @@ export const APPS = [
 		description: 'Get quick summaries for Logpush job health',
 		features: ['Logpush health checks', 'Job summaries'],
 		command: ['pnpm', ['--dir', 'apps/logpush', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8807,
 	},
 	{
@@ -89,6 +100,7 @@ export const APPS = [
 		description: 'Search logs and inspect prompts/responses',
 		features: ['Prompt analytics', 'Gateway usage inspection'],
 		command: ['pnpm', ['--dir', 'apps/ai-gateway', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8808,
 	},
 	{
@@ -96,6 +108,7 @@ export const APPS = [
 		description: 'Search and query account AutoRAG instances',
 		features: ['AutoRAG discovery', 'AutoRAG query tools'],
 		command: ['pnpm', ['--dir', 'apps/autorag', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8809,
 	},
 	{
@@ -103,6 +116,7 @@ export const APPS = [
 		description: 'Query audit logs and generate review reports',
 		features: ['Audit log queries', 'Compliance report support'],
 		command: ['pnpm', ['--dir', 'apps/auditlogs', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8810,
 	},
 	{
@@ -110,6 +124,7 @@ export const APPS = [
 		description: 'Optimize DNS performance and debug setup issues',
 		features: ['DNS analytics', 'Performance diagnostics'],
 		command: ['pnpm', ['--dir', 'apps/dns-analytics', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8811,
 	},
 	{
@@ -117,6 +132,7 @@ export const APPS = [
 		description: 'Insights on critical application user experience',
 		features: ['Digital experience insights', 'Application health trends'],
 		command: ['pnpm', ['--dir', 'apps/dex-analysis', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8812,
 	},
 	{
@@ -124,6 +140,7 @@ export const APPS = [
 		description: 'Identify SaaS security misconfigurations',
 		features: ['CASB posture checks', 'SaaS security insights'],
 		command: ['pnpm', ['--dir', 'apps/cloudflare-one-casb', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8813,
 	},
 	{
@@ -131,6 +148,7 @@ export const APPS = [
 		description: 'Explore Cloudflare Radar internet insights',
 		features: ['Internet trend data', 'Radar analytics'],
 		command: ['pnpm', ['--dir', 'apps/radar', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8814,
 	},
 	{
@@ -138,6 +156,7 @@ export const APPS = [
 		description: 'Search and read Cloudflare Blog posts',
 		features: ['Blog search', 'Article retrieval'],
 		command: ['pnpm', ['--dir', 'apps/cloudflare-blog', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8815,
 	},
 	{
@@ -145,6 +164,7 @@ export const APPS = [
 		description: 'Demonstrate a minimal Cloudflare MCP server',
 		features: ['Minimal MCP example', 'Local demo workflows'],
 		command: ['pnpm', ['--dir', 'apps/demo-day', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8816,
 	},
 	{
@@ -152,6 +172,7 @@ export const APPS = [
 		description: 'Cloudflare GraphQL analytics access',
 		features: ['GraphQL analytics tools', 'Query assistance'],
 		command: ['pnpm', ['--dir', 'apps/graphql', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8817,
 	},
 	{
@@ -159,6 +180,7 @@ export const APPS = [
 		description: 'Unified tool access across Cloudflare product domains',
 		features: ['Unified MCP surface', 'Cross-domain tools'],
 		command: ['pnpm', ['--dir', 'apps/stack-mcp', 'exec', 'wrangler', 'dev']],
+		processOptions: [WRANGLER_DEV_PROCESS],
 		defaultPort: 8818,
 	},
 ]
@@ -180,19 +202,31 @@ export function parseDotEnv(content) {
 	return output
 }
 
-export function createAppProcesses(app, port) {
+function normalizeCreateAppProcessOptions(options = {}) {
+	const { wranglerDevMode = 'default', ...unexpected } = options
+	const unexpectedKeys = Object.keys(unexpected)
+	if (unexpectedKeys.length > 0) {
+		throw new TypeError(`Unsupported createAppProcesses options: ${unexpectedKeys.join(', ')}`)
+	}
+	if (!['default', 'local'].includes(wranglerDevMode)) {
+		throw new TypeError(`Unsupported wranglerDevMode: ${wranglerDevMode}`)
+	}
+	return { wranglerDevMode }
+}
+
+export function createAppProcesses(app, port, options = {}) {
+	const { wranglerDevMode } = normalizeCreateAppProcessOptions(options)
 	const commands = app.multiCommand ?? [app.command]
 	return commands.map((entry, index) => {
 		const [command, args] = entry
 		const baseArgs = [...args]
-		if (command === 'pnpm') {
-			if (app.name === 'workers-builds') {
-				baseArgs.push('--port', String(port), '--strictPort')
-			} else if (app.name === 'sandbox-container') {
-				if (index === 1) baseArgs.push('--port', String(port))
-			} else {
-				baseArgs.push('--port', String(port))
-			}
+		const processOptions = app.processOptions?.[index] ?? {}
+		if (command === 'pnpm' && processOptions.appendPort) {
+			baseArgs.push('--port', String(port))
+			if (processOptions.strictPort) baseArgs.push('--strictPort')
+		}
+		if (processOptions.supportsLocalWranglerDev && wranglerDevMode === 'local') {
+			baseArgs.push('--local')
 		}
 		return [command, baseArgs]
 	})
