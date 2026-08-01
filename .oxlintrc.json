@@ -1,0 +1,11 @@
+{
+	"$schema": "https://json.schemastore.org/oxlintrc.json",
+	"ignorePatterns": [
+		"**/node_modules/**",
+		"**/dist/**",
+		"**/coverage/**",
+		"**/.turbo/**",
+		"apps/demo-day/frontend/**",
+		"**/worker-configuration.d.ts"
+	]
+}

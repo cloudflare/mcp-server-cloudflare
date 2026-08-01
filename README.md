@@ -24,7 +24,7 @@ The following servers are included in this repository:
 | [**DNS Analytics server**](/apps/dns-analytics)                | Optimize DNS performance and debug issues based on current setup                                | `https://dns-analytics.mcp.cloudflare.com/mcp` |
 | [**Digital Experience Monitoring server**](/apps/dex-analysis) | Get quick insight on critical applications for your organization                                | `https://dex.mcp.cloudflare.com/mcp`           |
 | [**Cloudflare One CASB server**](/apps/cloudflare-one-casb)    | Quickly identify any security misconfigurations for SaaS applications to safeguard users & data | `https://casb.mcp.cloudflare.com/mcp`          |
-| **Unified server**                            | Access tools from all domain-specific servers below via a single endpoint                       | `https://unified.mcp.cloudflare.com/mcp`       |
+| **Unified server**                                             | Access tools from all domain-specific servers below via a single endpoint                       | `https://unified.mcp.cloudflare.com/mcp`       |
 | [**Radar server**](/apps/radar)                                | Explore Cloudflare Radar internet insights                                                      | `https://radar.mcp.cloudflare.com/mcp`         |
 | [**Cloudflare Blog server**](/apps/cloudflare-blog)            | Search and read posts from the Cloudflare Blog                                                  | `https://blog.mcp.cloudflare.com/mcp`          |
 | [**Demo Day server**](/apps/demo-day)                          | Demonstrate a minimal Cloudflare MCP server                                                     | `https://demo-day.mcp.cloudflare.com/mcp`      |

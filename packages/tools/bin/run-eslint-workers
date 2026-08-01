@@ -2,19 +2,13 @@
 set -euo pipefail
 
 args=(
-  --cache
-  --cache-strategy content
-  --cache-location ./node_modules/.cache/eslint
-  --max-warnings 1000
+  --config
+  "$(git rev-parse --show-toplevel)/.oxlintrc.json"
   .
 )
 
 if [[ ! -z "${FIX_ESLINT:-}" ]]; then
-  args+=("--fix")
-fi
-
-if [[ ! -z "${GITHUB_ACTIONS:-}" ]]; then
-  args+=("--max-warnings=0")
+  args+=("--fix-suggestions")
 fi
 
 # get additional args
@@ -23,4 +17,4 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-eslint "${args[@]}"
+oxlint "${args[@]}"

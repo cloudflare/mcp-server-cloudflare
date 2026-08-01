@@ -2,6 +2,20 @@
 	"$schema": "https://turbo.build/schema.json",
 	"globalPassThroughEnv": ["FORCE_COLOR", "RUNNER_TEMP"],
 	"tasks": {
+		"dev": {
+			"cache": false,
+			"persistent": true,
+			"dependsOn": ["^dev"]
+		},
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": ["dist/**"],
+			"outputLogs": "new-only"
+		},
+		"test": {
+			"dependsOn": ["^test"],
+			"outputLogs": "new-only"
+		},
 		"deploy": {
 			"cache": false,
 			"env": ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN", "CLOUDFLARE_STAGING_API_TOKEN"],
