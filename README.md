@@ -10,6 +10,7 @@ The following servers are included in this repository:
 
 | Server Name                                                    | Description                                                                                     | Server URL                                     |
 | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------- |
 | [**Documentation server**](/apps/docs-ai-search)               | Get up-to-date reference information on Cloudflare                                              | `https://docs.mcp.cloudflare.com/mcp`          |
 | [**Workers Bindings server**](/apps/workers-bindings)          | Build Workers applications with storage, AI, and compute primitives                             | `https://bindings.mcp.cloudflare.com/mcp`      |
 | [**Workers Builds server**](/apps/workers-builds)              | Get insights and manage your Cloudflare Workers Builds                                          | `https://builds.mcp.cloudflare.com/mcp`        |
@@ -23,6 +24,7 @@ The following servers are included in this repository:
 | [**DNS Analytics server**](/apps/dns-analytics)                | Optimize DNS performance and debug issues based on current setup                                | `https://dns-analytics.mcp.cloudflare.com/mcp` |
 | [**Digital Experience Monitoring server**](/apps/dex-analysis) | Get quick insight on critical applications for your organization                                | `https://dex.mcp.cloudflare.com/mcp`           |
 | [**Cloudflare One CASB server**](/apps/cloudflare-one-casb)    | Quickly identify any security misconfigurations for SaaS applications to safeguard users & data | `https://casb.mcp.cloudflare.com/mcp`          |
+| **Unified server**                                             | Access tools from all domain-specific servers below via a single endpoint                       | `https://unified.mcp.cloudflare.com/mcp`       |
 | [**Radar server**](/apps/radar)                                | Explore Cloudflare Radar internet insights                                                      | `https://radar.mcp.cloudflare.com/mcp`         |
 | [**Cloudflare Blog server**](/apps/cloudflare-blog)            | Search and read posts from the Cloudflare Blog                                                  | `https://blog.mcp.cloudflare.com/mcp`          |
 | [**Demo Day server**](/apps/demo-day)                          | Demonstrate a minimal Cloudflare MCP server                                                     | `https://demo-day.mcp.cloudflare.com/mcp`      |
@@ -67,6 +69,32 @@ For example, to use the [Browser Run MCP server](https://github.com/cloudflare/m
 ## Need access to more Cloudflare tools?
 
 We're continuing to add more functionality to this remote MCP server repo. If you'd like to leave feedback, file a bug or provide a feature request, [please open an issue](https://github.com/cloudflare/mcp-server-cloudflare/issues/new/choose) on this repository
+
+## Repository structure
+
+- `apps/`: MCP server applications (one directory per server).
+- `packages/`: shared workspace packages (common runtime, tooling, observability, TypeScript presets).
+
+## Development workflows
+
+From the repository root:
+
+- `pnpm dev` runs Turbo-managed app development tasks.
+- `pnpm build` runs Turbo-managed build tasks.
+- `pnpm deploy` runs Turbo-managed deploy tasks.
+- `pnpm check` runs formatting, dependency consistency checks, lint/type checks, and tests.
+
+Linting and formatting are centralized at the repository root:
+
+- `.oxlintrc.json` for oxlint
+- `.prettierrc.json` for prettier
+
+## Dependency management
+
+This workspace uses `syncpack` for strict version consistency.
+
+- `pnpm check:deps` validates dependency version policy.
+- `pnpm update-deps` updates dependencies while preserving syncpack rules.
 
 ## Troubleshooting
 

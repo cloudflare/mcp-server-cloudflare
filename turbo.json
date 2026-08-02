@@ -2,8 +2,19 @@
 	"$schema": "https://turbo.build/schema.json",
 	"globalPassThroughEnv": ["FORCE_COLOR", "RUNNER_TEMP"],
 	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": ["dist/**"],
+			"outputLogs": "new-only"
+		},
+		"dev": {
+			"cache": false,
+			"persistent": true,
+			"outputLogs": "new-only"
+		},
 		"deploy": {
 			"cache": false,
+			"dependsOn": ["^deploy"],
 			"env": ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN", "CLOUDFLARE_STAGING_API_TOKEN"],
 			"outputs": ["dist"],
 			"outputLogs": "new-only"
@@ -21,18 +32,18 @@
 			"dependsOn": ["^check:lint"],
 			"outputLogs": "new-only"
 		},
+		"check:format": {
+			"outputLogs": "new-only"
+		},
+		"check:deps": {
+			"outputLogs": "new-only"
+		},
 		"eval:ci": {
 			"dependsOn": ["^eval:ci"],
 			"outputLogs": "new-only"
 		},
 		"types": {
 			"dependsOn": ["^types"],
-			"outputLogs": "new-only"
-		},
-		"//#check:format": {
-			"outputLogs": "new-only"
-		},
-		"//#check:deps": {
 			"outputLogs": "new-only"
 		}
 	}

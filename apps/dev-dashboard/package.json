@@ -1,0 +1,10 @@
+{
+	"name": "dev-dashboard",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "node ../../scripts/dev-manager.mjs",
+		"test": "node --test src/apps.test.mjs"
+	}
+}
