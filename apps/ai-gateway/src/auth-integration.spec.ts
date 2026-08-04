@@ -1,4 +1,4 @@
-import { getOAuthApi } from '@cloudflare/workers-oauth-provider'
+import { getOAuthApi, OAuthProvider } from '@cloudflare/workers-oauth-provider'
 import { env, reset } from 'cloudflare:test'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -82,23 +82,34 @@ function helperOptions(): OAuthProviderOptions<Env> {
 		defaultHandler: { fetch: () => new Response('unused') },
 		authorizeEndpoint: '/oauth/authorize',
 		tokenEndpoint: '/token',
-		allowImplicitFlow: true,
 	}
 }
 
+async function s256Challenge(verifier: string): Promise<string> {
+	const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier))
+	return btoa(String.fromCharCode(...new Uint8Array(digest)))
+		.replace(/\+/g, '-')
+		.replace(/\//g, '_')
+		.replace(/=+$/, '')
+}
+
 async function issueOAuthToken(resource: string) {
-	const helpers = getOAuthApi(helperOptions(), testEnv)
+	const options = helperOptions()
+	const helpers = getOAuthApi(options, testEnv)
 	const client = await helpers.createClient({
 		redirectUris: ['https://client.example.com/callback'],
 		tokenEndpointAuthMethod: 'none',
 	})
+	const codeVerifier = 'a'.repeat(43)
 	const result = await helpers.completeAuthorization({
 		request: {
-			responseType: 'token',
+			responseType: 'code',
 			clientId: client.clientId,
 			redirectUri: client.redirectUris[0],
 			scope: ['account:read', 'aig:read'],
 			state: 'test-state',
+			codeChallenge: await s256Challenge(codeVerifier),
+			codeChallengeMethod: 'S256',
 			resource,
 		},
 		userId: 'oauth-user',
@@ -110,9 +121,31 @@ async function issueOAuthToken(resource: string) {
 			account: { id: 'oauth-account', name: 'OAuth account' },
 		},
 	})
-	const token = new URLSearchParams(new URL(result.redirectTo).hash.slice(1)).get('access_token')
-	if (!token) throw new Error('OAuth helper did not issue an access token')
-	return token
+	const code = new URL(result.redirectTo).searchParams.get('code')
+	if (!code) throw new Error('OAuth helper did not issue an authorization code')
+
+	const provider = new OAuthProvider(options)
+	const tokenResponse = await provider.fetch(
+		new Request('https://ai-gateway.mcp.cloudflare.com/token', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: new URLSearchParams({
+				grant_type: 'authorization_code',
+				code,
+				redirect_uri: client.redirectUris[0],
+				client_id: client.clientId,
+				code_verifier: codeVerifier,
+				resource,
+			}),
+		}),
+		testEnv,
+		executionContext()
+	)
+	const tokenDocument = (await tokenResponse.json()) as { access_token?: string }
+	if (tokenResponse.status !== 200 || !tokenDocument.access_token) {
+		throw new Error(`OAuth token exchange failed: ${tokenResponse.status}`)
+	}
+	return tokenDocument.access_token
 }
 
 afterEach(async () => {
