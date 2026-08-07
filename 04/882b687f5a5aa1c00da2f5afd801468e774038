@@ -1,0 +1,29 @@
+pnpm-lock.yaml
+  s_50912ae13583e1::t_d6c77deea2b224 10-11,74,759,1354-1355,5768
+pnpm-workspace.yaml
+  s_00f89f7f682bec::t_08477192b17e52 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "04882b687f5a5aa1c00da2f5afd801468e774038",
+  "prompts": {},
+  "sessions": {
+    "s_00f89f7f682bec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "30790c37-106d-43ac-8d7d-355007a8d1bc",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_50912ae13583e1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34b1ef83-88de-41df-9b95-c7a4f05fed15",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
