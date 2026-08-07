@@ -1,88 +1,135 @@
+import { ExternalTokenError } from '@cloudflare/workers-oauth-provider'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 
-import { getApiTokenProps, handleApiTokenMode, isApiTokenRequest } from './api-token-mode'
+import {
+	cloudflareTokenOwner,
+	handleDevApiTokenMode,
+	isDevApiTokenRequest,
+	resolveExternalToken,
+} from './api-token-mode'
 import { server } from './test/msw-server'
 
-const env = {
-	DEV_CLOUDFLARE_API_TOKEN: '',
-	DEV_CLOUDFLARE_EMAIL: '',
-	DEV_DISABLE_OAUTH: 'false',
+function kvStub() {
+	const store = new Map<string, string>()
+	return {
+		store,
+		namespace: {
+			async get(key: string) {
+				const value = store.get(key)
+				return value === undefined ? null : JSON.parse(value)
+			},
+			async put(key: string, value: string) {
+				store.set(key, value)
+			},
+		} as unknown as KVNamespace,
+	}
 }
 
-function request(token = 'api-token') {
-	return new Request('https://mcp.example.com/mcp', {
-		headers: { Authorization: `Bearer ${token}` },
-	})
+function resolveInput(token: string, kv: KVNamespace) {
+	return {
+		token,
+		request: new Request('https://mcp.example.com/mcp'),
+		env: { OAUTH_KV: kv },
+	}
 }
 
 function mockCloudflareIdentity() {
+	const calls = { user: 0, accounts: 0 }
 	server.use(
-		http.get('https://api.cloudflare.com/client/v4/user', () =>
-			HttpResponse.json({
+		http.get('https://api.cloudflare.com/client/v4/user', () => {
+			calls.user += 1
+			return HttpResponse.json({
 				success: true,
 				result: { id: 'user-1', email: 'user@example.com' },
 				errors: [],
 				messages: [],
 			})
-		),
-		http.get('https://api.cloudflare.com/client/v4/accounts', () =>
-			HttpResponse.json({
+		}),
+		http.get('https://api.cloudflare.com/client/v4/accounts', () => {
+			calls.accounts += 1
+			return HttpResponse.json({
 				success: true,
 				result: [{ id: 'account-1', name: 'Account One' }],
 				errors: [],
 				messages: [],
 			})
-		)
+		})
 	)
+	return calls
 }
 
-describe('API-token request scope', () => {
-	it('distinguishes Cloudflare bearer credentials from MCP provider tokens', async () => {
-		expect(await isApiTokenRequest(request('cfut_test-user-token'), env)).toBe(true)
-		expect(await isApiTokenRequest(request('cfat_test-account-token'), env)).toBe(true)
-		expect(await isApiTokenRequest(request('cfoat_test-wrangler-token'), env)).toBe(true)
-		expect(await isApiTokenRequest(request('a'.repeat(40)), env)).toBe(true)
-		expect(await isApiTokenRequest(request('legacy-unknown-shape'), env)).toBe(true)
-		expect(await isApiTokenRequest(request('user:grant:secret'), env)).toBe(false)
+describe('cloudflareTokenOwner', () => {
+	it('reads documented credential ownership prefixes as hints', () => {
+		expect(cloudflareTokenOwner('cfat_test-account-token')).toBe('account')
+		expect(cloudflareTokenOwner('cfut_test-user-token')).toBe('user')
+		expect(cloudflareTokenOwner('cfoat_test-wrangler-token')).toBe('user')
+		expect(cloudflareTokenOwner('legacy-unknown-shape')).toBe('unknown')
 	})
+})
 
+describe('resolveExternalToken', () => {
 	it('validates the token into the shared AuthProps shape', async () => {
 		mockCloudflareIdentity()
-		expect(await getApiTokenProps(request(), env)).toEqual({
-			type: 'user_token',
-			accessToken: 'api-token',
-			user: { id: 'user-1', email: 'user@example.com' },
-			accounts: [{ id: 'account-1', name: 'Account One' }],
+		await expect(
+			resolveExternalToken(resolveInput('api-token', kvStub().namespace))
+		).resolves.toEqual({
+			props: {
+				type: 'user_token',
+				accessToken: 'api-token',
+				user: { id: 'user-1', email: 'user@example.com' },
+				accounts: [{ id: 'account-1', name: 'Account One' }],
+			},
 		})
+	})
+
+	it('caches a verified identity so repeat requests skip the probes', async () => {
+		const calls = mockCloudflareIdentity()
+		const kv = kvStub()
+
+		const first = await resolveExternalToken(resolveInput('secret-credential', kv.namespace))
+		const second = await resolveExternalToken(resolveInput('secret-credential', kv.namespace))
+
+		expect(second).toEqual(first)
+		expect(calls).toEqual({ user: 1, accounts: 1 })
+		expect(kv.store.size).toBe(1)
+		const [cacheKey] = [...kv.store.keys()]
+		expect(cacheKey).toMatch(/^api-token-identity:v1:[0-9a-f]{64}$/)
+		expect(cacheKey).not.toContain('secret-credential')
+	})
+
+	it('ignores a cache entry that does not match the expected shape', async () => {
+		const calls = mockCloudflareIdentity()
+		const kv = kvStub()
+
+		await resolveExternalToken(resolveInput('api-token', kv.namespace))
+		const [cacheKey] = [...kv.store.keys()]
+		kv.store.set(cacheKey, JSON.stringify({ unexpected: true }))
+
+		await expect(resolveExternalToken(resolveInput('api-token', kv.namespace))).resolves.toEqual({
+			props: {
+				type: 'user_token',
+				accessToken: 'api-token',
+				user: { id: 'user-1', email: 'user@example.com' },
+				accounts: [{ id: 'account-1', name: 'Account One' }],
+			},
+		})
+		expect(calls).toEqual({ user: 2, accounts: 2 })
 	})
 
 	it('uses only the accounts probe for a prefixed account token', async () => {
-		let userCalls = 0
-		let accountsCalls = 0
-		server.use(
-			http.get('https://api.cloudflare.com/client/v4/user', () => {
-				userCalls += 1
-				return HttpResponse.json({ success: false }, { status: 500 })
-			}),
-			http.get('https://api.cloudflare.com/client/v4/accounts', () => {
-				accountsCalls += 1
-				return HttpResponse.json({
-					success: true,
-					result: [{ id: 'account-1', name: 'Account One' }],
-					errors: [],
-					messages: [],
-				})
-			})
-		)
+		const calls = mockCloudflareIdentity()
 
-		await expect(getApiTokenProps(request('cfat_test-account-token'), env)).resolves.toEqual({
-			type: 'account_token',
-			accessToken: 'cfat_test-account-token',
-			account: { id: 'account-1', name: 'Account One' },
+		await expect(
+			resolveExternalToken(resolveInput('cfat_test-account-token', kvStub().namespace))
+		).resolves.toEqual({
+			props: {
+				type: 'account_token',
+				accessToken: 'cfat_test-account-token',
+				account: { id: 'account-1', name: 'Account One' },
+			},
 		})
-		expect(userCalls).toBe(0)
-		expect(accountsCalls).toBe(1)
+		expect(calls).toEqual({ user: 0, accounts: 1 })
 	})
 
 	it('rejects a prefixed account token that does not resolve to exactly one account', async () => {
@@ -100,40 +147,96 @@ describe('API-token request scope', () => {
 			)
 		)
 
-		await expect(getApiTokenProps(request('cfat_test-account-token'), env)).rejects.toMatchObject({
-			code: 401,
+		await expect(
+			resolveExternalToken(resolveInput('cfat_test-account-token', kvStub().namespace))
+		).rejects.toMatchObject({
+			name: 'ExternalTokenError',
+			code: 'invalid_token',
+			statusCode: 401,
 		})
 	})
 
-	it('keeps both identity probes for user, Wrangler OAuth, and legacy tokens', async () => {
-		let userCalls = 0
-		let accountsCalls = 0
+	it('preserves Retry-After when an identity probe is rate limited', async () => {
 		server.use(
-			http.get('https://api.cloudflare.com/client/v4/user', () => {
-				userCalls += 1
-				return HttpResponse.json({
-					success: true,
-					result: { id: 'user-1', email: 'user@example.com' },
-					errors: [],
-					messages: [],
-				})
-			}),
-			http.get('https://api.cloudflare.com/client/v4/accounts', () => {
-				accountsCalls += 1
-				return HttpResponse.json({
+			http.get('https://api.cloudflare.com/client/v4/user', () =>
+				HttpResponse.json({ success: false }, { status: 429, headers: { 'Retry-After': '17' } })
+			),
+			http.get('https://api.cloudflare.com/client/v4/accounts', () =>
+				HttpResponse.json({
 					success: true,
 					result: [{ id: 'account-1', name: 'Account One' }],
 					errors: [],
 					messages: [],
 				})
-			})
+			)
 		)
 
-		await getApiTokenProps(request('cfut_test-user-token'), env)
-		await getApiTokenProps(request('cfoat_test-wrangler-token'), env)
-		await getApiTokenProps(request('l'.repeat(40)), env)
-		expect(userCalls).toBe(3)
-		expect(accountsCalls).toBe(3)
+		await expect(
+			resolveExternalToken(resolveInput('cfoat_test-wrangler-token', kvStub().namespace))
+		).rejects.toMatchObject({
+			code: 'temporarily_unavailable',
+			statusCode: 429,
+			headers: { 'Retry-After': '17' },
+		})
+	})
+
+	it('maps malformed-token 400s to a structured invalid_token error', async () => {
+		server.use(
+			http.get('https://api.cloudflare.com/client/v4/user', () =>
+				HttpResponse.json({ success: false }, { status: 400 })
+			),
+			http.get('https://api.cloudflare.com/client/v4/accounts', () =>
+				HttpResponse.json({ success: false }, { status: 400 })
+			)
+		)
+
+		const rejection = await resolveExternalToken(
+			resolveInput('malformed-token', kvStub().namespace)
+		).then(
+			() => {
+				throw new Error('expected resolveExternalToken to reject')
+			},
+			(error: unknown) => error
+		)
+		expect(rejection).toBeInstanceOf(ExternalTokenError)
+		expect(rejection).toMatchObject({
+			code: 'invalid_token',
+			statusCode: 401,
+			description: 'Access token appears malformed; reauthenticate and try again',
+		})
+	})
+
+	it('maps insufficient permissions to insufficient_scope with step-up guidance', async () => {
+		server.use(
+			http.get('https://api.cloudflare.com/client/v4/user', () =>
+				HttpResponse.json({ success: false }, { status: 403 })
+			),
+			http.get('https://api.cloudflare.com/client/v4/accounts', () =>
+				HttpResponse.json({ success: false }, { status: 403 })
+			)
+		)
+
+		await expect(
+			resolveExternalToken(resolveInput('l'.repeat(40), kvStub().namespace))
+		).rejects.toMatchObject({
+			code: 'insufficient_scope',
+			statusCode: 403,
+			requiredScopes: ['user:read', 'account:read'],
+		})
+	})
+})
+
+describe('local development API-token mode', () => {
+	const devEnv = {
+		DEV_CLOUDFLARE_API_TOKEN: 'dev-token',
+		DEV_CLOUDFLARE_EMAIL: 'dev@example.com',
+		DEV_DISABLE_OAUTH: 'true',
+	}
+
+	it('activates only when a token is configured and OAuth is disabled', () => {
+		expect(isDevApiTokenRequest(devEnv)).toBe(true)
+		expect(isDevApiTokenRequest({ ...devEnv, DEV_DISABLE_OAUTH: 'false' })).toBe(false)
+		expect(isDevApiTokenRequest({ ...devEnv, DEV_CLOUDFLARE_API_TOKEN: '' })).toBe(false)
 	})
 
 	it('sets props only on the request ExecutionContext passed to the stateless handler', async () => {
@@ -145,15 +248,20 @@ describe('API-token request scope', () => {
 		} as ExecutionContext
 		let seenProps: unknown
 		const handler = {
-			fetch(_request: Request, _env: typeof env, requestCtx: ExecutionContext) {
+			fetch(_request: Request, _env: typeof devEnv, requestCtx: ExecutionContext) {
 				seenProps = requestCtx.props
 				return new Response('ok')
 			},
 		}
 
-		const response = await handleApiTokenMode(handler, request(), env, ctx)
+		const response = await handleDevApiTokenMode(
+			handler,
+			new Request('https://localhost/mcp'),
+			devEnv,
+			ctx
+		)
 		expect(await response.text()).toBe('ok')
-		expect(seenProps).toMatchObject({ type: 'user_token', accessToken: 'api-token' })
+		expect(seenProps).toMatchObject({ type: 'user_token', accessToken: 'dev-token' })
 		expect(ctx.props).toBe(seenProps)
 	})
 })

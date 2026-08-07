@@ -19,11 +19,23 @@ const mcpRequestPolicy = {
 	allowedHostnames: ['mcp.example.com'],
 	allowedOriginHostnames: ['mcp.example.com'],
 }
-const env = {
-	DEV_CLOUDFLARE_API_TOKEN: '',
-	DEV_CLOUDFLARE_EMAIL: '',
-	DEV_DISABLE_OAUTH: 'false',
-} as CloudflareOAuthEnv
+function testEnv() {
+	const store = new Map<string, string>()
+	return {
+		DEV_CLOUDFLARE_API_TOKEN: '',
+		DEV_CLOUDFLARE_EMAIL: '',
+		DEV_DISABLE_OAUTH: 'false',
+		OAUTH_KV: {
+			async get(key: string) {
+				const value = store.get(key)
+				return value === undefined ? null : JSON.parse(value)
+			},
+			async put(key: string, value: string) {
+				store.set(key, value)
+			},
+		} as unknown as KVNamespace,
+	} as CloudflareOAuthEnv
+}
 const executionContext = {
 	props: {},
 	waitUntil() {},
@@ -80,7 +92,7 @@ describe('OAuth router resource policy', () => {
 					Host: 'mcp.example.com',
 				},
 			}),
-			env,
+			testEnv(),
 			executionContext
 		)
 
@@ -115,7 +127,7 @@ describe('OAuth router resource policy', () => {
 					Host: 'mcp.example.com',
 				},
 			}),
-			env,
+			testEnv(),
 			executionContext
 		)
 

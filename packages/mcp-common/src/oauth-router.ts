@@ -4,7 +4,7 @@ import {
 	originValidationResponse,
 } from '@modelcontextprotocol/server'
 
-import { handleApiTokenMode, isApiTokenRequest } from './api-token-mode'
+import { handleDevApiTokenMode, isDevApiTokenRequest, resolveExternalToken } from './api-token-mode'
 import { createAuthHandlers, handleTokenExchangeCallback } from './cloudflare-oauth-handler'
 
 import type { OAuthProviderOptions } from '@cloudflare/workers-oauth-provider'
@@ -12,6 +12,7 @@ import type { MetricsTracker } from '@repo/mcp-observability'
 import type { RequestHandler } from './api-token-mode'
 
 export interface CloudflareOAuthEnv extends Cloudflare.Env {
+	OAUTH_KV: KVNamespace
 	CLOUDFLARE_CLIENT_ID: string
 	CLOUDFLARE_CLIENT_SECRET: string
 	DEV_CLOUDFLARE_API_TOKEN: string
@@ -39,6 +40,7 @@ export interface CreateCloudflareOAuthRouterOptions<Env extends CloudflareOAuthE
 		| 'authorizeEndpoint'
 		| 'tokenEndpoint'
 		| 'tokenExchangeCallback'
+		| 'resolveExternalToken'
 		| 'resourceMatchOriginOnly'
 	>
 }
@@ -82,8 +84,8 @@ export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 				if (request.method === 'OPTIONS') return apiHandler.fetch(request, env, ctx)
 			}
 
-			if (await isApiTokenRequest(request, env)) {
-				return handleApiTokenMode(apiHandler, request, env, ctx)
+			if (isDevApiTokenRequest(env)) {
+				return handleDevApiTokenMode(apiHandler, request, env, ctx)
 			}
 
 			return new OAuthProvider<Env>({
@@ -96,6 +98,9 @@ export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 				defaultHandler,
 				authorizeEndpoint: '/oauth/authorize',
 				tokenEndpoint: '/token',
+				// The provider resolves its own access tokens first, then delegates
+				// direct Cloudflare API/OAuth credentials to resolveExternalToken.
+				resolveExternalToken,
 				tokenExchangeCallback: (options) =>
 					handleTokenExchangeCallback(
 						options,

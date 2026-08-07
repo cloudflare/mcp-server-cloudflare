@@ -1,13 +1,23 @@
-import { GrantType, OAuthError as ProviderOAuthError } from '@cloudflare/workers-oauth-provider'
+import {
+	AuthorizationError,
+	CimdFetchError,
+	GrantType,
+	OAuthError as ProviderOAuthError,
+} from '@cloudflare/workers-oauth-provider'
 import { http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { refreshAuthToken } from './cloudflare-auth'
-import { getUserAndAccounts, handleTokenExchangeCallback } from './cloudflare-oauth-handler'
+import {
+	createAuthHandlers,
+	getUserAndAccounts,
+	handleTokenExchangeCallback,
+} from './cloudflare-oauth-handler'
 import { McpError } from './mcp-error'
 import { server } from './test/msw-server'
 
-import type { TokenExchangeCallbackOptions } from '@cloudflare/workers-oauth-provider'
+import type { OAuthHelpers, TokenExchangeCallbackOptions } from '@cloudflare/workers-oauth-provider'
+import type { MetricsTracker } from '@repo/mcp-observability'
 
 // Mock the refreshAuthToken function
 vi.mock('./cloudflare-auth', () => ({
@@ -543,5 +553,93 @@ describe('getUserAndAccounts', () => {
 				expect(err.reportToSentry).toBe(false)
 			}
 		})
+	})
+})
+
+describe('createAuthHandlers authorize route', () => {
+	const metrics = { logEvent() {} } as unknown as MetricsTracker
+	const executionCtx = {
+		props: {},
+		waitUntil() {},
+		passThroughOnException() {},
+	} as ExecutionContext
+
+	function authorizeEnv(oauthProvider: Partial<OAuthHelpers>) {
+		return {
+			OAUTH_PROVIDER: oauthProvider as OAuthHelpers,
+			OAUTH_KV: undefined as unknown as KVNamespace,
+			MCP_COOKIE_ENCRYPTION_KEY: 'test-key',
+			CLOUDFLARE_CLIENT_ID: 'client',
+			CLOUDFLARE_CLIENT_SECRET: 'secret',
+		}
+	}
+
+	it('redirects expected authorization failures to the validated client redirect URI', async () => {
+		const app = createAuthHandlers({ scopes: {}, metrics })
+		const response = await app.fetch(
+			new Request('https://mcp.example.com/oauth/authorize?client_id=abc'),
+			authorizeEnv({
+				parseAuthRequest() {
+					throw new AuthorizationError('invalid_scope', {
+						description: 'Requested scope is not registered',
+						redirectUri: 'https://client.example.com/callback',
+						state: 'client-state',
+						issuer: 'https://mcp.example.com',
+					})
+				},
+			}),
+			executionCtx
+		)
+
+		expect(response.status).toBe(302)
+		const location = new URL(response.headers.get('location') ?? '')
+		expect(`${location.origin}${location.pathname}`).toBe('https://client.example.com/callback')
+		expect(location.searchParams.get('error')).toBe('invalid_scope')
+		expect(location.searchParams.get('error_description')).toBe('Requested scope is not registered')
+		expect(location.searchParams.get('state')).toBe('client-state')
+		expect(location.searchParams.get('iss')).toBe('https://mcp.example.com')
+		expect(response.headers.get('cache-control')).toBe('no-store')
+	})
+
+	it('renders locally when the failure precedes redirect URI validation', async () => {
+		const app = createAuthHandlers({ scopes: {}, metrics })
+		const response = await app.fetch(
+			new Request('https://mcp.example.com/oauth/authorize'),
+			authorizeEnv({
+				parseAuthRequest() {
+					throw new AuthorizationError('invalid_request', {
+						description: 'client_id is required',
+					})
+				},
+			}),
+			executionCtx
+		)
+
+		expect(response.status).toBe(400)
+		await expect(response.json()).resolves.toEqual({
+			error: 'invalid_request',
+			error_description: 'client_id is required',
+		})
+	})
+
+	it('returns a retryable 503 when client metadata resolution fails', async () => {
+		const clientId = 'https://client.example.com/metadata.json'
+		const app = createAuthHandlers({ scopes: {}, metrics })
+		const response = await app.fetch(
+			new Request(`https://mcp.example.com/oauth/authorize?client_id=${clientId}`),
+			authorizeEnv({
+				async parseAuthRequest() {
+					return { clientId } as Awaited<ReturnType<OAuthHelpers['parseAuthRequest']>>
+				},
+				async lookupClient() {
+					throw new CimdFetchError(clientId, new Error('HTTP 403'))
+				},
+			}),
+			executionCtx
+		)
+
+		expect(response.status).toBe(503)
+		expect(response.headers.get('retry-after')).toBe('30')
+		await expect(response.json()).resolves.toMatchObject({ error: 'temporarily_unavailable' })
 	})
 })

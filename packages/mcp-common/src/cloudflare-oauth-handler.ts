@@ -1,4 +1,9 @@
-import { GrantType, OAuthError as ProviderOAuthError } from '@cloudflare/workers-oauth-provider'
+import {
+	AuthorizationError,
+	CimdFetchError,
+	GrantType,
+	OAuthError as ProviderOAuthError,
+} from '@cloudflare/workers-oauth-provider'
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
@@ -446,12 +451,29 @@ export function createAuthHandlers({
 	 */
 	app.get(`/oauth/authorize`, async (c) => {
 		try {
-			const oauthReqInfo = await c.env.OAUTH_PROVIDER.parseAuthRequest(c.req.raw)
-			oauthReqInfo.scope = Object.keys(scopes)
-
-			if (!oauthReqInfo.clientId) {
-				return new OAuthError('invalid_request', 'Missing client_id parameter', 400).toResponse()
+			let oauthReqInfo: AuthRequest
+			try {
+				oauthReqInfo = await c.env.OAUTH_PROVIDER.parseAuthRequest(c.req.raw)
+			} catch (e) {
+				// Expected request-validation failures: redirect when the provider has
+				// already validated the client's redirect URI, render locally otherwise.
+				if (e instanceof AuthorizationError) {
+					if (!e.redirectUri) {
+						return new OAuthError(e.code, e.description, 400).toResponse()
+					}
+					const redirect = new URL(e.redirectUri)
+					redirect.searchParams.set('error', e.code)
+					redirect.searchParams.set('error_description', e.description)
+					if (e.state) redirect.searchParams.set('state', e.state)
+					if (e.issuer) redirect.searchParams.set('iss', e.issuer)
+					return new Response(null, {
+						status: 302,
+						headers: { Location: redirect.href, 'Cache-Control': 'no-store' },
+					})
+				}
+				throw e
 			}
+			oauthReqInfo.scope = Object.keys(scopes)
 
 			// Check if client was previously approved (skip consent if so)
 			if (
@@ -506,6 +528,14 @@ export function createAuthHandlers({
 					errorMessage: `Authorize Error: ${message}`,
 				})
 			)
+			if (e instanceof CimdFetchError) {
+				return new OAuthError(
+					'temporarily_unavailable',
+					'Client metadata is temporarily unavailable. Please try again.',
+					503,
+					{ 'Retry-After': '30' }
+				).toResponse()
+			}
 			if (e instanceof OAuthError) {
 				return e.toResponse()
 			}
