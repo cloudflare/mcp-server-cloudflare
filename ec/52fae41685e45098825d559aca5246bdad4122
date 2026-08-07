@@ -1,0 +1,23 @@
+packages/mcp-common/src/api-token-mode.spec.ts
+  s_50912ae13583e1::t_2662ca7ab70413 7,237-239
+packages/mcp-common/src/api-token-mode.ts
+  s_50912ae13583e1::t_f4df9a88891ecd 144
+packages/mcp-common/src/oauth-router.ts
+  s_50912ae13583e1::t_20ac2de6b8c1fc 7-11,91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "ec52fae41685e45098825d559aca5246bdad4122",
+  "prompts": {},
+  "sessions": {
+    "s_50912ae13583e1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34b1ef83-88de-41df-9b95-c7a4f05fed15",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
