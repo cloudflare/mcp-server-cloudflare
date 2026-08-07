@@ -146,11 +146,23 @@ function throwCombinedApiError(userResponse: Response, accountsResponse: Respons
 
 export type CloudflareTokenOwner = 'account' | 'unknown' | 'user'
 
+export interface VerifiedIdentity {
+	user: UserSchema | null
+	accounts: AccountsSchema
+	/**
+	 * True when an ok-status probe returned an unparseable payload and the
+	 * identity was filled in with less information than the credential has.
+	 * Degraded identities may serve the current request but must never be
+	 * cached: they would pin the data loss until the cache entry expires.
+	 */
+	degraded: boolean
+}
+
 export async function getUserAndAccounts(
 	accessToken: string,
 	devModeHeaders?: HeadersInit,
 	tokenOwner: CloudflareTokenOwner = 'unknown'
-): Promise<{ user: UserSchema | null; accounts: AccountsSchema }> {
+): Promise<VerifiedIdentity> {
 	const headers = devModeHeaders
 		? devModeHeaders
 		: {
@@ -203,6 +215,7 @@ export async function getUserAndAccounts(
 	}
 
 	// Parse accounts with safeParse for graceful degradation
+	let degraded = false
 	let accounts: AccountsSchema = []
 	if (accountsResponse.ok) {
 		try {
@@ -211,9 +224,11 @@ export async function getUserAndAccounts(
 			if (parsed.success) {
 				accounts = parsed.data.result ?? []
 			} else {
+				degraded = true
 				console.error('Cloudflare API /accounts payload did not match expected shape', parsed.error)
 			}
 		} catch (error) {
+			degraded = true
 			console.error('Cloudflare API /accounts response is not valid JSON', error)
 		}
 	} else if (userResponse?.ok) {
@@ -233,7 +248,7 @@ export async function getUserAndAccounts(
 	}
 
 	if (userResponse === undefined) {
-		if (accounts.length === 1) return { user: null, accounts }
+		if (accounts.length === 1) return { user: null, accounts, degraded }
 		throw new McpError('Account token must resolve to exactly one Cloudflare account', 401, {
 			reportToSentry: false,
 			internalMessage: `accounts=${accountsResponse.status}, count=${accounts.length}`,
@@ -249,15 +264,17 @@ export async function getUserAndAccounts(
 			if (parsed.success) {
 				user = parsed.data.result ?? null
 			} else {
+				degraded = true
 				console.error('Cloudflare API /user payload did not match expected shape', parsed.error)
 			}
 		} catch (error) {
+			degraded = true
 			console.error('Cloudflare API /user response is not valid JSON', error)
 		}
 	} else if (accounts.length > 0 && tokenOwner === 'unknown' && userResponse.status < 429) {
 		// Only legacy credentials need response-based account-token inference.
 		// Transient failures must never change the inferred credential owner.
-		return { user: null, accounts }
+		return { user: null, accounts, degraded }
 	} else {
 		throwIdentityProbeError(
 			[userResponse.status],
@@ -267,12 +284,12 @@ export async function getUserAndAccounts(
 	}
 
 	if (user) {
-		return { user, accounts }
+		return { user, accounts, degraded }
 	}
 
 	// Only legacy unprefixed tokens need response-based account-token inference.
 	if (accounts.length > 0 && tokenOwner === 'unknown') {
-		return { user: null, accounts }
+		return { user: null, accounts, degraded }
 	}
 
 	throw new McpError('Failed to verify token: no user or account information', 401, {
@@ -689,6 +706,12 @@ export function createAuthHandlers({
 					errorMessage: `Callback Error: ${message}`,
 				})
 			)
+			// completeAuthorization revalidates the reconstructed request; grants
+			// started under an older provider version can fail here as expected
+			// client errors rather than server faults.
+			if (e instanceof AuthorizationError) {
+				return new OAuthError(e.code, e.description, 400).toResponse()
+			}
 			if (e instanceof OAuthError) {
 				return e.toResponse()
 			}

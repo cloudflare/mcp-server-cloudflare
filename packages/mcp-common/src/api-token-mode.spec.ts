@@ -264,4 +264,105 @@ describe('local development API-token mode', () => {
 		expect(seenProps).toMatchObject({ type: 'user_token', accessToken: 'dev-token' })
 		expect(ctx.props).toBe(seenProps)
 	})
+
+	it('returns a structured error instead of throwing when the dev token is rejected', async () => {
+		server.use(
+			http.get('https://api.cloudflare.com/client/v4/user', () =>
+				HttpResponse.json({ success: false }, { status: 401 })
+			),
+			http.get('https://api.cloudflare.com/client/v4/accounts', () =>
+				HttpResponse.json({ success: false }, { status: 401 })
+			)
+		)
+		const ctx = {
+			props: {},
+			waitUntil() {},
+			passThroughOnException() {},
+		} as ExecutionContext
+		const handler = {
+			fetch() {
+				return new Response('ok')
+			},
+		}
+
+		const response = await handleDevApiTokenMode(
+			handler,
+			new Request('https://localhost/mcp'),
+			devEnv,
+			ctx
+		)
+		expect(response.status).toBe(401)
+		await expect(response.json()).resolves.toEqual({
+			error: 'invalid_token',
+			error_description: 'Access token is invalid or expired',
+		})
+	})
+})
+
+describe('identity cache safety', () => {
+	it('never caches a failed verification and re-probes after recovery', async () => {
+		const kv = kvStub()
+		server.use(
+			http.get('https://api.cloudflare.com/client/v4/user', () =>
+				HttpResponse.json({ success: false }, { status: 401 })
+			),
+			http.get('https://api.cloudflare.com/client/v4/accounts', () =>
+				HttpResponse.json({ success: false }, { status: 401 })
+			)
+		)
+
+		await expect(
+			resolveExternalToken(resolveInput('cfut_recovering-token', kv.namespace))
+		).rejects.toMatchObject({ code: 'invalid_token' })
+		expect(kv.store.size).toBe(0)
+
+		const calls = mockCloudflareIdentity()
+		await expect(
+			resolveExternalToken(resolveInput('cfut_recovering-token', kv.namespace))
+		).resolves.toMatchObject({ props: { type: 'user_token' } })
+		expect(calls).toEqual({ user: 1, accounts: 1 })
+		expect(kv.store.size).toBe(1)
+	})
+
+	it('serves but never caches an identity degraded by an unparseable payload', async () => {
+		const kv = kvStub()
+		server.use(
+			http.get('https://api.cloudflare.com/client/v4/user', () =>
+				HttpResponse.json({
+					success: true,
+					result: { id: 'user-1', email: 'user@example.com' },
+					errors: [],
+					messages: [],
+				})
+			),
+			http.get('https://api.cloudflare.com/client/v4/accounts', () => HttpResponse.text('not json'))
+		)
+
+		await expect(resolveExternalToken(resolveInput('api-token', kv.namespace))).resolves.toEqual({
+			props: {
+				type: 'user_token',
+				accessToken: 'api-token',
+				user: { id: 'user-1', email: 'user@example.com' },
+				accounts: [],
+			},
+		})
+		expect(kv.store.size).toBe(0)
+	})
+
+	it('verifies the credential even when the cache itself is unavailable', async () => {
+		const calls = mockCloudflareIdentity()
+		const brokenKv = {
+			async get() {
+				throw new Error('KV read outage')
+			},
+			async put() {
+				throw new Error('KV write outage')
+			},
+		} as unknown as KVNamespace
+
+		await expect(resolveExternalToken(resolveInput('api-token', brokenKv))).resolves.toMatchObject({
+			props: { type: 'user_token' },
+		})
+		expect(calls).toEqual({ user: 1, accounts: 1 })
+	})
 })

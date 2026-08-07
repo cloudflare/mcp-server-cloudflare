@@ -63,7 +63,7 @@ export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 }: CreateCloudflareOAuthRouterOptions<Env>): RequestHandler<Env> {
 	if (provider && 'resourceMatchOriginOnly' in provider) {
 		throw new TypeError(
-			'resourceMatchOriginOnly is no longer supported; OAuth resources must match exactly'
+			'resourceMatchOriginOnly is deprecated and not supported here; OAuth resources must match exactly'
 		)
 	}
 	const defaultHandler = createAuthHandlers({ scopes, metrics })

@@ -69,14 +69,19 @@ async function getCachedIdentity(
 		console.warn('API-token identity cache read failed', error)
 	}
 
-	const identity = await getUserAndAccounts(token, undefined, tokenOwner)
+	const { user, accounts, degraded } = await getUserAndAccounts(token, undefined, tokenOwner)
+	const identity: CachedIdentity = { user, accounts }
 
-	try {
-		await kv.put(cacheKey, JSON.stringify(identity), {
-			expirationTtl: API_TOKEN_IDENTITY_CACHE_TTL_SECONDS,
-		})
-	} catch (error) {
-		console.warn('API-token identity cache write failed', error)
+	// A degraded identity may serve this request, but caching it would pin the
+	// data loss for the full TTL; leaving it uncached self-heals on re-probe.
+	if (!degraded) {
+		try {
+			await kv.put(cacheKey, JSON.stringify(identity), {
+				expirationTtl: API_TOKEN_IDENTITY_CACHE_TTL_SECONDS,
+			})
+		} catch (error) {
+			console.warn('API-token identity cache write failed', error)
+		}
 	}
 
 	return identity
@@ -157,7 +162,18 @@ export async function handleDevApiTokenMode<Env extends DevAuthEnv>(
 	ctx: ExecutionContext
 ): Promise<Response> {
 	const token = env.DEV_CLOUDFLARE_API_TOKEN
-	const identity = await getUserAndAccounts(token, undefined, cloudflareTokenOwner(token))
+	let identity: CachedIdentity
+	try {
+		identity = await getUserAndAccounts(token, undefined, cloudflareTokenOwner(token))
+	} catch (error) {
+		if (error instanceof McpError) {
+			return new Response(
+				JSON.stringify({ error: 'invalid_token', error_description: error.message }),
+				{ status: error.code, headers: { 'Content-Type': 'application/json', ...error.headers } }
+			)
+		}
+		throw error
+	}
 	;(ctx as { props: AuthProps }).props = buildAuthProps(token, identity)
 	return handler.fetch(req, env, ctx)
 }

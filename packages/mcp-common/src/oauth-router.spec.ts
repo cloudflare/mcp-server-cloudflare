@@ -141,4 +141,45 @@ describe('OAuth router resource policy', () => {
 			error_description: 'Access token appears malformed; reauthenticate and try again',
 		})
 	})
+
+	it('serves /sse with a direct API token through the provider hook', async () => {
+		server.use(
+			http.get('https://api.cloudflare.com/client/v4/user', () =>
+				HttpResponse.json({
+					success: true,
+					result: { id: 'user-1', email: 'user@example.com' },
+					errors: [],
+					messages: [],
+				})
+			),
+			http.get('https://api.cloudflare.com/client/v4/accounts', () =>
+				HttpResponse.json({
+					success: true,
+					result: [{ id: 'account-1', name: 'Account One' }],
+					errors: [],
+					messages: [],
+				})
+			)
+		)
+		const router = createCloudflareOAuthRouter<CloudflareOAuthEnv>({
+			apiHandler,
+			scopes: {},
+			metrics,
+			mcpRequestPolicy,
+		})
+
+		const response = await router.fetch(
+			new Request('https://mcp.example.com/sse', {
+				headers: {
+					Authorization: `Bearer ${'a'.repeat(40)}`,
+					Host: 'mcp.example.com',
+				},
+			}),
+			testEnv(),
+			executionContext
+		)
+
+		expect(response.status).toBe(200)
+		await expect(response.text()).resolves.toBe('ok')
+	})
 })

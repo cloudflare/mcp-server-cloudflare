@@ -313,6 +313,31 @@ describe('getUserAndAccounts', () => {
 		const result = await getUserAndAccounts('test-token')
 		expect(result.user).toEqual({ id: 'user-1', email: 'user@example.com' })
 		expect(result.accounts).toEqual([{ id: 'acc-1', name: 'My Account' }])
+		expect(result.degraded).toBe(false)
+	})
+
+	it('flags an identity as degraded when an ok-status payload is unparseable', async () => {
+		mockUserResponse(200, v4User)
+		server.use(
+			http.get('https://api.cloudflare.com/client/v4/accounts', () => HttpResponse.text('not json'))
+		)
+
+		const result = await getUserAndAccounts('test-token')
+		expect(result.user).toEqual({ id: 'user-1', email: 'user@example.com' })
+		expect(result.accounts).toEqual([])
+		expect(result.degraded).toBe(true)
+	})
+
+	it('flags legacy account-token inference from an unparseable user payload as degraded', async () => {
+		server.use(
+			http.get('https://api.cloudflare.com/client/v4/user', () => HttpResponse.text('not json'))
+		)
+		mockAccountsResponse(200, v4Accounts)
+
+		const result = await getUserAndAccounts('legacy-token')
+		expect(result.user).toBeNull()
+		expect(result.accounts).toEqual([{ id: 'acc-1', name: 'My Account' }])
+		expect(result.degraded).toBe(true)
 	})
 
 	it('returns user=null for account-scoped tokens (user 401, accounts 200)', async () => {
