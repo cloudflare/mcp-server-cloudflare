@@ -6,7 +6,7 @@ packages:
 # supported by Agents. SDK v1 is retained only for eval-tools' non-server Agents
 # client legacy interoperability.
 catalog:
-  '@cloudflare/workers-oauth-provider': '0.8.2'
+  '@cloudflare/workers-oauth-provider': '0.10.2'
   '@modelcontextprotocol/client': '2.0.0'
   '@modelcontextprotocol/sdk': '1.30.0'
   '@modelcontextprotocol/server': '2.0.0'

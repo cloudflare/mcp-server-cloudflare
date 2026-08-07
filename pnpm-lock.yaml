@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@cloudflare/workers-oauth-provider':
-      specifier: 0.8.2
-      version: 0.8.2
+      specifier: 0.10.2
+      version: 0.10.2
     '@modelcontextprotocol/client':
       specifier: 2.0.0
       version: 2.0.0
@@ -71,7 +71,7 @@ importers:
     dependencies:
       '@cloudflare/workers-oauth-provider':
         specifier: 'catalog:'
-        version: 0.8.2
+        version: 0.10.2
       '@repo/mcp-common':
         specifier: workspace:*
         version: link:../../packages/mcp-common
@@ -756,7 +756,7 @@ importers:
     dependencies:
       '@cloudflare/workers-oauth-provider':
         specifier: 'catalog:'
-        version: 0.8.2
+        version: 0.10.2
       '@fast-csv/format':
         specifier: 5.0.2
         version: 5.0.2
@@ -1351,8 +1351,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-oauth-provider@0.8.2':
-    resolution: {integrity: sha512-Pho5qWDl4qj1STI5QYMQfPmJBBkxyrFpXyDl9BrtYOfWHxThabEzdi9p3ezS2cUkbjA0E6L5ki/kq2pcbRUtlg==}
+  '@cloudflare/workers-oauth-provider@0.10.2':
+    resolution: {integrity: sha512-3yWtnPaZyNaiLuv9tWkWfEyqbILFsvfG0Q5RwZGJ2jkSkrOMM8IxKYaGCFakSGbMXmatvyrhFDCDZ70S6TVnqQ==}
 
   '@cloudflare/workers-types@4.20250416.0':
     resolution: {integrity: sha512-i37TX0Clp+MrPdXMBdvKZM7JghCrWD9GtG7E+8ANOAPmtZjUkZfEy9qq46IG3XlNpagPaWDkY3SgJ3s01gPxCw==}
@@ -5765,7 +5765,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20260529.1':
     optional: true
 
-  '@cloudflare/workers-oauth-provider@0.8.2': {}
+  '@cloudflare/workers-oauth-provider@0.10.2': {}
 
   '@cloudflare/workers-types@4.20250416.0': {}
 
