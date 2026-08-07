@@ -1,0 +1,47 @@
+packages/mcp-common/src/api-token-mode.spec.ts
+  s_29e3fd2a62ed7a::t_51242dbb0fcbc4 1,5-10,13-26,29-34,38,40-42,48-51,57,59,62-67,69,71,74-82,86-119,121,123-130,132,150-155,159,161-165,171,174-239,251,257-262,264
+packages/mcp-common/src/api-token-mode.ts
+  s_29e3fd2a62ed7a::t_a724c15b655cc9 1-4,8-11,15,21-24,29-43,49-51,54-59,61-66,68-79,82-88,90-92,94,99-100,104-122,124-127,129-133,135-136,138,143-146,148-162
+packages/mcp-common/src/cloudflare-oauth-handler.ts
+  s_0b3003d5997402::t_86333a36645068 1-6,454-474,476,531-538
+packages/mcp-common/src/oauth-router.spec.ts
+  s_50912ae13583e1::t_c38b41398a96ae 22-38,95,130
+packages/mcp-common/src/oauth-router.ts
+  s_50912ae13583e1::t_4a502084d744c2 7,15,43,87-88,101-103
+pnpm-lock.yaml
+  s_50912ae13583e1::t_d30800eca22e92 10-11,74,759,1354-1355,5768
+pnpm-workspace.yaml
+  s_29e3fd2a62ed7a::t_268dd65548891b 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "d93dd64ca2a8a1373d1fbff52d81d73f767c8e71",
+  "prompts": {},
+  "sessions": {
+    "s_0b3003d5997402": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd6b0-e1c0-7b61-ba71-7591b8469662",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_29e3fd2a62ed7a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7a996d96-a221-44e7-8218-acbee4f6f3c0",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_50912ae13583e1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34b1ef83-88de-41df-9b95-c7a4f05fed15",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
