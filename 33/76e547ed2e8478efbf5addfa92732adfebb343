@@ -1,0 +1,31 @@
+packages/mcp-common/src/api-token-mode.spec.ts
+  s_50912ae13583e1::t_9528244183c3ed 267-367
+packages/mcp-common/src/cloudflare-oauth-handler.spec.ts
+  s_50912ae13583e1::t_3d1cdb45612fa9 316-340
+packages/mcp-common/src/oauth-router.spec.ts
+  s_0b3003d5997402::t_6a15905b322b55 144-184
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "3376e547ed2e8478efbf5addfa92732adfebb343",
+  "prompts": {},
+  "sessions": {
+    "s_0b3003d5997402": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd6b0-e1c0-7b61-ba71-7591b8469662",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_50912ae13583e1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34b1ef83-88de-41df-9b95-c7a4f05fed15",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
