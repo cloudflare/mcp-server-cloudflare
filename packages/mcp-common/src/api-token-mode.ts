@@ -141,7 +141,7 @@ export async function resolveExternalToken({
 }
 
 /** Local development can disable OAuth entirely and use one fixed API token. */
-export function isDevApiTokenRequest(env: DevAuthEnv): boolean {
+export function devApiTokenModeEnabled(env: DevAuthEnv): boolean {
 	return Boolean(env.DEV_CLOUDFLARE_API_TOKEN) && env.DEV_DISABLE_OAUTH === 'true'
 }
 

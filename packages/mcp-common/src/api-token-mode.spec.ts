@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest'
 
 import {
 	cloudflareTokenOwner,
+	devApiTokenModeEnabled,
 	handleDevApiTokenMode,
-	isDevApiTokenRequest,
 	resolveExternalToken,
 } from './api-token-mode'
 import { server } from './test/msw-server'
@@ -234,9 +234,9 @@ describe('local development API-token mode', () => {
 	}
 
 	it('activates only when a token is configured and OAuth is disabled', () => {
-		expect(isDevApiTokenRequest(devEnv)).toBe(true)
-		expect(isDevApiTokenRequest({ ...devEnv, DEV_DISABLE_OAUTH: 'false' })).toBe(false)
-		expect(isDevApiTokenRequest({ ...devEnv, DEV_CLOUDFLARE_API_TOKEN: '' })).toBe(false)
+		expect(devApiTokenModeEnabled(devEnv)).toBe(true)
+		expect(devApiTokenModeEnabled({ ...devEnv, DEV_DISABLE_OAUTH: 'false' })).toBe(false)
+		expect(devApiTokenModeEnabled({ ...devEnv, DEV_CLOUDFLARE_API_TOKEN: '' })).toBe(false)
 	})
 
 	it('sets props only on the request ExecutionContext passed to the stateless handler', async () => {

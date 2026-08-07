@@ -633,14 +633,14 @@ export function createAuthHandlers({
 				return new OAuthError('invalid_request', 'Invalid OAuth request info', 400).toResponse()
 			}
 
-			// Exchange code for tokens and get user details
-			const [{ accessToken, refreshToken, user, accounts }] = await Promise.all([
-				getTokenAndUserDetails(c, code, codeVerifier), // use codeVerifier from KV
-				c.env.OAUTH_PROVIDER.createClient({
-					clientId: oauthReqInfo.clientId,
-					tokenEndpointAuthMethod: 'none',
-				}),
-			])
+			// Exchange code for tokens and get user details, using the codeVerifier from KV.
+			// MCP clients register themselves through the provider's /register endpoint;
+			// the authorize flow only completes grants for clients that already exist.
+			const { accessToken, refreshToken, user, accounts } = await getTokenAndUserDetails(
+				c,
+				code,
+				codeVerifier
+			)
 
 			// Complete authorization and issue token to MCP client
 			const { redirectTo } = await c.env.OAUTH_PROVIDER.completeAuthorization({

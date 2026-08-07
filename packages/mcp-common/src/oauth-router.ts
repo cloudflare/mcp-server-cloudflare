@@ -4,7 +4,11 @@ import {
 	originValidationResponse,
 } from '@modelcontextprotocol/server'
 
-import { handleDevApiTokenMode, isDevApiTokenRequest, resolveExternalToken } from './api-token-mode'
+import {
+	devApiTokenModeEnabled,
+	handleDevApiTokenMode,
+	resolveExternalToken,
+} from './api-token-mode'
 import { createAuthHandlers, handleTokenExchangeCallback } from './cloudflare-oauth-handler'
 
 import type { OAuthProviderOptions } from '@cloudflare/workers-oauth-provider'
@@ -84,7 +88,7 @@ export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 				if (request.method === 'OPTIONS') return apiHandler.fetch(request, env, ctx)
 			}
 
-			if (isDevApiTokenRequest(env)) {
+			if (devApiTokenModeEnabled(env)) {
 				return handleDevApiTokenMode(apiHandler, request, env, ctx)
 			}
 
