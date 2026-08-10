@@ -1,5 +1,12 @@
 # cloudflare-radar-mcp-server
 
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies [12a9a61]
+  - @repo/mcp-common@0.20.9
+
 ## 0.2.3
 
 ### Patch Changes
