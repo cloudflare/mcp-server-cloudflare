@@ -1,0 +1,19 @@
+pnpm-lock.yaml
+  s_50912ae13583e1::t_fc96fa8400635d 10-11,74,759,1354-1355,5768
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "03e9b2a76858e4704d58f2811b10535f95172265",
+  "prompts": {},
+  "sessions": {
+    "s_50912ae13583e1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34b1ef83-88de-41df-9b95-c7a4f05fed15",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
