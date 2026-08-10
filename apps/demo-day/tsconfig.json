@@ -1,0 +1,7 @@
+{
+	"extends": "@repo/typescript-config/workers.json",
+	"include": ["src/**/*.ts", "./vitest.config.ts", "./types.d.ts"],
+	"compilerOptions": {
+		"types": ["./worker-configuration.d.ts", "@cloudflare/vitest-pool-workers/types", "@types/node"]
+	}
+}

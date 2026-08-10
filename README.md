@@ -1,93 +1,88 @@
 # Cloudflare MCP Server
 
-Model Context Protocol (MCP) is a [new, standardized protocol](https://modelcontextprotocol.io/introduction) for managing context between large language models (LLMs) and external systems. In this repository, we provide an installer as well as an MCP Server for [Cloudflare's API](https://api.cloudflare.com).
+Model Context Protocol (MCP) is a [new, standardized protocol](https://modelcontextprotocol.io/introduction) for managing context between large language models (LLMs) and external systems. In this repository, you can find several MCP servers allowing you to connect to Cloudflare's service from an MCP client (e.g. Cursor, Claude) and use natural language to accomplish tasks through your Cloudflare account.
 
-This lets you use Claude Desktop, or any MCP Client, to use natural language to accomplish things on your Cloudflare account, e.g.:
+These MCP servers allow your [MCP Client](https://modelcontextprotocol.io/clients) to read configurations from your account, process information, make suggestions based on data, and even make those suggested changes for you. All of these actions can happen across Cloudflare's many services including application development, security and performance.
 
-- `List all the Cloudflare workers on my <some-email>@gmail.com account.`
-- `Can you tell me about any potential issues on this particular worker '...'?`
+Every server exposes the same stateless Streamable HTTP handler at `/mcp` and `/sse` through a fresh SDK v2 server factory. `/sse` remains as a URL compatibility alias; it does not use the deprecated HTTP+SSE transport. Modern 2026 requests and stateless 2025 requests share the same request-scoped implementation without an MCP protocol session. OAuth, credentials, account selection, application caches, and product Durable Objects remain application/security state where required.
 
-## Access the remote MCP server from Claude Desktop
+The following servers are included in this repository:
 
-Open Claude Desktop and navigate to Settings -> Developer -> Edit Config. This opens the configuration file that controls which MCP servers Claude can access.
+| Server Name                                                    | Description                                                                                     | Server URL                                     |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| [**Documentation server**](/apps/docs-ai-search)               | Get up-to-date reference information on Cloudflare                                              | `https://docs.mcp.cloudflare.com/mcp`          |
+| [**Workers Bindings server**](/apps/workers-bindings)          | Build Workers applications with storage, AI, and compute primitives                             | `https://bindings.mcp.cloudflare.com/mcp`      |
+| [**Workers Builds server**](/apps/workers-builds)              | Get insights and manage your Cloudflare Workers Builds                                          | `https://builds.mcp.cloudflare.com/mcp`        |
+| [**Observability server**](/apps/workers-observability)        | Debug and get insight into your application's logs and analytics                                | `https://observability.mcp.cloudflare.com/mcp` |
+| [**Container server**](/apps/sandbox-container)                | Spin up a sandbox development environment                                                       | `https://containers.mcp.cloudflare.com/mcp`    |
+| [**Browser Run server**](/apps/browser-rendering)              | Fetch web pages, convert them to markdown and take screenshots                                  | `https://browser.mcp.cloudflare.com/mcp`       |
+| [**Logpush server**](/apps/logpush)                            | Get quick summaries for Logpush job health                                                      | `https://logs.mcp.cloudflare.com/mcp`          |
+| [**AI Gateway server**](/apps/ai-gateway)                      | Search your logs, get details about the prompts and responses                                   | `https://ai-gateway.mcp.cloudflare.com/mcp`    |
+| [**AutoRAG server**](/apps/autorag)                            | Search and query account AutoRAG instances                                                      | `https://autorag.mcp.cloudflare.com/mcp`       |
+| [**Audit Logs server**](/apps/auditlogs)                       | Query audit logs and generate reports for review                                                | `https://auditlogs.mcp.cloudflare.com/mcp`     |
+| [**DNS Analytics server**](/apps/dns-analytics)                | Optimize DNS performance and debug issues based on current setup                                | `https://dns-analytics.mcp.cloudflare.com/mcp` |
+| [**Digital Experience Monitoring server**](/apps/dex-analysis) | Get quick insight on critical applications for your organization                                | `https://dex.mcp.cloudflare.com/mcp`           |
+| [**Cloudflare One CASB server**](/apps/cloudflare-one-casb)    | Quickly identify any security misconfigurations for SaaS applications to safeguard users & data | `https://casb.mcp.cloudflare.com/mcp`          |
+| [**Radar server**](/apps/radar)                                | Explore Cloudflare Radar internet insights                                                      | `https://radar.mcp.cloudflare.com/mcp`         |
+| [**Cloudflare Blog server**](/apps/cloudflare-blog)            | Search and read posts from the Cloudflare Blog                                                  | `https://blog.mcp.cloudflare.com/mcp`          |
+| [**Demo Day server**](/apps/demo-day)                          | Demonstrate a minimal Cloudflare MCP server                                                     | `https://demo-day.mcp.cloudflare.com/mcp`      |
 
-Replace the content with the following configuration. Once you restart Claude Desktop, a browser window will open showing your OAuth login page. Complete the authentication flow to grant Claude access to your MCP server. After you grant access, the tools will become available for you to use.
+## Which Cloudflare MCP server should you use?
 
-```
-{
-  "mcpServers": {
-    "cloudflare": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://observability.mcp.cloudflare.com/sse"
-      ]
-    }
-  }
-}
-```
+Cloudflare provides two categories of MCP servers:
+
+- **Code Mode server** (`mcp.cloudflare.com`) in [`cloudflare/mcp`](https://github.com/cloudflare/mcp):
+  best when you want broad access across Cloudflare's APIs through code execution.
+- **Domain-specific servers** (`*.mcp.cloudflare.com`) in this repository:
+  best when you want curated, typed tools for a specific Cloudflare product area.
+
+### When should you use each?
+
+Use the **Code Mode server** when:
+
+- you need broad API coverage across many Cloudflare products
+- you prefer a smaller set of general-purpose tools
+- your workflow is better served by code execution
+
+Use the **domain-specific servers** in this repository when:
+
+- you want purpose-built tools for a specific product area
+- you want more guided, typed interactions
+- you are working primarily within one Cloudflare domain such as observability, bindings, Radar, or Browser Run
+
+Learn more about the Code Mode server here: [`cloudflare/mcp`](https://github.com/cloudflare/mcp).
+
+## Connect to an MCP server
+
+Connect any MCP client with remote-server support directly to a URL in the table above. [Cloudflare AI Playground](https://playground.ai.cloudflare.com/) also accepts server URLs in its interface.
+
+## Using Cloudflare's MCP servers from the OpenAI Responses API
+
+To use one of Cloudflare's MCP servers with [OpenAI's responses API](https://openai.com/index/new-tools-and-features-in-the-responses-api/), you will need to provide the Responses API with an API token that has the scopes (permissions) required for that particular MCP server.
+
+For example, to use the [Browser Run MCP server](https://github.com/cloudflare/mcp-server-cloudflare/tree/main/apps/browser-rendering) with OpenAI, create an API token in the Cloudflare dashboard [here](https://dash.cloudflare.com/profile/api-tokens), with the following permissions:
+
+<img width="937" alt="Screenshot 2025-05-21 at 10 38 02 AM" src="https://github.com/user-attachments/assets/872e253f-23ce-43b3-983c-45f9d0f66100" />
 
 ## Need access to more Cloudflare tools?
 
-We're gradually moving over functionality to this remote MCP server repo. In the meantime please take a look at the local only mcp-server-cloudflare package which currently has more tools available.
+We're continuing to add more functionality to this remote MCP server repo. If you'd like to leave feedback, file a bug or provide a feature request, [please open an issue](https://github.com/cloudflare/mcp-server-cloudflare/issues/new/choose) on this repository
 
-Visit <https://www.npmjs.com/package/@cloudflare/mcp-server-cloudflare>
+## Troubleshooting
+
+"Claude's response was interrupted ... "
+
+If you see this message, Claude likely hit its context-length limit and stopped mid-reply. This happens most often on servers that trigger many chained tool calls such as the observability server.
+
+To reduce the chance of running in to this issue:
+
+- Try to be specific, keep your queries concise.
+- If a single request calls multiple tools, try to to break it into several smaller tool calls to keep the responses short.
 
 ## Paid Features
 
 Some features may require a paid Cloudflare Workers plan. Ensure your Cloudflare account has the necessary subscription level for the features you intend to use.
 
-## Features
-
-### Workers Management
-
-- `worker_list`: List all Workers in your account
-- `worker_get_worker`: Get a Worker's script content
-
-### Workers Logs
-
-- `worker_logs_by_worker_name`: Analyze recent logs for a Cloudflare Worker by worker name
-- `worker_logs_by_ray_id`: Analyze recent logs across all workers for a specific request by Cloudflare Ray ID
-- `worker_logs_keys`: Get available telemetry keys for a Cloudflare Worker
-
-## Developing
-
-### Apps
-
-- [workers-observability](apps/workers-observability/): The Workers Observability MCP server
-
-### Packages
-
-- eslint-config: Eslint config used by all apps and packages.
-- typescript-config: tsconfig used by all apps and packages.
-- mcp-common: Shared common tools and scripts to help manage this repo.
-
-For more details on development in this monorepo, take a look at apps/workers-observability
-
-## Testing
-
-The project uses Vitest as the testing framework with MSW (Mock Service Worker) for API mocking.
-
-### Running Tests
-
-To run all tests:
-
-```bash
-pnpm test
-```
-
-To run a specific test file:
-
-```bash
-pnpm test -- tests/tools/queues.test.ts
-```
-
-To run tests in watch mode (useful during development):
-
-```bash
-pnpm test:watch
-```
-
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Interested in contributing, and running this server locally? See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.

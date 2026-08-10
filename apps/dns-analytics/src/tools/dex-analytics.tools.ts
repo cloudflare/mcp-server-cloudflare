@@ -1,0 +1,141 @@
+import { z } from 'zod'
+
+import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
+
+import type { AccountGetParams } from 'cloudflare/resources/accounts/accounts.mjs'
+import type { ReportGetParams } from 'cloudflare/resources/dns/analytics.mjs'
+import type { ZoneGetParams } from 'cloudflare/resources/dns/settings.mjs'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
+
+function getStartDate(days: number) {
+	const today = new Date()
+	const start_date = new Date(today.setDate(today.getDate() - days))
+	return start_date.toISOString()
+}
+
+export function registerAnalyticTools<Env>(context: McpRegistrationContext<Env>) {
+	// Register DNS Report tool
+	context.registerTool(
+		'dns_report',
+		{
+			description: 'Fetch the DNS Report for a given zone since a date',
+			inputSchema: z.object({
+				zone: z.string(),
+				days: z.number(),
+			}),
+		},
+		async ({ zone, days }) => {
+			try {
+				const props = requireRequestProps(context)
+				const client = getCloudflareClient(props.accessToken)
+				const start_date = getStartDate(days)
+				const params: ReportGetParams = {
+					zone_id: zone,
+					metrics: 'responseTimeAvg,queryCount,uncachedCount,staleCount',
+					dimensions: 'responseCode,responseCached',
+					since: start_date,
+				}
+				const result = await client.dns.analytics.reports.get(params)
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								result,
+							}),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error fetching DNS report: ${error instanceof Error && error.message}`,
+						},
+					],
+					isError: true,
+				}
+			}
+		}
+	)
+	// Register Account DNS Settings display tool
+	context.accountTool(
+		'show_account_dns_settings',
+		{
+			description: 'Show DNS settings for current account',
+			inputSchema: z.object({}),
+		},
+		async (_args, accountId) => {
+			try {
+				const props = requireRequestProps(context)
+				const client = getCloudflareClient(props.accessToken)
+				const params: AccountGetParams = {
+					account_id: accountId,
+				}
+				const result = await client.dns.settings.account.get(params)
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								result,
+							}),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error fetching DNS report: ${error instanceof Error && error.message}`,
+						},
+					],
+					isError: true,
+				}
+			}
+		}
+	)
+	// Register Zone DNS Settings display tool
+	context.registerTool(
+		'show_zone_dns_settings',
+		{
+			description: 'Show DNS settings for a zone',
+			inputSchema: z.object({
+				zone: z.string(),
+			}),
+		},
+		async ({ zone }) => {
+			try {
+				const props = requireRequestProps(context)
+				const client = getCloudflareClient(props.accessToken)
+				const params: ZoneGetParams = {
+					zone_id: zone,
+				}
+				const result = await client.dns.settings.zone.get(params)
+				return {
+					content: [
+						{
+							type: 'text',
+							text: JSON.stringify({
+								result,
+							}),
+						},
+					],
+				}
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: `Error fetching DNS report: ${error instanceof Error && error.message}`,
+						},
+					],
+					isError: true,
+				}
+			}
+		}
+	)
+}

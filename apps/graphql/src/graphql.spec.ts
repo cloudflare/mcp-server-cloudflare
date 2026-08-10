@@ -1,0 +1,321 @@
+import { env } from 'cloudflare:test'
+import { http, HttpResponse } from 'msw'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import { server } from '@repo/mcp-common/src/test/msw-server'
+import { testStatelessMcpApp } from '@repo/mcp-common/src/test/stateless-app'
+
+import worker, { DEPRECATION_INSTRUCTIONS, mcpHandler } from './graphql.app'
+import { validateGraphQLResponse } from './tools/graphql.tools'
+
+import type { JsonBodyType } from 'msw'
+import type { Env } from './graphql.context'
+
+testStatelessMcpApp<Env>({
+	name: 'GraphQL',
+	handler: mcpHandler,
+	env: env as unknown as Env,
+	url: 'https://graphql.mcp.cloudflare.com',
+	authenticated: true,
+	authenticatedWorker: worker,
+	expectedTools: ['graphql_schema_search', 'graphql_query', 'zones_list'],
+})
+
+function context(): ExecutionContext {
+	return {
+		props: {
+			type: 'account_token',
+			accessToken: 'graphql-token',
+			account: { id: 'account-1', name: 'GraphQL account' },
+		},
+		waitUntil() {},
+		passThroughOnException() {},
+	} as ExecutionContext
+}
+
+function toolCall(name: string, arguments_: Record<string, unknown>) {
+	return new Request('https://graphql.mcp.cloudflare.com/mcp', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Accept: 'application/json, text/event-stream',
+			'MCP-Protocol-Version': '2026-07-28',
+			'Mcp-Method': 'tools/call',
+			'Mcp-Name': name,
+			Host: 'graphql.mcp.cloudflare.com',
+		},
+		body: JSON.stringify({
+			jsonrpc: '2.0',
+			id: 'graphql-call',
+			method: 'tools/call',
+			params: {
+				name,
+				arguments: arguments_,
+				_meta: {
+					'io.modelcontextprotocol/protocolVersion': '2026-07-28',
+					'io.modelcontextprotocol/clientInfo': { name: 'graphql-test', version: '1.0.0' },
+					'io.modelcontextprotocol/clientCapabilities': {},
+				},
+			},
+		}),
+	})
+}
+
+function initializeRequest() {
+	return new Request('https://graphql.mcp.cloudflare.com/mcp', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Accept: 'application/json, text/event-stream',
+			Host: 'graphql.mcp.cloudflare.com',
+		},
+		body: JSON.stringify({
+			jsonrpc: '2.0',
+			id: 'graphql-initialize',
+			method: 'initialize',
+			params: {
+				protocolVersion: '2025-11-25',
+				capabilities: {},
+				clientInfo: { name: 'graphql-test', version: '1.0.0' },
+			},
+		}),
+	})
+}
+
+async function responseDocument(response: Response): Promise<Record<string, any>> {
+	const text = await response.text()
+	if (response.headers.get('content-type')?.includes('application/json')) return JSON.parse(text)
+	const data = text
+		.split('\n')
+		.find((line) => line.startsWith('data: '))
+		?.slice('data: '.length)
+	if (!data) throw new Error(`Expected an MCP response document, received: ${text}`)
+	return JSON.parse(data)
+}
+
+const GRAPHQL_ENDPOINT = 'https://api.cloudflare.com/client/v4/graphql'
+
+function mockGraphQLResponse(
+	body: JsonBodyType,
+	expectedRequest: {
+		query: string | RegExp
+		variables?: Record<string, unknown>
+	}
+) {
+	server.use(
+		http.post(GRAPHQL_ENDPOINT, async ({ request }) => {
+			expect(request.headers.get('Authorization')).toBe('Bearer graphql-token')
+			expect(request.headers.get('Content-Type')).toBe('application/json')
+
+			const requestBody = (await request.json()) as Record<string, unknown>
+			if (typeof expectedRequest.query === 'string') {
+				expect(requestBody.query).toBe(expectedRequest.query)
+			} else {
+				expect(requestBody.query).toMatch(expectedRequest.query)
+			}
+			if ('variables' in expectedRequest) {
+				expect(requestBody.variables).toEqual(expectedRequest.variables)
+			} else {
+				expect(requestBody).not.toHaveProperty('variables')
+			}
+
+			return HttpResponse.json(body)
+		})
+	)
+}
+
+afterEach(() => {
+	vi.restoreAllMocks()
+})
+
+describe('GraphQL server deprecation', () => {
+	it('advertises the Cloudflare API MCP server in its initialize instructions', async () => {
+		const response = await mcpHandler.fetch(initializeRequest(), env as unknown as Env, context())
+		const document = await responseDocument(response)
+
+		expect(response.status).toBe(200)
+		expect(document.result.instructions).toBe(DEPRECATION_INSTRUCTIONS)
+		expect(document.result.instructions).toContain('https://mcp.cloudflare.com/mcp')
+	})
+})
+
+describe('GraphQL response validation', () => {
+	it('accepts the response fields and constraints defined by GraphQL', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+		const response = {
+			data: { viewer: null },
+			errors: [
+				{
+					message: 'A field returned a partial result',
+					locations: [{ line: 1, column: 2 }],
+					path: ['viewer', 0],
+					extensions: { code: 'partial' },
+				},
+			],
+			extensions: { traceId: 'test-trace' },
+		}
+
+		expect(validateGraphQLResponse(response)).toBe(response)
+		expect(warn).not.toHaveBeenCalled()
+	})
+
+	it('tolerates null optional fields returned by Cloudflare', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+		const responses = [
+			{ data: { viewer: null }, errors: null },
+			{
+				data: null,
+				errors: [{ message: 'not authorized', locations: null, path: null, extensions: null }],
+			},
+		]
+
+		for (const response of responses) expect(validateGraphQLResponse(response)).toBe(response)
+		expect(warn).not.toHaveBeenCalled()
+	})
+
+	it.each([
+		{ name: 'neither data nor errors', response: {} },
+		{ name: 'an empty errors list', response: { errors: [] } },
+		{
+			name: 'a non-positive source location',
+			response: { errors: [{ message: 'invalid', locations: [{ line: 0, column: 1 }] }] },
+		},
+		{
+			name: 'a negative path index',
+			response: { data: null, errors: [{ message: 'invalid', path: ['viewer', -1] }] },
+		},
+		{
+			name: 'an empty path segment',
+			response: { data: null, errors: [{ message: 'invalid', path: [''] }] },
+		},
+	])('warns about a response with $name while preserving it', ({ response }) => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+		expect(validateGraphQLResponse(response)).toBe(response)
+		expect(warn).toHaveBeenCalledOnce()
+	})
+})
+
+describe('GraphQL API response handling', () => {
+	it.each([
+		{
+			name: 'a nullable path',
+			message: 'not authorized for that account',
+			body: {
+				data: null,
+				errors: [
+					{
+						message: 'not authorized for that account',
+						path: null,
+						extensions: {
+							code: 'authz',
+							timestamp: '2026-06-19T00:00:00Z',
+							ray_id: 'test-ray',
+						},
+					},
+				],
+			},
+		},
+		{
+			name: 'no path or extensions',
+			message: 'Mutations are not supported',
+			body: {
+				data: null,
+				errors: [{ message: 'Mutations are not supported' }],
+			},
+		},
+		{
+			name: 'locations but no path',
+			message: 'Cannot query field "missing"',
+			body: {
+				errors: [
+					{
+						message: 'Cannot query field "missing"',
+						locations: [{ line: 1, column: 9 }],
+					},
+				],
+			},
+		},
+	])('returns an API error with $name instead of a Zod error', async ({ body, message }) => {
+		const query = 'query { missing }'
+		mockGraphQLResponse(body, { query, variables: {} })
+		vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+		const response = await mcpHandler.fetch(
+			toolCall('graphql_query', { query }),
+			env as unknown as Env,
+			context()
+		)
+		const document = await responseDocument(response)
+		const text = document.result.content[0].text as string
+
+		expect(response.status).toBe(200)
+		expect(document.result.isError).not.toBe(true)
+		expect(JSON.parse(text.split('\n\n')[0]).errors[0].message).toBe(message)
+		expect(text).not.toContain('invalid_union')
+	})
+
+	it('accepts a successful response that omits errors', async () => {
+		const query =
+			'query Zones($zoneTag: String!) { viewer { zones(filter: { zoneTag: $zoneTag }) { zoneTag } } }'
+		const variables = { zoneTag: 'zone-1' }
+		mockGraphQLResponse({ data: { viewer: { zones: [] } } }, { query, variables })
+
+		const response = await mcpHandler.fetch(
+			toolCall('graphql_query', { query, variables }),
+			env as unknown as Env,
+			context()
+		)
+		const document = await responseDocument(response)
+
+		expect(document.result.isError).not.toBe(true)
+		expect(document.result.content[0].text).toContain('"viewer":{"zones":[]}')
+	})
+
+	it('passes through an unrecognized response shape instead of throwing', async () => {
+		const query = 'query { viewer { zones { zoneTag } } }'
+		mockGraphQLResponse(
+			{
+				data: null,
+				errors: [{ message: 'upstream-specific error', extensions: ['custom', 'shape'] }],
+			},
+			{ query, variables: {} }
+		)
+		vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+		const response = await mcpHandler.fetch(
+			toolCall('graphql_query', { query }),
+			env as unknown as Env,
+			context()
+		)
+		const document = await responseDocument(response)
+		const text = document.result.content[0].text as string
+
+		expect(document.result.isError).not.toBe(true)
+		expect(text).toContain('upstream-specific error')
+		expect(text).toContain('"extensions":["custom","shape"]')
+	})
+
+	it('surfaces path-less API errors from schema requests', async () => {
+		mockGraphQLResponse(
+			{
+				data: null,
+				errors: [{ message: 'not authorized to inspect the schema', path: null }],
+			},
+			{ query: /query SchemaOverview/ }
+		)
+		vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+		const response = await mcpHandler.fetch(
+			toolCall('graphql_schema_overview', {}),
+			env as unknown as Env,
+			context()
+		)
+		const document = await responseDocument(response)
+		const text = document.result.content[0].text as string
+
+		expect(document.result.isError).toBe(true)
+		expect(text).toContain('not authorized to inspect the schema')
+		expect(text).not.toContain('invalid_union')
+	})
+})

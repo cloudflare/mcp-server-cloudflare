@@ -1,111 +1,69 @@
-# Remote MCP Server on Cloudflare
+# Cloudflare Workers Bindings MCP Server
 
-Let's get a remote MCP server up-and-running on Cloudflare Workers complete with OAuth login!
+This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP
+connections, with Cloudflare OAuth built-in.
 
-## Develop locally
+It integrates tools for managing resources in the Cloudflare Workers Platform, which you can connect to your Worker via [Bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/).
 
-```bash
-# clone the repository
-git clone git@github.com:cloudflare/ai.git
+The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth/account context for every request. `/sse` is not the deprecated HTTP+SSE transport. OAuth and product bindings remain application/security state; no MCP protocol session or protocol Durable Object is retained.
 
-# install dependencies
-cd ai
-npm install
+## 🔨 Available Tools
 
-# run locally
-npx nx dev remote-mcp-server
-```
+Currently available tools:
 
-You should be able to open [`http://localhost:8787/`](http://localhost:8787/) in your browser
+| **Category**      | **Tool**                   | **Description**                                                               |
+| ----------------- | -------------------------- | ----------------------------------------------------------------------------- |
+| **KV Namespaces** | `kv_namespaces_list`       | List all of the kv namespaces in your Cloudflare account                      |
+|                   | `kv_namespace_create`      | Create a new kv namespace in your Cloudflare account                          |
+|                   | `kv_namespace_delete`      | Delete a kv namespace in your Cloudflare account                              |
+|                   | `kv_namespace_get`         | Get details of a kv namespace in your Cloudflare account                      |
+|                   | `kv_namespace_update`      | Update the title of a kv namespace in your Cloudflare account                 |
+| **Workers**       | `workers_list`             | List all Workers in your Cloudflare account                                   |
+|                   | `workers_get_worker`       | Get the details of a Cloudflare Worker                                        |
+|                   | `workers_get_worker_code`  | Get the source code of a Cloudflare Worker                                    |
+| **R2 Buckets**    | `r2_buckets_list`          | List r2 buckets in your Cloudflare account                                    |
+|                   | `r2_bucket_create`         | Create a new r2 bucket in your Cloudflare account                             |
+|                   | `r2_bucket_get`            | Get details about a specific R2 bucket                                        |
+|                   | `r2_bucket_delete`         | Delete an R2 bucket                                                           |
+| **D1 Databases**  | `d1_databases_list`        | List all of the D1 databases in your Cloudflare account                       |
+|                   | `d1_database_create`       | Create a new D1 database in your Cloudflare account                           |
+|                   | `d1_database_delete`       | Delete a d1 database in your Cloudflare account                               |
+|                   | `d1_database_get`          | Get a D1 database in your Cloudflare account                                  |
+|                   | `d1_database_query`        | Query a D1 database in your Cloudflare account                                |
+| **Hyperdrive**    | `hyperdrive_configs_list`  | List Hyperdrive configurations in your Cloudflare account                     |
+|                   | `hyperdrive_config_create` | Create a new Hyperdrive configuration in your Cloudflare account              |
+|                   | `hyperdrive_config_delete` | Delete a Hyperdrive configuration in your Cloudflare account                  |
+|                   | `hyperdrive_config_get`    | Get details of a specific Hyperdrive configuration in your Cloudflare account |
+|                   | `hyperdrive_config_edit`   | Edit (patch) a Hyperdrive configuration in your Cloudflare account            |
 
-## Connect the MCP inspector to your server
+This MCP server is still a work in progress, and we plan to add more tools in the future.
 
-To explore your new MCP api, you can use the [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector).
+### Prompt Examples
 
-- Start it with `npx @modelcontextprotocol/inspector`
-- [Within the inspector](http://localhost:5173), switch the Transport Type to `SSE` and enter `http://localhost:8787/sse` as the URL of the MCP server to connect to, and click "Connect"
-- You will navigate to a (mock) user/password login screen. Input any email and pass to login.
-- You should be redirected back to the MCP Inspector and you can now list and call any defined tools!
+- `List my Cloudflare accounts.`
+- `Show me my KV namespaces.`
+- `Create a new KV namespace called 'my-kv-store'.`
+- `Get the details for KV namespace 'YOUR_NAMESPACE_ID'.` (Replace YOUR_NAMESPACE_ID)
+- `Delete the KV namespace 'NAMESPACE_TO_DELETE_ID'.` (Replace NAMESPACE_TO_DELETE_ID)
+- `List my Cloudflare Workers.`
+- `Get the code for the 'my-worker-script' worker.`
+- `Show me my R2 buckets.`
+- `Create an R2 bucket named 'my-new-bucket'.`
+- `Get details for the R2 bucket 'my-data-bucket'.`
+- `Delete the R2 bucket 'old-bucket'.`
+- `List my D1 databases.`
+- `Create a D1 database named 'analytics-db'.`
+- `Get details for D1 database 'YOUR_D1_DB_ID'.` (Replace YOUR_D1_DB_ID)
+- `Run the query 'SELECT * FROM customers LIMIT 10;' on D1 database 'YOUR_D1_DB_ID'.` (Replace YOUR_D1_DB_ID)
+- `Delete the D1 database 'TEMP_DB_ID'.` (Replace TEMP_DB_ID)
+- `List my Hyperdrive configurations.`
+- `Create a Hyperdrive config named 'prod-db-cache' for my database.` (You might need to provide more origin details)
+- `Get details for Hyperdrive config 'YOUR_HYPERDRIVE_ID'.` (Replace YOUR_HYPERDRIVE_ID)
+- `Update the cache settings for Hyperdrive config 'YOUR_HYPERDRIVE_ID'.` (Replace YOUR_HYPERDRIVE_ID)
+- `Delete the Hyperdrive config 'OLD_HYPERDRIVE_ID'.` (Replace OLD_HYPERDRIVE_ID)
 
-<div align="center">
-  <img src="img/mcp-inspector-sse-config.png" alt="MCP Inspector with the above config" width="600"/>
-</div>
+## Connect to the MCP server
 
-<div align="center">
-  <img src="img/mcp-inspector-successful-tool-call.png" alt="MCP Inspector with after a tool call" width="600"/>
-</div>
+Connect your MCP client directly to `https://bindings.mcp.cloudflare.com/mcp`. If prompted, complete the Cloudflare OAuth flow in your browser. The tools become available after authorization.
 
-## Connect Claude Desktop to your local MCP server
-
-The MCP inspector is great, but we really want to connect this to Claude! Follow [Anthropic's Quickstart](https://modelcontextprotocol.io/quickstart/user) and within Claude Desktop go to Settings > Developer > Edit Config to find your configuration file.
-
-Open the file in your text editor and replace it with this configuration:
-
-```json
-{
-	"mcpServers": {
-		"math": {
-			"command": "npx",
-			"args": ["mcp-remote", "http://localhost:8787/sse"]
-		}
-	}
-}
-```
-
-This will run a local proxy and let Claude talk to your MCP server over HTTP
-
-When you open Claude a browser window should open and allow you to login. You should see the tools available in the bottom right. Given the right prompt Claude should ask to call the tool.
-
-<div align="center">
-  <img src="img/available-tools.png" alt="Clicking on the hammer icon shows a list of available tools" width="600"/>
-</div>
-
-<div align="center">
-  <img src="img/claude-does-math-the-fancy-way.png" alt="Claude answers the prompt 'I seem to have lost my calculator and have run out of fingers. Could you use the math tool to add 23 and 19?' by invoking the MCP add tool" width="600"/>
-</div>
-
-## Deploy to Cloudflare
-
-1. `npx wrangler kv namespace create OAUTH_KV`
-2. Follow the guidance to add the kv namespace ID to `wrangler.jsonc`
-3. `npm run deploy`
-
-## Call your newly deployed remote MCP server from a remote MCP client
-
-Just like you did above in "Develop locally", run the MCP inspector:
-
-`npx @modelcontextprotocol/inspector@latest`
-
-Then enter the `workers.dev` URL (ex: `worker-name.account-name.workers.dev/sse`) of your Worker in the inspector as the URL of the MCP server to connect to, and click "Connect".
-
-You've now connected to your MCP server from a remote MCP client.
-
-## Connect Claude Desktop to your remote MCP server
-
-Update the Claude configuration file to point to your `workers.dev` URL (ex: `worker-name.account-name.workers.dev/sse`) and restart Claude
-
-```json
-{
-	"mcpServers": {
-		"math": {
-			"command": "npx",
-			"args": ["mcp-remote", "https://worker-name.account-name.workers.dev/sse"]
-		}
-	}
-}
-```
-
-## Debugging
-
-Should anything go wrong it can be helpful to restart Claude, or to try connecting directly to your
-MCP server on the command line with the following command.
-
-```bash
-npx mcp-remote http://localhost:8787/sse
-```
-
-In some rare cases it may help to clear the files added to `~/.mcp-auth`
-
-```bash
-rm -rf ~/.mcp-auth
-```
+Interested in contributing, and running this server locally? See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.

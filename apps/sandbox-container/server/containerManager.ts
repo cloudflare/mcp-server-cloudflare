@@ -1,11 +1,23 @@
 import { DurableObject } from 'cloudflare:workers'
 
+import { MetricsTracker } from '@repo/mcp-observability'
+
+import { ContainerEvent } from './metrics'
+
+import type { Env } from './sandbox.server.context'
+
 export class ContainerManager extends DurableObject<Env> {
+	readonly metrics: MetricsTracker
+
 	constructor(
-		public ctx: DurableObjectState,
+		ctx: DurableObjectState,
 		public env: Env
 	) {
 		super(ctx, env)
+		this.metrics = new MetricsTracker(env.MCP_METRICS, {
+			name: env.MCP_SERVER_NAME,
+			version: env.MCP_SERVER_VERSION,
+		})
 	}
 
 	async trackContainer(id: string) {
@@ -25,11 +37,13 @@ export class ContainerManager extends DurableObject<Env> {
 
 			console.log(id, time, now, now.valueOf() - time.valueOf())
 
-			if (now.valueOf() - time.valueOf() > 10 * 60 * 1000) {
-				const doId = this.env.CONTAINER_MCP_AGENT.idFromString(id)
-				const stub = this.env.CONTAINER_MCP_AGENT.get(doId)
-				await stub.destroyContainer()
+			// 15m timeout for container lifetime
+			if (now.valueOf() - time.valueOf() > 15 * 60 * 1000) {
 				await this.killContainer(id)
+				// TODO: Figure out why we were running in to invalid durable object id the id does not match this durable object class error
+				const doId = this.env.USER_CONTAINER.idFromString(id)
+				const stub = this.env.USER_CONTAINER.get(doId)
+				await stub.destroyContainer()
 			}
 		}
 	}
@@ -40,6 +54,13 @@ export class ContainerManager extends DurableObject<Env> {
 		for (const c of activeContainers.keys()) {
 			activeIds.push(c)
 		}
+
+		this.metrics.logEvent(
+			new ContainerEvent({
+				active: activeIds.length,
+			})
+		)
+
 		return activeIds
 	}
 }

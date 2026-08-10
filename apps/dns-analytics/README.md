@@ -1,0 +1,39 @@
+# Cloudflare DNS Analytics MCP Server 📡
+
+This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP
+connections, with Cloudflare OAuth built-in.
+
+It integrates tools powered by the [Cloudflare DNS Analytics API](https://developers.cloudflare.com/api/resources/dns/) to provide insights on DNS analytics and optimization.
+
+The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth/account context for every request. `/sse` is not the deprecated HTTP+SSE transport. OAuth grants and token validation remain durable security state; the server stores no MCP protocol session.
+
+## 🔨 Available Tools
+
+Currently available tools:
+
+| **Category**            | **Tool**                    | **Description**                                                |
+| ----------------------- | --------------------------- | -------------------------------------------------------------- |
+| **Zone Information**    | `zones_list`                | List zones under the current active account.                   |
+| **DNS Analytics**       | `dns_report`                | Fetch the DNS Report for a given zone over a given time frame. |
+| **Account DNS Setting** | `show_account_dns_settings` | Fetch the DNS setting for the current active account.          |
+| **Zone DNS Setting**    | `show_zone_dns_settings`    | Fetch the DNS setting for a given zone.                        |
+
+**Note:** Account-scoped tools detect single-account credentials and account-scoped API tokens automatically. If your credentials can access multiple accounts, pass `account_id` to the tool or set a `cf-account-id` request header in your MCP client configuration.
+
+This MCP server is still a work in progress, and we plan to add more tools in the future.
+
+### Prompt Examples
+
+- `List zones under my Cloudflare account.`
+- `What are the DNS Settings for my account?`
+- `Show me the zones under my account and fetch DNS Report for them.`
+- `How can I optimize my DNS Setting based on my DNS Report?`
+- `Which of my zones has the highest traffic?`
+- `Read Cloudflare's documentation on managing DNS records and tell me how to optimize my DNS settings.`
+- `Show me DNS Report for https://example.com in the last X days.`
+
+## Connect to the MCP server
+
+Connect your MCP client directly to `https://dns-analytics.mcp.cloudflare.com/mcp`. If prompted, complete the Cloudflare OAuth flow in your browser. The tools become available after authorization.
+
+Interested in contributing, and running this server locally? See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.

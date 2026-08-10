@@ -1,11 +1,11 @@
-import { assert, expect } from 'vitest'
+import { expect } from 'vitest'
 import { describeEval } from 'vitest-evals'
-import { z } from 'zod'
 
+import { runTask } from '@repo/eval-tools/src/runTask'
 import { checkFactuality } from '@repo/eval-tools/src/scorers'
 import { eachModel } from '@repo/eval-tools/src/test-models'
 
-import { initializeClient, runTask } from './utils'
+import { initializeClient } from './utils'
 
 eachModel('$modelName', ({ model }) => {
 	describeEval('Runs a python file in a container', {

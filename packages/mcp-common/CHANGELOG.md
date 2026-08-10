@@ -1,0 +1,150 @@
+# @repo/mcp-common
+
+## 0.20.8
+
+### Patch Changes
+
+- 4e1e6ab: Handle malformed direct API-token requests as structured client auth responses, use credential ownership prefixes to avoid unnecessary identity probes while retaining Wrangler OAuth and legacy compatibility, preserve rate-limit backoff, and downgrade expected authentication failures from error logging.
+
+## 0.20.7
+
+### Patch Changes
+
+- 1df6213: Migrate all MCP servers to fresh SDK v2 factories with default stateless 2025 compatibility, request-scoped auth/context, and no live protocol Durable Object or SSE session state. Upgrade the released MCP stack to `agents@0.20.1`, `@modelcontextprotocol/server@2.0.0`, `@modelcontextprotocol/client@2.0.0`, and SDK v1 compatibility package `@modelcontextprotocol/sdk@1.30.0`, using the isolated `agents/mcp/server` stateless handler. Keep `/sse` as a URL alias for the same Streamable HTTP handler as `/mcp`, without retaining the deprecated HTTP+SSE transport. Assemble every deployment through canonical public/authenticated app modules, prune obsolete app-level routing dependencies, and expose a tracked registration context instead of the raw SDK server. Preserve append-only Durable Object migration history while explicitly deleting retired protocol classes, preserve application/security state, upgrade the OAuth provider to 0.8.2 with exact resource matching, bound MCP request bodies, and require explicit Workers Builds identifiers.
+- Updated dependencies [1df6213]
+  - @repo/mcp-observability@0.32.6
+
+## 0.20.6
+
+### Patch Changes
+
+- cb01861: Add structured output for the Cloudflare documentation AI Search tool while preserving XML text content for older clients.
+
+## 0.20.5
+
+### Patch Changes
+
+- f77355c: fix(mcp-common): allow `workflow` `eventType` and treat `wallTimeMs`/`cpuTimeMs` as optional in observability response schema
+
+  The Workers Observability response schema (`zCloudflareMiniEvent` / `zCloudflareEvent` in `packages/mcp-common/src/types/workers-logs.types.ts`) was missing `'workflow'` from the `eventType` enum, and `zCloudflareEvent` re-declared `cpuTimeMs` / `wallTimeMs` as required. Cloudflare Workflow events emit `eventType: "workflow"` and do not always include the time fields, so the workers-observability MCP's `query_worker_observability` tool would reject any response containing a workflow event with a Zod validation error and return no data to the caller.
+
+  This left the MCP unable to surface logs from any Worker built on Cloudflare Workflows. Adding `'workflow'` to the enum and making the time fields optional unblocks those queries.
+
+## 0.20.4
+
+### Patch Changes
+
+- 50926ec: Bump @cloudflare/workers-oauth-provider to ^0.4.0, add resourceMatchOriginOnly migration flag and 30-day refresh token TTL
+
+## 0.20.3
+
+### Patch Changes
+
+- 01a172e: Classify upstream 4xx errors correctly instead of returning 500, and set reportToSentry flag to avoid alerting on expected client errors
+
+## 0.20.2
+
+### Patch Changes
+
+- 99e2282: Move docs MCP server to use AI Search
+- Updated dependencies [99e2282]
+  - @repo/mcp-observability@0.32.5
+
+## 0.20.1
+
+### Patch Changes
+
+- 7fc3f18: Update cloudflare oauth handler 2
+
+## 0.20.0
+
+### Minor Changes
+
+- f9f0bb6: Be explicit in oauth error messages
+
+### Patch Changes
+
+- 847fc1f: Update cloudflare-oauth-handler
+- Updated dependencies [847fc1f]
+  - @repo/mcp-observability@0.32.4
+
+## 0.19.3
+
+### Patch Changes
+
+- 43f493d: Update agent + modelcontextprotocol deps
+- Updated dependencies [43f493d]
+  - @repo/mcp-observability@0.32.3
+
+## 0.19.2
+
+### Patch Changes
+
+- 24dd872: feat: Add MCP tool titles and hints to all Cloudflare tools
+
+## 0.19.1
+
+### Patch Changes
+
+- 7422e71: Update MCP sdk
+- Updated dependencies [7422e71]
+  - @repo/mcp-observability@0.32.2
+
+## 0.19.0
+
+### Minor Changes
+
+- 1833c6d: add relative timeframe support for querying
+
+### Patch Changes
+
+- cc6d41f: Update agents deps & modelcontextprotocol
+- Updated dependencies [cc6d41f]
+  - @repo/mcp-observability@0.32.1
+
+## 0.18.0
+
+### Minor Changes
+
+- f885d07: Add search docs tool to bindings and obs servers
+
+## 0.17.1
+
+### Patch Changes
+
+- 83e2d19: Pass in type user_token in props during oauth flow
+
+## 0.17.0
+
+### Minor Changes
+
+- 6cf52a6: Support AOT tokens
+
+### Patch Changes
+
+- 0fc4439: Update agents and modelcontext dependencies
+- Updated dependencies [6cf52a6]
+- Updated dependencies [0fc4439]
+  - @repo/mcp-observability@0.32.0
+
+## 0.16.3
+
+### Patch Changes
+
+- 3677a18: Remove extraneous log
+
+## 0.16.2
+
+### Patch Changes
+
+- 86c2e4f: Add API token passthrough auth
+
+## 0.16.1
+
+### Patch Changes
+
+- cf3771b: chore: add suffixes to common files in apps and packages
+
+  It can be confusing switching between 16 files named 'index.ts', or 3 files named workers.ts. This change renames common files to have suffixes such as .types.ts, .api.ts, etc. to make it easier to work across files in the monorepo.
+
+  - @repo/mcp-observability@0.31.1

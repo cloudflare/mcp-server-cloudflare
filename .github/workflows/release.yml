@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    branches: ['main']
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  create-release-pr:
+    name: Create Release PR
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    timeout-minutes: 5
+    concurrency: ${{ github.workflow }}-create-release-pr
+    outputs:
+      published: ${{ steps.create-release-pr.outputs.published }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Create Release PR
+        id: create-release-pr
+        uses: changesets/action@v1
+        with:
+          publish: pnpm changeset publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Save Published Packages
+        if: steps.create-release-pr.outputs.published == 'true'
+        run: |
+          echo '${{steps.create-release-pr.outputs.publishedPackages}}' \
+            > ${{ github.workspace }}/published-packages.json
+      - name: Upload Published Packages
+        if: steps.create-release-pr.outputs.published == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-packages
+          path: ${{ github.workspace }}/published-packages.json
+
+  deploy-production:
+    name: Deploy (production)
+    needs: create-release-pr
+    if: needs.create-release-pr.outputs.published == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency: ${{ github.workflow }}-deploy-production
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+      - name: Download published packages
+        uses: actions/download-artifact@v4
+        with:
+          name: published-packages
+          path: ${{ runner.temp }}
+      - uses: ./.github/actions/setup
+      - name: Deploy Published Workers (production)
+        run: pnpm runx deploy-published-workers --env production
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

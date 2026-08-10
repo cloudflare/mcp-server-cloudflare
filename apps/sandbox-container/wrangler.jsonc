@@ -1,14 +1,14 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "sandbox-container-dev",
-	"main": "server/index.ts",
+	"main": "server/sandbox.server.app.ts",
 	"compatibility_date": "2025-04-03",
 	"compatibility_flags": ["nodejs_compat"],
 	"containers": [
 		{
 			"name": "sandbox-container",
 			"image": "./Dockerfile",
-			"class_name": "ContainerMcpAgent",
+			"class_name": "UserContainer",
 			"max_instances": 2,
 			"rollout_step_percentage": 100
 		}
@@ -16,12 +16,12 @@
 	"durable_objects": {
 		"bindings": [
 			{
-				"class_name": "ContainerMcpAgent",
-				"name": "CONTAINER_MCP_AGENT"
-			},
-			{
 				"class_name": "ContainerManager",
 				"name": "CONTAINER_MANAGER"
+			},
+			{
+				"class_name": "UserContainer",
+				"name": "USER_CONTAINER"
 			}
 		]
 	},
@@ -29,15 +29,31 @@
 		{
 			"new_sqlite_classes": ["ContainerManager", "ContainerMcpAgent"],
 			"tag": "v1"
+		},
+		{
+			"new_sqlite_classes": ["UserContainer"],
+			"tag": "v2"
+		},
+		{
+			"deleted_classes": ["ContainerMcpAgent"],
+			"tag": "v3"
 		}
 	],
 	"observability": {
-		"enabled": true
+		"enabled": true,
+		"traces": {
+			"enabled": true,
+			"head_sampling_rate": 0.1
+		}
 	},
 	"kv_namespaces": [
 		{
 			"binding": "OAUTH_KV",
 			"id": "DEV_KV"
+		},
+		{
+			"binding": "USER_BLOCKLIST",
+			"id": "DEV_BLOCKLIST"
 		}
 	],
 	"dev": {
@@ -87,6 +103,43 @@
 					}
 				]
 			},
+			"name": "mcp-cloudflare-container-sandbox-staging",
+			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
+			"routes": [{ "pattern": "containers-staging.mcp.cloudflare.com", "custom_domain": true }],
+			"containers": [
+				{
+					"name": "sandbox-container-staging",
+					// UPDATE WHEN DEPLOYING A NEW IMAGE
+					"image": "registry.cloudchamber.cfdata.org/sandbox-container:d802004",
+					"class_name": "UserContainer",
+					"max_instances": 5,
+					"rollout_step_percentage": 100,
+					"instances": 3
+				}
+			],
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "ContainerManager",
+						"name": "CONTAINER_MANAGER"
+					},
+					{
+						"class_name": "UserContainer",
+						"name": "USER_CONTAINER"
+					}
+				]
+			},
+			"vars": {
+				"ENVIRONMENT": "staging",
+				"MCP_SERVER_NAME": "<PLACEHOLDER>",
+				"MCP_SERVER_VERSION": "<PLACEHOLDER>"
+			},
+			"analytics_engine_datasets": [
+				{
+					"binding": "MCP_METRICS",
+					"dataset": "mcp-metrics-staging"
+				}
+			],
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",
@@ -101,35 +154,19 @@
 			"analytics_engine_datasets": [
 				{
 					"binding": "MCP_METRICS",
-					"dataset": "mcp-metrics-staging"
+					"dataset": "mcp-metrics-production"
+				}
+			],
+			"kv_namespaces": [
+				{
+					"binding": "OAUTH_KV",
+					"id": "8d66696bdd534133bbc6a773b8caf99b"
+				},
+				{
+					"binding": "USER_BLOCKLIST",
+					"id": "b874d6ae29ec43e5afad7be8da067676"
 				}
 			]
-		},
-		// "production": {
-		// 	"name": "mcp-cloudflare-workers-observability-production",
-		// 	"account_id": "8995c0f49cdcf57eb54d2c1e52b7d2f3",
-		// 	"routes": [{ "pattern": "containers.mcp.cloudflare.com", "custom_domain": true }],
-		// 	"durable_objects": {
-		// 		"bindings": [
-		// 	{
-		// 		"class_name": "ContainerMcpAgent",
-		// 		"name": "CONTAINER_MCP_AGENT"
-		// 	},
-		// 	{
-		// 		"class_name": "ContainerManager",
-		// 		"name": "CONTAINER_MANAGER"
-		// 	}
-		// ]
-		// 	},
-		// 	"kv_namespaces": [
-		// 		{
-		// 			"binding": "OAUTH_KV",
-		// 			"id": "f9782295993747df90c29c45ca89edb1"
-		// 		}
-		// 	],
-		// 	"vars": {
-		// 		"ENVIRONMENT": "production"
-		// 	}
-		// }
+		}
 	}
 }

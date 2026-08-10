@@ -1,10 +1,24 @@
 {
 	"name": "@repo/tools",
-	"version": "0.31.1",
+	"version": "0.33.2",
 	"private": true,
 	"sideEffects": false,
 	"type": "module",
 	"directories": {
 		"bin": "bin"
+	},
+	"devDependencies": {
+		"@types/fs-extra": "11.0.4",
+		"@types/node": "22.15.17",
+		"vitest": "4.1.8"
+	},
+	"dependencies": {
+		"@commander-js/extra-typings": "13.1.0",
+		"@jahands/cli-tools": "0.10.2",
+		"commander": "13.1.0",
+		"empathic": "1.1.0",
+		"tsx": "4.19.3",
+		"zod": "4.4.3",
+		"zx": "8.5.4"
 	}
 }

@@ -1,0 +1,28 @@
+{
+	"name": "cloudflare-radar-mcp-server",
+	"version": "0.2.3",
+	"private": true,
+	"scripts": {
+		"check:lint": "run-eslint-workers",
+		"check:types": "run-tsc",
+		"deploy": "run-wrangler-deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"types": "wrangler types",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@repo/mcp-common": "workspace:*",
+		"cloudflare": "4.2.0",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "0.16.11",
+		"@types/node": "22.15.17",
+		"prettier": "3.5.3",
+		"typescript": "5.5.4",
+		"vitest": "4.1.8",
+		"wrangler": "4.96.0"
+	},
+	"type": "module"
+}

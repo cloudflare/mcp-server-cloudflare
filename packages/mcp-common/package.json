@@ -1,6 +1,6 @@
 {
 	"name": "@repo/mcp-common",
-	"version": "0.16.0",
+	"version": "0.20.8",
 	"private": true,
 	"sideEffects": false,
 	"main": "./src/index.ts",
@@ -11,24 +11,28 @@
 		"test:coverage": "run-vitest-coverage"
 	},
 	"dependencies": {
-		"@cloudflare/workers-oauth-provider": "0.0.2",
+		"@cloudflare/workers-oauth-provider": "catalog:",
+		"@fast-csv/format": "5.0.2",
 		"@hono/zod-validator": "0.4.3",
-		"@modelcontextprotocol/sdk": "1.9.0",
+		"@modelcontextprotocol/server": "catalog:",
 		"@repo/mcp-observability": "workspace:*",
-		"agents": "0.0.62",
+		"agents": "catalog:",
 		"cloudflare": "4.2.0",
 		"hono": "4.7.6",
-		"zod": "3.24.2"
+		"toucan-js": "4.1.1",
+		"zod": "4.4.3"
 	},
 	"devDependencies": {
-		"@cloudflare/types": "6.29.1",
-		"@cloudflare/vitest-pool-workers": "0.8.14",
-		"@cloudflare/workers-types": "4.20250414.0",
+		"@cloudflare/vitest-pool-workers": "0.16.11",
 		"@repo/eslint-config": "workspace:*",
 		"@repo/tools": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@vitest/ui": "3.0.9",
-		"vitest": "3.0.9",
-		"@types/node": "22.14.1"
-	}
+		"@sentry/types": "8.9.2",
+		"@types/node": "22.15.17",
+		"@vitest/ui": "4.1.8",
+		"msw": "2.14.6",
+		"vitest": "4.1.8",
+		"wrangler": "4.96.0"
+	},
+	"type": "module"
 }

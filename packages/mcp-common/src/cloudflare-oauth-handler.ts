@@ -1,75 +1,298 @@
+import { GrantType, OAuthError as ProviderOAuthError } from '@cloudflare/workers-oauth-provider'
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
-import { AuthUser } from '../../mcp-observability/src'
-import { getAuthorizationURL, getAuthToken, refreshAuthToken } from './cloudflare-auth'
-import { McpError } from './mcp-error'
+import { AuthUser } from '@repo/mcp-observability'
+
+import { AuthPropsSchema, CloudflareAccountsSchema, CloudflareUserSchema } from './auth-props'
+import {
+	generatePKCECodes,
+	getAuthorizationURL,
+	getAuthToken,
+	refreshAuthToken,
+} from './cloudflare-auth'
+import { McpError, safeStatusCode } from './mcp-error'
+import { useSentry } from './sentry'
+import { V4Schema } from './v4-api'
+import {
+	bindStateToSession,
+	clientIdAlreadyApproved,
+	createOAuthState,
+	generateCSRFProtection,
+	OAuthError,
+	parseRedirectApproval,
+	renderApprovalDialog,
+	validateOAuthState,
+} from './workers-oauth-utils'
 
 import type {
+	AuthRequest,
 	OAuthHelpers,
 	TokenExchangeCallbackOptions,
 	TokenExchangeCallbackResult,
 } from '@cloudflare/workers-oauth-provider'
 import type { Context } from 'hono'
-import type { MetricsTracker } from '../../mcp-observability/src'
+import type { MetricsTracker } from '@repo/mcp-observability'
+import type { AuthProps } from './auth-props'
+import type { BaseHonoContext } from './sentry'
+
+/**
+ * Converts an McpError into an OAuth 2.1 spec-compliant JSON error response.
+ *
+ * Maps HTTP status codes to the standard OAuth error codes defined in
+ * https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#section-3.2.4
+ */
+function mcpErrorToOAuthResponse(e: McpError): Response {
+	let oauthCode: string
+	if (e.code >= 500) {
+		oauthCode = 'server_error'
+	} else if (e.code === 429) {
+		oauthCode = 'temporarily_unavailable'
+	} else if (e.code === 401 || e.code === 403) {
+		oauthCode = 'access_denied'
+	} else {
+		oauthCode = 'invalid_request'
+	}
+	return new OAuthError(oauthCode, e.message, e.code >= 500 ? 500 : e.code, e.headers).toResponse()
+}
 
 type AuthContext = {
 	Bindings: {
 		OAUTH_PROVIDER: OAuthHelpers
+		OAUTH_KV: KVNamespace
+		MCP_COOKIE_ENCRYPTION_KEY: string
 		CLOUDFLARE_CLIENT_ID: string
 		CLOUDFLARE_CLIENT_SECRET: string
+		MCP_SERVER_NAME?: string
+		MCP_SERVER_DESCRIPTION?: string
 	}
-}
+} & BaseHonoContext
 
-const AuthRequestSchema = z.object({
-	responseType: z.string(),
-	clientId: z.string(),
-	redirectUri: z.string(),
-	scope: z.array(z.string()),
-	state: z.string(),
-	codeChallenge: z.string().optional(),
-	codeChallengeMethod: z.string().optional(),
-})
-
-// AuthRequest but with extra params that we use in our authentication logic
-export const AuthRequestSchemaWithExtraParams = AuthRequestSchema.merge(
-	z.object({ codeVerifier: z.string() })
-)
-
-export const AuthQuery = z.object({
+const AuthQuery = z.object({
 	code: z.string().describe('OAuth code from CF dash'),
 	state: z.string().describe('Value of the OAuth state'),
 	scope: z.string().describe('OAuth scopes granted'),
 })
 
-export type UserSchema = z.infer<typeof UserResponseSchema>
-const UserResponseSchema = z.object({
-	result: z.object({
-		id: z.string(),
-		email: z.string(),
-	}),
-})
+type UserSchema = z.infer<typeof CloudflareUserSchema>
+type AccountsSchema = z.infer<typeof CloudflareAccountsSchema>
 
-export type AccountSchema = z.infer<typeof AccountResponseSchema>
-const AccountResponseSchema = z.object({
-	result: z.array(
-		z.object({
-			name: z.string(),
-			id: z.string(),
+export { AuthPropsSchema }
+export type { AuthProps } from './auth-props'
+
+function retryAfterHeaders(...responses: Response[]): Record<string, string> {
+	return {
+		'Retry-After':
+			responses.find((response) => response.status === 429)?.headers.get('Retry-After') ?? '30',
+	}
+}
+
+/** Classifies one or more identity-probe failures by priority. */
+function throwIdentityProbeError(
+	statuses: readonly [number, ...number[]],
+	internalMessage: string,
+	headers: Record<string, string> = {}
+): never {
+	if (statuses.some((status) => status >= 500)) {
+		throw new McpError('Cloudflare API is temporarily unavailable', 502, {
+			reportToSentry: true,
+			internalMessage,
 		})
-	),
-})
+	}
+	if (statuses.includes(429)) {
+		throw new McpError('Rate limited, try again later', 429, {
+			reportToSentry: false,
+			internalMessage,
+			headers,
+		})
+	}
+	if (statuses.includes(401)) {
+		throw new McpError('Access token is invalid or expired', 401, {
+			reportToSentry: false,
+			internalMessage,
+		})
+	}
+	if (statuses.includes(403)) {
+		throw new McpError('Token lacks required user:read or account:read scope', 403, {
+			reportToSentry: false,
+			internalMessage,
+		})
+	}
+	if (statuses.includes(400)) {
+		throw new McpError('Access token appears malformed; reauthenticate and try again', 401, {
+			reportToSentry: false,
+			internalMessage,
+		})
+	}
+	throw new McpError('Failed to verify token', safeStatusCode(statuses[0]), {
+		reportToSentry: false,
+		internalMessage,
+	})
+}
 
-async function getTokenAndUser(
+function throwCombinedApiError(userResponse: Response, accountsResponse: Response): never {
+	throwIdentityProbeError(
+		[userResponse.status, accountsResponse.status],
+		`Upstream user=${userResponse.status}, accounts=${accountsResponse.status}`,
+		retryAfterHeaders(userResponse, accountsResponse)
+	)
+}
+
+export type CloudflareTokenOwner = 'account' | 'unknown' | 'user'
+
+export async function getUserAndAccounts(
+	accessToken: string,
+	devModeHeaders?: HeadersInit,
+	tokenOwner: CloudflareTokenOwner = 'unknown'
+): Promise<{ user: UserSchema | null; accounts: AccountsSchema }> {
+	const headers = devModeHeaders
+		? devModeHeaders
+		: {
+				Authorization: `Bearer ${accessToken}`,
+			}
+
+	// Account-owned tokens cannot represent a user, so skip the unnecessary user probe.
+	let userResponse: Response | undefined
+	let accountsResponse: Response
+	try {
+		const userRequest =
+			tokenOwner === 'account'
+				? Promise.resolve(undefined)
+				: fetch('https://api.cloudflare.com/client/v4/user', { headers })
+		;[userResponse, accountsResponse] = await Promise.all([
+			userRequest,
+			fetch('https://api.cloudflare.com/client/v4/accounts', { headers }),
+		])
+	} catch (error) {
+		console.error('Cloudflare API request failed', error)
+		throw new McpError('Cloudflare API is temporarily unavailable', 502, {
+			reportToSentry: true,
+			internalMessage: `Network error: ${error instanceof Error ? error.message : String(error)}`,
+		})
+	}
+
+	if (userResponse === undefined && !accountsResponse.ok) {
+		const message = `Cloudflare API error: accounts=${accountsResponse.status}`
+		if (accountsResponse.status >= 500) {
+			console.error(message)
+		} else {
+			console.warn(message)
+		}
+		throwIdentityProbeError(
+			[accountsResponse.status],
+			`Upstream accounts=${accountsResponse.status}`,
+			retryAfterHeaders(accountsResponse)
+		)
+	}
+
+	// If both endpoints failed, use priority-based error classification
+	if (userResponse !== undefined && !userResponse.ok && !accountsResponse.ok) {
+		const message = `Cloudflare API error: user=${userResponse.status}, accounts=${accountsResponse.status}`
+		if (userResponse.status >= 500 || accountsResponse.status >= 500) {
+			console.error(message)
+		} else {
+			console.warn(message)
+		}
+		throwCombinedApiError(userResponse, accountsResponse)
+	}
+
+	// Parse accounts with safeParse for graceful degradation
+	let accounts: AccountsSchema = []
+	if (accountsResponse.ok) {
+		try {
+			const json = await accountsResponse.json()
+			const parsed = V4Schema(CloudflareAccountsSchema).safeParse(json)
+			if (parsed.success) {
+				accounts = parsed.data.result ?? []
+			} else {
+				console.error('Cloudflare API /accounts payload did not match expected shape', parsed.error)
+			}
+		} catch (error) {
+			console.error('Cloudflare API /accounts response is not valid JSON', error)
+		}
+	} else if (userResponse?.ok) {
+		// User succeeded but accounts failed — surface the accounts error
+		// (5xx should be reported, 4xx like 403 may indicate insufficient scopes)
+		const message = `Cloudflare API /accounts failed with status ${accountsResponse.status}`
+		if (accountsResponse.status >= 500) {
+			console.error(message)
+		} else {
+			console.warn(message)
+		}
+		throwIdentityProbeError(
+			[accountsResponse.status],
+			`Upstream accounts=${accountsResponse.status}`,
+			retryAfterHeaders(accountsResponse)
+		)
+	}
+
+	if (userResponse === undefined) {
+		if (accounts.length === 1) return { user: null, accounts }
+		throw new McpError('Account token must resolve to exactly one Cloudflare account', 401, {
+			reportToSentry: false,
+			internalMessage: `accounts=${accountsResponse.status}, count=${accounts.length}`,
+		})
+	}
+
+	// Parse user with safeParse for graceful degradation
+	let user: UserSchema | null = null
+	if (userResponse.ok) {
+		try {
+			const json = await userResponse.json()
+			const parsed = V4Schema(CloudflareUserSchema).safeParse(json)
+			if (parsed.success) {
+				user = parsed.data.result ?? null
+			} else {
+				console.error('Cloudflare API /user payload did not match expected shape', parsed.error)
+			}
+		} catch (error) {
+			console.error('Cloudflare API /user response is not valid JSON', error)
+		}
+	} else if (accounts.length > 0 && tokenOwner === 'unknown' && userResponse.status < 429) {
+		// Only legacy credentials need response-based account-token inference.
+		// Transient failures must never change the inferred credential owner.
+		return { user: null, accounts }
+	} else {
+		throwIdentityProbeError(
+			[userResponse.status],
+			`Upstream user=${userResponse.status}`,
+			retryAfterHeaders(userResponse)
+		)
+	}
+
+	if (user) {
+		return { user, accounts }
+	}
+
+	// Only legacy unprefixed tokens need response-based account-token inference.
+	if (accounts.length > 0 && tokenOwner === 'unknown') {
+		return { user: null, accounts }
+	}
+
+	throw new McpError('Failed to verify token: no user or account information', 401, {
+		reportToSentry: false,
+		internalMessage: `user=${userResponse.status}, accounts=${accountsResponse.status}`,
+	})
+}
+
+/**
+ * Exchanges an OAuth authorization code for access and refresh tokens, then fetches user and account details.
+ *
+ * @param c - Hono context containing OAuth environment variables (client ID/secret)
+ * @param code - OAuth authorization code received from the authorization server
+ * @param code_verifier - PKCE code verifier used to validate the authorization request
+ * @returns Promise resolving to an object containing access token, refresh token, user profile, and accounts
+ */
+async function getTokenAndUserDetails(
 	c: Context<AuthContext>,
 	code: string,
 	code_verifier: string
 ): Promise<{
 	accessToken: string
 	refreshToken: string
-	user: UserSchema['result']
-	accounts: AccountSchema['result']
+	user: UserSchema
+	accounts: AccountsSchema
 }> {
 	// Exchange the code for an access token
 	const { access_token: accessToken, refresh_token: refreshToken } = await getAuthToken({
@@ -79,31 +302,13 @@ async function getTokenAndUser(
 		code,
 		code_verifier,
 	})
-	const [userResponse, accountsResponse] = await Promise.all([
-		fetch('https://api.cloudflare.com/client/v4/user', {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-		}),
-		fetch('https://api.cloudflare.com/client/v4/accounts', {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-		}),
-	])
 
-	if (!userResponse.ok) {
-		console.log(await userResponse.text())
-		throw new McpError('Failed to fetch user', 500)
+	// Cloudflare OAuth authorization-code grants always represent a user principal.
+	const { user, accounts } = await getUserAndAccounts(accessToken, undefined, 'user')
+	// User cannot be null for OAuth flow
+	if (user === null) {
+		throw new McpError('Failed to fetch user', 500, { reportToSentry: true })
 	}
-	if (!accountsResponse.ok) {
-		console.log(await accountsResponse.text())
-		throw new McpError('Failed to fetch accounts', 500)
-	}
-
-	// Fetch the user & accounts info from Cloudflare
-	const { result: user } = UserResponseSchema.parse(await userResponse.json())
-	const { result: accounts } = AccountResponseSchema.parse(await accountsResponse.json())
 
 	return { accessToken, refreshToken, user, accounts }
 }
@@ -114,27 +319,109 @@ export async function handleTokenExchangeCallback(
 	clientSecret: string
 ): Promise<TokenExchangeCallbackResult | undefined> {
 	// options.props contains the current props
-	if (options.grantType === 'refresh_token') {
-		// handle token refreshes
-		const {
-			access_token: accessToken,
-			refresh_token: refreshToken,
-			expires_in,
-		} = await refreshAuthToken({
-			client_id: clientId,
-			client_secret: clientSecret,
-			refresh_token: options.props.refreshToken,
-		})
+	if (options.grantType === GrantType.REFRESH_TOKEN) {
+		const props = AuthPropsSchema.parse(options.props)
+		if (props.type === 'account_token') {
+			// Account tokens cannot be refreshed — this is a client error, not a server error
+			throw new ProviderOAuthError('invalid_grant', {
+				description: 'Account tokens cannot be refreshed',
+				statusCode: 400,
+			})
+		}
+		if (!props.refreshToken) {
+			throw new ProviderOAuthError('invalid_grant', {
+				description: 'No refresh token available for this grant',
+				statusCode: 400,
+			})
+		}
+
+		// handle token refreshes — convert upstream McpErrors to OAuth-compliant errors
+		let accessToken: string
+		let refreshToken: string
+		let expires_in: number
+		try {
+			const result = await refreshAuthToken({
+				client_id: clientId,
+				client_secret: clientSecret,
+				refresh_token: props.refreshToken,
+			})
+			accessToken = result.access_token
+			refreshToken = result.refresh_token
+			expires_in = result.expires_in
+		} catch (e) {
+			if (e instanceof McpError) {
+				// Map upstream failures to OAuth error codes per RFC 6749
+				let oauthCode: string
+				let httpStatus: number
+				if (e.code >= 500) {
+					oauthCode = 'server_error'
+					httpStatus = 500
+				} else if (e.code === 429) {
+					oauthCode = 'temporarily_unavailable'
+					httpStatus = 503
+				} else if (e.code === 401) {
+					oauthCode = 'invalid_client'
+					httpStatus = 401
+				} else {
+					oauthCode = 'invalid_grant'
+					httpStatus = 400
+				}
+				throw new ProviderOAuthError(oauthCode, {
+					description: e.message,
+					statusCode: httpStatus,
+				})
+			}
+			throw e
+		}
 
 		return {
 			newProps: {
 				...options.props,
 				accessToken,
 				refreshToken,
-			},
+			} satisfies AuthProps,
 			accessTokenTTL: expires_in,
 		}
 	}
+}
+
+/**
+ * Helper function to redirect to Cloudflare OAuth
+ *
+ * Note: We pass the stateToken as a simple string in the URL.
+ * The existing getAuthorizationURL function will wrap it with the oauthReqInfo
+ * before base64-encoding.
+ * On callback, we extract the stateToken, look up the original oauthReqInfo in KV.
+ */
+async function redirectToCloudflare(
+	c: Context<AuthContext>,
+	oauthReqInfo: AuthRequest,
+	stateToken: string,
+	codeChallenge: string,
+	scopes: Record<string, string>,
+	additionalHeaders: Record<string, string> = {}
+): Promise<Response> {
+	// Create a modified oauthReqInfo that includes our stateToken
+	const stateWithToken: AuthRequest = {
+		...oauthReqInfo,
+		state: stateToken, // embed our KV state token
+	}
+
+	const { authUrl } = await getAuthorizationURL({
+		client_id: c.env.CLOUDFLARE_CLIENT_ID,
+		redirect_uri: new URL('/oauth/callback', c.req.url).href,
+		state: stateWithToken,
+		scopes,
+		codeChallenge,
+	})
+
+	return new Response(null, {
+		status: 302,
+		headers: {
+			...additionalHeaders,
+			Location: authUrl,
+		},
+	})
 }
 
 /**
@@ -151,124 +438,236 @@ export function createAuthHandlers({
 	scopes: Record<string, string>
 	metrics: MetricsTracker
 }) {
-	{
-		const app = new Hono<AuthContext>()
-		/**
-		 * OAuth Authorization Endpoint
-		 *
-		 * This route initiates the Cloudflare OAuth flow when a user wants to log in.
-		 * It creates a random state parameter to prevent CSRF attacks and stores the
-		 * original OAuth request information in KV storage for later retrieval.
-		 * Then it redirects the user to Cloudflare's authorization page with the appropriate
-		 * parameters so the user can authenticate and grant permissions.
-		 */
-		app.get(`/oauth/authorize`, async (c) => {
-			try {
-				const oauthReqInfo = await c.env.OAUTH_PROVIDER.parseAuthRequest(c.req.raw)
-				oauthReqInfo.scope = Object.keys(scopes)
-				if (!oauthReqInfo.clientId) {
-					return c.text('Invalid request', 400)
-				}
-				const res = await getAuthorizationURL({
-					client_id: c.env.CLOUDFLARE_CLIENT_ID,
-					redirect_uri: new URL('/oauth/callback', c.req.url).href,
-					state: oauthReqInfo,
-					scopes,
-				})
+	const app = new Hono<AuthContext>()
+	app.use(useSentry)
 
-				return Response.redirect(res.authUrl, 302)
-			} catch (e) {
-				if (e instanceof Error) {
-					metrics.logEvent(
-						new AuthUser({
-							errorMessage: `Authorize Error: ${e.name}: ${e.message}`,
-						})
-					)
-				}
-				if (e instanceof McpError) {
-					return c.text(e.message, { status: e.code })
-				}
-				console.error(e)
-				return c.text('Internal Error', 500)
+	/**
+	 * GET /oauth/authorize - Show consent dialog or redirect if approved
+	 */
+	app.get(`/oauth/authorize`, async (c) => {
+		try {
+			const oauthReqInfo = await c.env.OAUTH_PROVIDER.parseAuthRequest(c.req.raw)
+			oauthReqInfo.scope = Object.keys(scopes)
+
+			if (!oauthReqInfo.clientId) {
+				return new OAuthError('invalid_request', 'Missing client_id parameter', 400).toResponse()
 			}
-		})
 
-		/**
-		 * OAuth Callback Endpoint
-		 *
-		 * This route handles the callback from Cloudflare after user authentication.
-		 * It exchanges the temporary code for an access token, then stores some
-		 * user metadata & the auth token as part of the 'props' on the token passed
-		 * down to the client. It ends by redirecting the client back to _its_ callback URL
-		 */
-		app.get(`/oauth/callback`, zValidator('query', AuthQuery), async (c) => {
-			try {
-				const { state, code } = c.req.valid('query')
-				const oauthReqInfo = AuthRequestSchemaWithExtraParams.parse(JSON.parse(atob(state)))
-				// Get the oathReqInfo out of KV
-				if (!oauthReqInfo.clientId) {
-					throw new McpError('Invalid State', 400)
-				}
-
-				const [{ accessToken, refreshToken, user, accounts }] = await Promise.all([
-					getTokenAndUser(c, code, oauthReqInfo.codeVerifier),
-					c.env.OAUTH_PROVIDER.createClient({
-						clientId: oauthReqInfo.clientId,
-						tokenEndpointAuthMethod: 'none',
-					}),
-				])
-
-				// TODO: Implement auth restriction in staging
-				// if (
-				// 	!user.email.endsWith("@cloudflare.com") &&
-				// 	!(c.env.PERMITTED_USERS ?? []).includes(user.email)
-				// ) {
-				// 	throw new McpError(
-				// 		`This user ${user.email} is not allowed to access this restricted MCP server`,
-				// 		401,
-				// 	);
-				// }
-
-				// Return back to the MCP client a new token
-				const { redirectTo } = await c.env.OAUTH_PROVIDER.completeAuthorization({
-					request: oauthReqInfo,
-					userId: user.id,
-					metadata: {
-						label: user.email,
-					},
-					scope: oauthReqInfo.scope,
-					// This will be available on this.props inside MyMCP
-					props: {
-						user,
-						accounts,
-						accessToken,
-						refreshToken,
-					},
-				})
-
-				metrics.logEvent(
-					new AuthUser({
-						userId: user.id,
-					})
+			// Check if client was previously approved (skip consent if so)
+			if (
+				await clientIdAlreadyApproved(
+					c.req.raw,
+					oauthReqInfo.clientId,
+					c.env.MCP_COOKIE_ENCRYPTION_KEY
 				)
+			) {
+				// Client already approved - create state and redirect immediately
+				const { codeChallenge, codeVerifier } = await generatePKCECodes()
+				const stateToken = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV, codeVerifier)
+				const { setCookie: sessionCookie } = await bindStateToSession(stateToken)
 
-				return Response.redirect(redirectTo, 302)
-			} catch (e) {
-				if (e instanceof Error) {
-					console.error(e)
-					metrics.logEvent(
-						new AuthUser({
-							errorMessage: `Callback Error: ${e.name}: ${e.message}`,
-						})
-					)
-				}
-				if (e instanceof McpError) {
-					return c.text(e.message, { status: e.code })
-				}
-				return c.text('Internal Error', 500)
+				return redirectToCloudflare(c, oauthReqInfo, stateToken, codeChallenge, scopes, {
+					'Set-Cookie': sessionCookie,
+				})
 			}
-		})
 
-		return app
-	}
+			// Client not approved - show consent dialog
+			const { token: csrfToken, setCookie: csrfCookie } = generateCSRFProtection()
+
+			// Render approval dialog
+			const response = renderApprovalDialog(c.req.raw, {
+				client: await c.env.OAUTH_PROVIDER.lookupClient(oauthReqInfo.clientId),
+				server: {
+					name: c.env.MCP_SERVER_NAME || 'Cloudflare MCP Server',
+					logo: 'https://images.mcp.cloudflare.com/mcp.svg',
+					description:
+						c.env.MCP_SERVER_DESCRIPTION || 'This server uses Cloudflare for authentication.',
+				},
+				state: {
+					oauthReqInfo,
+				},
+				csrfToken,
+				setCookie: csrfCookie,
+			})
+
+			return response
+		} catch (e) {
+			c.var.sentry?.recordError(e)
+			let message: string | undefined
+			if (e instanceof Error) {
+				message = `${e.name}: ${e.message}`
+			} else if (typeof e === 'string') {
+				message = e
+			} else {
+				message = 'Unknown error'
+			}
+			metrics.logEvent(
+				new AuthUser({
+					errorMessage: `Authorize Error: ${message}`,
+				})
+			)
+			if (e instanceof OAuthError) {
+				return e.toResponse()
+			}
+			if (e instanceof McpError) {
+				return mcpErrorToOAuthResponse(e)
+			}
+			console.error(e)
+			return new OAuthError('server_error', 'Internal Error', 500).toResponse()
+		}
+	})
+
+	/**
+	 * POST /oauth/authorize - Handle consent form submission
+	 */
+	app.post(`/oauth/authorize`, async (c) => {
+		try {
+			// Validates CSRF token, extracts state, and generates approved client cookie
+			const { state, headers } = await parseRedirectApproval(
+				c.req.raw,
+				c.env.MCP_COOKIE_ENCRYPTION_KEY
+			)
+
+			if (!state.oauthReqInfo) {
+				return new OAuthError(
+					'invalid_request',
+					'Missing OAuth request info in state',
+					400
+				).toResponse()
+			}
+
+			const oauthReqInfo = state.oauthReqInfo as AuthRequest
+
+			// Create OAuth state in KV and bind to session
+			const { codeChallenge, codeVerifier } = await generatePKCECodes()
+			const stateToken = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV, codeVerifier)
+			const { setCookie: sessionCookie } = await bindStateToSession(stateToken)
+
+			// Build redirect response
+			const redirectResponse = await redirectToCloudflare(
+				c,
+				oauthReqInfo,
+				stateToken,
+				codeChallenge,
+				scopes
+			)
+
+			// Add both cookies: approved client cookie (if present) and session binding cookie
+			// Note: We must use append() for multiple Set-Cookie headers, not combine with commas
+			if (headers['Set-Cookie']) {
+				redirectResponse.headers.append('Set-Cookie', headers['Set-Cookie'])
+			}
+			redirectResponse.headers.append('Set-Cookie', sessionCookie)
+
+			return redirectResponse
+		} catch (e) {
+			c.var.sentry?.recordError(e)
+			let message: string | undefined
+			if (e instanceof Error) {
+				message = `${e.name}: ${e.message}`
+			} else if (typeof e === 'string') {
+				message = e
+			} else {
+				message = 'Unknown error'
+			}
+			metrics.logEvent(
+				new AuthUser({
+					errorMessage: `Authorize POST Error: ${message}`,
+				})
+			)
+			if (e instanceof OAuthError) {
+				return e.toResponse()
+			}
+			if (e instanceof McpError) {
+				return mcpErrorToOAuthResponse(e)
+			}
+			console.error(e)
+			return new OAuthError('server_error', 'Internal Error', 500).toResponse()
+		}
+	})
+
+	/**
+	 * GET /oauth/callback - Handle OAuth callback from Cloudflare
+	 */
+	app.get(`/oauth/callback`, zValidator('query', AuthQuery), async (c) => {
+		try {
+			const { code } = c.req.valid('query')
+
+			// Validate state using dual validation (KV + session cookie)
+			const { oauthReqInfo, codeVerifier, clearCookie } = await validateOAuthState(
+				c.req.raw,
+				c.env.OAUTH_KV
+			)
+
+			if (!oauthReqInfo.clientId) {
+				return new OAuthError('invalid_request', 'Invalid OAuth request info', 400).toResponse()
+			}
+
+			// Exchange code for tokens and get user details
+			const [{ accessToken, refreshToken, user, accounts }] = await Promise.all([
+				getTokenAndUserDetails(c, code, codeVerifier), // use codeVerifier from KV
+				c.env.OAUTH_PROVIDER.createClient({
+					clientId: oauthReqInfo.clientId,
+					tokenEndpointAuthMethod: 'none',
+				}),
+			])
+
+			// Complete authorization and issue token to MCP client
+			const { redirectTo } = await c.env.OAUTH_PROVIDER.completeAuthorization({
+				request: oauthReqInfo,
+				userId: user.id,
+				metadata: {
+					label: user.email,
+				},
+				scope: oauthReqInfo.scope,
+				props: {
+					type: 'user_token',
+					user,
+					accounts,
+					accessToken,
+					refreshToken,
+				} satisfies AuthProps,
+			})
+
+			metrics.logEvent(
+				new AuthUser({
+					userId: user.id,
+				})
+			)
+
+			// Redirect back to MCP client with cleared session cookie
+			return new Response(null, {
+				status: 302,
+				headers: {
+					Location: redirectTo,
+					'Set-Cookie': clearCookie,
+				},
+			})
+		} catch (e) {
+			c.var.sentry?.recordError(e)
+			let message: string | undefined
+			if (e instanceof Error) {
+				console.error(e)
+				message = `${e.name}: ${e.message}`
+			} else if (typeof e === 'string') {
+				message = e
+			} else {
+				message = 'Unknown error'
+			}
+			metrics.logEvent(
+				new AuthUser({
+					errorMessage: `Callback Error: ${message}`,
+				})
+			)
+			if (e instanceof OAuthError) {
+				return e.toResponse()
+			}
+			if (e instanceof McpError) {
+				return mcpErrorToOAuthResponse(e)
+			}
+			return new OAuthError('server_error', 'Internal Error', 500).toResponse()
+		}
+	})
+
+	return app
 }

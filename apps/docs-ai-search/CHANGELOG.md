@@ -1,0 +1,209 @@
+# docs-ai-search
+
+## 0.4.11
+
+### Patch Changes
+
+- Updated dependencies [4e1e6ab]
+  - @repo/mcp-common@0.20.8
+
+## 0.4.10
+
+### Patch Changes
+
+- 1df6213: Migrate all MCP servers to fresh SDK v2 factories with default stateless 2025 compatibility, request-scoped auth/context, and no live protocol Durable Object or SSE session state. Upgrade the released MCP stack to `agents@0.20.1`, `@modelcontextprotocol/server@2.0.0`, `@modelcontextprotocol/client@2.0.0`, and SDK v1 compatibility package `@modelcontextprotocol/sdk@1.30.0`, using the isolated `agents/mcp/server` stateless handler. Keep `/sse` as a URL alias for the same Streamable HTTP handler as `/mcp`, without retaining the deprecated HTTP+SSE transport. Assemble every deployment through canonical public/authenticated app modules, prune obsolete app-level routing dependencies, and expose a tracked registration context instead of the raw SDK server. Preserve append-only Durable Object migration history while explicitly deleting retired protocol classes, preserve application/security state, upgrade the OAuth provider to 0.8.2 with exact resource matching, bound MCP request bodies, and require explicit Workers Builds identifiers.
+- Updated dependencies [1df6213]
+  - @repo/mcp-common@0.20.7
+
+## 0.4.9
+
+### Patch Changes
+
+- Updated dependencies [cb01861]
+  - @repo/mcp-common@0.20.6
+
+## 0.4.8
+
+### Patch Changes
+
+- a358e69: Upgrade `@cloudflare/workers-oauth-provider` 0.4.0 → 0.7.0.
+
+  No tool or behavior changes. The only API change affecting this repo is that
+  `TokenExchangeCallbackOptions` now carries a required `grantId` field, which only
+  touched a test fixture (the provider supplies it at runtime).
+
+- f625075: Upgrade core dependencies: `agents` 0.2.19 → 0.13.3, `@modelcontextprotocol/sdk` 1.20.2 →
+  1.29.0, `zod` 3 → 4, and `ai` 4 → 6.
+
+  No user-facing tool or behavior changes. Internal adjustments for the new versions:
+
+  - `zod` 4: `z.record(...)` now takes an explicit key schema; `z.string().ip()` replaced with
+    `z.ipv4()`/`z.ipv6()` validation; dropped the removed `objectOutputType` helper.
+  - `agents` 0.13: `McpAgent` env generic is constrained to `Cloudflare.Env`.
+  - MCP SDK 1.29: tool `annotations` hints must be flat (`{ title, readOnlyHint, ... }`) — fixes a
+    latent bug where nested hints were silently ignored.
+  - `ai` 6: eval tooling updated (`LanguageModel`, `inputSchema`, `stopWhen`/`stepCountIs`, tool-call `input`).
+
+## 0.4.7
+
+### Patch Changes
+
+- Updated dependencies [f77355c]
+  - @repo/mcp-common@0.20.5
+
+## 0.4.6
+
+### Patch Changes
+
+- 50926ec: Bump @cloudflare/workers-oauth-provider to ^0.4.0, add resourceMatchOriginOnly migration flag and 30-day refresh token TTL
+- Updated dependencies [50926ec]
+  - @repo/mcp-common@0.20.4
+
+## 0.4.5
+
+### Patch Changes
+
+- Updated dependencies [01a172e]
+  - @repo/mcp-common@0.20.3
+
+## 0.4.4
+
+### Patch Changes
+
+- 99e2282: Move docs MCP server to use AI Search
+- Updated dependencies [99e2282]
+  - @repo/mcp-common@0.20.2
+  - @repo/mcp-observability@0.32.5
+
+## 0.5.0
+
+### Minor Changes
+
+- Changed backend from Vectorize to AI Search for documentation search
+  - Now uses Cloudflare AI Search (AutoRAG) for contextual search of the Cloudflare Developer Documentation
+  - Maintains full backward compatibility - same XML response format and tool interface
+  - Package renamed from `docs-vectorize` to `docs-ai-search` to reflect the new backend
+
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies [7fc3f18]
+  - @repo/mcp-common@0.20.1
+
+## 0.4.2
+
+### Patch Changes
+
+- 847fc1f: Update cloudflare-oauth-handler
+- Updated dependencies [f9f0bb6]
+- Updated dependencies [847fc1f]
+  - @repo/mcp-common@0.20.0
+  - @repo/mcp-observability@0.32.4
+
+## 0.4.1
+
+### Patch Changes
+
+- 43f493d: Update agent + modelcontextprotocol deps
+- Updated dependencies [43f493d]
+  - @repo/mcp-observability@0.32.3
+  - @repo/mcp-common@0.19.3
+
+## 0.4.0
+
+### Minor Changes
+
+- dee0a7b: Updated the model for docs search to embeddinggemma-300m
+
+## 0.3.3
+
+### Patch Changes
+
+- 24dd872: feat: Add MCP tool titles and hints to all Cloudflare tools
+- Updated dependencies [24dd872]
+  - @repo/mcp-common@0.19.2
+
+## 0.3.2
+
+### Patch Changes
+
+- 7422e71: Update MCP sdk
+- Updated dependencies [7422e71]
+  - @repo/mcp-observability@0.32.2
+  - @repo/mcp-common@0.19.1
+
+## 0.3.1
+
+### Patch Changes
+
+- cc6d41f: Update agents deps & modelcontextprotocol
+- Updated dependencies [1833c6d]
+- Updated dependencies [cc6d41f]
+  - @repo/mcp-common@0.19.0
+  - @repo/mcp-observability@0.32.1
+
+## 0.3.0
+
+### Minor Changes
+
+- f885d07: Add search docs tool to bindings and obs servers
+
+### Patch Changes
+
+- Updated dependencies [f885d07]
+  - @repo/mcp-common@0.18.0
+
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [83e2d19]
+  - @repo/mcp-common@0.17.1
+
+## 0.2.0
+
+### Minor Changes
+
+- 89bfaf4: feat: add Pages to Workers migration guide to docs-vectorize MCP server
+
+## 0.1.0
+
+### Minor Changes
+
+- 6cf52a6: Support AOT tokens
+
+### Patch Changes
+
+- 0fc4439: Update agents and modelcontext dependencies
+- Updated dependencies [6cf52a6]
+- Updated dependencies [0fc4439]
+  - @repo/mcp-observability@0.32.0
+  - @repo/mcp-common@0.17.0
+
+## 0.0.4
+
+### Patch Changes
+
+- 3677a18: Remove extraneous log
+- Updated dependencies [3677a18]
+  - @repo/mcp-common@0.16.3
+
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [86c2e4f]
+  - @repo/mcp-common@0.16.2
+
+## 0.0.2
+
+### Patch Changes
+
+- cf3771b: chore: add suffixes to common files in apps and packages
+
+  It can be confusing switching between 16 files named 'index.ts', or 3 files named workers.ts. This change renames common files to have suffixes such as .types.ts, .api.ts, etc. to make it easier to work across files in the monorepo.
+
+- Updated dependencies [cf3771b]
+  - @repo/mcp-common@0.16.1
+  - @repo/mcp-observability@0.31.1

@@ -1,0 +1,14 @@
+export interface Env {
+	OAUTH_KV: KVNamespace
+	MCP_COOKIE_ENCRYPTION_KEY: string
+	ENVIRONMENT: 'development' | 'staging' | 'production'
+	MCP_SERVER_NAME: string
+	MCP_SERVER_VERSION: string
+	MCP_METRICS: AnalyticsEngineDataset
+	AI: Ai
+	CLOUDFLARE_CLIENT_ID: string
+	CLOUDFLARE_CLIENT_SECRET: string
+	DEV_DISABLE_OAUTH: string
+	DEV_CLOUDFLARE_API_TOKEN: string
+	DEV_CLOUDFLARE_EMAIL: string
+}

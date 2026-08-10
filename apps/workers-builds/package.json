@@ -1,0 +1,29 @@
+{
+	"name": "workers-builds",
+	"version": "0.2.3",
+	"private": true,
+	"scripts": {
+		"check:lint": "run-eslint-workers",
+		"check:types": "run-tsc",
+		"deploy": "run-wrangler-deploy",
+		"dev": "vite dev",
+		"start": "vite dev",
+		"types": "wrangler types",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@repo/mcp-common": "workspace:*",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@cloudflare/vite-plugin": "1.1.0",
+		"@cloudflare/vitest-pool-workers": "0.16.11",
+		"@types/node": "22.15.17",
+		"prettier": "3.5.3",
+		"typescript": "5.5.4",
+		"vite": "6.3.4",
+		"vitest": "4.1.8",
+		"wrangler": "4.96.0"
+	},
+	"type": "module"
+}
