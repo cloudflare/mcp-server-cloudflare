@@ -162,22 +162,24 @@ export function testStatelessMcpApp<Env>({
 			expect((await policyHandler.fetch(badOrigin, env, context(false))).status).toBe(403)
 		})
 
-		it('serves /sse through the same modern and legacy stateless transport', async () => {
+		it('serves the /sse Streamable HTTP alias and guides legacy SSE clients to /mcp', async () => {
 			const routeHandler = authenticated ? handler : (authenticatedWorker ?? handler)
+			const migrationHandler = authenticatedWorker ?? routeHandler
 			const alias = new URL('/sse', url).href
+			const replacement = new URL('/mcp', url).href
 			const modern = await routeHandler.fetch(
 				modernRequest(alias, 'server/discover'),
 				env,
 				context()
 			)
 			const legacy = await routeHandler.fetch(legacyInitializeRequest(alias), env, context())
-			const oldSse = await routeHandler.fetch(
+			const oldSse = await migrationHandler.fetch(
 				new Request(alias, {
 					method: 'GET',
 					headers: { Accept: 'text/event-stream', Host: new URL(url).hostname },
 				}),
 				env,
-				context()
+				context(false)
 			)
 
 			expect(modern.status).toBe(200)
@@ -190,7 +192,27 @@ export function testStatelessMcpApp<Env>({
 			expect(await responseDocument(legacy)).toMatchObject({
 				result: { protocolVersion: '2025-11-25' },
 			})
-			expect(oldSse.status).toBe(405)
+			expect(oldSse.status).toBe(410)
+			expect(oldSse.headers.get('content-type')).toContain('application/problem+json')
+			expect(oldSse.headers.get('link')).toBe(`<${replacement}>; rel="alternate"`)
+			await expect(oldSse.json()).resolves.toMatchObject({
+				title: 'Legacy SSE transport is no longer supported',
+				status: 410,
+				options: [
+					{
+						action: 'change-transport',
+						transport: 'streamable-http',
+						url: alias,
+						recommended: false,
+					},
+					{
+						action: 'update-url',
+						transport: 'streamable-http',
+						url: replacement,
+						recommended: true,
+					},
+				],
+			})
 			expect('MCP_OBJECT' in (env as object)).toBe(false)
 		})
 	})

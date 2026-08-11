@@ -4,7 +4,7 @@ Model Context Protocol (MCP) is a [new, standardized protocol](https://modelcont
 
 These MCP servers allow your [MCP Client](https://modelcontextprotocol.io/clients) to read configurations from your account, process information, make suggestions based on data, and even make those suggested changes for you. All of these actions can happen across Cloudflare's many services including application development, security and performance.
 
-Every server exposes the same stateless Streamable HTTP handler at `/mcp` and `/sse` through a fresh SDK v2 server factory. `/sse` remains as a URL compatibility alias; it does not use the deprecated HTTP+SSE transport. Modern 2026 requests and stateless 2025 requests share the same request-scoped implementation without an MCP protocol session. OAuth, credentials, account selection, application caches, and product Durable Objects remain application/security state where required.
+Every server exposes the same stateless Streamable HTTP handler at `/mcp` and `/sse` through a fresh SDK v2 server factory. `/sse` remains as a URL compatibility alias; it does not use the deprecated HTTP+SSE transport. A legacy SSE `GET /sse` request receives a `410 Gone` Problem Details response with two migration options: configure the existing URL to use Streamable HTTP, or switch to the recommended `/mcp` URL for future compatibility. Modern 2026 requests and stateless 2025 requests share the same request-scoped implementation without an MCP protocol session. OAuth, credentials, account selection, application caches, and product Durable Objects remain application/security state where required.
 
 The following servers are included in this repository:
 

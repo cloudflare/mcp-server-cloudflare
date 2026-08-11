@@ -10,6 +10,7 @@ import {
 	resolveExternalToken,
 } from './api-token-mode'
 import { createAuthHandlers, handleTokenExchangeCallback } from './cloudflare-oauth-handler'
+import { isLegacySseStreamRequest } from './transport-migration'
 
 import type { OAuthProviderOptions } from '@cloudflare/workers-oauth-provider'
 import type { MetricsTracker } from '@repo/mcp-observability'
@@ -82,10 +83,13 @@ export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 					return apiHandler.fetch(request, env, ctx)
 				}
 
-				// Let the MCP handler own its browser preflight so the exact policy and
-				// modern request-header allowlist are not replaced by the OAuth Provider's
-				// intentionally broad discovery-endpoint CORS response.
-				if (request.method === 'OPTIONS') return apiHandler.fetch(request, env, ctx)
+				// Let the MCP handler own browser preflight and the unauthenticated SSE
+				// migration response so its exact HTTP policy is preserved. The OAuth
+				// Provider would otherwise challenge GET /sse before clients see the
+				// actionable replacement endpoint.
+				if (request.method === 'OPTIONS' || isLegacySseStreamRequest(request)) {
+					return apiHandler.fetch(request, env, ctx)
+				}
 			}
 
 			if (devApiTokenModeEnabled(env)) {

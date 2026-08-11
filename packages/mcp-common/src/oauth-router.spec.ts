@@ -64,6 +64,31 @@ describe('OAuth router resource policy', () => {
 		).toThrow('resourceMatchOriginOnly')
 	})
 
+	it('routes legacy SSE stream requests to the migration handler before OAuth', async () => {
+		const router = createCloudflareOAuthRouter<CloudflareOAuthEnv>({
+			apiHandler: {
+				fetch() {
+					return new Response('migration', { status: 410 })
+				},
+			},
+			scopes: {},
+			metrics,
+			mcpRequestPolicy,
+		})
+
+		const response = await router.fetch(
+			new Request('https://mcp.example.com/sse', {
+				method: 'GET',
+				headers: { Accept: 'text/event-stream', Host: 'mcp.example.com' },
+			}),
+			testEnv(),
+			executionContext
+		)
+
+		expect(response.status).toBe(410)
+		await expect(response.text()).resolves.toBe('migration')
+	})
+
 	it('returns a retryable response when a Wrangler OAuth identity probe is rate limited', async () => {
 		server.use(
 			http.get('https://api.cloudflare.com/client/v4/user', () =>
@@ -170,6 +195,7 @@ describe('OAuth router resource policy', () => {
 
 		const response = await router.fetch(
 			new Request('https://mcp.example.com/sse', {
+				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${'a'.repeat(40)}`,
 					Host: 'mcp.example.com',
