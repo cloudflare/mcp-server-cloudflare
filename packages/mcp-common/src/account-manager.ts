@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
-import type { AuthProps } from './cloudflare-oauth-handler'
+import type { CallToolResult } from '@modelcontextprotocol/server'
+import type { AuthProps } from './auth-props'
 
 /**
  * Request header a user can set in their MCP client config to pin a Cloudflare account.
@@ -28,7 +28,7 @@ export type ResolveResult =
 	| { accountId?: never; error: CallToolResult }
 
 /**
- * Centralizes Cloudflare account-ID resolution for a single authenticated session.
+ * Centralizes Cloudflare account-ID resolution for a single authenticated request.
  *
  * Resolution precedence (highest → lowest):
  *  1. Auth-pinned account — an account-scoped token's single account, or a user token with
@@ -117,7 +117,7 @@ export class AccountManager {
 	}
 
 	/**
-	 * Account-list block appended to a server's `initialize` instructions for multi-account
+	 * Account-list block appended to request-specific server instructions for multi-account
 	 * tokens (empty string otherwise). Lets a user discover their account IDs without a tool call.
 	 */
 	instructionsSuffix(): string {

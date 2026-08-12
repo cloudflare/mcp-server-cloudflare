@@ -10,12 +10,16 @@
 	"name": "mcp-cloudflare-graphql-dev",
 	"migrations": [
 		{
-			"new_sqlite_classes": ["GraphQLMCP"],
+			"new_sqlite_classes": ["UserDetails", "GraphQLMCP"],
 			"tag": "v1"
 		},
 		{
 			"deleted_classes": ["UserDetails"],
 			"tag": "v2"
+		},
+		{
+			"deleted_classes": ["GraphQLMCP"],
+			"tag": "v3"
 		}
 	],
 	"observability": {
@@ -24,14 +28,6 @@
 			"enabled": true,
 			"head_sampling_rate": 0.1
 		}
-	},
-	"durable_objects": {
-		"bindings": [
-			{
-				"class_name": "GraphQLMCP",
-				"name": "MCP_OBJECT"
-			}
-		]
 	},
 	"kv_namespaces": [
 		{
@@ -62,14 +58,6 @@
 			"name": "mcp-cloudflare-graphql-staging",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "graphql-staging.mcp.cloudflare.com", "custom_domain": true }],
-			"durable_objects": {
-				"bindings": [
-					{
-						"class_name": "GraphQLMCP",
-						"name": "MCP_OBJECT"
-					}
-				]
-			},
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",
@@ -92,14 +80,6 @@
 			"name": "mcp-cloudflare-graphql-production",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "graphql.mcp.cloudflare.com", "custom_domain": true }],
-			"durable_objects": {
-				"bindings": [
-					{
-						"class_name": "GraphQLMCP",
-						"name": "MCP_OBJECT"
-					}
-				]
-			},
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",

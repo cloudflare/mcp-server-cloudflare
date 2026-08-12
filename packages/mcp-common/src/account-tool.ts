@@ -1,63 +1,62 @@
 import { AccountIdParam, CF_ACCOUNT_ID_HEADER } from './account-manager'
 
-import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js'
 import type {
 	CallToolResult,
-	ServerNotification,
-	ServerRequest,
-} from '@modelcontextprotocol/sdk/types.js'
-import type { z, ZodRawShape } from 'zod'
+	InputRequiredResult,
+	ServerContext,
+	ToolCallback,
+} from '@modelcontextprotocol/server'
+import type { z } from 'zod'
 import type { AccountManager } from './account-manager'
 
-type ToolExtra = RequestHandlerExtra<ServerRequest, ServerNotification>
+export type AccountToolResult =
+	| CallToolResult
+	| InputRequiredResult
+	| Promise<CallToolResult | InputRequiredResult>
 
 /**
- * Handler for an account-scoped tool. Receives the resolved Cloudflare account id (from the
- * 3-layer {@link AccountManager} resolution) alongside the validated tool arguments and the
- * usual request extra.
+ * Handler for an account-scoped tool. The account id has already been resolved from
+ * authenticated request state before the handler runs.
  */
-export type AccountToolCallback<Shape extends ZodRawShape> = (
-	args: z.infer<z.ZodObject<Shape>>,
+export type AccountToolCallback<Shape extends z.ZodRawShape> = (
+	args: z.output<z.ZodObject<Shape>>,
 	accountId: string,
-	extra: ToolExtra
-) => CallToolResult | Promise<CallToolResult>
+	ctx: ServerContext
+) => AccountToolResult
 
 /**
- * Pure core of {@link CloudflareMCPServer.accountTool}, kept free of any MCP-server (and thus
- * `ajv`/workerd-bundler) dependency so it is unit-testable in isolation.
+ * Builds the schema and callback used by the shared server's account-tool helper.
  *
- * Returns the input shape to register — with an optional `account_id` parameter appended only
- * when the token spans multiple accounts — and a callback that resolves the account id per call
- * (`cf-account-id` header → `account_id` argument), short-circuiting to an error
- * {@link CallToolResult} when resolution fails (the handler is then never invoked).
+ * Account selection is request-scoped. For multi-account credentials the explicit
+ * `cf-account-id` request header wins over the model-provided `account_id` argument.
+ * No selection is retained between MCP calls.
  */
-export function buildAccountTool<Shape extends ZodRawShape>(
+export function buildAccountTool<Shape extends z.ZodRawShape>(
 	accountManager: AccountManager,
-	shape: Shape,
+	request: Request,
+	inputSchema: z.ZodObject<Shape>,
 	handler: AccountToolCallback<Shape>
 ): {
-	shape: ZodRawShape
-	callback: ToolCallback<ZodRawShape>
+	inputSchema: z.ZodObject<z.ZodRawShape>
+	callback: ToolCallback<z.ZodObject<z.ZodRawShape>>
 } {
-	const registeredShape: ZodRawShape = accountManager.requiresAccountSelection
-		? { ...shape, account_id: AccountIdParam }
-		: shape
+	const registeredSchema: z.ZodObject<z.ZodRawShape> = accountManager.requiresAccountSelection
+		? inputSchema.extend({ account_id: AccountIdParam })
+		: inputSchema
 
-	const callback = (
-		args: Record<string, unknown>,
-		extra: ToolExtra
-	): CallToolResult | Promise<CallToolResult> => {
-		const rawHeader = extra.requestInfo?.headers?.[CF_ACCOUNT_ID_HEADER]
-		const header = Array.isArray(rawHeader) ? rawHeader[0] : rawHeader
+	const callback: ToolCallback<z.ZodObject<z.ZodRawShape>> = async (args, ctx) => {
 		const providedAccountId = typeof args.account_id === 'string' ? args.account_id : undefined
+		const resolved = accountManager.resolve({
+			header: request.headers.get(CF_ACCOUNT_ID_HEADER) ?? undefined,
+			providedAccountId,
+		})
 
-		const resolved = accountManager.resolve({ header, providedAccountId })
 		if (resolved.error) {
 			return resolved.error
 		}
-		return handler(args as z.infer<z.ZodObject<Shape>>, resolved.accountId, extra)
+
+		return handler(args as z.output<z.ZodObject<Shape>>, resolved.accountId, ctx)
 	}
 
-	return { shape: registeredShape, callback }
+	return { inputSchema: registeredSchema, callback }
 }

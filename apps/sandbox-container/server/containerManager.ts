@@ -1,24 +1,23 @@
 import { DurableObject } from 'cloudflare:workers'
 
-import { getEnv } from '@repo/mcp-common/src/env'
 import { MetricsTracker } from '@repo/mcp-observability'
 
 import { ContainerEvent } from './metrics'
 
 import type { Env } from './sandbox.server.context'
 
-const env = getEnv<Env>()
 export class ContainerManager extends DurableObject<Env> {
-	metrics = new MetricsTracker(env.MCP_METRICS, {
-		name: env.MCP_SERVER_NAME,
-		version: env.MCP_SERVER_VERSION,
-	})
+	readonly metrics: MetricsTracker
 
 	constructor(
 		ctx: DurableObjectState,
 		public env: Env
 	) {
 		super(ctx, env)
+		this.metrics = new MetricsTracker(env.MCP_METRICS, {
+			name: env.MCP_SERVER_NAME,
+			version: env.MCP_SERVER_VERSION,
+		})
 	}
 
 	async trackContainer(id: string) {

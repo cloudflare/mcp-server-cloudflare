@@ -1,31 +1,29 @@
-import { V4PagePaginationArray } from 'cloudflare/src/pagination.js'
 import { z } from 'zod'
 
 import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
-import { getProps } from '@repo/mcp-common/src/get-props'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
 import { pageParam, perPageParam } from '../types'
 
-import type { AutoRAGMCP } from '../autorag.app'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 
-export function registerAutoRAGTools(agent: AutoRAGMCP) {
-	agent.server.accountTool(
+export function registerAutoRAGTools<Env>(context: McpRegistrationContext<Env>) {
+	context.accountTool(
 		'list_rags',
-		'List AutoRAGs (vector stores)',
 		{
-			page: pageParam,
-			per_page: perPageParam,
+			description: 'List AutoRAGs (vector stores)',
+			inputSchema: z.object({
+				page: pageParam,
+				per_page: perPageParam,
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
-				const r = (await client.getAPIList(
-					`/accounts/${accountId}/autorag/rags`,
-					// @ts-ignore
-					V4PagePaginationArray,
-					{ query: { page: params.page, per_page: params.per_page } }
-				)) as unknown as {
+				const r = (await client.get(`/accounts/${accountId}/autorag/rags`, {
+					query: { page: params.page, per_page: params.per_page },
+				})) as {
 					result: Array<{ id: string; source: string; paused: boolean }>
 					result_info: { total_count: number }
 				}
@@ -61,16 +59,18 @@ export function registerAutoRAGTools(agent: AutoRAGMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'search',
-		'Search Documents using AutoRAG (vector store)',
 		{
-			rag_id: z.string().describe('ID of the AutoRAG to search'),
-			query: z.string().describe('Query to search for. Can be a URL, a title, or a snippet.'),
+			description: 'Search Documents using AutoRAG (vector store)',
+			inputSchema: z.object({
+				rag_id: z.string().describe('ID of the AutoRAG to search'),
+				query: z.string().describe('Query to search for. Can be a URL, a title, or a snippet.'),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.post(
 					`/accounts/${accountId}/autorag/rags/${params.rag_id}/search`,
@@ -116,16 +116,18 @@ export function registerAutoRAGTools(agent: AutoRAGMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'ai_search',
-		'AI Search Documents using AutoRAG (vector store)',
 		{
-			rag_id: z.string().describe('ID of the AutoRAG to search'),
-			query: z.string().describe('Query to search for. Can be a URL, a title, or a snippet.'),
+			description: 'AI Search Documents using AutoRAG (vector store)',
+			inputSchema: z.object({
+				rag_id: z.string().describe('ID of the AutoRAG to search'),
+				query: z.string().describe('Query to search for. Can be a URL, a title, or a snippet.'),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.post(
 					`/accounts/${accountId}/autorag/rags/${params.rag_id}/ai-search`,

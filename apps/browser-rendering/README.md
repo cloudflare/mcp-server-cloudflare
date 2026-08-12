@@ -6,6 +6,8 @@ connections, with Cloudflare OAuth built-in.
 It integrates tools powered by the [Cloudflare Browser Run API](https://developers.cloudflare.com/browser-run/) to fetch
 web pages, convert them to markdown, and take screenshots.
 
+The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth/account context for every request. `/sse` is not the deprecated HTTP+SSE transport. OAuth grants and token validation remain durable security state; the server stores no MCP protocol session. The Browser Run session tools below manage application-level browser sessions, not MCP protocol sessions.
+
 ## 🔨 Available Tools
 
 Currently available tools:
@@ -41,25 +43,8 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 - `Crawl https://example.com two levels deep and give me the results.`
 - `List my active browser sessions and kill the oldest one.`
 
-## Access the remote MCP server from any MCP Client
+## Connect to the MCP server
 
-If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://browser.mcp.cloudflare.com`) directly within its interface (for example in[Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
-
-If your client does not yet support remote MCP servers, you will need to set up its respective configuration file using mcp-remote (https://www.npmjs.com/package/mcp-remote) to specify which servers your client can access.
-
-Replace the content with the following configuration:
-
-```json
-{
-	"mcpServers": {
-		"cloudflare": {
-			"command": "npx",
-			"args": ["mcp-remote", "https://browser.mcp.cloudflare.com/mcp"]
-		}
-	}
-}
-```
-
-Once you've set up your configuration file, restart MCP client and a browser window will open showing your OAuth login page. Proceed through the authentication flow to grant the client access to your MCP server. After you grant access, the tools will become available for you to use.
+Connect your MCP client directly to `https://browser.mcp.cloudflare.com/mcp`. If prompted, complete the Cloudflare OAuth flow in your browser. The tools become available after authorization.
 
 Interested in contributing, and running this server locally? See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.

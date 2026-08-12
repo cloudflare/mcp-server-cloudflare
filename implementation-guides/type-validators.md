@@ -133,7 +133,9 @@ Use a consistent naming convention for your validator schemas. A recommended pat
 
 ## Location
 
-Place validators related to a specific service or concept in dedicated files within the `packages/mcp-common/src/types/` directory (e.g., `hyperdrive.types.ts`, `kv.ts`).
+Place product-specific validators next to the tools and API adapters that own them. For example, Workers Bindings validators live under `apps/workers-bindings/src/types/`, while Workers Observability validators live under `apps/workers-observability/src/types/`.
+
+Only validators used by multiple applications belong in `packages/mcp-common`.
 
 ## Summary
 

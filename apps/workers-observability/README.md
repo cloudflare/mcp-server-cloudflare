@@ -7,6 +7,8 @@ It integrates tools powered by [Workers Observability](https://developers.cloudf
 and get insight into your W<img width="500" height="500" alt="1000229896" src="https://github.com/user-attachments/assets/9a0cb856-91a6-4e59-ab75-fbec154c5346" />
 orkers' logs and analytics.
 
+The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth/account context for every request. `/sse` is not the deprecated HTTP+SSE transport. OAuth and application search bindings remain durable application/security state; no MCP protocol session or protocol Durable Object is retained.
+
 ## 🔨 Available Tools
 
 Currently available tools:
@@ -27,25 +29,8 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 - `How many requests were made to my worker 'my-app' broken down by HTTP status code?`
 - `Compare the error rates between my production and staging workers`
 
-## Access the remote MCP server from any MCP Client
+## Connect to the MCP server
 
-If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL (`https://observability.mcp.cloudflare.com`) directly within its interface (for example in [Cloudflare AI Playground](https://playground.ai.cloudflare.com/)).
-
-If your client does not yet support remote MCP servers, you will need to set up its respective configuration file using [mcp-remote](https://www.npmjs.com/package/mcp-remote) to specify which servers your client can access.
-
-Replace the content with the following configuration:
-
-```json
-{
-	"mcpServers": {
-		"cloudflare": {
-			"command": "npx",
-			"args": ["mcp-remote", "https://observability.mcp.cloudflare.com/mcp"]
-		}
-	}
-}
-```
-
-Once you've set up your configuration file, restart MCP client and a browser window will open showing your OAuth login page. Proceed through the authentication flow to grant the client access to your MCP server. After you grant access, the tools will become available for you to use.
+Connect your MCP client directly to `https://observability.mcp.cloudflare.com/mcp`. If prompted, complete the Cloudflare OAuth flow in your browser. The tools become available after authorization.
 
 Interested in contributing, and running this server locally? See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.

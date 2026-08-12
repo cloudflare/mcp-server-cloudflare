@@ -4,13 +4,13 @@ Model Context Protocol (MCP) is a [new, standardized protocol](https://modelcont
 
 These MCP servers allow your [MCP Client](https://modelcontextprotocol.io/clients) to read configurations from your account, process information, make suggestions based on data, and even make those suggested changes for you. All of these actions can happen across Cloudflare's many services including application development, security and performance.
 
-They support both the `streamable-http` transport via `/mcp` and the `sse` transport (deprecated) via `/sse`.
+Every server exposes the same stateless Streamable HTTP handler at `/mcp` and `/sse` through a fresh SDK v2 server factory. `/sse` remains as a URL compatibility alias; it does not use the deprecated HTTP+SSE transport. A legacy SSE `GET /sse` request receives a `410 Gone` Problem Details response with two migration options: configure the existing URL to use Streamable HTTP, or switch to the recommended `/mcp` URL for future compatibility. Modern 2026 requests and stateless 2025 requests share the same request-scoped implementation without an MCP protocol session. OAuth, credentials, account selection, application caches, and product Durable Objects remain application/security state where required.
 
 The following servers are included in this repository:
 
 | Server Name                                                    | Description                                                                                     | Server URL                                     |
 | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| [**Documentation server**](/apps/docs-vectorize)               | Get up to date reference information on Cloudflare                                              | `https://docs.mcp.cloudflare.com/mcp`          |
+| [**Documentation server**](/apps/docs-ai-search)               | Get up-to-date reference information on Cloudflare                                              | `https://docs.mcp.cloudflare.com/mcp`          |
 | [**Workers Bindings server**](/apps/workers-bindings)          | Build Workers applications with storage, AI, and compute primitives                             | `https://bindings.mcp.cloudflare.com/mcp`      |
 | [**Workers Builds server**](/apps/workers-builds)              | Get insights and manage your Cloudflare Workers Builds                                          | `https://builds.mcp.cloudflare.com/mcp`        |
 | [**Observability server**](/apps/workers-observability)        | Debug and get insight into your application's logs and analytics                                | `https://observability.mcp.cloudflare.com/mcp` |
@@ -18,11 +18,14 @@ The following servers are included in this repository:
 | [**Browser Run server**](/apps/browser-rendering)              | Fetch web pages, convert them to markdown and take screenshots                                  | `https://browser.mcp.cloudflare.com/mcp`       |
 | [**Logpush server**](/apps/logpush)                            | Get quick summaries for Logpush job health                                                      | `https://logs.mcp.cloudflare.com/mcp`          |
 | [**AI Gateway server**](/apps/ai-gateway)                      | Search your logs, get details about the prompts and responses                                   | `https://ai-gateway.mcp.cloudflare.com/mcp`    |
+| [**AutoRAG server**](/apps/autorag)                            | Search and query account AutoRAG instances                                                      | `https://autorag.mcp.cloudflare.com/mcp`       |
 | [**Audit Logs server**](/apps/auditlogs)                       | Query audit logs and generate reports for review                                                | `https://auditlogs.mcp.cloudflare.com/mcp`     |
-| [**DNS Analytics server**](/apps/dns-analytics)                | Optimize DNS performance and debug issues based on current set up                               | `https://dns-analytics.mcp.cloudflare.com/mcp` |
+| [**DNS Analytics server**](/apps/dns-analytics)                | Optimize DNS performance and debug issues based on current setup                                | `https://dns-analytics.mcp.cloudflare.com/mcp` |
 | [**Digital Experience Monitoring server**](/apps/dex-analysis) | Get quick insight on critical applications for your organization                                | `https://dex.mcp.cloudflare.com/mcp`           |
 | [**Cloudflare One CASB server**](/apps/cloudflare-one-casb)    | Quickly identify any security misconfigurations for SaaS applications to safeguard users & data | `https://casb.mcp.cloudflare.com/mcp`          |
-| [**GraphQL server**](/apps/graphql/)                           | Get analytics data using Cloudflare’s GraphQL API                                               | `https://graphql.mcp.cloudflare.com/mcp`       |
+| [**Radar server**](/apps/radar)                                | Explore Cloudflare Radar internet insights                                                      | `https://radar.mcp.cloudflare.com/mcp`         |
+| [**Cloudflare Blog server**](/apps/cloudflare-blog)            | Search and read posts from the Cloudflare Blog                                                  | `https://blog.mcp.cloudflare.com/mcp`          |
+| [**Demo Day server**](/apps/demo-day)                          | Demonstrate a minimal Cloudflare MCP server                                                     | `https://demo-day.mcp.cloudflare.com/mcp`      |
 
 ## Which Cloudflare MCP server should you use?
 
@@ -49,26 +52,9 @@ Use the **domain-specific servers** in this repository when:
 
 Learn more about the Code Mode server here: [`cloudflare/mcp`](https://github.com/cloudflare/mcp).
 
-## Access the remote MCP server from any MCP client
+## Connect to an MCP server
 
-If your MCP client has first class support for remote MCP servers, the client will provide a way to accept the server URL directly within its interface (e.g. [Cloudflare AI Playground](https://playground.ai.cloudflare.com/))
-
-If your client does not yet support remote MCP servers, you will need to set up its respective configuration file using mcp-remote (https://www.npmjs.com/package/mcp-remote) to specify which servers your client can access.
-
-```json
-{
-	"mcpServers": {
-		"cloudflare-observability": {
-			"command": "npx",
-			"args": ["mcp-remote", "https://observability.mcp.cloudflare.com/mcp"]
-		},
-		"cloudflare-bindings": {
-			"command": "npx",
-			"args": ["mcp-remote", "https://bindings.mcp.cloudflare.com/mcp"]
-		}
-	}
-}
-```
+Connect any MCP client with remote-server support directly to a URL in the table above. [Cloudflare AI Playground](https://playground.ai.cloudflare.com/) also accepts server URLs in its interface.
 
 ## Using Cloudflare's MCP servers from the OpenAI Responses API
 

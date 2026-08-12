@@ -12,7 +12,8 @@ export class OAuthError extends Error {
 	constructor(
 		public code: string,
 		public description: string,
-		public statusCode = 400
+		public statusCode = 400,
+		public headers: Record<string, string> = {}
 	) {
 		super(description)
 		this.name = 'OAuthError'
@@ -26,7 +27,7 @@ export class OAuthError extends Error {
 			}),
 			{
 				status: this.statusCode,
-				headers: { 'Content-Type': 'application/json' },
+				headers: { 'Content-Type': 'application/json', ...this.headers },
 			}
 		)
 	}

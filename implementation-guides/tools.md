@@ -1,69 +1,72 @@
 # MCP Tool Implementation Guide
 
-This guide explains how to implement and register tools within an MCP (Model Context Protocol) server, enabling AI models to interact with external systems, APIs, or specific functionalities like Cloudflare services.
+This guide explains how to implement and register tools within an MCP (Model Context Protocol) server, enabling AI models to interact with external systems, APIs, or Cloudflare services.
 
 ## Purpose of Tools
 
-Tools are the mechanism by which an MCP agent (powered by an LLM) can perform actions beyond generating text. They allow the agent to accomplish many tasks, including:
+Tools let an MCP client perform actions beyond generating text. They can:
 
-- Interact with APIs (e.g., Cloudflare API, other REST APIs).
-- Query databases or vector stores (like Autorag).
-- Access environment resources (KV, R2, D1, Service Bindings).
-- Perform specific computations or data transformations.
+- Interact with APIs.
+- Query databases or vector stores.
+- Access environment resources such as KV, R2, D1, and service bindings.
+- Perform computations or data transformations.
 
-## Registering a Tool
+## Request-scoped registration
 
-Tools are registered using the `agent.server.tool()` method. **Account-scoped tools** (anything that needs a Cloudflare account id) instead use `agent.server.accountTool()`, which centrally resolves the account id and passes it to your handler.
+Every MCP request creates a fresh SDK v2 server. Tool registrars receive an `McpRegistrationContext` containing validated auth props, environment bindings, the request, execution context, `waitUntil`, and the SDK request context. It exposes registration methods rather than the raw SDK server, so shared metrics, error reporting, and account selection cannot be bypassed accidentally.
 
-Account-id resolution (handled by `accountTool`, in priority order):
+Register general tools with `context.registerTool()`. Register anything that needs a Cloudflare account ID with `context.accountTool()`, which resolves the account and passes its ID to the handler.
 
-1. **Auth-pinned account** — an account-scoped API token's single account, or an OAuth token with exactly one account. No `account_id` parameter is exposed in this case.
-2. **`cf-account-id` request header** — set by the user in their MCP client config (multi-account tokens only).
-3. **`account_id` argument** — `accountTool` automatically appends an optional `account_id` parameter when the token spans multiple accounts.
+Account-ID resolution, in priority order:
 
-If the account can't be resolved (multi-account, no header/argument), `accountTool` returns an error result and your handler is never called.
+1. **Auth-pinned account** — an account-scoped API token's account, or an OAuth token with exactly one account. No `account_id` input is exposed.
+2. **`cf-account-id` request header** — set in an MCP client configuration for multi-account credentials.
+3. **`account_id` tool input** — `accountTool` appends this optional input when credentials span multiple accounts.
+
+If a multi-account request supplies neither a valid header nor input, `accountTool` returns an error and does not invoke the handler. Account selection is never retained between calls.
 
 ```typescript
-// Import your Zod schemas
 import { z } from 'zod'
 
 import { getCloudflareClient } from '../cloudflare-api'
-import { type CloudflareMcpAgent } from '../types/cloudflare-mcp-agent'
-import { KvNamespaceIdSchema, KvNamespaceTitleSchema } from '../types/kv_namespace'
+import { requireRequestProps } from '../request-context'
 
-export function registerMyServiceTools(agent: CloudflareMcpAgent) {
-	agent.server.accountTool(
-		'tool_name', // String: Unique name for the tool
-		'Detailed description', // String: Description for the LLM (CRITICAL!)
+import type { McpRegistrationContext } from '../registration-context'
+
+export function registerMyServiceTools<Env>(context: McpRegistrationContext<Env>) {
+	context.accountTool(
+		'tool_name',
 		{
-			// Object: Parameter definitions using Zod schemas. Do NOT add `account_id`
-			// yourself — accountTool adds it when (and only when) it is needed.
-			param1: MyParam1Schema,
-			param2: MyParam2Schema.optional(),
-			// ... other parameters
+			description: 'Detailed description used by the model to choose this tool.',
+			inputSchema: z.object({
+				// Do not add account_id. accountTool adds it only when needed.
+				param1: z.string(),
+				param2: z.number().optional(),
+			}),
+			annotations: {
+				title: 'Human-readable tool title',
+				readOnlyHint: true,
+			},
 		},
 		async (params, accountId) => {
-			// params: the validated parameters { param1, param2, ... }
-			// accountId: the resolved (and validated) Cloudflare account id
-
-			// --- Tool Logic Start ---
 			try {
-				// Perform the action (e.g., call SDK, query DB)
-				// const client = getCloudflareClient(agent.props.accessToken);
-				// const result = await client.someService.someAction({ account_id: accountId, ... });
+				const props = requireRequestProps(context)
+				const client = getCloudflareClient(props.accessToken)
+				// const result = await client.someService.someAction({
+				//   account_id: accountId,
+				//   ...params,
+				// })
 
-				// Format the successful response
 				return {
 					content: [
 						{
 							type: 'text',
-							text: JSON.stringify({ success: true /*, result */ }),
+							text: JSON.stringify({ success: true, accountId, params }),
 						},
-						// Or potentially EmbeddedResource for richer data
 					],
 				}
 			} catch (error) {
-				// Format the error response — set isError so clients can distinguish failures
+				context.recordError(error)
 				return {
 					content: [
 						{
@@ -74,59 +77,44 @@ export function registerMyServiceTools(agent: CloudflareMcpAgent) {
 					isError: true,
 				}
 			}
-			// --- Tool Logic End ---
 		}
 	)
 
-	// Tools that do NOT need an account id use `agent.server.tool(...)` as before.
-
-	// ... register other tools ...
+	context.registerTool(
+		'non_account_tool',
+		{
+			description: 'A tool that does not need a Cloudflare account ID.',
+			inputSchema: z.object({ query: z.string() }),
+		},
+		async ({ query }) => ({
+			content: [{ type: 'text', text: query }],
+		})
+	)
 }
 ```
 
-### Key Components:
+## Key components
 
-1.  **`toolName` (string):**
+1. **Name**
+   - Use a unique `snake_case` identifier, usually `service_noun_verb`.
+2. **Description**
+   - State the purpose, when to use the tool, important inputs, and what it returns.
+   - Keep it specific and concise; the model uses this text to decide whether to call the tool.
+3. **Input schema**
+   - Pass a Standard Schema object such as `z.object({...})` as `inputSchema`.
+   - Follow [type-validators.md](./type-validators.md).
+4. **Handler**
+   - Receives validated parameters. `accountTool` also receives the resolved account ID.
+   - Read auth from `requireRequestProps(context)` and bindings from `context.env`.
+   - Return MCP content blocks and set `isError: true` for handled failures.
 
-    - A unique identifier for the tool.
-    - **Convention:** Use `snake_case`. Typically `service_noun_verb` (e.g., `kv_namespace_create`, `hyperdrive_config_list`, `docs_search`).
+## Best practices
 
-2.  **`description` (string - Max 1024 chars):**
-
-    - **This is the MOST CRITICAL part for LLM interaction.** The LLM uses this description _exclusively_ to decide _when_ to use the tool and _what_ it does.
-    - **A good description should include:**
-      - **Core Purpose:** What does the tool _do_? (e.g., "List Hyperdrive configurations", "Search Cloudflare documentation").
-      - **When to Use:** Provide clear scenarios or user intents that should trigger this tool. Use bullet points or clear instructions. (e.g., "Use this when a user asks to see their Hyperdrive setups", "Use this tool when: a user asks about Cloudflare products; you need info on a feature; you are unsure how to use Cloudflare functionality; you are writing Workers code and need docs").
-      - **Inputs:** Briefly mention key inputs if not obvious from parameter names.
-      - **Outputs:** Briefly describe what the tool returns (e.g., "Returns a list of namespace objects", "Returns search results as embedded resources").
-      - **Example Workflows/Follow-ups (Optional but helpful):** Suggest how this tool fits into a larger task or what tools might be used next (e.g., "After creating a namespace with `kv_namespace_create`, you might bind it to a Worker.", "Use `hyperdrive_config_get` to view details before using `hyperdrive_config_edit`.").
-    - **Be specific and unambiguous.** Avoid jargon unless it's essential domain terminology the LLM should understand.
-    - **Keep it concise** while conveying necessary information.
-
-3.  **`parameters` (object):**
-
-    - An object mapping parameter names (keys) to their corresponding Zod schemas (values).
-    - Follow the principles outlined in the `implementation-guides/type-validators.md` guide
-
-4.  **`handlerFunction` (async function):**
-    - The asynchronous function that executes the tool's logic.
-    - It receives the validated `params` object. Account-scoped tools registered with `accountTool` also receive the resolved `accountId` as a second argument.
-    - **Implementation Details:**
-      - **Access Context:** Use the `accountId` passed to your `accountTool` handler, `agent.props.accessToken`, and `agent.env` (for worker bindings like AI, D1, R2) to get necessary credentials, environment variables, or bindings.
-      - **Error Handling:** Wrap the core logic in a `try...catch` block to gracefully handle failures (e.g., API errors, network issues, invalid inputs not caught by Zod).
-      - **Perform Action:** Interact with the relevant service (Cloudflare SDK, database, vector store, etc.).
-      - **Format Response:** Return an object with a `content` property, which is an array of `ContentBlock` objects (usually `type: 'text'` or `type: 'resource'`).
-        - For simple success/failure or structured data, `JSON.stringify` the result in a text block.
-        - For richer data like search results, use `EmbeddedResource` (`type: 'resource'`) as seen in `docs-autorag.tools.ts`.
-        - Return clear error messages in the `text` property of a content block upon failure.
-
-## Best Practices
-
-- **Clear Descriptions are Paramount:** Invest time in writing excellent tool descriptions. This has the biggest impact on the LLM's ability to use tools effectively.
-- **Granular Tools:** Prefer smaller, focused tools over monolithic ones. (e.g., separate `_create`, `_list`, `_get`, `_update`, `_delete` tools for a resource).
-- **Robust Error Handling:** Anticipate potential failures and return informative error messages to the LLM.
-- **Consistent Naming:** Follow naming conventions for tools and parameters.
-- **Use Zod Validators:** Leverage Zod for input validation as described in the validator guide.
-- **Leverage Agent Context:** Use `agent.props`, `agent.env`, and the `accountId` provided to `accountTool` handlers appropriately.
-- **Statelessness:** Aim for tools to be stateless where possible. Rely on parameters and agent context for necessary information.
-- **Security:** Be mindful of the actions tools perform, especially destructive ones (`delete`, `update`). Ensure proper authentication and authorization context is used (the account id is resolved and validated for you by `accountTool`).
+- Prefer small, focused tools over monolithic ones.
+- Use explicit parameters for every target; do not depend on a previous call or MCP session.
+- Treat `context` as request-local and never store it globally.
+- Use Zod schemas for input validation.
+- Return clear errors and record unexpected failures with `context.recordError`.
+- Mark read-only or destructive behavior accurately with tool annotations.
+- Keep authentication, account selection, and environment bindings request-scoped.
+- Preserve genuine application state only where the product requires it; do not use protocol Durable Objects or transport replay state.

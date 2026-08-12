@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { getProps } from '@repo/mcp-common/src/get-props'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
 import {
 	CreateScanResult,
@@ -12,22 +12,26 @@ import {
 	UrlParam,
 } from '../types/url-scanner'
 
-import type { RadarMCP } from '../radar.app'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
+import type { Env } from '../radar.context'
 
 const URLSCANNER_API_BASE = 'https://api.cloudflare.com/client/v4/accounts'
 
-export function registerUrlScannerTools(agent: RadarMCP) {
+export function registerUrlScannerTools(context: McpRegistrationContext<Env>) {
 	// Search URL scans
-	agent.server.accountTool(
+	context.accountTool(
 		'search_url_scans',
-		"Search URL scans using ElasticSearch-like query syntax. Examples: 'page.domain:example.com', 'verdicts.malicious:true', 'page.asn:AS24940 AND hash:xxx', 'apikey:me AND date:[2025-01 TO 2025-02]'",
 		{
-			query: SearchQueryParam,
-			size: SearchSizeParam,
+			description:
+				"Search URL scans using ElasticSearch-like query syntax. Examples: 'page.domain:example.com', 'verdicts.malicious:true', 'page.asn:AS24940 AND hash:xxx', 'apikey:me AND date:[2025-01 TO 2025-02]'",
+			inputSchema: z.object({
+				query: SearchQueryParam,
+				size: SearchSizeParam,
+			}),
 		},
 		async ({ query, size }, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const url = new URL(`${URLSCANNER_API_BASE}/${accountId}/urlscanner/v2/search`)
 				if (query) url.searchParams.set('q', query)
 				if (size) url.searchParams.set('size', String(size))
@@ -65,17 +69,20 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 	)
 
 	// Create URL scan
-	agent.server.accountTool(
+	context.accountTool(
 		'create_url_scan',
-		'Submit a URL to scan. Returns the scan UUID which can be used to retrieve results.',
 		{
-			url: UrlParam,
-			visibility: ScanVisibilityParam,
-			screenshotResolution: ScreenshotResolutionParam,
+			description:
+				'Submit a URL to scan. Returns the scan UUID which can be used to retrieve results.',
+			inputSchema: z.object({
+				url: UrlParam,
+				visibility: ScanVisibilityParam,
+				screenshotResolution: ScreenshotResolutionParam,
+			}),
 		},
 		async ({ url, visibility, screenshotResolution }, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				const body: Record<string, unknown> = { url }
 				if (visibility) body.visibility = visibility
@@ -124,15 +131,18 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 	)
 
 	// Get URL scan result
-	agent.server.accountTool(
+	context.accountTool(
 		'get_url_scan',
-		'Get the results of a URL scan by its UUID. Returns detailed information including verdicts, page info, requests, cookies, and more.',
 		{
-			scanId: ScanIdParam,
+			description:
+				'Get the results of a URL scan by its UUID. Returns detailed information including verdicts, page info, requests, cookies, and more.',
+			inputSchema: z.object({
+				scanId: ScanIdParam,
+			}),
 		},
 		async ({ scanId }, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				const res = await fetch(
 					`${URLSCANNER_API_BASE}/${accountId}/urlscanner/v2/result/${scanId}`,
@@ -184,20 +194,22 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 	)
 
 	// Get scan screenshot
-	agent.server.accountTool(
+	context.accountTool(
 		'get_url_scan_screenshot',
-		'Get the screenshot URL for a completed scan.',
 		{
-			scanId: ScanIdParam,
-			resolution: z
-				.enum(['desktop', 'mobile', 'tablet'])
-				.default('desktop')
-				.optional()
-				.describe('Screenshot resolution/device type.'),
+			description: 'Get the screenshot URL for a completed scan.',
+			inputSchema: z.object({
+				scanId: ScanIdParam,
+				resolution: z
+					.enum(['desktop', 'mobile', 'tablet'])
+					.default('desktop')
+					.optional()
+					.describe('Screenshot resolution/device type.'),
+			}),
 		},
 		async ({ scanId, resolution }, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const res = resolution || 'desktop'
 
 				const screenshotUrl = `${URLSCANNER_API_BASE}/${accountId}/urlscanner/v2/screenshots/${scanId}.png`
@@ -238,15 +250,18 @@ export function registerUrlScannerTools(agent: RadarMCP) {
 	)
 
 	// Get scan HAR
-	agent.server.accountTool(
+	context.accountTool(
 		'get_url_scan_har',
-		'Get the HAR (HTTP Archive) data for a completed scan. Contains detailed network request/response information.',
 		{
-			scanId: ScanIdParam,
+			description:
+				'Get the HAR (HTTP Archive) data for a completed scan. Contains detailed network request/response information.',
+			inputSchema: z.object({
+				scanId: ScanIdParam,
+			}),
 		},
 		async ({ scanId }, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 
 				const res = await fetch(`${URLSCANNER_API_BASE}/${accountId}/urlscanner/v2/har/${scanId}`, {
 					headers: { Authorization: `Bearer ${props.accessToken}` },

@@ -5,6 +5,17 @@ const config = {
 	lintFormatting: false, // handled by prettier
 	versionGroups: [
 		{
+			label: 'use the workspace catalog for the MCP migration stack',
+			dependencies: [
+				'@cloudflare/workers-oauth-provider',
+				'@modelcontextprotocol/client',
+				'@modelcontextprotocol/sdk',
+				'@modelcontextprotocol/server',
+				'agents',
+			],
+			pinVersion: 'catalog:',
+		},
+		{
 			label: 'local packages',
 			packages: ['**'],
 			dependencies: ['@repo/*'],
@@ -53,6 +64,17 @@ const config = {
 		},
 	],
 	semverGroups: [
+		{
+			label: 'workspace catalogs resolve exact versions in pnpm-workspace.yaml',
+			dependencies: [
+				'@cloudflare/workers-oauth-provider',
+				'@modelcontextprotocol/client',
+				'@modelcontextprotocol/sdk',
+				'@modelcontextprotocol/server',
+				'agents',
+			],
+			isIgnored: true,
+		},
 		{
 			label: 'pin all deps',
 			range: '',

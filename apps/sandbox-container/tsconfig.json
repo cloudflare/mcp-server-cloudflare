@@ -1,5 +1,11 @@
 {
 	"extends": "@repo/typescript-config/workers.json",
-	"include": ["*/**.ts", "./vitest.config.evals.ts", "./types.d.ts"],
+	"include": [
+		"*/**.ts",
+		"./vitest.config.ts",
+		"./vitest.config.node.ts",
+		"./vitest.config.evals.ts",
+		"./types.d.ts"
+	],
 	"exclude": ["container/**.ts"]
 }

@@ -1,20 +1,22 @@
 import { z } from 'zod'
 
 import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
-import { getProps } from '@repo/mcp-common/src/get-props'
+import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
-import type { BrowserMCP } from '../browser.app'
+import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 
-export function registerBrowserTools(agent: BrowserMCP) {
-	agent.server.accountTool(
+export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) {
+	context.accountTool(
 		'get_url_html_content',
-		'Get page HTML content',
 		{
-			url: z.string().url(),
+			description: 'Get page HTML content',
+			inputSchema: z.object({
+				url: z.string().url(),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await client.browserRendering.content.create({
 					account_id: accountId,
@@ -45,15 +47,17 @@ export function registerBrowserTools(agent: BrowserMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'get_url_markdown',
-		'Get page converted into Markdown',
 		{
-			url: z.string().url(),
+			description: 'Get page converted into Markdown',
+			inputSchema: z.object({
+				url: z.string().url(),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.post(`/accounts/${accountId}/browser-run/markdown`, {
 					body: {
@@ -85,21 +89,23 @@ export function registerBrowserTools(agent: BrowserMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'get_url_screenshot',
-		'Get page screenshot',
 		{
-			url: z.string().url(),
-			viewport: z
-				.object({
-					height: z.number().default(600),
-					width: z.number().default(800),
-				})
-				.optional(),
+			description: 'Get page screenshot',
+			inputSchema: z.object({
+				url: z.string().url(),
+				viewport: z
+					.object({
+						height: z.number().default(600),
+						width: z.number().default(800),
+					})
+					.optional(),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await client
 					.post(`/accounts/${accountId}/browser-run/screenshot`, {
@@ -137,15 +143,17 @@ export function registerBrowserTools(agent: BrowserMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'get_url_pdf',
-		'Render a page to PDF',
 		{
-			url: z.string().url(),
+			description: 'Render a page to PDF',
+			inputSchema: z.object({
+				url: z.string().url(),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = await client
 					.post(`/accounts/${accountId}/browser-run/pdf`, {
@@ -185,15 +193,17 @@ export function registerBrowserTools(agent: BrowserMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'get_url_snapshot',
-		'Get page HTML content and a screenshot in a single call',
 		{
-			url: z.string().url(),
+			description: 'Get page HTML content and a screenshot in a single call',
+			inputSchema: z.object({
+				url: z.string().url(),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.post(`/accounts/${accountId}/browser-run/snapshot`, {
 					body: {
@@ -233,23 +243,25 @@ export function registerBrowserTools(agent: BrowserMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'scrape_url_elements',
-		'Scrape elements from a page by CSS selector',
 		{
-			url: z.string().url(),
-			elements: z
-				.array(
-					z.object({
-						selector: z.string(),
-					})
-				)
-				.min(1)
-				.describe('CSS selectors of the elements to scrape'),
+			description: 'Scrape elements from a page by CSS selector',
+			inputSchema: z.object({
+				url: z.string().url(),
+				elements: z
+					.array(
+						z.object({
+							selector: z.string(),
+						})
+					)
+					.min(1)
+					.describe('CSS selectors of the elements to scrape'),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.post(`/accounts/${accountId}/browser-run/scrape`, {
 					body: {
@@ -280,23 +292,26 @@ export function registerBrowserTools(agent: BrowserMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'get_url_json',
-		'Extract structured JSON from a page using AI. Provide a prompt and/or a response_format JSON schema to guide extraction.',
 		{
-			url: z.string().url(),
-			prompt: z.string().optional().describe('Natural-language instruction for what to extract'),
-			response_format: z
-				.object({
-					type: z.string(),
-					json_schema: z.unknown().optional(),
-				})
-				.optional()
-				.describe('Optional JSON-schema response format to constrain the output'),
+			description:
+				'Extract structured JSON from a page using AI. Provide a prompt and/or a response_format JSON schema to guide extraction.',
+			inputSchema: z.object({
+				url: z.string().url(),
+				prompt: z.string().optional().describe('Natural-language instruction for what to extract'),
+				response_format: z
+					.object({
+						type: z.string(),
+						json_schema: z.unknown().optional(),
+					})
+					.optional()
+					.describe('Optional JSON-schema response format to constrain the output'),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.post(`/accounts/${accountId}/browser-run/json`, {
 					body: {
@@ -328,19 +343,21 @@ export function registerBrowserTools(agent: BrowserMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'get_url_links',
-		'Get the list of links on a page',
 		{
-			url: z.string().url(),
-			visibleLinksOnly: z
-				.boolean()
-				.optional()
-				.describe('Only return links that are visible in the rendered page'),
+			description: 'Get the list of links on a page',
+			inputSchema: z.object({
+				url: z.string().url(),
+				visibleLinksOnly: z
+					.boolean()
+					.optional()
+					.describe('Only return links that are visible in the rendered page'),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.post(`/accounts/${accountId}/browser-run/links`, {
 					body: {
@@ -373,21 +390,24 @@ export function registerBrowserTools(agent: BrowserMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'start_crawl',
-		'Start an asynchronous crawl of a website. Returns a job_id — poll get_crawl_result to retrieve records.',
 		{
-			url: z.string().url(),
-			render: z
-				.boolean()
-				.default(true)
-				.describe('Whether to render pages with a browser (vs. fetching raw HTML)'),
-			depth: z.number().int().min(1).optional().describe('How many links deep to crawl'),
-			limit: z.number().int().min(1).optional().describe('Maximum number of pages to crawl'),
+			description:
+				'Start an asynchronous crawl of a website. Returns a job_id — poll get_crawl_result to retrieve records.',
+			inputSchema: z.object({
+				url: z.string().url(),
+				render: z
+					.boolean()
+					.default(true)
+					.describe('Whether to render pages with a browser (vs. fetching raw HTML)'),
+				depth: z.number().int().min(1).optional().describe('How many links deep to crawl'),
+				limit: z.number().int().min(1).optional().describe('Maximum number of pages to crawl'),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.post(`/accounts/${accountId}/browser-run/crawl`, {
 					body: {
@@ -423,15 +443,17 @@ export function registerBrowserTools(agent: BrowserMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'get_crawl_result',
-		'Get the status and records of a crawl job started with start_crawl',
 		{
-			job_id: z.string(),
+			description: 'Get the status and records of a crawl job started with start_crawl',
+			inputSchema: z.object({
+				job_id: z.string(),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.get(
 					`/accounts/${accountId}/browser-run/crawl/${params.job_id}`
@@ -459,15 +481,17 @@ export function registerBrowserTools(agent: BrowserMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'cancel_crawl',
-		'Cancel a running crawl job',
 		{
-			job_id: z.string(),
+			description: 'Cancel a running crawl job',
+			inputSchema: z.object({
+				job_id: z.string(),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				const r = (await client.delete(
 					`/accounts/${accountId}/browser-run/crawl/${params.job_id}`
@@ -495,13 +519,15 @@ export function registerBrowserTools(agent: BrowserMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'list_browser_sessions',
-		'List active Browser Run sessions for the account',
-		{},
+		{
+			description: 'List active Browser Run sessions for the account',
+			inputSchema: z.object({}),
+		},
 		async (_params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				// This endpoint returns a bare JSON array of sessions, not the
 				// usual `{ success, result }` envelope, so use the response as-is.
@@ -533,15 +559,17 @@ export function registerBrowserTools(agent: BrowserMCP) {
 		}
 	)
 
-	agent.server.accountTool(
+	context.accountTool(
 		'kill_browser_session',
-		'Close (kill) a Browser Run session by its session ID',
 		{
-			session_id: z.string(),
+			description: 'Close (kill) a Browser Run session by its session ID',
+			inputSchema: z.object({
+				session_id: z.string(),
+			}),
 		},
 		async (params, accountId) => {
 			try {
-				const props = getProps(agent)
+				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
 				await client.delete(
 					`/accounts/${accountId}/browser-run/devtools/browser/${params.session_id}`

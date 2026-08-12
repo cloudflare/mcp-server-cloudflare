@@ -1,10 +1,7 @@
-import { type ClientCapabilities } from '@modelcontextprotocol/sdk/types.js'
-
 import { MetricsEvent, MetricsEventIndexIds } from './analytics-engine'
 
-/**
- * TODO: once there are better hooks into MCP servers, we should track the session ID
- */
+import type { ClientCapabilities } from '@modelcontextprotocol/server'
+
 export class ToolCall extends MetricsEvent {
 	constructor(
 		private toolCall: {
@@ -30,10 +27,17 @@ export class ToolCall extends MetricsEvent {
 	}
 }
 
-export class SessionStart extends MetricsEvent {
+/**
+ * One stateless MCP request. A modern request has no initialize lifecycle, and the
+ * 2025 compatibility path creates a new server for each POST, so this metric must not
+ * imply that a protocol session was created.
+ */
+export class McpRequest extends MetricsEvent {
 	constructor(
-		private session: {
+		private request: {
 			userId?: string
+			clientId?: string
+			protocolEra: 'legacy' | 'modern'
 			clientInfo?: {
 				name: string
 				version: string
@@ -46,15 +50,17 @@ export class SessionStart extends MetricsEvent {
 
 	toDataPoint(): AnalyticsEngineDataPoint {
 		return {
-			indexes: [MetricsEventIndexIds.SESSION_START],
+			indexes: [MetricsEventIndexIds.MCP_REQUEST],
 			blobs: this.mapBlobs({
-				blob3: this.session.userId,
-				blob4: this.session.clientInfo?.name,
-				blob5: this.session.clientInfo?.version,
+				blob3: this.request.userId,
+				blob4: this.request.clientInfo?.name,
+				blob5: this.request.clientInfo?.version,
+				blob6: this.request.protocolEra,
+				blob7: this.request.clientId,
 			}),
 			doubles: this.mapDoubles({
-				double1: this.session.clientCapabilities?.roots ? 1 : 0,
-				double2: this.session.clientCapabilities?.sampling ? 1 : 0,
+				double1: this.request.clientCapabilities?.roots ? 1 : 0,
+				double2: this.request.clientCapabilities?.sampling ? 1 : 0,
 			}),
 		}
 	}

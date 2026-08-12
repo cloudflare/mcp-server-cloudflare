@@ -62,7 +62,8 @@ describe('get_file_name_from_path', () => {
 				})
 
 				const listFiles = await list_files_in_directory('')
-				expect(listFiles).toEqual(['file:///../../../../../../testDir'])
+				expect(listFiles).toHaveLength(1)
+				expect(listFiles[0]).toMatch(/^file:\/\/\/.*testDir$/)
 			})
 	}),
 	describe('get_mime_type', async () => {

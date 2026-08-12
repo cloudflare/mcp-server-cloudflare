@@ -1,5 +1,42 @@
 # demo-day
 
+## 0.1.18
+
+### Patch Changes
+
+- b9e6d76: Return an actionable `410 Gone` Problem Details response when a client attempts the removed HTTP+SSE transport with `GET /sse`. The response explains that clients can configure the existing `/sse` URL to use Streamable HTTP or, preferably, move to `/mcp` for future compatibility. It preserves query parameters, identifies the recommended replacement in a `Link` header, and is available before OAuth authentication. Streamable HTTP `POST` requests continue to work on both `/sse` and `/mcp`.
+- Updated dependencies [b9e6d76]
+  - @repo/mcp-common@0.20.10
+
+## 0.1.17
+
+### Patch Changes
+
+- Updated dependencies [12a9a61]
+  - @repo/mcp-common@0.20.9
+
+## 0.1.16
+
+### Patch Changes
+
+- Updated dependencies [4e1e6ab]
+  - @repo/mcp-common@0.20.8
+
+## 0.1.15
+
+### Patch Changes
+
+- 1df6213: Migrate all MCP servers to fresh SDK v2 factories with default stateless 2025 compatibility, request-scoped auth/context, and no live protocol Durable Object or SSE session state. Upgrade the released MCP stack to `agents@0.20.1`, `@modelcontextprotocol/server@2.0.0`, `@modelcontextprotocol/client@2.0.0`, and SDK v1 compatibility package `@modelcontextprotocol/sdk@1.30.0`, using the isolated `agents/mcp/server` stateless handler. Keep `/sse` as a URL alias for the same Streamable HTTP handler as `/mcp`, without retaining the deprecated HTTP+SSE transport. Assemble every deployment through canonical public/authenticated app modules, prune obsolete app-level routing dependencies, and expose a tracked registration context instead of the raw SDK server. Preserve append-only Durable Object migration history while explicitly deleting retired protocol classes, preserve application/security state, upgrade the OAuth provider to 0.8.2 with exact resource matching, bound MCP request bodies, and require explicit Workers Builds identifiers.
+- Updated dependencies [1df6213]
+  - @repo/mcp-common@0.20.7
+
+## 0.1.14
+
+### Patch Changes
+
+- Updated dependencies [cb01861]
+  - @repo/mcp-common@0.20.6
+
 ## 0.1.13
 
 ### Patch Changes

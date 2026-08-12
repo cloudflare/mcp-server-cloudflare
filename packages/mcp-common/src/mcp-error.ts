@@ -38,6 +38,7 @@ export function throwUpstreamApiError(status: number, context: string, rawBody?:
 export class McpError extends Error {
 	public code: ContentfulStatusCode
 	public reportToSentry: boolean
+	public headers: Record<string, string>
 	// error message for internal use
 	public internalMessage?: string
 	public cause?: Error
@@ -48,12 +49,14 @@ export class McpError extends Error {
 			reportToSentry: boolean
 			internalMessage?: string
 			cause?: Error
+			headers?: Record<string, string>
 		} = { reportToSentry: false }
 	) {
 		super(message)
 		this.code = code
 		this.name = 'MCPError'
 		this.reportToSentry = opts.reportToSentry
+		this.headers = opts.headers ?? {}
 		this.internalMessage = opts.internalMessage
 		this.cause = opts.cause
 	}

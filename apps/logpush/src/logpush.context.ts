@@ -1,5 +1,3 @@
-import type { LogsMCP } from './logpush.app'
-
 export interface Env {
 	OAUTH_KV: KVNamespace
 	MCP_COOKIE_ENCRYPTION_KEY: string
@@ -8,7 +6,6 @@ export interface Env {
 	MCP_SERVER_VERSION: string
 	CLOUDFLARE_CLIENT_ID: string
 	CLOUDFLARE_CLIENT_SECRET: string
-	MCP_OBJECT: DurableObjectNamespace<LogsMCP>
 	MCP_METRICS: AnalyticsEngineDataset
 	DEV_DISABLE_OAUTH: string
 	DEV_CLOUDFLARE_API_TOKEN: string

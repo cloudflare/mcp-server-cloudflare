@@ -1,6 +1,6 @@
 export const MAX_CONTAINERS = 50
 export async function startAndWaitForPort(
-	environment: 'dev' | 'prod' | 'test',
+	environment: 'dev' | 'staging' | 'prod' | 'test',
 	container: Container | undefined,
 	portToAwait: number,
 	maxTries = 10
@@ -62,7 +62,7 @@ export async function startAndWaitForPort(
 }
 
 export async function proxyFetch(
-	environment: 'dev' | 'prod' | 'test',
+	environment: 'dev' | 'staging' | 'prod' | 'test',
 	container: Container | undefined,
 	request: Request,
 	portNumber: number

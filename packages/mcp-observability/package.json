@@ -1,22 +1,21 @@
 {
 	"name": "@repo/mcp-observability",
-	"version": "0.32.5",
+	"version": "0.32.6",
 	"private": true,
 	"sideEffects": false,
 	"type": "module",
 	"main": "./src/index.ts",
 	"scripts": {
-		"types": "wrangler types"
+		"check:types": "run-tsc"
 	},
 	"directories": {
 		"bin": "bin"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "1.29.0",
-		"wrangler": "4.96.0",
-		"zod": "4.4.3"
+		"@modelcontextprotocol/server": "catalog:"
 	},
 	"devDependencies": {
+		"@repo/tools": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "22.15.17"
 	}

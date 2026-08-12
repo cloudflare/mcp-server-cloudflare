@@ -1,64 +1,27 @@
-import OAuthProvider from '@cloudflare/workers-oauth-provider'
-
-import { createApiHandler } from '@repo/mcp-common/src/api-handler'
-import { handleApiTokenMode, isApiTokenRequest } from '@repo/mcp-common/src/api-token-mode'
-import {
-	createAuthHandlers,
-	handleTokenExchangeCallback,
-} from '@repo/mcp-common/src/cloudflare-oauth-handler'
-import { getEnv } from '@repo/mcp-common/src/env'
+import { createAuthenticatedMcpApp } from '@repo/mcp-common/src/mcp-app'
 import { RequiredScopes } from '@repo/mcp-common/src/scopes'
-import { MetricsTracker } from '@repo/mcp-observability'
 
+import { registerContainerTools } from './container-tools'
 import { ContainerManager } from './containerManager'
-import { ContainerMcpAgent } from './containerMcp'
+import { BASE_INSTRUCTIONS } from './prompts'
 import { UserContainer } from './userContainer'
 
-import type { AuthProps } from '@repo/mcp-common/src/cloudflare-oauth-handler'
 import type { Env } from './sandbox.server.context'
 
-export { ContainerManager, ContainerMcpAgent, UserContainer }
-
-const env = getEnv<Env>()
-
-const metrics = new MetricsTracker(env.MCP_METRICS, {
-	name: env.MCP_SERVER_NAME,
-	version: env.MCP_SERVER_VERSION,
-})
-
-// Context from the auth process, encrypted & stored in the auth token
-// and provided to the DurableMCP as this.props
-export type Props = AuthProps
+export { ContainerManager, UserContainer }
 
 const ContainerScopes = {
 	...RequiredScopes,
 	'account:read': 'See your account info such as account details, analytics, and memberships.',
 } as const
 
-export default {
-	fetch: async (req: Request, env: Env, ctx: ExecutionContext) => {
-		if (await isApiTokenRequest(req, env)) {
-			return await handleApiTokenMode(ContainerMcpAgent, req, env, ctx)
-		}
+const app = createAuthenticatedMcpApp<Env>({
+	serviceHostnames: ['containers-staging.mcp.cloudflare.com', 'containers.mcp.cloudflare.com'],
+	scopes: ContainerScopes,
+	serverOptions: { instructions: BASE_INSTRUCTIONS },
+	register: registerContainerTools,
+})
 
-		return new OAuthProvider({
-			apiRoute: ['/mcp', '/sse'],
-			apiHandler: createApiHandler(ContainerMcpAgent),
-			defaultHandler: createAuthHandlers({ scopes: ContainerScopes, metrics }),
-			authorizeEndpoint: '/oauth/authorize',
-			tokenEndpoint: '/token',
-			tokenExchangeCallback: (options) =>
-				handleTokenExchangeCallback(
-					options,
-					env.CLOUDFLARE_CLIENT_ID,
-					env.CLOUDFLARE_CLIENT_SECRET
-				),
-			// Cloudflare access token TTL
-			accessTokenTTL: 3600,
-			refreshTokenTTL: 2592000, // 30 days
-			// TODO: Remove after 2026-05-01 — all pre-0.4.0 grants will have expired by then
-			resourceMatchOriginOnly: true,
-			clientRegistrationEndpoint: '/register',
-		}).fetch(req, env, ctx)
-	},
-}
+export const mcpHandler = app.mcpHandler
+
+export default app.worker

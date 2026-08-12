@@ -12,6 +12,10 @@
 		{
 			"new_sqlite_classes": ["RadarMCP"],
 			"tag": "v1"
+		},
+		{
+			"deleted_classes": ["RadarMCP"],
+			"tag": "v2"
 		}
 	],
 	"observability": {
@@ -20,14 +24,6 @@
 			"enabled": true,
 			"head_sampling_rate": 0.1
 		}
-	},
-	"durable_objects": {
-		"bindings": [
-			{
-				"class_name": "RadarMCP",
-				"name": "MCP_OBJECT"
-			}
-		]
 	},
 	"kv_namespaces": [
 		{
@@ -56,14 +52,6 @@
 			"name": "mcp-cloudflare-radar-staging",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "radar-staging.mcp.cloudflare.com", "custom_domain": true }],
-			"durable_objects": {
-				"bindings": [
-					{
-						"class_name": "RadarMCP",
-						"name": "MCP_OBJECT"
-					}
-				]
-			},
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",
@@ -86,14 +74,6 @@
 			"name": "mcp-cloudflare-radar-production",
 			"account_id": "6702657b6aa048cf3081ff3ff3c9c52f",
 			"routes": [{ "pattern": "radar.mcp.cloudflare.com", "custom_domain": true }],
-			"durable_objects": {
-				"bindings": [
-					{
-						"class_name": "RadarMCP",
-						"name": "MCP_OBJECT"
-					}
-				]
-			},
 			"kv_namespaces": [
 				{
 					"binding": "OAUTH_KV",
