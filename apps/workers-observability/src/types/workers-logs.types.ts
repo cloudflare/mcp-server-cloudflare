@@ -65,7 +65,7 @@ export const zQueryFilter = z.object({
 
     • PREFERRED KEYS (faster & always available):
       - $metadata.service: Worker service name
-			- $metadata.origin: Trigger type (e.g., fetch, scheduled, etc.)
+			- $metadata.origin: Trigger type (e.g., fetch, cron, etc.)
 			- $metadata.trigger: Trigger type (e.g., GET /users, POST /orders, etc.)
       - $metadata.message: Log message text (present in nearly all logs)
       - $metadata.error: Error message (when applicable)
@@ -248,7 +248,7 @@ const zCloudflareMiniEventDetails = z.object({
 export const zCloudflareMiniEvent = z.object({
 	event: zCloudflareMiniEventDetails,
 	scriptName: z.string(),
-	outcome: z.string(),
+	outcome: z.string().optional(),
 	eventType: z.enum([
 		'fetch',
 		'scheduled',
