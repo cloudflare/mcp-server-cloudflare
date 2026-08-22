@@ -1,13 +1,12 @@
 import {
 	AuthorizationError,
-	CimdFetchError,
 	GrantType,
 	OAuthError as ProviderOAuthError,
 } from '@cloudflare/workers-oauth-provider'
 import { http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { refreshAuthToken } from './cloudflare-auth'
+import { generatePKCECodes, getAuthorizationURL, refreshAuthToken } from './cloudflare-auth'
 import {
 	createAuthHandlers,
 	getUserAndAccounts,
@@ -28,6 +27,8 @@ vi.mock('./cloudflare-auth', () => ({
 }))
 
 const mockRefreshAuthToken = vi.mocked(refreshAuthToken)
+const mockGeneratePKCECodes = vi.mocked(generatePKCECodes)
+const mockGetAuthorizationURL = vi.mocked(getAuthorizationURL)
 
 beforeEach(() => {
 	vi.resetAllMocks()
@@ -592,8 +593,9 @@ describe('createAuthHandlers authorize route', () => {
 	function authorizeEnv(oauthProvider: Partial<OAuthHelpers>) {
 		return {
 			OAUTH_PROVIDER: oauthProvider as OAuthHelpers,
-			OAUTH_KV: undefined as unknown as KVNamespace,
-			MCP_COOKIE_ENCRYPTION_KEY: 'test-key',
+			OAUTH_KV: {
+				put: vi.fn(async () => {}),
+			} as unknown as KVNamespace,
 			CLOUDFLARE_CLIENT_ID: 'client',
 			CLOUDFLARE_CLIENT_SECRET: 'secret',
 		}
@@ -647,24 +649,56 @@ describe('createAuthHandlers authorize route', () => {
 		})
 	})
 
-	it('returns a retryable 503 when client metadata resolution fails', async () => {
-		const clientId = 'https://client.example.com/metadata.json'
-		const app = createAuthHandlers({ scopes: {}, metrics })
+	it('redirects directly to Cloudflare authorization without a local approval page', async () => {
+		const scopes = {
+			'account:read': 'Read account details',
+			'workers:write': 'Manage Workers',
+		}
+		const oauthReqInfo = {
+			clientId: 'https://client.example.com/metadata.json',
+			redirectUri: 'https://client.example.com/callback',
+			responseType: 'code',
+			scope: [],
+			state: 'client-state',
+		}
+		const env = authorizeEnv({
+			async parseAuthRequest() {
+				return oauthReqInfo
+			},
+			lookupClient: vi.fn(),
+		})
+		mockGeneratePKCECodes.mockResolvedValue({
+			codeChallenge: 'challenge',
+			codeVerifier: 'verifier',
+		})
+		mockGetAuthorizationURL.mockResolvedValue({
+			authUrl: 'https://dash.cloudflare.com/oauth2/auth?scope=account%3Aread+workers%3Awrite',
+		})
+
+		const app = createAuthHandlers({ scopes, metrics })
 		const response = await app.fetch(
-			new Request(`https://mcp.example.com/oauth/authorize?client_id=${clientId}`),
-			authorizeEnv({
-				async parseAuthRequest() {
-					return { clientId } as Awaited<ReturnType<OAuthHelpers['parseAuthRequest']>>
-				},
-				async lookupClient() {
-					throw new CimdFetchError(clientId, new Error('HTTP 403'))
-				},
-			}),
+			new Request('https://mcp.example.com/oauth/authorize?client_id=abc'),
+			env,
 			executionCtx
 		)
 
-		expect(response.status).toBe(503)
-		expect(response.headers.get('retry-after')).toBe('30')
-		await expect(response.json()).resolves.toMatchObject({ error: 'temporarily_unavailable' })
+		expect(response.status).toBe(302)
+		expect(response.headers.get('location')).toBe(
+			'https://dash.cloudflare.com/oauth2/auth?scope=account%3Aread+workers%3Awrite'
+		)
+		expect(response.headers.get('set-cookie')).toContain('__Host-CONSENTED_STATE=')
+		expect(env.OAUTH_PROVIDER.lookupClient).not.toHaveBeenCalled()
+		expect(mockGetAuthorizationURL).toHaveBeenCalledWith(
+			expect.objectContaining({
+				client_id: 'client',
+				scopes,
+				codeChallenge: 'challenge',
+				state: expect.objectContaining({
+					...oauthReqInfo,
+					scope: Object.keys(scopes),
+					state: expect.any(String),
+				}),
+			})
+		)
 	})
 })
