@@ -482,6 +482,8 @@ export function createAuthHandlers({
 				}
 				throw e
 			}
+			// Always request the server's complete configured scope set. Cloudflare's
+			// consent dialog is responsible for letting the user decline optional scopes.
 			oauthReqInfo.scope = Object.keys(scopes)
 
 			const { codeChallenge, codeVerifier } = await generatePKCECodes()

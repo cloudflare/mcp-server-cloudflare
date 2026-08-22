@@ -649,7 +649,7 @@ describe('createAuthHandlers authorize route', () => {
 		})
 	})
 
-	it('redirects directly to Cloudflare authorization without a local approval page', async () => {
+	it('redirects directly to Cloudflare and requests every configured scope', async () => {
 		const scopes = {
 			'account:read': 'Read account details',
 			'workers:write': 'Manage Workers',
