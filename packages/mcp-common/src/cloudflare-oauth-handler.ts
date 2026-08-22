@@ -69,8 +69,6 @@ type AuthContext = {
 		MCP_COOKIE_ENCRYPTION_KEY: string
 		CLOUDFLARE_CLIENT_ID: string
 		CLOUDFLARE_CLIENT_SECRET: string
-		MCP_SERVER_NAME?: string
-		MCP_SERVER_DESCRIPTION?: string
 	}
 } & BaseHonoContext
 
@@ -523,10 +521,9 @@ export function createAuthHandlers({
 
 			const response = renderApprovalDialog(c.req.raw, {
 				client,
-				serverName: c.env.MCP_SERVER_NAME || 'Cloudflare MCP Server',
 				redirectUri: oauthReqInfo.redirectUri,
 				cancelUri: cancelUri.href,
-				scopes,
+				scopes: oauthReqInfo.scope,
 				state: { oauthReqInfo },
 				csrfToken,
 				setCookie: csrfCookie,

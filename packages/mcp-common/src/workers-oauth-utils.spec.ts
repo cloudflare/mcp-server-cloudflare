@@ -52,28 +52,21 @@ describe('renderApprovalDialog', () => {
 				redirectUris: ['http://127.0.0.1:4321/callback'],
 				tokenEndpointAuthMethod: 'none',
 			},
-			serverName: 'Cloudflare MCP Server',
 			redirectUri: 'http://127.0.0.1:4321/callback',
 			cancelUri: 'http://127.0.0.1:4321/callback?error=access_denied&state=client-state',
-			scopes: {
-				'user:read': 'Read your user profile.',
-				'workers:write': 'Manage Workers.',
-			},
+			scopes: ['user:read', 'workers:write'],
 			state: { oauthReqInfo: { clientId: 'client-id' } },
 			csrfToken: 'csrf-token',
 			setCookie: '__Host-CSRF_TOKEN=csrf-token',
 		})
 
 		const html = await response.text()
-		expect(html).toContain('Authorize Application')
+		expect(html).toContain('Authorize Codex')
 		expect(html).toContain('Codex')
-		expect(html).toContain('chatgpt.com')
-		expect(html).toContain('127.0.0.1')
-		expect(html).toContain('Local redirect:')
+		expect(html).toContain('http://127.0.0.1:4321/callback')
 		expect(html).toContain('user:read')
-		expect(html).toContain('Read your user profile.')
 		expect(html).toContain('workers:write')
-		expect(html).toContain('Manage Workers.')
+		expect(html).not.toContain('chatgpt.com')
 		expect(html).toContain('error=access_denied&amp;state=client-state')
 		expect(response.headers.get('content-security-policy')).toContain("frame-ancestors 'none'")
 		expect(response.headers.get('content-security-policy')).not.toContain('script-src')

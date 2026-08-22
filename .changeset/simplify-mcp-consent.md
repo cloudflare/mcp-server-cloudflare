@@ -2,4 +2,4 @@
 '@repo/mcp-common': patch
 ---
 
-Simplify the required MCP client consent interstitial and align it with Cloudflare's Kumo-based OAuth experience. The page now focuses on the requesting client, redirect hostname, local-redirect warning, and complete configured scope set before continuing to Cloudflare authorization.
+Reduce the MCP client consent interstitial to the information required by the MCP security guidance: the requesting client name, full registered redirect URI, complete third-party scope set, and explicit approval controls. Preserve the signed consent cookie, CSRF validation, restrictive CSP, and OAuth state binding.

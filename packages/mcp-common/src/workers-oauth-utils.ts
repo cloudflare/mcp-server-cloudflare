@@ -171,10 +171,9 @@ export async function clientIdAlreadyApproved(
  */
 export interface ApprovalDialogOptions {
 	client: ClientInfo | null
-	serverName: string
 	redirectUri: string
 	cancelUri: string
-	scopes: Record<string, string>
+	scopes: readonly string[]
 	state: Record<string, unknown>
 	csrfToken: string
 	setCookie: string
@@ -182,37 +181,16 @@ export interface ApprovalDialogOptions {
 
 /** Renders the required MCP client consent interstitial before upstream OAuth. */
 export function renderApprovalDialog(request: Request, options: ApprovalDialogOptions): Response {
-	const { client, serverName, redirectUri, cancelUri, scopes, state, csrfToken, setCookie } =
-		options
-	const hostname = (value: string): string => {
-		try {
-			return new URL(value).hostname
-		} catch {
-			return value
-		}
-	}
-	const redirectUrl = new URL(redirectUri)
+	const { client, redirectUri, cancelUri, scopes, state, csrfToken, setCookie } = options
 	const clientName = sanitizeHtml(client?.clientName || 'Unknown MCP client')
-	const clientHostname = sanitizeHtml(client ? hostname(client.clientId) : 'Unknown')
-	const redirectHostname = sanitizeHtml(redirectUrl.hostname)
-	const safeServerName = sanitizeHtml(serverName)
-	const isLocalRedirect = ['127.0.0.1', '::1', 'localhost'].includes(redirectUrl.hostname)
-	const scopeItems = Object.entries(scopes)
-		.map(
-			([scope, description]) => `
-          <li>
-            <code>${sanitizeHtml(scope)}</code>
-            <span>${sanitizeHtml(description)}</span>
-          </li>`
-		)
-		.join('')
+	const scopeItems = scopes.map((scope) => `<li><code>${sanitizeHtml(scope)}</code></li>`).join('')
 
 	const htmlContent = `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Authorize ${clientName} | Cloudflare</title>
+  <title>Authorize ${clientName}</title>
   <style>
     :root {
       /* Kumo-derived Cloudflare design tokens. */
@@ -222,12 +200,9 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
       --canvas: #fbfbfb;
       --elevated: #fafafa;
       --hairline: #eee;
-      --line: rgba(37, 37, 37, 0.1);
       --interact: #d4d4d4;
       --text: #262626;
       --text-subtle: #808080;
-      --warning-bg: #fff7ed;
-      --warning-line: #fed7aa;
     }
     * { box-sizing: border-box; }
     body {
@@ -237,116 +212,68 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
       color: var(--text);
       font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      height: 72px;
-      padding: 0 32px;
-      background: var(--base);
-      border-bottom: 1px solid var(--hairline);
-    }
-    .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: .02em; }
-    .brand svg { width: 34px; color: var(--brand); }
-    .divider { width: 1px; height: 28px; background: var(--interact); }
-    .product { color: var(--text-subtle); font-size: 16px; }
-    main { display: flex; justify-content: center; padding: 42px 24px; }
+    main { display: flex; justify-content: center; padding: 48px 20px; }
     .card {
       width: 100%;
-      max-width: 640px;
-      overflow: hidden;
+      max-width: 560px;
+      padding: 32px;
       background: var(--base);
       border: 1px solid var(--hairline);
       border-radius: 12px;
     }
-    .card-header { padding: 28px 32px; text-align: center; border-bottom: 1px solid var(--hairline); }
-    h1 { margin: 0 0 4px; font-size: 20px; letter-spacing: -.02em; }
-    .subtitle { margin: 0; color: var(--text-subtle); }
-    .card-body { padding: 28px 32px 32px; }
-    .client-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-      padding: 8px 12px;
+    h1 { margin: 0 0 28px; font-size: 20px; letter-spacing: -.02em; }
+    dt { margin: 20px 0 8px; color: var(--text-subtle); font-weight: 500; }
+    dd { margin: 0; }
+    .redirect {
+      display: block;
+      padding: 12px 14px;
+      overflow-wrap: anywhere;
       background: var(--elevated);
       border: 1px solid var(--hairline);
       border-radius: 8px;
+    }
+    ul { margin: 0; padding: 0; list-style: none; border: 1px solid var(--hairline); border-radius: 8px; }
+    li { padding: 11px 14px; }
+    li + li { border-top: 1px solid var(--hairline); }
+    code { font-size: 13px; font-weight: 600; }
+    .actions { display: flex; gap: 10px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--hairline); }
+    .button {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1px solid var(--interact);
+      border-radius: 8px;
+      background: var(--base);
+      color: var(--text);
+      font: inherit;
       font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
     }
-    .client-icon {
-      display: grid;
-      place-items: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 5px;
-      background: var(--brand);
-      color: white;
-      font-size: 12px;
-    }
-    .details { overflow: hidden; margin-bottom: 20px; border: 1px solid var(--hairline); border-radius: 8px; background: var(--elevated); }
-    .detail { display: flex; justify-content: space-between; gap: 24px; padding: 11px 14px; }
-    .detail + .detail { border-top: 1px solid var(--hairline); }
-    .detail span { color: var(--text-subtle); }
-    .detail code { overflow-wrap: anywhere; text-align: right; font-weight: 600; }
-    .warning { margin: -6px 0 22px; padding: 12px 14px; border: 1px solid var(--warning-line); border-radius: 8px; background: var(--warning-bg); }
-    .section-label { margin: 0 0 10px; color: var(--text-subtle); font-weight: 500; }
-    .permissions { margin: 0 0 28px; padding: 0; list-style: none; border: 1px solid var(--hairline); border-radius: 8px; }
-    .permissions li { padding: 12px 14px; }
-    .permissions li + li { border-top: 1px dashed var(--line); }
-    .permissions code { font-weight: 600; }
-    .permissions span { display: block; margin-top: 2px; color: var(--text-subtle); }
-    .actions { display: flex; gap: 10px; padding-top: 20px; border-top: 1px solid var(--hairline); }
-    .button { flex: 1; padding: 10px 16px; border: 1px solid var(--interact); border-radius: 8px; background: var(--base); color: var(--text); font: inherit; font-weight: 600; text-align: center; text-decoration: none; cursor: pointer; }
     .button:hover { background: var(--elevated); }
     button[type="submit"] { border-color: var(--brand); background: var(--brand); color: white; }
     button[type="submit"]:hover { border-color: var(--brand-hover); background: var(--brand-hover); }
-    @media (max-width: 600px) {
-      .header { height: 60px; padding: 0 20px; }
-      main { padding: 20px 12px; }
-      .card-header, .card-body { padding: 22px 20px; }
-      .detail { display: block; }
-      .detail code { display: block; margin-top: 3px; text-align: left; }
-    }
+    @media (max-width: 600px) { main { padding: 16px 12px; } .card { padding: 24px 20px; } }
   </style>
 </head>
 <body>
-  <header class="header">
-    <div class="brand">
-      <svg viewBox="0 0 48 24" fill="currentColor" aria-hidden="true"><path d="M34.7 9.7a7.2 7.2 0 0 0-13.8-2.2A9.2 9.2 0 0 0 4.2 13H3a3 3 0 0 0 0 6h34.5a5 5 0 0 0-2.8-9.3Z"/><path opacity=".7" d="M39.5 12a5.5 5.5 0 0 0-5.2 3.7H18.8a3.3 3.3 0 0 0-3.1 2.3h27.8a4 4 0 0 0-4-6Z"/></svg>
-      CLOUDFLARE
-    </div>
-    <div class="divider"></div>
-    <div class="product">MCP Server</div>
-  </header>
   <main>
     <section class="card">
-      <div class="card-header">
-        <h1>Authorize Application</h1>
-        <p class="subtitle">Connect to ${safeServerName}</p>
-      </div>
-      <div class="card-body">
-        <div class="client-badge"><span class="client-icon">MCP</span>${clientName}</div>
-        <div class="details" aria-label="Client identity and redirect destination">
-          <div class="detail"><span>Client ID hostname</span><code>${clientHostname}</code></div>
-          <div class="detail"><span>Redirect URI hostname</span><code>${redirectHostname}</code></div>
+      <h1>Authorize ${clientName}</h1>
+      <dl>
+        <dt>Registered redirect URI</dt>
+        <dd><code class="redirect">${sanitizeHtml(redirectUri)}</code></dd>
+        <dt>Third-party API scopes requested</dt>
+        <dd><ul>${scopeItems}</ul></dd>
+      </dl>
+      <form method="post" action="${sanitizeHtml(new URL(request.url).pathname)}">
+        <input type="hidden" name="state" value="${btoa(JSON.stringify(state))}">
+        <input type="hidden" name="csrf_token" value="${sanitizeHtml(csrfToken)}">
+        <div class="actions">
+          <a class="button" href="${sanitizeHtml(cancelUri)}">Cancel</a>
+          <button class="button" type="submit">Continue</button>
         </div>
-        ${
-					isLocalRedirect
-						? '<div class="warning" role="alert"><strong>Local redirect:</strong> this client will receive the authorization code on this device. Only continue if you trust the application that opened this page.</div>'
-						: ''
-				}
-        <p class="section-label">Requested permissions (${Object.keys(scopes).length})</p>
-        <ul class="permissions">${scopeItems}</ul>
-        <form method="post" action="${sanitizeHtml(new URL(request.url).pathname)}">
-          <input type="hidden" name="state" value="${btoa(JSON.stringify(state))}">
-          <input type="hidden" name="csrf_token" value="${sanitizeHtml(csrfToken)}">
-          <div class="actions">
-            <a class="button" href="${sanitizeHtml(cancelUri)}">Cancel</a>
-            <button class="button" type="submit">Continue</button>
-          </div>
-        </form>
-      </div>
+      </form>
     </section>
   </main>
 </body>
