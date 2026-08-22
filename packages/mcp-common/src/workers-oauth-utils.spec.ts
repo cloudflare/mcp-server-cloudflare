@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { OAuthError, validateOAuthState } from './workers-oauth-utils'
+import {
+	OAuthError,
+	parseRedirectApproval,
+	renderApprovalDialog,
+	validateOAuthState,
+} from './workers-oauth-utils'
 
 describe('OAuthError', () => {
 	it('creates an error with code, description, and statusCode', () => {
@@ -35,6 +40,188 @@ describe('OAuthError', () => {
 		}).toResponse()
 
 		expect(response.headers.get('retry-after')).toBe('17')
+	})
+})
+
+describe('renderApprovalDialog', () => {
+	it('shows the client, redirect destination, and every requested scope', async () => {
+		const response = renderApprovalDialog(new Request('https://mcp.example.com/oauth/authorize'), {
+			client: {
+				clientId: 'https://chatgpt.com/oauth/codex',
+				clientName: 'Codex',
+				redirectUris: ['http://127.0.0.1:4321/callback'],
+				tokenEndpointAuthMethod: 'none',
+			},
+			serverName: 'Cloudflare MCP Server',
+			redirectUri: 'http://127.0.0.1:4321/callback',
+			cancelUri: 'http://127.0.0.1:4321/callback?error=access_denied&state=client-state',
+			scopes: {
+				'user:read': 'Read your user profile.',
+				'workers:write': 'Manage Workers.',
+			},
+			state: { oauthReqInfo: { clientId: 'client-id' } },
+			csrfToken: 'csrf-token',
+			setCookie: '__Host-CSRF_TOKEN=csrf-token',
+		})
+
+		const html = await response.text()
+		expect(html).toContain('Authorize Application')
+		expect(html).toContain('Codex')
+		expect(html).toContain('chatgpt.com')
+		expect(html).toContain('127.0.0.1')
+		expect(html).toContain('Local redirect:')
+		expect(html).toContain('user:read')
+		expect(html).toContain('Read your user profile.')
+		expect(html).toContain('workers:write')
+		expect(html).toContain('Manage Workers.')
+		expect(html).toContain('error=access_denied&amp;state=client-state')
+		expect(response.headers.get('content-security-policy')).toContain("frame-ancestors 'none'")
+		expect(response.headers.get('content-security-policy')).not.toContain('script-src')
+		expect(response.headers.get('referrer-policy')).toBe('no-referrer')
+		expect(response.headers.get('x-frame-options')).toBe('DENY')
+	})
+})
+
+describe('parseRedirectApproval', () => {
+	it('throws OAuthError 405 for non-POST requests', async () => {
+		const request = new Request('https://example.com/oauth/authorize', {
+			method: 'GET',
+		})
+
+		try {
+			await parseRedirectApproval(request, 'test-secret')
+			expect.unreachable()
+		} catch (e) {
+			expect(e).toBeInstanceOf(OAuthError)
+			const err = e as OAuthError
+			expect(err.statusCode).toBe(405)
+			expect(err.code).toBe('invalid_request')
+		}
+	})
+
+	it('throws OAuthError 400 for missing form token', async () => {
+		const formData = new FormData()
+		formData.set('state', btoa(JSON.stringify({ oauthReqInfo: { clientId: 'test' } })))
+		// no csrf_token
+
+		const request = new Request('https://example.com/oauth/authorize', {
+			method: 'POST',
+			body: formData,
+		})
+
+		try {
+			await parseRedirectApproval(request, 'test-secret')
+			expect.unreachable()
+		} catch (e) {
+			expect(e).toBeInstanceOf(OAuthError)
+			const err = e as OAuthError
+			expect(err.statusCode).toBe(400)
+			expect(err.code).toBe('invalid_request')
+			expect(err.description).toContain('Missing required form token')
+		}
+	})
+
+	it('throws OAuthError 403 for form token mismatch', async () => {
+		const formData = new FormData()
+		formData.set('csrf_token', 'form-token')
+		formData.set('state', btoa(JSON.stringify({ oauthReqInfo: { clientId: 'test' } })))
+
+		const request = new Request('https://example.com/oauth/authorize', {
+			method: 'POST',
+			body: formData,
+			headers: {
+				Cookie: '__Host-CSRF_TOKEN=different-token',
+			},
+		})
+
+		try {
+			await parseRedirectApproval(request, 'test-secret')
+			expect.unreachable()
+		} catch (e) {
+			expect(e).toBeInstanceOf(OAuthError)
+			const err = e as OAuthError
+			expect(err.statusCode).toBe(403)
+			expect(err.code).toBe('access_denied')
+			expect(err.description).toBe('Request validation failed')
+		}
+	})
+
+	it('throws OAuthError 400 for missing state', async () => {
+		const csrfToken = 'matching-token'
+		const formData = new FormData()
+		formData.set('csrf_token', csrfToken)
+		// no state
+
+		const request = new Request('https://example.com/oauth/authorize', {
+			method: 'POST',
+			body: formData,
+			headers: {
+				Cookie: `__Host-CSRF_TOKEN=${csrfToken}`,
+			},
+		})
+
+		try {
+			await parseRedirectApproval(request, 'test-secret')
+			expect.unreachable()
+		} catch (e) {
+			expect(e).toBeInstanceOf(OAuthError)
+			const err = e as OAuthError
+			expect(err.statusCode).toBe(400)
+			expect(err.code).toBe('invalid_request')
+			expect(err.description).toContain('Missing state')
+		}
+	})
+
+	it('throws OAuthError 400 for malformed state encoding', async () => {
+		const csrfToken = 'matching-token'
+		const formData = new FormData()
+		formData.set('csrf_token', csrfToken)
+		formData.set('state', '!!!not-valid-base64!!!')
+
+		const request = new Request('https://example.com/oauth/authorize', {
+			method: 'POST',
+			body: formData,
+			headers: {
+				Cookie: `__Host-CSRF_TOKEN=${csrfToken}`,
+			},
+		})
+
+		try {
+			await parseRedirectApproval(request, 'test-secret')
+			expect.unreachable()
+		} catch (e) {
+			expect(e).toBeInstanceOf(OAuthError)
+			const err = e as OAuthError
+			expect(err.statusCode).toBe(400)
+			expect(err.code).toBe('invalid_request')
+			expect(err.description).toContain('Invalid state encoding')
+		}
+	})
+
+	it('throws OAuthError 400 for invalid state data', async () => {
+		const csrfToken = 'matching-token'
+		const formData = new FormData()
+		formData.set('csrf_token', csrfToken)
+		formData.set('state', btoa(JSON.stringify({ noOauthReqInfo: true })))
+
+		const request = new Request('https://example.com/oauth/authorize', {
+			method: 'POST',
+			body: formData,
+			headers: {
+				Cookie: `__Host-CSRF_TOKEN=${csrfToken}`,
+			},
+		})
+
+		try {
+			await parseRedirectApproval(request, 'test-secret')
+			expect.unreachable()
+		} catch (e) {
+			expect(e).toBeInstanceOf(OAuthError)
+			const err = e as OAuthError
+			expect(err.statusCode).toBe(400)
+			expect(err.code).toBe('invalid_request')
+			expect(err.description).toContain('Invalid state data')
+		}
 	})
 })
 

@@ -1,5 +1,6 @@
 import {
 	AuthorizationError,
+	CimdFetchError,
 	GrantType,
 	OAuthError as ProviderOAuthError,
 } from '@cloudflare/workers-oauth-provider'
@@ -21,8 +22,12 @@ import { useSentry } from './sentry'
 import { V4Schema } from './v4-api'
 import {
 	bindStateToSession,
+	clientIdAlreadyApproved,
 	createOAuthState,
+	generateCSRFProtection,
 	OAuthError,
+	parseRedirectApproval,
+	renderApprovalDialog,
 	validateOAuthState,
 } from './workers-oauth-utils'
 
@@ -61,8 +66,11 @@ type AuthContext = {
 	Bindings: {
 		OAUTH_PROVIDER: OAuthHelpers
 		OAUTH_KV: KVNamespace
+		MCP_COOKIE_ENCRYPTION_KEY: string
 		CLOUDFLARE_CLIENT_ID: string
 		CLOUDFLARE_CLIENT_SECRET: string
+		MCP_SERVER_NAME?: string
+		MCP_SERVER_DESCRIPTION?: string
 	}
 } & BaseHonoContext
 
@@ -456,7 +464,7 @@ export function createAuthHandlers({
 	app.use(useSentry)
 
 	/**
-	 * GET /oauth/authorize - Redirect to Cloudflare's consent dialog
+	 * GET /oauth/authorize - Show consent dialog or redirect if approved
 	 */
 	app.get(`/oauth/authorize`, async (c) => {
 		try {
@@ -482,17 +490,49 @@ export function createAuthHandlers({
 				}
 				throw e
 			}
-			// Always request the server's complete configured scope set. Cloudflare's
-			// consent dialog is responsible for letting the user decline optional scopes.
+			// Request the complete server scope set; Cloudflare handles optional selection.
 			oauthReqInfo.scope = Object.keys(scopes)
 
-			const { codeChallenge, codeVerifier } = await generatePKCECodes()
-			const stateToken = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV, codeVerifier)
-			const { setCookie: sessionCookie } = await bindStateToSession(stateToken)
+			// Check if client was previously approved (skip consent if so)
+			if (
+				await clientIdAlreadyApproved(
+					c.req.raw,
+					oauthReqInfo.clientId,
+					c.env.MCP_COOKIE_ENCRYPTION_KEY
+				)
+			) {
+				// Client already approved - create state and redirect immediately
+				const { codeChallenge, codeVerifier } = await generatePKCECodes()
+				const stateToken = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV, codeVerifier)
+				const { setCookie: sessionCookie } = await bindStateToSession(stateToken)
 
-			return redirectToCloudflare(c, oauthReqInfo, stateToken, codeChallenge, scopes, {
-				'Set-Cookie': sessionCookie,
+				return redirectToCloudflare(c, oauthReqInfo, stateToken, codeChallenge, scopes, {
+					'Set-Cookie': sessionCookie,
+				})
+			}
+
+			// Client not approved - show consent dialog
+			const { token: csrfToken, setCookie: csrfCookie } = generateCSRFProtection()
+
+			// Render approval dialog
+			const client = await c.env.OAUTH_PROVIDER.lookupClient(oauthReqInfo.clientId)
+			const cancelUri = new URL(oauthReqInfo.redirectUri)
+			cancelUri.searchParams.set('error', 'access_denied')
+			cancelUri.searchParams.set('error_description', 'The resource owner denied the request')
+			if (oauthReqInfo.state) cancelUri.searchParams.set('state', oauthReqInfo.state)
+
+			const response = renderApprovalDialog(c.req.raw, {
+				client,
+				serverName: c.env.MCP_SERVER_NAME || 'Cloudflare MCP Server',
+				redirectUri: oauthReqInfo.redirectUri,
+				cancelUri: cancelUri.href,
+				scopes,
+				state: { oauthReqInfo },
+				csrfToken,
+				setCookie: csrfCookie,
 			})
+
+			return response
 		} catch (e) {
 			c.var.sentry?.recordError(e)
 			let message: string | undefined
@@ -506,6 +546,83 @@ export function createAuthHandlers({
 			metrics.logEvent(
 				new AuthUser({
 					errorMessage: `Authorize Error: ${message}`,
+				})
+			)
+			if (e instanceof CimdFetchError) {
+				return new OAuthError(
+					'temporarily_unavailable',
+					'Client metadata is temporarily unavailable. Please try again.',
+					503,
+					{ 'Retry-After': '30' }
+				).toResponse()
+			}
+			if (e instanceof OAuthError) {
+				return e.toResponse()
+			}
+			if (e instanceof McpError) {
+				return mcpErrorToOAuthResponse(e)
+			}
+			console.error(e)
+			return new OAuthError('server_error', 'Internal Error', 500).toResponse()
+		}
+	})
+
+	/**
+	 * POST /oauth/authorize - Handle consent form submission
+	 */
+	app.post(`/oauth/authorize`, async (c) => {
+		try {
+			// Validates CSRF token, extracts state, and generates approved client cookie
+			const { state, headers } = await parseRedirectApproval(
+				c.req.raw,
+				c.env.MCP_COOKIE_ENCRYPTION_KEY
+			)
+
+			if (!state.oauthReqInfo) {
+				return new OAuthError(
+					'invalid_request',
+					'Missing OAuth request info in state',
+					400
+				).toResponse()
+			}
+
+			const oauthReqInfo = state.oauthReqInfo as AuthRequest
+
+			// Create OAuth state in KV and bind to session
+			const { codeChallenge, codeVerifier } = await generatePKCECodes()
+			const stateToken = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV, codeVerifier)
+			const { setCookie: sessionCookie } = await bindStateToSession(stateToken)
+
+			// Build redirect response
+			const redirectResponse = await redirectToCloudflare(
+				c,
+				oauthReqInfo,
+				stateToken,
+				codeChallenge,
+				scopes
+			)
+
+			// Add both cookies: approved client cookie (if present) and session binding cookie
+			// Note: We must use append() for multiple Set-Cookie headers, not combine with commas
+			if (headers['Set-Cookie']) {
+				redirectResponse.headers.append('Set-Cookie', headers['Set-Cookie'])
+			}
+			redirectResponse.headers.append('Set-Cookie', sessionCookie)
+
+			return redirectResponse
+		} catch (e) {
+			c.var.sentry?.recordError(e)
+			let message: string | undefined
+			if (e instanceof Error) {
+				message = `${e.name}: ${e.message}`
+			} else if (typeof e === 'string') {
+				message = e
+			} else {
+				message = 'Unknown error'
+			}
+			metrics.logEvent(
+				new AuthUser({
+					errorMessage: `Authorize POST Error: ${message}`,
 				})
 			)
 			if (e instanceof OAuthError) {
