@@ -1,0 +1,81 @@
+version: "1"
+description: "Cloudflare MCP — permissive policy. All tools allowed. Rate limits on destructive and resource-creation operations."
+default: allow
+
+tools:
+  # Destructive tools — rate limited even in permissive mode
+  kv_namespace_delete:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "5/hour"
+        on_deny: "Max 5 KV namespace deletions per hour"
+
+  r2_bucket_delete:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "5/hour"
+        on_deny: "Max 5 R2 bucket deletions per hour"
+
+  d1_database_delete:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "5/hour"
+        on_deny: "Max 5 D1 database deletions per hour"
+
+  hyperdrive_config_delete:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "5/hour"
+        on_deny: "Max 5 Hyperdrive config deletions per hour"
+
+  container_file_delete:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "10/hour"
+        on_deny: "Max 10 container file deletions per hour"
+
+  # Resource creation — rate limited
+  kv_namespace_create:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "20/hour"
+        on_deny: "Max 20 KV namespace creations per hour"
+
+  r2_bucket_create:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "20/hour"
+        on_deny: "Max 20 R2 bucket creations per hour"
+
+  d1_database_create:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "20/hour"
+        on_deny: "Max 20 D1 database creations per hour"
+
+  hyperdrive_config_create:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "20/hour"
+        on_deny: "Max 20 Hyperdrive config creations per hour"
+
+  # Container execution — rate limited
+  container_exec:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "120/hour"
+        on_deny: "Max 120 container commands per hour"
+
+  # GraphQL queries — rate limited
+  graphql_query:
+    rules:
+      - name: "rate-limit"
+        rate_limit: "120/hour"
+        on_deny: "Max 120 GraphQL queries per hour"
+
+  # Global safety net
+  "*":
+    rules:
+      - name: "global-rate-limit"
+        rate_limit: "120/minute"
+        on_deny: "Global rate limit — max 120 tool calls per minute"
