@@ -69,8 +69,6 @@ type AuthContext = {
 		MCP_COOKIE_ENCRYPTION_KEY: string
 		CLOUDFLARE_CLIENT_ID: string
 		CLOUDFLARE_CLIENT_SECRET: string
-		MCP_SERVER_NAME?: string
-		MCP_SERVER_DESCRIPTION?: string
 	}
 } & BaseHonoContext
 
@@ -490,6 +488,7 @@ export function createAuthHandlers({
 				}
 				throw e
 			}
+			// Request the complete server scope set; Cloudflare handles optional selection.
 			oauthReqInfo.scope = Object.keys(scopes)
 
 			// Check if client was previously approved (skip consent if so)
@@ -514,17 +513,18 @@ export function createAuthHandlers({
 			const { token: csrfToken, setCookie: csrfCookie } = generateCSRFProtection()
 
 			// Render approval dialog
+			const client = await c.env.OAUTH_PROVIDER.lookupClient(oauthReqInfo.clientId)
+			const cancelUri = new URL(oauthReqInfo.redirectUri)
+			cancelUri.searchParams.set('error', 'access_denied')
+			cancelUri.searchParams.set('error_description', 'The resource owner denied the request')
+			if (oauthReqInfo.state) cancelUri.searchParams.set('state', oauthReqInfo.state)
+
 			const response = renderApprovalDialog(c.req.raw, {
-				client: await c.env.OAUTH_PROVIDER.lookupClient(oauthReqInfo.clientId),
-				server: {
-					name: c.env.MCP_SERVER_NAME || 'Cloudflare MCP Server',
-					logo: 'https://images.mcp.cloudflare.com/mcp.svg',
-					description:
-						c.env.MCP_SERVER_DESCRIPTION || 'This server uses Cloudflare for authentication.',
-				},
-				state: {
-					oauthReqInfo,
-				},
+				client,
+				redirectUri: oauthReqInfo.redirectUri,
+				cancelUri: cancelUri.href,
+				scopes: oauthReqInfo.scope,
+				state: { oauthReqInfo },
 				csrfToken,
 				setCookie: csrfCookie,
 			})
