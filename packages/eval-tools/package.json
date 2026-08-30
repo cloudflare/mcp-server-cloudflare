@@ -11,18 +11,19 @@
 		"bin": "bin"
 	},
 	"dependencies": {
-		"@cloudflare/vitest-pool-workers": "0.16.11",
+		"@cloudflare/vitest-pool-workers": "0.18.6",
 		"@modelcontextprotocol/client": "catalog:",
 		"@modelcontextprotocol/sdk": "catalog:",
 		"agents": "catalog:",
 		"ai": "6.0.194",
 		"ai-gateway-provider": "3.1.3",
-		"wrangler": "4.96.0",
+		"wrangler": "4.118.0",
 		"zod": "4.4.3"
 	},
 	"devDependencies": {
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "22.15.17",
+		"vitest": "4.1.8",
 		"vitest-evals": "0.1.4"
 	}
 }

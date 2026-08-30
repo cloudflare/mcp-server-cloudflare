@@ -1,0 +1,46 @@
+{
+	"trailingComma": "es5",
+	"tabWidth": 2,
+	"useTabs": true,
+	"semi": false,
+	"singleQuote": true,
+	"printWidth": 100,
+	"plugins": ["@ianvs/prettier-plugin-sort-imports"],
+	"importOrder": [
+		"<BUILTIN_MODULES>",
+		"<THIRD_PARTY_MODULES>",
+		"",
+		"^(@repo)(/.*)$",
+		"",
+		"^[.]{2}$",
+		"^[.]{2}/",
+		"^[.]/(?!index)",
+		"^[.]$",
+		"^[.]/index$",
+		"",
+		"<TYPES>",
+		"<TYPES><BUILTIN_MODULES>",
+		"<TYPES><THIRD_PARTY_MODULES>",
+		"<TYPES>^(@repo)(/.*)$",
+		"<TYPES>^[.]{2}$",
+		"<TYPES>^[.]{2}/",
+		"<TYPES>^[.]/(?!index)",
+		"<TYPES>^[.]$",
+		"<TYPES>^[.]/index$"
+	],
+	"importOrderTypeScriptVersion": "5.5.4",
+	"overrides": [
+		{
+			"files": "*.mdx",
+			"options": {
+				"parser": "mdx"
+			}
+		},
+		{
+			"files": ["*.jsonc", "*.code-workspace"],
+			"options": {
+				"trailingComma": "none"
+			}
+		}
+	]
+}

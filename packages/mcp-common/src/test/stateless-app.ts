@@ -47,7 +47,7 @@ export function testStatelessMcpApp<Env>({
 			...(withAuth && { props: TEST_PROPS }),
 			waitUntil() {},
 			passThroughOnException() {},
-		}) as ExecutionContext
+		}) as unknown as ExecutionContext
 
 	describe(`${name} stateless MCP transport`, () => {
 		if (authenticated) {

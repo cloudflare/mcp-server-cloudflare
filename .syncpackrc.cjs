@@ -38,23 +38,9 @@ const config = {
 			pinVersion: '4.1.8',
 		},
 		{
-			label: 'pin typescript for eslint',
+			label: 'pin workspace typescript',
 			dependencies: ['typescript'],
 			pinVersion: '5.5.4',
-		},
-		{
-			label: `pin eslint and all it's plugins for eslint v8`,
-			dependencies: [
-				'eslint',
-				'@types/eslint',
-				'eslint-config-prettier',
-				'eslint-plugin-react-hooks',
-				'eslint-plugin-unused-imports',
-				'@typescript-eslint/eslint-plugin',
-				'@typescript-eslint/parser',
-			],
-			// snapTo removes it from syncpack update list, which is the main goal
-			snapTo: ['@repo/eslint-config'],
 		},
 		{
 			label: 'use zod v4 in packages/tools',

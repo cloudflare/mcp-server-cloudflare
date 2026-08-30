@@ -12,11 +12,29 @@ This monorepo has two top-level directories: `/apps` and `/packages`.
   - [apps/radar](apps/radar)
   - [apps/cloudflare-one-casb](apps/cloudflare-one-casb)
 - **/packages**: Containing shared packages used across our various apps.
-  - packages/eslint-config: Eslint config used by all apps and packages.
-  - packages/typescript-config: tsconfig used by all apps and packages.
-  - packages/mcp-common: Shared common tools and scripts to help manage this repo.
+  - `packages/typescript-config`: shared TypeScript presets.
+  - `packages/mcp-common`: shared runtime/server utilities used by MCP apps.
+  - `packages/mcp-observability`: shared observability helpers.
+  - `packages/eval-tools`: shared evaluation tooling.
+  - `packages/tools`: shared CLI helpers used by workspace scripts.
 
 We use [TurboRepo](https://turbo.build/) and [pnpm](https://pnpm.io/) to manage this repository. TurboRepo manages the monorepo by ensuring commands are run across all apps.
+
+### Workspace task entrypoints
+
+Run these from the repository root:
+
+```bash
+pnpm dev      # turbo dev across apps
+pnpm build    # turbo build across packages/apps that define build
+pnpm deploy   # turbo deploy across deployable apps
+pnpm check    # format + dependency + lint/type checks + tests
+```
+
+### Linting and formatting
+
+- Formatting is centralized in root `.prettierrc.json`.
+- Linting is centralized in root `.oxlintrc.json` and executed through shared workspace scripts.
 
 ## Getting Started
 

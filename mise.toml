@@ -1,0 +1,406 @@
+# mise.toml - Central tool management & task orchestration
+# https://mise.jdx.dev/
+# Manages Node, pnpm, Turbo, and dev tasks across the monorepo
+
+[tools]
+node = "20.18.0"
+pnpm = "10.8.0"
+turbo = "2.10.7"
+
+[env]
+PNPM_HOME = "{{ env.HOME }}/.pnpm"
+NODE_ENV = "development"
+FORCE_COLOR = "1"
+
+[tasks]
+
+# =============================================================================
+# MAIN ORCHESTRATION TASKS
+# =============================================================================
+
+[tasks.setup]
+description = "Initial setup: install deps, validate tools, prepare environment"
+run = """
+echo "🚀 Starting MCP Monorepo Setup..."
+echo ""
+echo "1️⃣  Validating Mise installation..."
+mise --version
+echo ""
+echo "2️⃣  Installing dependencies (pnpm)..."
+pnpm install
+echo ""
+echo "3️⃣  Installing Turbo..."
+pnpm add -D turbo --workspace-root
+echo ""
+echo "4️⃣  Running validations..."
+mise run validate:all
+echo ""
+echo "✅ Setup complete! Run 'mise run dev' to start all apps."
+"""
+depends = ["validate:tools"]
+
+[tasks.validate:all]
+description = "Run all validation checks: format, lint, types, deps"
+run = """
+echo "🔍 Running all validation checks..."
+mise run validate:format
+mise run validate:lint
+mise run validate:types
+mise run validate:deps
+echo "✅ All validations passed!"
+"""
+
+[tasks.validate:tools]
+description = "Validate essential tools are installed (node, pnpm, turbo)"
+run = """
+echo "Checking node version..."
+node --version
+echo "Checking pnpm version..."
+pnpm --version
+echo "Checking turbo version..."
+turbo --version || echo "⚠️  Turbo not yet installed (will install in setup)"
+"""
+
+[tasks.validate:format]
+description = "Check code formatting (prettier, oxfmt)"
+run = "pnpm check:format"
+
+[tasks.validate:lint]
+description = "Run linting (oxlint, eslint)"
+run = "pnpm lint"
+
+[tasks.validate:types]
+description = "Run TypeScript type checking"
+run = "pnpm typecheck"
+
+[tasks.validate:deps]
+description = "Validate dependency consistency with syncpack"
+run = "pnpm check:deps"
+
+# =============================================================================
+# BUILD TASKS
+# =============================================================================
+
+[tasks.build]
+description = "Build all apps and packages with Turbo"
+run = """
+echo "🔨 Building all packages..."
+pnpm turbo run build
+echo "✅ Build complete!"
+"""
+
+[tasks.build:watch]
+description = "Build all packages in watch mode"
+run = "pnpm turbo run build --watch"
+
+[tasks.build:clean]
+description = "Clean all build artifacts"
+run = """
+echo "🧹 Cleaning build artifacts..."
+rm -rf dist/ .next/ build/ out/ 
+find . -type d -name .turbo -exec rm -rf {} + 2>/dev/null || true
+pnpm turbo run clean
+echo "✅ Clean complete!"
+"""
+
+# =============================================================================
+# DEVELOPMENT TASKS
+# =============================================================================
+
+[tasks.dev]
+description = "Start all MCP apps + unified dashboard (single command)"
+run = """
+echo "🚀 Starting MCP servers and dashboard..."
+echo ""
+echo "📋 Running apps:"
+echo "  • ai-gateway: http://localhost:3000/mcp"
+echo "  • workers-builds: http://localhost:3001/mcp"
+echo "  • radar: http://localhost:3002/mcp"
+echo "  • dns-analytics: http://localhost:3003/mcp"
+echo "  • dev-dashboard: http://localhost:5173"
+echo ""
+echo "Press Ctrl+C to stop all services"
+echo ""
+pnpm run dev
+"""
+depends = ["validate:tools"]
+
+[tasks.dev:dashboard]
+description = "Start only the unified dev dashboard"
+run = """
+cd apps/dev-dashboard
+echo "🎨 Starting dev dashboard at http://localhost:5173..."
+pnpm dev
+"""
+
+[tasks.dev:app]
+description = "Start a specific app: mise run dev:app -- <app-name>"
+run = """
+APP_NAME="${1:?Error: provide app name, e.g., 'mise run dev:app -- ai-gateway'}"
+echo "Starting $APP_NAME..."
+cd apps/$APP_NAME && pnpm dev
+"""
+
+[tasks.dev:lint]
+description = "Watch mode linting with oxlint"
+run = "oxlint src/ --watch"
+
+[tasks.dev:types]
+description = "Watch mode type checking with tsc"
+run = "tsc --noEmit --watch"
+
+# =============================================================================
+# TESTING TASKS
+# =============================================================================
+
+[tasks.test]
+description = "Run all tests with Vitest"
+run = "pnpm vitest run"
+
+[tasks.test:watch]
+description = "Watch mode testing with Vitest"
+run = "pnpm vitest"
+
+[tasks.test:coverage]
+description = "Generate test coverage report"
+run = "pnpm vitest run --coverage"
+
+[tasks.test:ci]
+description = "CI test mode (exit on first failure)"
+run = "pnpm run test:ci"
+
+# =============================================================================
+# CODE QUALITY TASKS
+# =============================================================================
+
+[tasks.format]
+description = "Format all code with prettier and oxfmt"
+run = """
+echo "Formatting TypeScript files with oxfmt..."
+oxfmt --write src/
+echo "Formatting all files with prettier..."
+pnpm fix:format
+echo "✅ Formatting complete!"
+"""
+
+[tasks.format:check]
+description = "Check code formatting without fixing"
+run = """
+echo "Checking formatting..."
+pnpm check:format
+echo "✅ All files properly formatted!"
+"""
+
+[tasks.lint:fix]
+description = "Fix linting issues"
+run = """
+echo "Fixing linting issues..."
+pnpm lint --fix
+echo "✅ Linting fixes applied!"
+"""
+
+# =============================================================================
+# DEPENDENCY MANAGEMENT
+# =============================================================================
+
+[tasks.deps:check]
+description = "Audit dependencies for security & consistency"
+run = """
+echo "🔍 Checking dependencies..."
+pnpm check:deps
+echo "✅ Dependencies verified!"
+"""
+
+[tasks.deps:update]
+description = "Update dependencies interactively"
+run = """
+echo "📦 Updating dependencies..."
+pnpm update-deps
+echo "✅ Dependencies updated!"
+"""
+
+[tasks.deps:audit]
+description = "Audit dependencies for vulnerabilities"
+run = """
+echo "🔒 Auditing dependencies for vulnerabilities..."
+pnpm audit
+"""
+
+# =============================================================================
+# DEPLOYMENT TASKS
+# =============================================================================
+
+[tasks.deploy:staging]
+description = "Deploy all apps to Cloudflare staging environment"
+run = """
+echo "🚀 Deploying to staging..."
+pnpm run check
+pnpm turbo run deploy --filter='!dev-dashboard'
+echo "✅ Staging deployment complete!"
+"""
+
+[tasks.deploy:prod]
+description = "Deploy all apps to Cloudflare production environment"
+run = """
+echo "⚠️  Deploying to PRODUCTION..."
+read -p "Press Enter to continue or Ctrl+C to abort..."
+pnpm run check
+pnpm turbo run deploy:prod --filter='!dev-dashboard'
+echo "✅ Production deployment complete!"
+"""
+
+[tasks.deploy:verify]
+description = "Verify deployments are live and healthy"
+run = """
+echo "🔍 Verifying deployments..."
+curl -s https://ai-gateway.mcp.cloudflare.com/mcp/initialize | jq .
+curl -s https://builds.mcp.cloudflare.com/mcp/initialize | jq .
+echo "✅ Deployments verified!"
+"""
+
+# =============================================================================
+# DOCUMENTATION & MAINTENANCE
+# =============================================================================
+
+[tasks.docs:build]
+description = "Build all documentation"
+run = """
+echo "📚 Building documentation..."
+pnpm turbo run docs:build
+echo "✅ Documentation built!"
+"""
+
+[tasks.docs:serve]
+description = "Serve documentation locally"
+run = """
+echo "📖 Serving documentation at http://localhost:3333..."
+pnpm turbo run docs:serve
+"""
+
+[tasks.changelog:new]
+description = "Create new changeset entry"
+run = """
+echo "📝 Creating new changeset..."
+pnpm run changeset:new
+"""
+
+[tasks.release]
+description = "Release new version (tag, changelog, publish)"
+run = """
+echo "🏷️  Creating release..."
+pnpm run changeset version
+git add -A
+git commit -m "chore: release versions"
+git push origin main
+echo "✅ Release complete!"
+"""
+
+# =============================================================================
+# PROJECT INSPECTION & REPORTS
+# =============================================================================
+
+[tasks.inspect:structure]
+description = "Display monorepo structure and workspaces"
+run = """
+echo "📊 Monorepo Structure:"
+tree -L 2 -I 'node_modules|dist|build|.turbo' .
+echo ""
+echo "📦 Workspace Packages:"
+pnpm -r --depth=-1 ls
+"""
+
+[tasks.inspect:deps-tree]
+description = "Show dependency tree for all packages"
+run = """
+echo "🌲 Dependency Tree:"
+pnpm ls --depth=3
+"""
+
+[tasks.inspect:turbo-graph]
+description = "Generate Turbo task dependency graph"
+run = """
+echo "🔗 Turbo Task Graph:"
+turbo run build --graph
+"""
+
+[tasks.report:size]
+description = "Generate bundle size report"
+run = """
+echo "📦 Bundle Sizes:"
+find dist -type f -name '*.js' -exec ls -lh {} \; | awk '{print $5, $9}'
+"""
+
+# =============================================================================
+# HEALTH CHECK & DEBUG
+# =============================================================================
+
+[tasks.health]
+description = "Run comprehensive health check: tools, deps, builds, tests"
+run = """
+echo "🏥 Running Health Check..."
+echo ""
+mise run validate:tools
+echo ""
+mise run validate:deps
+echo ""
+echo "Building sample package..."
+pnpm turbo run build --filter='@repo/typescript-config'
+echo ""
+echo "Running tests..."
+pnpm vitest run --run
+echo ""
+echo "✅ Health check complete!"
+"""
+
+[tasks.debug:env]
+description = "Display environment variables and tool versions"
+run = """
+echo "🔍 Environment Debug Info:"
+echo ""
+echo "Node Version:"
+node --version
+echo ""
+echo "pnpm Version:"
+pnpm --version
+echo ""
+echo "Turbo Version:"
+turbo --version 2>/dev/null || echo "Not installed"
+echo ""
+echo "Mise Version:"
+mise --version
+echo ""
+echo "Environment Variables (relevant):"
+env | grep -E 'NODE_|PNPM_|TURBO_|FORCE_|CLOUDFLARE_' || echo "None set"
+echo ""
+echo "Current Working Directory:"
+pwd
+echo ""
+echo "Disk Space:"
+df -h .
+"""
+
+# =============================================================================
+# QUICK SHORTCUTS
+# =============================================================================
+
+[tasks.check]
+description = "Quick check: format, lint, types (all validations)"
+run = "mise run validate:all"
+
+[tasks.clean]
+description = "Clean all artifacts"
+run = "mise run build:clean"
+
+[tasks.ci]
+description = "Run CI pipeline: validate, build, test"
+run = """
+echo "🤖 Running CI Pipeline..."
+mise run validate:all
+mise run build
+mise run test:ci
+echo "✅ CI Pipeline passed!"
+"""
+
+[tasks.help]
+description = "Display all available tasks with descriptions"
+run = "mise tasks"

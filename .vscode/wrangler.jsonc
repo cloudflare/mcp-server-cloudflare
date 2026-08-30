@@ -1,0 +1,25 @@
+{
+	"$schema": "https://raw.githubusercontent.com/cloudflare/workerd/main/src/workerd/server/workerd.json-schema.json",
+	"name": "unified-mcp-server",
+	"main": "src/unified.app.ts",
+	"compatibility_date": "2024-07-25",
+	"compatibility_flags": ["nodejs_compat"],
+	"limits": {
+		"cpu_ms": 100
+	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "d1e79c13a38a422295d553831b7a2e45",
+			"preview_id": "069831a457c748788521c0b335542470"
+		}
+	],
+	"env": {
+		"production": {
+			"name": "unified-mcp-server"
+		},
+		"staging": {
+			"name": "unified-mcp-server-staging"
+		}
+	}
+}
