@@ -1,0 +1,36 @@
+{
+	"name": "@cloudflare/mcp-server-cloudflare",
+	"version": "0.2.0",
+	"description": "MCP server for interacting with the Cloudflare API",
+	"license": "Apache-2.0",
+	"author": "Cloudflare, Inc. (https://cloudflare.com)",
+	"homepage": "https://github.com/cloudflare/mcp-server-cloudflare",
+	"bugs": "https://github.com/cloudflare/mcp-server-cloudflare/issues",
+	"type": "module",
+	"bin": {
+		"mcp-server-cloudflare": "src/cli.js"
+	},
+	"exports": {
+		"./proxy": "./src/proxy.js"
+	},
+	"files": [
+		"README.md",
+		"src/cli.js",
+		"src/proxy.js"
+	],
+	"scripts": {
+		"test": "vitest run --config vitest.config.ts"
+	},
+	"dependencies": {
+		"mcp-server-cloudflare-legacy": "npm:@cloudflare/mcp-server-cloudflare@0.2.0"
+	},
+	"devDependencies": {
+		"vitest": "4.1.8"
+	},
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

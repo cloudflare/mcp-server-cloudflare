@@ -1,5 +1,5 @@
 {
-	"name": "@cloudflare/mcp-server-cloudflare",
+	"name": "@repo/mcp-server-cloudflare-monorepo",
 	"version": "1.0.0",
 	"description": "Monorepo for Cloudflare MCP servers",
 	"private": true,
