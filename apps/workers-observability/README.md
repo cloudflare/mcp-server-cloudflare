@@ -32,4 +32,12 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 
 Connect your MCP client directly to `https://observability.mcp.cloudflare.com/mcp`. If prompted, complete the Cloudflare OAuth flow in your browser. The tools become available after authorization.
 
+### Agent Plugins 1.0
+
+Connect to Cloudflare's Workers Observability MCP server with Universal Agent Plugins:
+
+```bash
+npx universal-agent-plugins add cloudflare-observability
+```
+
 Interested in contributing, and running this server locally? See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.

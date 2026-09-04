@@ -24,4 +24,12 @@ Currently available tools:
 
 Connect your MCP client directly to `https://docs.mcp.cloudflare.com/mcp`. This server does not require OAuth.
 
+### Agent Plugins 1.0
+
+Connect to Cloudflare's documentation MCP server with Universal Agent Plugins:
+
+```bash
+npx universal-agent-plugins add cloudflare-docs
+```
+
 Interested in contributing, and running this server locally? See the [CONTRIBUTING.md](../../CONTRIBUTING.md) in the repo root to get started.

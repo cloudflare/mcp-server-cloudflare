@@ -1,0 +1,13 @@
+{
+	"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+	"name": "cloudflare-observability",
+	"description": "Query Cloudflare Workers logs and analytics through Cloudflare's hosted Observability MCP server.",
+	"author": {
+		"name": "Cloudflare",
+		"url": "https://www.cloudflare.com/"
+	},
+	"homepage": "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/",
+	"repository": "https://github.com/cloudflare/mcp-server-cloudflare",
+	"license": "Apache-2.0",
+	"keywords": ["cloudflare", "workers", "observability", "mcp"]
+}
