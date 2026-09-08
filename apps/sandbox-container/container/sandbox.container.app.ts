@@ -13,6 +13,8 @@ import {
 	get_file_name_from_path,
 	get_mime_type,
 	list_files_in_directory,
+	PathTraversalError,
+	resolve_in_workdir,
 } from './fileUtils.ts'
 
 import type { FileList } from '../shared/schema.ts'
@@ -72,9 +74,12 @@ app.get('/files/contents/*', async (c) => {
 	try {
 		const mimeType = await get_mime_type(reqPath)
 		const headers = mimeType ? { 'Content-Type': mimeType } : undefined
-		const contents = await fs.readFile(path.join(process.cwd(), reqPath))
+		const contents = await fs.readFile(resolve_in_workdir(reqPath))
 		return c.newResponse(contents, 200, headers)
 	} catch (e: any) {
+		if (e instanceof PathTraversalError) {
+			return c.newResponse(e.message, 400)
+		}
 		if (e.code) {
 			if (e.code === 'EISDIR') {
 				const files = await list_files_in_directory(reqPath)
@@ -101,7 +106,7 @@ app.post('/files/contents', zValidator('json', FileWrite), async (c) => {
 	const reqPath = await get_file_name_from_path(file.path)
 
 	try {
-		await fs.writeFile(reqPath, file.text)
+		await fs.writeFile(resolve_in_workdir(reqPath), file.text)
 		return c.newResponse(null, 200)
 	} catch (e) {
 		return c.newResponse(`Error: ${e}`, 400)
@@ -117,9 +122,12 @@ app.delete('/files/contents/*', async (c) => {
 	const reqPath = await get_file_name_from_path(c.req.path)
 
 	try {
-		await fs.rm(path.join(process.cwd(), reqPath), { recursive: true })
+		await fs.rm(resolve_in_workdir(reqPath), { recursive: true })
 		return c.newResponse('ok', 200)
 	} catch (e: any) {
+		if (e instanceof PathTraversalError) {
+			return c.newResponse(e.message, 400)
+		}
 		if (e.code) {
 			if (e.code === 'ENOENT') {
 				return c.notFound()
