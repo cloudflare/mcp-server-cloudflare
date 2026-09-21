@@ -3,68 +3,84 @@ import { describe, expect, it, vi } from 'vitest'
 import { formatDocsResults, queryAiSearch, registerDocsTools } from './docs-ai-search.tools'
 
 const aiSearchResponse = {
-	object: 'vector_store.search_results.page',
 	search_query: 'workers kv binding example',
-	data: [
+	chunks: [
 		{
-			file_id: 'file-1',
-			filename: 'workers/runtime-apis/kv/index.md',
+			id: 'chunk-1',
+			type: 'text',
+			score: 0.8,
+			text: 'Create a KV namespace.',
+			item: { key: 'workers/runtime-apis/kv/index.md' },
+		},
+		{
+			id: 'other-chunk',
+			type: 'text',
+			score: 0.85,
+			text: 'Configure a Worker.',
+			item: { key: 'workers/configuration/index.md' },
+		},
+		{
+			id: 'chunk-2',
+			type: 'text',
 			score: 0.93,
-			attributes: {},
-			content: [
-				{ id: 'chunk-1', type: 'text', text: 'Create a KV namespace.' },
-				{ id: 'chunk-2', type: 'text', text: 'Bind it to your Worker.' },
-			],
+			text: 'Bind it to your Worker.',
+			item: { key: 'workers/runtime-apis/kv/index.md', metadata: { section: 'bindings' } },
 		},
 	],
-	has_more: false,
-	next_page: null,
 }
 
-function makeAi(response: unknown): { ai: Ai; search: ReturnType<typeof vi.fn> } {
+function makeAiSearch(response: unknown): {
+	instance: AiSearchInstance
+	search: ReturnType<typeof vi.fn>
+} {
 	const search = vi.fn().mockResolvedValue(response)
 	return {
-		ai: {
-			autorag: vi.fn(() => ({ search })),
-		} as unknown as Ai,
+		instance: { search } as unknown as AiSearchInstance,
 		search,
 	}
 }
 
 describe('docs AI Search tools', () => {
-	it('queries AI Search and maps results', async () => {
-		const { ai, search } = makeAi(aiSearchResponse)
+	it('groups chunks and uses the highest-scoring chunk ID and score', async () => {
+		const { instance, search } = makeAiSearch(aiSearchResponse)
 
-		const results = await queryAiSearch(ai, 'workers kv binding example')
+		const results = await queryAiSearch(instance, 'workers kv binding example')
 
-		expect(ai.autorag).toHaveBeenCalledWith('docs-mcp-rag')
 		expect(search).toHaveBeenCalledWith({
 			query: 'workers kv binding example',
 		})
 		expect(results).toEqual([
 			{
 				similarity: 0.93,
-				id: 'file-1',
+				id: 'chunk-2',
 				url: 'https://developers.cloudflare.com/workers/runtime-apis/kv/',
 				title: 'kv',
 				text: 'Create a KV namespace.\nBind it to your Worker.',
+			},
+			{
+				similarity: 0.85,
+				id: 'other-chunk',
+				url: 'https://developers.cloudflare.com/workers/configuration/',
+				title: 'configuration',
+				text: 'Configure a Worker.',
 			},
 		])
 	})
 
 	it('keeps absolute documentation URLs from AI Search unchanged', async () => {
-		const { ai } = makeAi({
+		const { instance } = makeAiSearch({
 			...aiSearchResponse,
-			data: [
+			chunks: [
 				{
-					...aiSearchResponse.data[0],
-					filename:
-						'https://developers.cloudflare.com/agents/model-context-protocol/protocol/transport/index.mdx',
+					...aiSearchResponse.chunks[0],
+					item: {
+						key: 'https://developers.cloudflare.com/agents/model-context-protocol/protocol/transport/index.mdx',
+					},
 				},
 			],
 		})
 
-		const [result] = await queryAiSearch(ai, 'remote MCP transport')
+		const [result] = await queryAiSearch(instance, 'remote MCP transport')
 
 		expect(result).toMatchObject({
 			url: 'https://developers.cloudflare.com/agents/model-context-protocol/protocol/transport/',
@@ -93,13 +109,13 @@ Create a KV namespace.
 	})
 
 	it('registers outputSchema and returns structuredContent', async () => {
-		const { ai } = makeAi(aiSearchResponse)
+		const { instance } = makeAiSearch(aiSearchResponse)
 		const registeredTools = new Map<string, { options: any; handler: any }>()
 		const registerTool = vi.fn((name: string, options: any, handler: any) => {
 			registeredTools.set(name, { options, handler })
 		})
 
-		registerDocsTools({ registerTool, env: { AI: ai } } as any)
+		registerDocsTools({ registerTool, env: { DOCS_AI_SEARCH: instance } } as any)
 
 		const docsTool = registeredTools.get('search_cloudflare_documentation')
 		expect(docsTool?.options.outputSchema).toBeDefined()
@@ -111,10 +127,17 @@ Create a KV namespace.
 			results: [
 				{
 					similarity: 0.93,
-					id: 'file-1',
+					id: 'chunk-2',
 					url: 'https://developers.cloudflare.com/workers/runtime-apis/kv/',
 					title: 'kv',
 					text: 'Create a KV namespace.\nBind it to your Worker.',
+				},
+				{
+					similarity: 0.85,
+					id: 'other-chunk',
+					url: 'https://developers.cloudflare.com/workers/configuration/',
+					title: 'configuration',
+					text: 'Configure a Worker.',
 				},
 			],
 		})
