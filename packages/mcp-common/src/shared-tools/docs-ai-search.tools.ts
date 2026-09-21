@@ -62,7 +62,7 @@ export function registerDocsTools<Env extends RequiredEnv>(context: McpRegistrat
 				results: z.array(
 					z.object({
 						similarity: z.number().describe('Similarity score from AI Search'),
-						id: z.string().describe('Highest-scoring matching chunk ID'),
+						id: z.string().describe('Matching chunk ID'),
 						url: z.string().describe('Developer documentation URL'),
 						title: z.string().describe('Documentation page title'),
 						text: z.string().describe('Matching documentation chunk text'),
@@ -132,27 +132,13 @@ export async function queryAiSearch(
 	// Parse and validate the response using Zod
 	const response = AiSearchResponseSchema.parse(rawResponse)
 
-	const grouped = new Map<string, DocsSearchResult>()
-	for (const chunk of response.chunks) {
-		const existing = grouped.get(chunk.item.key)
-		if (existing) {
-			existing.text += `\n${chunk.text}`
-			if (chunk.score > existing.similarity) {
-				existing.similarity = chunk.score
-				existing.id = chunk.id
-			}
-			continue
-		}
-		grouped.set(chunk.item.key, {
-			similarity: chunk.score,
-			id: chunk.id,
-			url: sourceToUrl(chunk.item.key),
-			title: extractTitle(chunk.item.key),
-			text: chunk.text,
-		})
-	}
-
-	return [...grouped.values()].sort((a, b) => b.similarity - a.similarity)
+	return response.chunks.map((chunk) => ({
+		similarity: chunk.score,
+		id: chunk.id,
+		url: sourceToUrl(chunk.item.key),
+		title: extractTitle(chunk.item.key),
+		text: chunk.text,
+	}))
 }
 
 export function formatDocsResults(results: DocsSearchResult[]): string {

@@ -41,7 +41,7 @@ function makeAiSearch(response: unknown): {
 }
 
 describe('docs AI Search tools', () => {
-	it('groups chunks and uses the highest-scoring chunk ID and score', async () => {
+	it('maps every chunk in exact response order', async () => {
 		const { instance, search } = makeAiSearch(aiSearchResponse)
 
 		const results = await queryAiSearch(instance, 'workers kv binding example')
@@ -51,11 +51,11 @@ describe('docs AI Search tools', () => {
 		})
 		expect(results).toEqual([
 			{
-				similarity: 0.93,
-				id: 'chunk-2',
+				similarity: 0.8,
+				id: 'chunk-1',
 				url: 'https://developers.cloudflare.com/workers/runtime-apis/kv/',
 				title: 'kv',
-				text: 'Create a KV namespace.\nBind it to your Worker.',
+				text: 'Create a KV namespace.',
 			},
 			{
 				similarity: 0.85,
@@ -63,6 +63,13 @@ describe('docs AI Search tools', () => {
 				url: 'https://developers.cloudflare.com/workers/configuration/',
 				title: 'configuration',
 				text: 'Configure a Worker.',
+			},
+			{
+				similarity: 0.93,
+				id: 'chunk-2',
+				url: 'https://developers.cloudflare.com/workers/runtime-apis/kv/',
+				title: 'kv',
+				text: 'Bind it to your Worker.',
 			},
 		])
 	})
@@ -126,11 +133,11 @@ Create a KV namespace.
 		expect(response.structuredContent).toEqual({
 			results: [
 				{
-					similarity: 0.93,
-					id: 'chunk-2',
+					similarity: 0.8,
+					id: 'chunk-1',
 					url: 'https://developers.cloudflare.com/workers/runtime-apis/kv/',
 					title: 'kv',
-					text: 'Create a KV namespace.\nBind it to your Worker.',
+					text: 'Create a KV namespace.',
 				},
 				{
 					similarity: 0.85,
@@ -138,6 +145,13 @@ Create a KV namespace.
 					url: 'https://developers.cloudflare.com/workers/configuration/',
 					title: 'configuration',
 					text: 'Configure a Worker.',
+				},
+				{
+					similarity: 0.93,
+					id: 'chunk-2',
+					url: 'https://developers.cloudflare.com/workers/runtime-apis/kv/',
+					title: 'kv',
+					text: 'Bind it to your Worker.',
 				},
 			],
 		})
