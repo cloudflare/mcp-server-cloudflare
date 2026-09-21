@@ -11,6 +11,7 @@ const aiSearchResponse = {
 			score: 0.8,
 			text: 'Create a KV namespace.',
 			item: { key: 'workers/runtime-apis/kv/index.md' },
+			scoring_details: { vector_score: 0.8 },
 		},
 		{
 			id: 'other-chunk',
@@ -52,26 +53,24 @@ describe('docs AI Search tools', () => {
 		expect(results).toEqual([
 			{
 				similarity: 0.8,
-				id: 'chunk-1',
 				url: 'https://developers.cloudflare.com/workers/runtime-apis/kv/',
 				title: 'kv',
 				text: 'Create a KV namespace.',
 			},
 			{
 				similarity: 0.85,
-				id: 'other-chunk',
 				url: 'https://developers.cloudflare.com/workers/configuration/',
 				title: 'configuration',
 				text: 'Configure a Worker.',
 			},
 			{
 				similarity: 0.93,
-				id: 'chunk-2',
 				url: 'https://developers.cloudflare.com/workers/runtime-apis/kv/',
 				title: 'kv',
 				text: 'Bind it to your Worker.',
 			},
 		])
+		expect(results.every((result) => !('id' in result))).toBe(true)
 	})
 
 	it('keeps absolute documentation URLs from AI Search unchanged', async () => {
@@ -100,7 +99,6 @@ describe('docs AI Search tools', () => {
 			formatDocsResults([
 				{
 					similarity: 0.93,
-					id: 'file-1',
 					url: 'https://developers.cloudflare.com/workers/runtime-apis/kv/',
 					title: 'KV',
 					text: 'Create a KV namespace.',
@@ -134,21 +132,18 @@ Create a KV namespace.
 			results: [
 				{
 					similarity: 0.8,
-					id: 'chunk-1',
 					url: 'https://developers.cloudflare.com/workers/runtime-apis/kv/',
 					title: 'kv',
 					text: 'Create a KV namespace.',
 				},
 				{
 					similarity: 0.85,
-					id: 'other-chunk',
 					url: 'https://developers.cloudflare.com/workers/configuration/',
 					title: 'configuration',
 					text: 'Configure a Worker.',
 				},
 				{
 					similarity: 0.93,
-					id: 'chunk-2',
 					url: 'https://developers.cloudflare.com/workers/runtime-apis/kv/',
 					title: 'kv',
 					text: 'Bind it to your Worker.',

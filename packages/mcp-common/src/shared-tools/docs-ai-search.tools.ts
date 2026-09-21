@@ -8,7 +8,6 @@ interface RequiredEnv {
 
 type DocsSearchResult = {
 	similarity: number
-	id: string
 	url: string
 	title: string
 	text: string
@@ -20,20 +19,13 @@ type DocsSearchOutput = {
 
 // Zod schema for AI Search response validation
 const AiSearchResponseSchema = z.object({
-	search_query: z.string(),
 	chunks: z.array(
 		z.object({
-			id: z.string(),
-			type: z.string(),
 			score: z.number(),
 			text: z.string(),
-			item: z
-				.object({
-					key: z.string(),
-					timestamp: z.number().optional(),
-					metadata: z.record(z.string(), z.unknown()).optional(),
-				})
-				.catchall(z.unknown()),
+			item: z.object({
+				key: z.string(),
+			}),
 		})
 	),
 })
@@ -62,7 +54,6 @@ export function registerDocsTools<Env extends RequiredEnv>(context: McpRegistrat
 				results: z.array(
 					z.object({
 						similarity: z.number().describe('Similarity score from AI Search'),
-						id: z.string().describe('Matching chunk ID'),
 						url: z.string().describe('Developer documentation URL'),
 						title: z.string().describe('Documentation page title'),
 						text: z.string().describe('Matching documentation chunk text'),
@@ -134,7 +125,6 @@ export async function queryAiSearch(
 
 	return response.chunks.map((chunk) => ({
 		similarity: chunk.score,
-		id: chunk.id,
 		url: sourceToUrl(chunk.item.key),
 		title: extractTitle(chunk.item.key),
 		text: chunk.text,
