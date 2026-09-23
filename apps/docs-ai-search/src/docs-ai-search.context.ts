@@ -7,5 +7,5 @@ export interface Env {
 	SENTRY_ACCESS_CLIENT_SECRET: string
 	GIT_HASH: string
 	SENTRY_DSN: string
-	AI: Ai
+	DOCS_AI_SEARCH: AiSearchInstance
 }

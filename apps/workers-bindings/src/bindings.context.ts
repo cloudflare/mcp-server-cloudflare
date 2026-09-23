@@ -12,7 +12,7 @@ export interface Env {
 	AI_GATEWAY_TOKEN: string
 	CLOUDFLARE_ACCOUNT_ID: string
 	AI_GATEWAY_ID: string
-	AI: Ai
+	DOCS_AI_SEARCH: AiSearchInstance
 	VECTORIZE: VectorizeIndex
 	DEV_DISABLE_OAUTH: string
 	DEV_CLOUDFLARE_API_TOKEN: string

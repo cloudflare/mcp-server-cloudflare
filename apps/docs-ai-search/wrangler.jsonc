@@ -26,9 +26,7 @@
 			"head_sampling_rate": 0.1
 		}
 	},
-	"ai": {
-		"binding": "AI"
-	},
+	"ai_search": [{ "binding": "DOCS_AI_SEARCH", "instance_name": "docs-mcp-rag", "remote": true }],
 	"vars": {
 		"ENVIRONMENT": "development",
 		"MCP_SERVER_NAME": "PLACEHOLDER",
@@ -59,9 +57,9 @@
 				"ENVIRONMENT": "staging",
 				"SENTRY_DSN": "https://d3ffa014f0daa57b27a174476bc2573f@sentry10.cfdata.org/2090"
 			},
-			"ai": {
-				"binding": "AI"
-			},
+			"ai_search": [
+				{ "binding": "DOCS_AI_SEARCH", "instance_name": "docs-mcp-rag", "remote": true }
+			],
 			"analytics_engine_datasets": [
 				{
 					"binding": "MCP_METRICS",
@@ -82,9 +80,9 @@
 				"ENVIRONMENT": "production",
 				"SENTRY_DSN": "https://d3ffa014f0daa57b27a174476bc2573f@sentry10.cfdata.org/2090"
 			},
-			"ai": {
-				"binding": "AI"
-			},
+			"ai_search": [
+				{ "binding": "DOCS_AI_SEARCH", "instance_name": "docs-mcp-rag", "remote": true }
+			],
 			"analytics_engine_datasets": [
 				{
 					"binding": "MCP_METRICS",

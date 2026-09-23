@@ -3,12 +3,11 @@ import { z } from 'zod'
 import type { McpRegistrationContext } from '../registration-context'
 
 interface RequiredEnv {
-	AI: Ai
+	DOCS_AI_SEARCH: AiSearchInstance
 }
 
 type DocsSearchResult = {
 	similarity: number
-	id: string
 	url: string
 	title: string
 	text: string
@@ -20,30 +19,15 @@ type DocsSearchOutput = {
 
 // Zod schema for AI Search response validation
 const AiSearchResponseSchema = z.object({
-	object: z.string(),
-	search_query: z.string(),
-	data: z.array(
+	chunks: z.array(
 		z.object({
-			file_id: z.string(),
-			filename: z.string(),
 			score: z.number(),
-			attributes: z
-				.object({
-					modified_date: z.number().optional(),
-					folder: z.string().optional(),
-				})
-				.catchall(z.any()),
-			content: z.array(
-				z.object({
-					id: z.string(),
-					type: z.string(),
-					text: z.string(),
-				})
-			),
+			text: z.string(),
+			item: z.object({
+				key: z.string(),
+			}),
 		})
 	),
-	has_more: z.boolean(),
-	next_page: z.string().nullable(),
 })
 
 /**
@@ -70,7 +54,6 @@ export function registerDocsTools<Env extends RequiredEnv>(context: McpRegistrat
 				results: z.array(
 					z.object({
 						similarity: z.number().describe('Similarity score from AI Search'),
-						id: z.string().describe('Source file ID'),
 						url: z.string().describe('Developer documentation URL'),
 						title: z.string().describe('Documentation page title'),
 						text: z.string().describe('Matching documentation chunk text'),
@@ -84,7 +67,7 @@ export function registerDocsTools<Env extends RequiredEnv>(context: McpRegistrat
 		},
 		async ({ query }) => {
 			const structuredContent: DocsSearchOutput = {
-				results: await queryAiSearch(context.env.AI, query),
+				results: await queryAiSearch(context.env.DOCS_AI_SEARCH, query),
 			}
 			return {
 				content: [{ type: 'text', text: formatDocsResults(structuredContent.results) }],
@@ -131,22 +114,20 @@ export function registerDocsTools<Env extends RequiredEnv>(context: McpRegistrat
 	)
 }
 
-export async function queryAiSearch(ai: Ai, query: string): Promise<DocsSearchResult[]> {
-	const rawResponse = await doWithRetries(() =>
-		ai.autorag('docs-mcp-rag').search({
-			query,
-		})
-	)
+export async function queryAiSearch(
+	instance: AiSearchInstance,
+	query: string
+): Promise<DocsSearchResult[]> {
+	const rawResponse = await doWithRetries(() => instance.search({ query }))
 
 	// Parse and validate the response using Zod
 	const response = AiSearchResponseSchema.parse(rawResponse)
 
-	return response.data.map((item) => ({
-		similarity: item.score,
-		id: item.file_id,
-		url: sourceToUrl(item.filename),
-		title: extractTitle(item.filename),
-		text: item.content.map((c) => c.text).join('\n'),
+	return response.chunks.map((chunk) => ({
+		similarity: chunk.score,
+		url: sourceToUrl(chunk.item.key),
+		title: extractTitle(chunk.item.key),
+		text: chunk.text,
 	}))
 }
 
