@@ -1,0 +1,35 @@
+.changeset/deprecate-auditlogs-mcp.md
+  s_84f48ab4c055a3::t_4933bbd6050295 1-7
+apps/auditlogs/CONTRIBUTING.md
+  s_84f48ab4c055a3::t_4b6a942a1fe0e4 1-52
+apps/auditlogs/README.md
+  s_84f48ab4c055a3::t_46d9e80b7875a2 3-26,51-52,54-55
+apps/auditlogs/src/auditlogs.app.ts
+  s_84f48ab4c055a3::t_28206a96de0543 8-21,31
+apps/auditlogs/src/auditlogs.spec.ts
+  s_b98a11030e254b::t_7c7d357695e23d 8,23-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "712ed44d88d8d157cf06c26e101c06379e5804b1",
+  "prompts": {},
+  "sessions": {
+    "s_84f48ab4c055a3": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a0d311-aa44-73a1-a9d1-531147a26b07",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_b98a11030e254b": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a0d30c-32a9-7567-8e5d-6ed15aea6051",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
