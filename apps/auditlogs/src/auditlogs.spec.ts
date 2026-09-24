@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { server } from '@repo/mcp-common/src/test/msw-server'
 import { testStatelessMcpApp } from '@repo/mcp-common/src/test/stateless-app'
 
-import worker, { mcpHandler } from './auditlogs.app'
+import worker, { DEPRECATION_INSTRUCTIONS, mcpHandler } from './auditlogs.app'
 import { handleGetAuditLogs } from './tools/auditlogs.tools'
 
 import type { Env } from './auditlogs.context'
@@ -18,6 +18,61 @@ testStatelessMcpApp<Env>({
 	authenticated: true,
 	authenticatedWorker: worker,
 	expectedTools: ['auditlogs_by_account_id'],
+})
+
+function initializeRequest() {
+	return new Request('https://auditlogs.mcp.cloudflare.com/mcp', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Accept: 'application/json, text/event-stream',
+			Host: 'auditlogs.mcp.cloudflare.com',
+		},
+		body: JSON.stringify({
+			jsonrpc: '2.0',
+			id: 'auditlogs-initialize',
+			method: 'initialize',
+			params: {
+				protocolVersion: '2025-11-25',
+				capabilities: {},
+				clientInfo: { name: 'auditlogs-test', version: '1.0.0' },
+			},
+		}),
+	})
+}
+
+async function responseDocument(response: Response): Promise<unknown> {
+	const text = await response.text()
+	if (response.headers.get('content-type')?.includes('application/json')) return JSON.parse(text)
+	const data = text
+		.split('\n')
+		.find((line) => line.startsWith('data: '))
+		?.slice('data: '.length)
+	if (!data) throw new Error(`Expected an MCP response document, received: ${text}`)
+	return JSON.parse(data)
+}
+
+function context(): ExecutionContext {
+	return {
+		props: {
+			type: 'account_token',
+			accessToken: 'auditlogs-token',
+			account: { id: 'account-1', name: 'Audit Logs account' },
+		},
+		waitUntil() {},
+		passThroughOnException() {},
+	} as ExecutionContext
+}
+
+describe('Audit Logs server deprecation', () => {
+	it('advertises the Cloudflare API MCP server in its initialize instructions', async () => {
+		const response = await mcpHandler.fetch(initializeRequest(), env as unknown as Env, context())
+
+		expect(response.status).toBe(200)
+		expect(await responseDocument(response)).toMatchObject({
+			result: { instructions: DEPRECATION_INSTRUCTIONS },
+		})
+	})
 })
 
 describe('Audit Logs responses', () => {
