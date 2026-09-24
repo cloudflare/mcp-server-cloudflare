@@ -31,9 +31,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Save Published Packages
         if: steps.create-release-pr.outputs.published == 'true'
-        run: |
-          echo '${{steps.create-release-pr.outputs.publishedPackages}}' \
-            > ${{ github.workspace }}/published-packages.json
+        env:
+          PUBLISHED_PACKAGES: ${{ steps.create-release-pr.outputs.publishedPackages }}
+        run: echo "$PUBLISHED_PACKAGES" > ${{ github.workspace }}/published-packages.json
       - name: Upload Published Packages
         if: steps.create-release-pr.outputs.published == 'true'
         uses: actions/upload-artifact@v4
