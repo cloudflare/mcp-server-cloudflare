@@ -1,5 +1,11 @@
 # docs-ai-search
 
+## 0.4.14
+
+### Patch Changes
+
+- 632916d: Use a least-privilege AI Search instance binding for Cloudflare documentation search.
+
 ## 0.4.13
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # workers-observability
 
+## 0.5.6
+
+### Patch Changes
+
+- 632916d: Use a least-privilege AI Search instance binding for Cloudflare documentation search.
+
 ## 0.5.5
 
 ### Patch Changes
