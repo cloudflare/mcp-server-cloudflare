@@ -18,6 +18,8 @@
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.16.11",
 		"@types/node": "22.15.17",
+		"cloudflare": "4.2.0",
+		"msw": "2.14.6",
 		"prettier": "3.5.3",
 		"typescript": "5.5.4",
 		"vitest": "4.1.8",

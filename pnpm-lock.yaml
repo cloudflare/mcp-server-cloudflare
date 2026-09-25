@@ -175,6 +175,12 @@ importers:
       '@types/node':
         specifier: 22.15.17
         version: 22.15.17
+      cloudflare:
+        specifier: 4.2.0
+        version: 4.2.0
+      msw:
+        specifier: 2.14.6
+        version: 2.14.6(@types/node@22.15.17)(typescript@5.5.4)
       prettier:
         specifier: 3.5.3
         version: 3.5.3
