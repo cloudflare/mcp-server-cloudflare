@@ -65,7 +65,7 @@ export const zQueryFilter = z.object({
 
     • PREFERRED KEYS (faster & always available):
       - $metadata.service: Worker service name
-			- $metadata.origin: Trigger type (e.g., fetch, scheduled, etc.)
+			- $metadata.origin: Trigger type (e.g., fetch, cron, etc.). For cron-triggered invocations, filter on "cron", not "scheduled".
 			- $metadata.trigger: Trigger type (e.g., GET /users, POST /orders, etc.)
       - $metadata.message: Log message text (present in nearly all logs)
       - $metadata.error: Error message (when applicable)
