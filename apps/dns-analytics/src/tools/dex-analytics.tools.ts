@@ -19,13 +19,13 @@ export function registerAnalyticTools<Env>(context: McpRegistrationContext<Env>)
 	context.registerTool(
 		'dns_report',
 		{
-			description: 'Fetch the DNS Report for a given zone since a date',
+			description: 'Fetch the DNS Report for a given zone ID since a date',
 			inputSchema: z.object({
-				zone: z.string(),
+				zoneId: z.string().describe('The ID of the zone to get the report for'),
 				days: z.number(),
 			}),
 		},
-		async ({ zone, days }) => {
+		async ({ zoneId: zone, days }) => {
 			try {
 				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
@@ -102,12 +102,12 @@ export function registerAnalyticTools<Env>(context: McpRegistrationContext<Env>)
 	context.registerTool(
 		'show_zone_dns_settings',
 		{
-			description: 'Show DNS settings for a zone',
+			description: 'Show DNS settings for a zone ID',
 			inputSchema: z.object({
-				zone: z.string(),
+				zoneId: z.string().describe('The ID of the zone to get settings for'),
 			}),
 		},
-		async ({ zone }) => {
+		async ({ zoneId: zone }) => {
 			try {
 				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
