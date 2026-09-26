@@ -248,7 +248,7 @@ const zCloudflareMiniEventDetails = z.object({
 export const zCloudflareMiniEvent = z.object({
 	event: zCloudflareMiniEventDetails,
 	scriptName: z.string(),
-	outcome: z.string(),
+	outcome: z.string().optional(),
 	eventType: z.enum([
 		'fetch',
 		'scheduled',
