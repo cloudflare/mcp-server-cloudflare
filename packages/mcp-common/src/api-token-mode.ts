@@ -1,136 +1,179 @@
+import { ExternalTokenError } from '@cloudflare/workers-oauth-provider'
+import { z } from 'zod'
+
+import { CloudflareAccountsSchema, CloudflareUserSchema } from './auth-props'
 import { getUserAndAccounts } from './cloudflare-oauth-handler'
 import { McpError } from './mcp-error'
 
+import type {
+	ResolveExternalTokenInput,
+	ResolveExternalTokenResult,
+} from '@cloudflare/workers-oauth-provider'
 import type { AuthProps } from './auth-props'
 import type { CloudflareTokenOwner } from './cloudflare-oauth-handler'
 
-interface RequiredEnv {
+export interface DevAuthEnv {
 	DEV_CLOUDFLARE_API_TOKEN: string
 	DEV_CLOUDFLARE_EMAIL: string
 	DEV_DISABLE_OAUTH: string
+}
+
+export interface ExternalTokenEnv {
+	OAUTH_KV: KVNamespace
 }
 
 export interface RequestHandler<Env> {
 	fetch(req: Request, env: Env, ctx: ExecutionContext): Response | Promise<Response>
 }
 
-function cloudflareTokenOwner(token: string): CloudflareTokenOwner {
+/**
+ * Verified identities are cached against a digest of the credential so repeat
+ * MCP requests do not re-probe the Cloudflare API. Revoking a credential still
+ * revokes access: tool calls use the token itself, not the cached identity.
+ */
+const API_TOKEN_IDENTITY_CACHE_TTL_SECONDS = 2_592_000
+
+const CachedIdentitySchema = z.object({
+	user: CloudflareUserSchema.nullable(),
+	accounts: CloudflareAccountsSchema,
+})
+type CachedIdentity = z.infer<typeof CachedIdentitySchema>
+
+/** Prefixes are ownership hints; unprefixed legacy credentials remain supported. */
+export function cloudflareTokenOwner(token: string): CloudflareTokenOwner {
 	if (token.startsWith('cfat_')) return 'account'
 	if (token.startsWith('cfoat_') || token.startsWith('cfut_')) return 'user'
 	return 'unknown'
 }
 
-export async function isApiTokenRequest(req: Request, env: RequiredEnv) {
-	if (env.DEV_CLOUDFLARE_API_TOKEN && env.DEV_DISABLE_OAUTH === 'true') {
-		return true
-	}
-
-	const authHeader = req.headers.get('Authorization')
-	if (!authHeader) return false
-
-	const [type, token] = authHeader.split(' ')
-	if (type !== 'Bearer' || !token) return false
-
-	// MCP OAuth Provider tokens have a separate user:grant:secret format.
-	// Every other bearer value may be a Cloudflare API/OAuth credential; ownership
-	// prefixes are optimization hints, not an allowlist, so legacy values still work.
-	return token.split(':').length !== 3
+async function hashApiToken(token: string): Promise<string> {
+	const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token))
+	return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('')
 }
 
-/** Validates an API token and returns the same request props shape as OAuth. */
-export async function getApiTokenProps(req: Request, env: RequiredEnv): Promise<AuthProps> {
-	let headers: HeadersInit | undefined
-	let token: string
+async function getCachedIdentity(
+	token: string,
+	tokenOwner: CloudflareTokenOwner,
+	kv: KVNamespace
+): Promise<CachedIdentity> {
+	const cacheKey = `api-token-identity:v1:${await hashApiToken(token)}`
 
-	if (env.DEV_CLOUDFLARE_API_TOKEN && env.DEV_DISABLE_OAUTH === 'true') {
-		token = env.DEV_CLOUDFLARE_API_TOKEN
-		headers = { Authorization: `Bearer ${token}` }
-	} else {
-		const authHeader = req.headers.get('Authorization')
-		if (!authHeader) {
-			throw new Error('Authorization header is required')
+	try {
+		const cachedValue = await kv.get(cacheKey, 'json')
+		if (cachedValue !== null) {
+			const cached = CachedIdentitySchema.safeParse(cachedValue)
+			if (cached.success) return cached.data
+			console.warn('API-token identity cache entry did not match expected shape; ignoring')
 		}
-
-		const [type, tokenValue] = authHeader.split(' ')
-		if (type !== 'Bearer' || !tokenValue) {
-			throw new Error('Invalid authorization type, must be Bearer')
-		}
-		token = tokenValue
+	} catch (error) {
+		console.warn('API-token identity cache read failed', error)
 	}
 
-	const { user, accounts } = await getUserAndAccounts(token, headers, cloudflareTokenOwner(token))
-	if (user === null) {
-		const account = accounts[0]
+	const { user, accounts, degraded } = await getUserAndAccounts(token, undefined, tokenOwner)
+	const identity: CachedIdentity = { user, accounts }
+
+	// A degraded identity may serve this request, but caching it would pin the
+	// data loss for the full TTL; leaving it uncached self-heals on re-probe.
+	if (!degraded) {
+		try {
+			await kv.put(cacheKey, JSON.stringify(identity), {
+				expirationTtl: API_TOKEN_IDENTITY_CACHE_TTL_SECONDS,
+			})
+		} catch (error) {
+			console.warn('API-token identity cache write failed', error)
+		}
+	}
+
+	return identity
+}
+
+/** Converts a verified Cloudflare identity into the shared request props shape. */
+function buildAuthProps(token: string, identity: CachedIdentity): AuthProps {
+	if (identity.user === null) {
+		const account = identity.accounts.at(0)
 		if (!account) {
-			throw new Error('API token cannot access a Cloudflare account')
+			throw new McpError('API token cannot access a Cloudflare account', 401, {
+				reportToSentry: false,
+			})
 		}
-		return {
-			type: 'account_token',
-			accessToken: token,
-			account,
-		}
+		return { type: 'account_token', accessToken: token, account }
 	}
-
 	return {
 		type: 'user_token',
 		accessToken: token,
-		user,
-		accounts,
+		user: identity.user,
+		accounts: identity.accounts,
 	}
 }
 
+function externalTokenError(error: McpError, tokenOwner: CloudflareTokenOwner): ExternalTokenError {
+	const common = { description: error.message, headers: error.headers }
+
+	if (error.code >= 500) {
+		return new ExternalTokenError('server_error', { ...common, statusCode: error.code })
+	}
+	if (error.code === 429) {
+		return new ExternalTokenError('temporarily_unavailable', { ...common, statusCode: 429 })
+	}
+	if (error.code === 403) {
+		return new ExternalTokenError('insufficient_scope', {
+			...common,
+			statusCode: 403,
+			requiredScopes: tokenOwner === 'account' ? ['account:read'] : ['user:read', 'account:read'],
+		})
+	}
+	return new ExternalTokenError('invalid_token', { ...common, statusCode: 401 })
+}
+
 /**
- * Serves one API-token request through the same stateless handler as OAuth.
- * Props live on this request's ExecutionContext only; no Agent or MCP session is used.
+ * Resolves direct Cloudflare API/OAuth credentials after the OAuth Provider's
+ * internal token lookup misses. Expected validation failures become
+ * ExternalTokenError so the provider returns a structured 401/403 with a
+ * WWW-Authenticate challenge instead of an uncaught Worker exception.
  */
-export async function handleApiTokenMode<Env extends RequiredEnv>(
+export async function resolveExternalToken({
+	token,
+	env,
+}: ResolveExternalTokenInput<ExternalTokenEnv>): Promise<ResolveExternalTokenResult> {
+	const tokenOwner = cloudflareTokenOwner(token)
+	try {
+		const identity = await getCachedIdentity(token, tokenOwner, env.OAUTH_KV)
+		return { props: buildAuthProps(token, identity) }
+	} catch (error) {
+		if (error instanceof McpError) throw externalTokenError(error, tokenOwner)
+		throw error
+	}
+}
+
+/** Local development can disable OAuth entirely and use one fixed API token. */
+export function devApiTokenModeEnabled(env: DevAuthEnv): boolean {
+	return Boolean(env.DEV_CLOUDFLARE_API_TOKEN) && env.DEV_DISABLE_OAUTH === 'true'
+}
+
+/**
+ * Serves one local-development request through the same stateless handler as
+ * OAuth, bypassing the OAuth Provider. Props live on this request's
+ * ExecutionContext only; no Agent or MCP session is used.
+ */
+export async function handleDevApiTokenMode<Env extends DevAuthEnv>(
 	handler: RequestHandler<Env>,
 	req: Request,
 	env: Env,
 	ctx: ExecutionContext
 ): Promise<Response> {
-	let props: AuthProps
+	const token = env.DEV_CLOUDFLARE_API_TOKEN
+	let identity: CachedIdentity
 	try {
-		props = await getApiTokenProps(req, env)
+		identity = await getUserAndAccounts(token, undefined, cloudflareTokenOwner(token))
 	} catch (error) {
-		if (error instanceof McpError) return apiTokenErrorResponse(req, error)
+		if (error instanceof McpError) {
+			return new Response(
+				JSON.stringify({ error: 'invalid_token', error_description: error.message }),
+				{ status: error.code, headers: { 'Content-Type': 'application/json', ...error.headers } }
+			)
+		}
 		throw error
 	}
-	;(ctx as { props: AuthProps }).props = props
+	;(ctx as { props: AuthProps }).props = buildAuthProps(token, identity)
 	return handler.fetch(req, env, ctx)
-}
-
-function apiTokenErrorResponse(request: Request, error: McpError): Response {
-	let oauthCode: string
-	if (error.code >= 500) {
-		oauthCode = 'server_error'
-	} else if (error.code === 429) {
-		oauthCode = 'temporarily_unavailable'
-	} else if (error.code === 401) {
-		oauthCode = 'invalid_token'
-	} else if (error.code === 403) {
-		oauthCode = 'insufficient_scope'
-	} else {
-		oauthCode = 'invalid_request'
-	}
-	const headers: Record<string, string> = {
-		'Cache-Control': 'no-store',
-		'Content-Type': 'application/json',
-		Pragma: 'no-cache',
-		...error.headers,
-	}
-	if (error.code === 401 || error.code === 403) {
-		const url = new URL(request.url)
-		const resourceMetadata = `${url.origin}/.well-known/oauth-protected-resource${url.pathname}`
-		headers['WWW-Authenticate'] =
-			`Bearer realm="OAuth", resource_metadata="${resourceMetadata}", error="${oauthCode}"`
-	}
-
-	return new Response(
-		JSON.stringify({
-			error: oauthCode,
-			error_description: error.message,
-		}),
-		{ status: error.code, headers }
-	)
 }

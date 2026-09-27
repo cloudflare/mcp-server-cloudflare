@@ -22,5 +22,7 @@ export default defineConfig({
 		}),
 	],
 
-	test: {},
+	test: {
+		setupFiles: ['@repo/mcp-common/src/test/msw-setup.ts'],
+	},
 })

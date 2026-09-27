@@ -1,6 +1,6 @@
 {
 	"name": "cloudflare-browser-mcp-server",
-	"version": "0.3.2",
+	"version": "0.3.4",
 	"private": true,
 	"scripts": {
 		"check:lint": "run-eslint-workers",
@@ -18,6 +18,8 @@
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.16.11",
 		"@types/node": "22.15.17",
+		"cloudflare": "4.2.0",
+		"msw": "2.14.6",
 		"prettier": "3.5.3",
 		"typescript": "5.5.4",
 		"vitest": "4.1.8",

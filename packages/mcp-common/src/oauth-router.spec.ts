@@ -19,11 +19,23 @@ const mcpRequestPolicy = {
 	allowedHostnames: ['mcp.example.com'],
 	allowedOriginHostnames: ['mcp.example.com'],
 }
-const env = {
-	DEV_CLOUDFLARE_API_TOKEN: '',
-	DEV_CLOUDFLARE_EMAIL: '',
-	DEV_DISABLE_OAUTH: 'false',
-} as CloudflareOAuthEnv
+function testEnv() {
+	const store = new Map<string, string>()
+	return {
+		DEV_CLOUDFLARE_API_TOKEN: '',
+		DEV_CLOUDFLARE_EMAIL: '',
+		DEV_DISABLE_OAUTH: 'false',
+		OAUTH_KV: {
+			async get(key: string) {
+				const value = store.get(key)
+				return value === undefined ? null : JSON.parse(value)
+			},
+			async put(key: string, value: string) {
+				store.set(key, value)
+			},
+		} as unknown as KVNamespace,
+	} as CloudflareOAuthEnv
+}
 const executionContext = {
 	props: {},
 	waitUntil() {},
@@ -50,6 +62,31 @@ describe('OAuth router resource policy', () => {
 				provider: { resourceMatchOriginOnly: true } as never,
 			})
 		).toThrow('resourceMatchOriginOnly')
+	})
+
+	it('routes legacy SSE stream requests to the migration handler before OAuth', async () => {
+		const router = createCloudflareOAuthRouter<CloudflareOAuthEnv>({
+			apiHandler: {
+				fetch() {
+					return new Response('migration', { status: 410 })
+				},
+			},
+			scopes: {},
+			metrics,
+			mcpRequestPolicy,
+		})
+
+		const response = await router.fetch(
+			new Request('https://mcp.example.com/sse', {
+				method: 'GET',
+				headers: { Accept: 'text/event-stream', Host: 'mcp.example.com' },
+			}),
+			testEnv(),
+			executionContext
+		)
+
+		expect(response.status).toBe(410)
+		await expect(response.text()).resolves.toBe('migration')
 	})
 
 	it('returns a retryable response when a Wrangler OAuth identity probe is rate limited', async () => {
@@ -80,7 +117,7 @@ describe('OAuth router resource policy', () => {
 					Host: 'mcp.example.com',
 				},
 			}),
-			env,
+			testEnv(),
 			executionContext
 		)
 
@@ -115,7 +152,7 @@ describe('OAuth router resource policy', () => {
 					Host: 'mcp.example.com',
 				},
 			}),
-			env,
+			testEnv(),
 			executionContext
 		)
 
@@ -128,5 +165,47 @@ describe('OAuth router resource policy', () => {
 			error: 'invalid_token',
 			error_description: 'Access token appears malformed; reauthenticate and try again',
 		})
+	})
+
+	it('serves /sse with a direct API token through the provider hook', async () => {
+		server.use(
+			http.get('https://api.cloudflare.com/client/v4/user', () =>
+				HttpResponse.json({
+					success: true,
+					result: { id: 'user-1', email: 'user@example.com' },
+					errors: [],
+					messages: [],
+				})
+			),
+			http.get('https://api.cloudflare.com/client/v4/accounts', () =>
+				HttpResponse.json({
+					success: true,
+					result: [{ id: 'account-1', name: 'Account One' }],
+					errors: [],
+					messages: [],
+				})
+			)
+		)
+		const router = createCloudflareOAuthRouter<CloudflareOAuthEnv>({
+			apiHandler,
+			scopes: {},
+			metrics,
+			mcpRequestPolicy,
+		})
+
+		const response = await router.fetch(
+			new Request('https://mcp.example.com/sse', {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${'a'.repeat(40)}`,
+					Host: 'mcp.example.com',
+				},
+			}),
+			testEnv(),
+			executionContext
+		)
+
+		expect(response.status).toBe(200)
+		await expect(response.text()).resolves.toBe('ok')
 	})
 })

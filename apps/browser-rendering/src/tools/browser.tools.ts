@@ -5,6 +5,19 @@ import { requireRequestProps } from '@repo/mcp-common/src/request-context'
 
 import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 
+/** Selects the browser that renders the page. Browser Run uses Chrome when this is not set. */
+const browserParam = z
+	.enum(['kitesurf'])
+	.optional()
+	.describe(
+		'Browser that renders the page. Omit to use the default Chrome browser. Set to "kitesurf" to use the Kitesurf browser engine.'
+	)
+
+/** Query string that routes a quick action to the requested browser. Empty for the default. */
+function browserSearch(browser: z.infer<typeof browserParam>): string {
+	return browser ? `?${new URLSearchParams({ browser })}` : ''
+}
+
 export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) {
 	context.accountTool(
 		'get_url_html_content',
@@ -12,16 +25,20 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 			description: 'Get page HTML content',
 			inputSchema: z.object({
 				url: z.string().url(),
+				browser: browserParam,
 			}),
 		},
 		async (params, accountId) => {
 			try {
 				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
-				const r = await client.browserRendering.content.create({
-					account_id: accountId,
-					url: params.url,
-				})
+				const r = await client.browserRendering.content.create(
+					{
+						account_id: accountId,
+						url: params.url,
+					},
+					{ query: params.browser ? { browser: params.browser } : undefined }
+				)
 
 				return {
 					content: [
@@ -53,13 +70,15 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 			description: 'Get page converted into Markdown',
 			inputSchema: z.object({
 				url: z.string().url(),
+				browser: browserParam,
 			}),
 		},
 		async (params, accountId) => {
 			try {
 				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
-				const r = (await client.post(`/accounts/${accountId}/browser-run/markdown`, {
+				const query = browserSearch(params.browser)
+				const r = (await client.post(`/accounts/${accountId}/browser-run/markdown${query}`, {
 					body: {
 						url: params.url,
 					},
@@ -101,14 +120,16 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 						width: z.number().default(800),
 					})
 					.optional(),
+				browser: browserParam,
 			}),
 		},
 		async (params, accountId) => {
 			try {
 				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
+				const query = browserSearch(params.browser)
 				const r = await client
-					.post(`/accounts/${accountId}/browser-run/screenshot`, {
+					.post(`/accounts/${accountId}/browser-run/screenshot${query}`, {
 						body: {
 							url: params.url,
 							viewport: params.viewport,
@@ -149,14 +170,16 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 			description: 'Render a page to PDF',
 			inputSchema: z.object({
 				url: z.string().url(),
+				browser: browserParam,
 			}),
 		},
 		async (params, accountId) => {
 			try {
 				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
+				const query = browserSearch(params.browser)
 				const r = await client
-					.post(`/accounts/${accountId}/browser-run/pdf`, {
+					.post(`/accounts/${accountId}/browser-run/pdf${query}`, {
 						body: {
 							url: params.url,
 						},
@@ -199,13 +222,15 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 			description: 'Get page HTML content and a screenshot in a single call',
 			inputSchema: z.object({
 				url: z.string().url(),
+				browser: browserParam,
 			}),
 		},
 		async (params, accountId) => {
 			try {
 				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
-				const r = (await client.post(`/accounts/${accountId}/browser-run/snapshot`, {
+				const query = browserSearch(params.browser)
+				const r = (await client.post(`/accounts/${accountId}/browser-run/snapshot${query}`, {
 					body: {
 						url: params.url,
 					},
@@ -257,13 +282,15 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 					)
 					.min(1)
 					.describe('CSS selectors of the elements to scrape'),
+				browser: browserParam,
 			}),
 		},
 		async (params, accountId) => {
 			try {
 				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
-				const r = (await client.post(`/accounts/${accountId}/browser-run/scrape`, {
+				const query = browserSearch(params.browser)
+				const r = (await client.post(`/accounts/${accountId}/browser-run/scrape${query}`, {
 					body: {
 						url: params.url,
 						elements: params.elements,
@@ -307,13 +334,15 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 					})
 					.optional()
 					.describe('Optional JSON-schema response format to constrain the output'),
+				browser: browserParam,
 			}),
 		},
 		async (params, accountId) => {
 			try {
 				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
-				const r = (await client.post(`/accounts/${accountId}/browser-run/json`, {
+				const query = browserSearch(params.browser)
+				const r = (await client.post(`/accounts/${accountId}/browser-run/json${query}`, {
 					body: {
 						url: params.url,
 						...(params.prompt ? { prompt: params.prompt } : {}),
@@ -353,13 +382,15 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 					.boolean()
 					.optional()
 					.describe('Only return links that are visible in the rendered page'),
+				browser: browserParam,
 			}),
 		},
 		async (params, accountId) => {
 			try {
 				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
-				const r = (await client.post(`/accounts/${accountId}/browser-run/links`, {
+				const query = browserSearch(params.browser)
+				const r = (await client.post(`/accounts/${accountId}/browser-run/links${query}`, {
 					body: {
 						url: params.url,
 						...(params.visibleLinksOnly !== undefined
@@ -403,9 +434,24 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 					.describe('Whether to render pages with a browser (vs. fetching raw HTML)'),
 				depth: z.number().int().min(1).optional().describe('How many links deep to crawl'),
 				limit: z.number().int().min(1).optional().describe('Maximum number of pages to crawl'),
+				browser: browserParam.describe(
+					'Browser that renders the crawled pages. Omit to use the default Chrome browser. Set to "kitesurf" to use the Kitesurf browser engine. Requires render to be true.'
+				),
 			}),
 		},
 		async (params, accountId) => {
+			if (params.browser && !params.render) {
+				return {
+					content: [
+						{
+							type: 'text',
+							text: 'Error starting crawl: browser can only be set when render is true',
+						},
+					],
+					isError: true,
+				}
+			}
+
 			try {
 				const props = requireRequestProps(context)
 				const client = getCloudflareClient(props.accessToken)
@@ -415,6 +461,8 @@ export function registerBrowserTools<Env>(context: McpRegistrationContext<Env>) 
 						render: params.render,
 						...(params.depth !== undefined ? { depth: params.depth } : {}),
 						...(params.limit !== undefined ? { limit: params.limit } : {}),
+						// Unlike quick actions, the crawl endpoint reads `browser` from the body.
+						...(params.browser ? { browser: params.browser } : {}),
 					},
 				})) as { result: string }
 

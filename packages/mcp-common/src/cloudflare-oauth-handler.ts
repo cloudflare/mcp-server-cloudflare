@@ -1,4 +1,9 @@
-import { GrantType, OAuthError as ProviderOAuthError } from '@cloudflare/workers-oauth-provider'
+import {
+	AuthorizationError,
+	CimdFetchError,
+	GrantType,
+	OAuthError as ProviderOAuthError,
+} from '@cloudflare/workers-oauth-provider'
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
@@ -141,11 +146,23 @@ function throwCombinedApiError(userResponse: Response, accountsResponse: Respons
 
 export type CloudflareTokenOwner = 'account' | 'unknown' | 'user'
 
+export interface VerifiedIdentity {
+	user: UserSchema | null
+	accounts: AccountsSchema
+	/**
+	 * True when an ok-status probe returned an unparseable payload and the
+	 * identity was filled in with less information than the credential has.
+	 * Degraded identities may serve the current request but must never be
+	 * cached: they would pin the data loss until the cache entry expires.
+	 */
+	degraded: boolean
+}
+
 export async function getUserAndAccounts(
 	accessToken: string,
 	devModeHeaders?: HeadersInit,
 	tokenOwner: CloudflareTokenOwner = 'unknown'
-): Promise<{ user: UserSchema | null; accounts: AccountsSchema }> {
+): Promise<VerifiedIdentity> {
 	const headers = devModeHeaders
 		? devModeHeaders
 		: {
@@ -198,6 +215,7 @@ export async function getUserAndAccounts(
 	}
 
 	// Parse accounts with safeParse for graceful degradation
+	let degraded = false
 	let accounts: AccountsSchema = []
 	if (accountsResponse.ok) {
 		try {
@@ -206,9 +224,11 @@ export async function getUserAndAccounts(
 			if (parsed.success) {
 				accounts = parsed.data.result ?? []
 			} else {
+				degraded = true
 				console.error('Cloudflare API /accounts payload did not match expected shape', parsed.error)
 			}
 		} catch (error) {
+			degraded = true
 			console.error('Cloudflare API /accounts response is not valid JSON', error)
 		}
 	} else if (userResponse?.ok) {
@@ -228,7 +248,7 @@ export async function getUserAndAccounts(
 	}
 
 	if (userResponse === undefined) {
-		if (accounts.length === 1) return { user: null, accounts }
+		if (accounts.length === 1) return { user: null, accounts, degraded }
 		throw new McpError('Account token must resolve to exactly one Cloudflare account', 401, {
 			reportToSentry: false,
 			internalMessage: `accounts=${accountsResponse.status}, count=${accounts.length}`,
@@ -244,15 +264,17 @@ export async function getUserAndAccounts(
 			if (parsed.success) {
 				user = parsed.data.result ?? null
 			} else {
+				degraded = true
 				console.error('Cloudflare API /user payload did not match expected shape', parsed.error)
 			}
 		} catch (error) {
+			degraded = true
 			console.error('Cloudflare API /user response is not valid JSON', error)
 		}
 	} else if (accounts.length > 0 && tokenOwner === 'unknown' && userResponse.status < 429) {
 		// Only legacy credentials need response-based account-token inference.
 		// Transient failures must never change the inferred credential owner.
-		return { user: null, accounts }
+		return { user: null, accounts, degraded }
 	} else {
 		throwIdentityProbeError(
 			[userResponse.status],
@@ -262,12 +284,12 @@ export async function getUserAndAccounts(
 	}
 
 	if (user) {
-		return { user, accounts }
+		return { user, accounts, degraded }
 	}
 
 	// Only legacy unprefixed tokens need response-based account-token inference.
 	if (accounts.length > 0 && tokenOwner === 'unknown') {
-		return { user: null, accounts }
+		return { user: null, accounts, degraded }
 	}
 
 	throw new McpError('Failed to verify token: no user or account information', 401, {
@@ -446,12 +468,29 @@ export function createAuthHandlers({
 	 */
 	app.get(`/oauth/authorize`, async (c) => {
 		try {
-			const oauthReqInfo = await c.env.OAUTH_PROVIDER.parseAuthRequest(c.req.raw)
-			oauthReqInfo.scope = Object.keys(scopes)
-
-			if (!oauthReqInfo.clientId) {
-				return new OAuthError('invalid_request', 'Missing client_id parameter', 400).toResponse()
+			let oauthReqInfo: AuthRequest
+			try {
+				oauthReqInfo = await c.env.OAUTH_PROVIDER.parseAuthRequest(c.req.raw)
+			} catch (e) {
+				// Expected request-validation failures: redirect when the provider has
+				// already validated the client's redirect URI, render locally otherwise.
+				if (e instanceof AuthorizationError) {
+					if (!e.redirectUri) {
+						return new OAuthError(e.code, e.description, 400).toResponse()
+					}
+					const redirect = new URL(e.redirectUri)
+					redirect.searchParams.set('error', e.code)
+					redirect.searchParams.set('error_description', e.description)
+					if (e.state) redirect.searchParams.set('state', e.state)
+					if (e.issuer) redirect.searchParams.set('iss', e.issuer)
+					return new Response(null, {
+						status: 302,
+						headers: { Location: redirect.href, 'Cache-Control': 'no-store' },
+					})
+				}
+				throw e
 			}
+			oauthReqInfo.scope = Object.keys(scopes)
 
 			// Check if client was previously approved (skip consent if so)
 			if (
@@ -506,6 +545,14 @@ export function createAuthHandlers({
 					errorMessage: `Authorize Error: ${message}`,
 				})
 			)
+			if (e instanceof CimdFetchError) {
+				return new OAuthError(
+					'temporarily_unavailable',
+					'Client metadata is temporarily unavailable. Please try again.',
+					503,
+					{ 'Retry-After': '30' }
+				).toResponse()
+			}
 			if (e instanceof OAuthError) {
 				return e.toResponse()
 			}
@@ -603,14 +650,14 @@ export function createAuthHandlers({
 				return new OAuthError('invalid_request', 'Invalid OAuth request info', 400).toResponse()
 			}
 
-			// Exchange code for tokens and get user details
-			const [{ accessToken, refreshToken, user, accounts }] = await Promise.all([
-				getTokenAndUserDetails(c, code, codeVerifier), // use codeVerifier from KV
-				c.env.OAUTH_PROVIDER.createClient({
-					clientId: oauthReqInfo.clientId,
-					tokenEndpointAuthMethod: 'none',
-				}),
-			])
+			// Exchange code for tokens and get user details, using the codeVerifier from KV.
+			// MCP clients register themselves through the provider's /register endpoint;
+			// the authorize flow only completes grants for clients that already exist.
+			const { accessToken, refreshToken, user, accounts } = await getTokenAndUserDetails(
+				c,
+				code,
+				codeVerifier
+			)
 
 			// Complete authorization and issue token to MCP client
 			const { redirectTo } = await c.env.OAUTH_PROVIDER.completeAuthorization({
@@ -659,6 +706,12 @@ export function createAuthHandlers({
 					errorMessage: `Callback Error: ${message}`,
 				})
 			)
+			// completeAuthorization revalidates the reconstructed request; grants
+			// started under an older provider version can fail here as expected
+			// client errors rather than server faults.
+			if (e instanceof AuthorizationError) {
+				return new OAuthError(e.code, e.description, 400).toResponse()
+			}
 			if (e instanceof OAuthError) {
 				return e.toResponse()
 			}

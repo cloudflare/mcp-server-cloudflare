@@ -48,7 +48,7 @@ export default app.worker
 
 For lower-level use, `createCloudflareMcpHandler()` accepts explicit server metadata, observability factories, and HTTP policy. It delegates protocol routing, CORS, Host/Origin validation, and legacy compatibility to `createMcpHandler()` from the isolated `agents/mcp/server` entry point. Do not construct a global MCP server. Do not set `legacy: 'reject'`: the default `legacy: 'stateless'` fallback is part of the migration contract.
 
-The shared handler serves `POST` and CORS `OPTIONS` on `/mcp` and `/sse`. The latter is a URL alias, not the deprecated HTTP+SSE transport. The SDK returns `405` for stateless legacy stream and session-deletion requests. MCP request bodies are capped at 4 MiB before SDK parsing, and OAuth resources use strict path-aware matching.
+The shared handler serves `POST` and CORS `OPTIONS` on `/mcp` and `/sse`. The latter is a URL alias, not the deprecated HTTP+SSE transport. A legacy SSE `GET /sse` request returns `410 Gone` with an `application/problem+json` body that offers two Streamable HTTP migrations: keep the existing URL by changing the configured transport, or switch to the recommended `/mcp` URL for future compatibility. The SDK continues to return `405` for other stateless legacy stream and session-deletion requests. MCP request bodies are capped at 4 MiB before SDK parsing, and OAuth resources use strict path-aware matching.
 
 ## Request registration context
 

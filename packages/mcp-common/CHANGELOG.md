@@ -1,5 +1,17 @@
 # @repo/mcp-common
 
+## 0.20.10
+
+### Patch Changes
+
+- b9e6d76: Return an actionable `410 Gone` Problem Details response when a client attempts the removed HTTP+SSE transport with `GET /sse`. The response explains that clients can configure the existing `/sse` URL to use Streamable HTTP or, preferably, move to `/mcp` for future compatibility. It preserves query parameters, identifies the recommended replacement in a `Link` header, and is available before OAuth authentication. Streamable HTTP `POST` requests continue to work on both `/sse` and `/mcp`.
+
+## 0.20.9
+
+### Patch Changes
+
+- 12a9a61: Delegate direct Cloudflare API-token and OAuth credential validation to the Workers OAuth Provider's resolveExternalToken hook on provider 0.10.1. Expected verification failures now become structured 401/403/429 responses with WWW-Authenticate challenges instead of escaping as Worker exceptions, verified identities are cached against a credential digest so repeat MCP requests skip the Cloudflare API probes, and authorize-endpoint validation failures redirect to validated client redirect URIs or render locally per OAuth 2.1.
+
 ## 0.20.8
 
 ### Patch Changes

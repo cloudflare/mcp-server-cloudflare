@@ -4,14 +4,20 @@ import {
 	originValidationResponse,
 } from '@modelcontextprotocol/server'
 
-import { handleApiTokenMode, isApiTokenRequest } from './api-token-mode'
+import {
+	devApiTokenModeEnabled,
+	handleDevApiTokenMode,
+	resolveExternalToken,
+} from './api-token-mode'
 import { createAuthHandlers, handleTokenExchangeCallback } from './cloudflare-oauth-handler'
+import { isLegacySseStreamRequest } from './transport-migration'
 
 import type { OAuthProviderOptions } from '@cloudflare/workers-oauth-provider'
 import type { MetricsTracker } from '@repo/mcp-observability'
 import type { RequestHandler } from './api-token-mode'
 
 export interface CloudflareOAuthEnv extends Cloudflare.Env {
+	OAUTH_KV: KVNamespace
 	CLOUDFLARE_CLIENT_ID: string
 	CLOUDFLARE_CLIENT_SECRET: string
 	DEV_CLOUDFLARE_API_TOKEN: string
@@ -39,6 +45,7 @@ export interface CreateCloudflareOAuthRouterOptions<Env extends CloudflareOAuthE
 		| 'authorizeEndpoint'
 		| 'tokenEndpoint'
 		| 'tokenExchangeCallback'
+		| 'resolveExternalToken'
 		| 'resourceMatchOriginOnly'
 	>
 }
@@ -57,7 +64,7 @@ export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 }: CreateCloudflareOAuthRouterOptions<Env>): RequestHandler<Env> {
 	if (provider && 'resourceMatchOriginOnly' in provider) {
 		throw new TypeError(
-			'resourceMatchOriginOnly is no longer supported; OAuth resources must match exactly'
+			'resourceMatchOriginOnly is deprecated and not supported here; OAuth resources must match exactly'
 		)
 	}
 	const defaultHandler = createAuthHandlers({ scopes, metrics })
@@ -76,14 +83,17 @@ export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 					return apiHandler.fetch(request, env, ctx)
 				}
 
-				// Let the MCP handler own its browser preflight so the exact policy and
-				// modern request-header allowlist are not replaced by the OAuth Provider's
-				// intentionally broad discovery-endpoint CORS response.
-				if (request.method === 'OPTIONS') return apiHandler.fetch(request, env, ctx)
+				// Let the MCP handler own browser preflight and the unauthenticated SSE
+				// migration response so its exact HTTP policy is preserved. The OAuth
+				// Provider would otherwise challenge GET /sse before clients see the
+				// actionable replacement endpoint.
+				if (request.method === 'OPTIONS' || isLegacySseStreamRequest(request)) {
+					return apiHandler.fetch(request, env, ctx)
+				}
 			}
 
-			if (await isApiTokenRequest(request, env)) {
-				return handleApiTokenMode(apiHandler, request, env, ctx)
+			if (devApiTokenModeEnabled(env)) {
+				return handleDevApiTokenMode(apiHandler, request, env, ctx)
 			}
 
 			return new OAuthProvider<Env>({
@@ -96,6 +106,9 @@ export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 				defaultHandler,
 				authorizeEndpoint: '/oauth/authorize',
 				tokenEndpoint: '/token',
+				// The provider resolves its own access tokens first, then delegates
+				// direct Cloudflare API/OAuth credentials to resolveExternalToken.
+				resolveExternalToken,
 				tokenExchangeCallback: (options) =>
 					handleTokenExchangeCallback(
 						options,

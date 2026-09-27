@@ -28,6 +28,8 @@ Currently available tools:
 | `list_browser_sessions` | Lists active Browser Run sessions for the account.                                  |
 | `kill_browser_session`  | Closes (kills) a Browser Run session by its session ID.                             |
 
+**Browser selection:** The page tools (`get_url_*`, `scrape_url_elements`, and `start_crawl`) accept an optional `browser` argument. Omit it to use the default Chrome browser. Set it to `kitesurf` to render the page with the Kitesurf browser engine. `start_crawl` accepts `kitesurf` only when `render` is `true`.
+
 **Note:** These tools are account-scoped. Single-account credentials (and account-scoped API tokens) are detected automatically. If your credentials can access multiple accounts, pass `account_id` to the tool, or set a `cf-account-id` request header in your MCP client config.
 
 This MCP server is still a work in progress, and we plan to add more tools in the future.
@@ -37,6 +39,7 @@ This MCP server is still a work in progress, and we plan to add more tools in th
 - `Get the HTML content of https://example.com.`
 - `Convert https://example.com to Markdown.`
 - `Take a screenshot of https://example.com.`
+- `Take a screenshot of https://example.com with the kitesurf browser.`
 - `Render https://example.com to a PDF.`
 - `Extract the product name and price from https://example.com as JSON.`
 - `List all the links on https://example.com.`

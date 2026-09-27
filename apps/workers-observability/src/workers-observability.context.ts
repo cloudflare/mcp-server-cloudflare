@@ -11,7 +11,7 @@ export interface Env {
 	SENTRY_ACCESS_CLIENT_SECRET: string
 	GIT_HASH: string
 	SENTRY_DSN: string
-	AI: Ai
+	DOCS_AI_SEARCH: AiSearchInstance
 	VECTORIZE: VectorizeIndex
 	DEV_DISABLE_OAUTH: string
 	DEV_CLOUDFLARE_API_TOKEN: string

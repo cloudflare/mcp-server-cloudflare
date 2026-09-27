@@ -40,16 +40,15 @@ When scoped, `list_libraries` and `search_dev_stack` (including its `library` en
 
 Scoping is read from the connection URL on every request, so it applies whether the client connects to `/mcp` or the `/sse` alias.
 
-## Access the remote MCP server
+## Connect to the remote MCP server
 
-Point any MCP client that supports remote servers at `https://stack.mcp.cloudflare.com/mcp` (streamable HTTP; the `/sse` path is served by the same stateless transport for backward compatibility). For clients without native remote support, use [`mcp-remote`](https://www.npmjs.com/package/mcp-remote).
+Connect an MCP client directly to `https://stack.mcp.cloudflare.com/mcp` using Streamable HTTP. The `/sse` path serves the same stateless transport for backward compatibility.
 
 ```json
 {
 	"mcpServers": {
 		"cloudflare-stack": {
-			"command": "npx",
-			"args": ["mcp-remote", "https://stack.mcp.cloudflare.com/mcp"]
+			"url": "https://stack.mcp.cloudflare.com/mcp"
 		}
 	}
 }

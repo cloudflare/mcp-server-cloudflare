@@ -91,6 +91,10 @@ async function issueOAuthToken(resource: string) {
 	const client = await helpers.createClient({
 		redirectUris: ['https://client.example.com/callback'],
 		tokenEndpointAuthMethod: 'none',
+		// The provider validates registered capabilities, so the implicit flow
+		// this helper uses to mint a token must be registered explicitly.
+		grantTypes: ['implicit'],
+		responseTypes: ['token'],
 	})
 	const result = await helpers.completeAuthorization({
 		request: {
