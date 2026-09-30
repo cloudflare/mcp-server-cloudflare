@@ -321,9 +321,13 @@ export async function forwardAnsWebhook(
 	if (!subscription.active || subscription.expiresAt <= now) {
 		return new Response(null, { status: 204 })
 	}
-	if (!(await dependencies.hasAccess(subscription))) {
-		await dependencies.deactivateSubscription(id)
-		return new Response(null, { status: 204 })
+	try {
+		if (!(await dependencies.hasAccess(subscription))) {
+			await dependencies.deactivateSubscription(id)
+			return new Response(null, { status: 204 })
+		}
+	} catch {
+		return new Response(null, { status: 503 })
 	}
 	const reader = request.body?.getReader()
 	if (!reader) return new Response(null, { status: 400 })
@@ -389,7 +393,12 @@ export async function forwardAnsWebhook(
 			await dependencies.deactivateSubscription(id)
 			return new Response(null, { status: 204 })
 		}
-		if (response.status === 429 || response.status >= 500 || response.status < 400) {
+		if (
+			response.status === 408 ||
+			response.status === 429 ||
+			response.status >= 500 ||
+			response.status < 400
+		) {
 			return new Response(null, { status: 503 })
 		}
 		return new Response(null, { status: response.status })

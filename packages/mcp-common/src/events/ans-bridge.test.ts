@@ -214,6 +214,7 @@ describe('ANS synchronous delivery bridge', () => {
 	it.each([
 		[204, 204],
 		[202, 204],
+		[408, 503],
 		[429, 503],
 		[500, 503],
 		[502, 503],
@@ -335,6 +336,24 @@ describe('ANS synchronous delivery bridge', () => {
 			throw new Error('timeout')
 		}) as unknown as typeof fetch
 		expect((await forwardAnsWebhook(request(), subscription.id, deps)).status).toBe(503)
+		expect(deps.webhookFetch).toHaveBeenCalledOnce()
+	})
+
+	it('makes one delivery attempt and leaves retries to ANS', async () => {
+		const deps = dependencies(503)
+		expect((await forwardAnsWebhook(request(), subscription.id, deps)).status).toBe(503)
+		expect(deps.webhookFetch).toHaveBeenCalledOnce()
+		expect(deps.deactivateSubscription).not.toHaveBeenCalled()
+	})
+
+	it('leaves transient access-check failures to ANS without deactivating', async () => {
+		const deps = dependencies()
+		deps.hasAccess = vi.fn(async () => {
+			throw new Error('Service unavailable')
+		})
+		expect((await forwardAnsWebhook(request(), subscription.id, deps)).status).toBe(503)
+		expect(deps.webhookFetch).not.toHaveBeenCalled()
+		expect(deps.deactivateSubscription).not.toHaveBeenCalled()
 	})
 
 	it('bounds inbound and outgoing event bodies', async () => {

@@ -4,7 +4,20 @@ Implement webhook subscriptions to `cloudflare.alert.workers_observability_real_
 using ANS webhook destinations, notification policies and Vega issue automations.
 Expose the event only when the authenticated account is eligible for the alert.
 
-## What this draft implements
+## Delivery and retry ownership
+
+ANS is the only delivery queue and retry scheduler. Each incoming ANS webhook makes
+one synchronous callback attempt. The bridge acknowledges ANS only after callback
+acceptance; network failures, callback timeouts (408), rate limits (429) and server
+errors return 503 so ANS schedules the next attempt. Transient authorization-check
+failures also return 503 without deactivating the subscription.
+
+Do not persist outgoing events before acknowledging ANS, enqueue background delivery,
+or add callback retry loops, backoff timers or delivery alarms. Persist subscription
+configuration and managed resource identities only. Subscription expiry and resource
+cleanup are lifecycle work, not delivery retries.
+
+## Implemented bridge behavior
 
 - Validated event/subscription schemas and account-eligible catalogue projection.
 - Principal-scoped subscription identity, finite TTL and bounded key rotation.
