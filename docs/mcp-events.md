@@ -1,11 +1,8 @@
-# Draft: ANS-backed MCP Events
+# MCP Events for real-time issues
 
-Use the existing ANS webhook policy/destination API, not Workspace Agent trigger IDs.
-Both the Workers Observability and all-in-one Code Mode servers should expose the same
-initial catalogue: `cloudflare.alert.workers_observability_real_time_issue` only.
-Intersect the implemented catalogue with the connected account's eligible ANS alerts.
-Other ANS alert types are not advertised until their arguments, payload and delivery
-identity contracts have been implemented and tested.
+Implement webhook subscriptions to `cloudflare.alert.workers_observability_real_time_issue`
+using ANS webhook destinations, notification policies and Vega issue automations.
+Expose the event only when the authenticated account is eligible for the alert.
 
 ## What this draft implements
 
