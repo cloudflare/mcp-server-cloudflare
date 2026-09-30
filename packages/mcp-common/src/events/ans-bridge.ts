@@ -329,15 +329,15 @@ export async function forwardAnsWebhook(
 	if (!reader) return new Response(null, { status: 400 })
 	const chunks: Uint8Array[] = []
 	let size = 0
-	while (true) {
-		const chunk = await reader.read()
-		if (chunk.done) break
-		size += chunk.value.length
+	let part = await reader.read()
+	while (!part.done) {
+		size += part.value.length
 		if (size > MAX_EVENT_BYTES) {
 			await reader.cancel()
 			return new Response(null, { status: 413 })
 		}
-		chunks.push(chunk.value)
+		chunks.push(part.value)
+		part = await reader.read()
 	}
 	const bytes = new Uint8Array(size)
 	let offset = 0
