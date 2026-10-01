@@ -26,7 +26,7 @@ The tools below still work for now, but no new features will be added. Please mi
 
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP connections, with Cloudflare OAuth built in. It integrates tools powered by the [Cloudflare GraphQL Analytics API](https://developers.cloudflare.com/analytics/graphql-api/) to provide insights and utilities for your Cloudflare account.
 
-Until retirement, the `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth and account context for every request. `/sse` is not the deprecated HTTP+SSE transport. OAuth remains durable security state; the server retains no MCP protocol session or protocol Durable Object.
+Until retirement, the `/mcp` URL uses a stateless SDK v2 handler that creates a fresh server with request-scoped auth and account context for every request. The retired `/sse` URL returns `410 Gone` pointing at `/mcp`. OAuth remains durable security state; the server retains no MCP protocol session or protocol Durable Object.
 
 ## Available tools
 

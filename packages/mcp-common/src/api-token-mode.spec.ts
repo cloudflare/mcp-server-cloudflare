@@ -80,6 +80,7 @@ describe('resolveExternalToken', () => {
 				user: { id: 'user-1', email: 'user@example.com' },
 				accounts: [{ id: 'account-1', name: 'Account One' }],
 			},
+			audience: 'https://mcp.example.com/mcp',
 		})
 	})
 
@@ -113,6 +114,7 @@ describe('resolveExternalToken', () => {
 				user: { id: 'user-1', email: 'user@example.com' },
 				accounts: [{ id: 'account-1', name: 'Account One' }],
 			},
+			audience: 'https://mcp.example.com/mcp',
 		})
 		expect(calls).toEqual({ user: 2, accounts: 2 })
 	})
@@ -128,6 +130,7 @@ describe('resolveExternalToken', () => {
 				accessToken: 'cfat_test-account-token',
 				account: { id: 'account-1', name: 'Account One' },
 			},
+			audience: 'https://mcp.example.com/mcp',
 		})
 		expect(calls).toEqual({ user: 0, accounts: 1 })
 	})
@@ -345,6 +348,7 @@ describe('identity cache safety', () => {
 				user: { id: 'user-1', email: 'user@example.com' },
 				accounts: [],
 			},
+			audience: 'https://mcp.example.com/mcp',
 		})
 		expect(kv.store.size).toBe(0)
 	})

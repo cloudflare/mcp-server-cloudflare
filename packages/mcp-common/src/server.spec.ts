@@ -191,10 +191,10 @@ describe('shared stateless MCP foundation', () => {
 		expect(instances.size).toBe(4)
 	})
 
-	it('returns an actionable migration problem for legacy SSE stream requests', async () => {
+	it('answers every /sse request with a 410 naming the /mcp URL', async () => {
 		let registrations = 0
 		const handler = createCloudflareMcpHandler<TestEnv>({
-			serverInfo: { name: 'sse-migration', version: '1.0.0' },
+			serverInfo: { name: 'sse-retired', version: '1.0.0' },
 			register() {
 				registrations++
 			},
@@ -205,7 +205,8 @@ describe('shared stateless MCP foundation', () => {
 			},
 		})
 		const replacementUrl = 'https://mcp.example.com/mcp?libs=cloudflare,hono'
-		const response = await handler.fetch(
+		const requests = [
+			// Legacy HTTP+SSE stream
 			new Request('https://mcp.example.com/sse?libs=cloudflare,hono', {
 				method: 'GET',
 				headers: {
@@ -214,45 +215,38 @@ describe('shared stateless MCP foundation', () => {
 					Origin: 'https://app.example.com',
 				},
 			}),
-			{ requestLabel: 'sse-migration' },
-			executionContext()
-		)
-
-		expect(response.status).toBe(410)
-		expect(response.headers.get('content-type')).toContain('application/problem+json')
-		expect(response.headers.get('cache-control')).toBe('no-store')
-		expect(response.headers.get('link')).toBe(`<${replacementUrl}>; rel="alternate"`)
-		expect(response.headers.get('access-control-allow-origin')).toBe('https://app.example.com')
-		await expect(response.json()).resolves.toEqual({
-			type: 'https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/',
-			title: 'Legacy SSE transport is no longer supported',
-			status: 410,
-			detail:
-				'This URL no longer supports the deprecated HTTP+SSE transport. Configure this URL to use Streamable HTTP, or update to the replacement URL for future compatibility.',
-			options: [
-				{
-					action: 'change-transport',
-					transport: 'streamable-http',
-					url: 'https://mcp.example.com/sse?libs=cloudflare,hono',
-					recommended: false,
+			// Streamable HTTP, which /sse used to serve as an alias of /mcp
+			new Request('https://mcp.example.com/sse?libs=cloudflare,hono', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Accept: 'application/json, text/event-stream',
+					Host: 'mcp.example.com',
+					Origin: 'https://app.example.com',
 				},
-				{
-					action: 'update-url',
-					transport: 'streamable-http',
-					url: replacementUrl,
-					recommended: true,
-				},
-			],
-		})
-		const rejected = await handler.fetch(
-			new Request('https://mcp.example.com/sse', {
-				method: 'GET',
-				headers: { Accept: 'text/event-stream', Host: 'evil.example.com' },
+				body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'server/discover', params: {} }),
 			}),
-			{ requestLabel: 'sse-migration-invalid-host' },
-			executionContext()
-		)
-		expect(rejected.status).toBe(403)
+		]
+
+		for (const request of requests) {
+			const response = await handler.fetch(
+				request,
+				{ requestLabel: 'sse-retired' },
+				executionContext()
+			)
+			expect(response.status).toBe(410)
+			expect(response.headers.get('content-type')).toContain('application/problem+json')
+			expect(response.headers.get('cache-control')).toBe('no-store')
+			expect(response.headers.get('link')).toBe(`<${replacementUrl}>; rel="alternate"`)
+			expect(response.headers.get('access-control-allow-origin')).toBe('https://app.example.com')
+			await expect(response.json()).resolves.toEqual({
+				type: 'https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/',
+				title: 'This MCP URL has moved to /mcp',
+				status: 410,
+				detail: `The /sse URL is no longer served. Update your MCP client configuration to ${replacementUrl}.`,
+				url: replacementUrl,
+			})
+		}
 		expect(registrations).toBe(0)
 	})
 
