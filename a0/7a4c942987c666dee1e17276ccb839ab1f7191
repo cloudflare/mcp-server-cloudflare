@@ -1,0 +1,47 @@
+.changeset/outbound-user-agent.md
+  s_379d5d0e28a496::t_d89c91022b9083 1-9
+apps/cloudflare-blog/src/tools/blog.tools.ts
+  s_379d5d0e28a496::t_28e1f566a0e55a 3-4,27,69
+apps/dex-analysis/src/warp_diag_reader.ts
+  s_379d5d0e28a496::t_39f91c2bb0639d 4-5,81
+apps/graphql/src/tools/graphql.tools.ts
+  s_379d5d0e28a496::t_d14ec91ac517f2 5,236,279
+apps/radar/src/tools/radar.tools.ts
+  s_379d5d0e28a496::t_0331cd023d6c23 6,164
+apps/radar/src/tools/url-scanner.tools.ts
+  s_379d5d0e28a496::t_f6fe422c3f82d5 4,40,92-102,151,221,270-275
+packages/mcp-common/src/cloudflare-api.spec.ts
+  s_379d5d0e28a496::t_fe59f1a4c4a41e 7,26-39
+packages/mcp-common/src/cloudflare-api.ts
+  s_379d5d0e28a496::t_250970f18c2ec6 5,15,19,53
+packages/mcp-common/src/cloudflare-auth.spec.ts
+  s_379d5d0e28a496::t_71f79bc339e84a 7,39-45,48,217-223,226
+packages/mcp-common/src/cloudflare-auth.ts
+  s_379d5d0e28a496::t_773f1e42c7d726 4,190,221
+packages/mcp-common/src/cloudflare-oauth-handler.ts
+  s_379d5d0e28a496::t_9ccc20a9292ce1 22,180,183
+packages/mcp-common/src/shared-prompts/docs-ai-search.prompts.ts
+  s_379d5d0e28a496::t_d9d1e9f7034b61 1-2,22
+packages/mcp-common/src/shared-tools/docs-ai-search.tools.ts
+  s_379d5d0e28a496::t_ff789b7ef9e4f7 3-4,94
+packages/mcp-common/src/user-agent.spec.ts
+  s_379d5d0e28a496::t_a4e6eccf37b8ee 1-47
+packages/mcp-common/src/user-agent.ts
+  s_379d5d0e28a496::t_27e9df44e424a6 1-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "a07a4c942987c666dee1e17276ccb839ab1f7191",
+  "prompts": {},
+  "sessions": {
+    "s_379d5d0e28a496": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a0f6ae-35ab-7049-9efa-0bf09d568c4f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
