@@ -1,5 +1,14 @@
 # workers-observability
 
+## 0.5.6
+
+### Patch Changes
+
+- 632916d: Use a least-privilege AI Search instance binding for Cloudflare documentation search.
+- ab883e5: Send `User-Agent: mcp-server-cloudflare/<server>` on every outbound request to Cloudflare, with `<server>` taken from the new `serverId` option of `createPublicMcpApp()` / `createAuthenticatedMcpApp()`. It covers the Cloudflare SDK client, `fetchCloudflareApi`, the OAuth token exchange and refresh, the identity probe, and the direct `fetch` calls in the Radar, URL Scanner, GraphQL, DEX, Blog and docs tools.
+- Updated dependencies [ab883e5]
+  - @repo/mcp-common@0.20.11
+
 ## 0.5.5
 
 ### Patch Changes

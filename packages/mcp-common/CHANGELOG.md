@@ -1,5 +1,11 @@
 # @repo/mcp-common
 
+## 0.20.11
+
+### Patch Changes
+
+- ab883e5: Send `User-Agent: mcp-server-cloudflare/<server>` on every outbound request to Cloudflare, with `<server>` taken from the new `serverId` option of `createPublicMcpApp()` / `createAuthenticatedMcpApp()`. It covers the Cloudflare SDK client, `fetchCloudflareApi`, the OAuth token exchange and refresh, the identity probe, and the direct `fetch` calls in the Radar, URL Scanner, GraphQL, DEX, Blog and docs tools.
+
 ## 0.20.10
 
 ### Patch Changes
