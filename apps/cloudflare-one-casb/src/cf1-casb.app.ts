@@ -12,6 +12,7 @@ const CloudflareOneCasbScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'cloudflare-one-casb',
 	serviceHostnames: ['casb-staging.mcp.cloudflare.com', 'casb.mcp.cloudflare.com'],
 	scopes: CloudflareOneCasbScopes,
 	register: registerIntegrationsTools,

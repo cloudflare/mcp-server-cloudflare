@@ -38,6 +38,7 @@ const RadarScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'radar',
 	serviceHostnames: ['radar-staging.mcp.cloudflare.com', 'radar.mcp.cloudflare.com'],
 	scopes: RadarScopes,
 	serverOptions: {

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { getAuthToken, refreshAuthToken } from './cloudflare-auth'
 import { McpError } from './mcp-error'
 import { server } from './test/msw-server'
-import { USER_AGENT } from './user-agent'
+import { getUserAgent } from './user-agent'
 
 const TOKEN_ENDPOINT = 'https://dash.cloudflare.com/oauth2/token'
 
@@ -45,7 +45,7 @@ describe('getAuthToken', () => {
 		)
 
 		const result = await getAuthToken(baseParams)
-		expect(userAgent).toBe(USER_AGENT)
+		expect(userAgent).toBe(getUserAgent())
 		expect(result.access_token).toBe('test-access-token')
 		expect(result.refresh_token).toBe('test-refresh-token')
 		expect(result.expires_in).toBe(3600)
@@ -223,7 +223,7 @@ describe('refreshAuthToken', () => {
 		)
 
 		const result = await refreshAuthToken(baseParams)
-		expect(userAgent).toBe(USER_AGENT)
+		expect(userAgent).toBe(getUserAgent())
 		expect(result.access_token).toBe('test-access-token')
 		expect(result.refresh_token).toBe('test-refresh-token')
 	})

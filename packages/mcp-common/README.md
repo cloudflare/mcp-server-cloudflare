@@ -31,6 +31,7 @@ Use `createPublicMcpApp()` or `createAuthenticatedMcpApp()` for application entr
 import { createAuthenticatedMcpApp } from '@repo/mcp-common/src/mcp-app'
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'example',
 	serviceHostnames: ['example-staging.mcp.cloudflare.com', 'example.mcp.cloudflare.com'],
 	scopes: ExampleScopes,
 	register(context) {

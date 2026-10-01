@@ -16,6 +16,7 @@ const AnalyticsScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'dns-analytics',
 	serviceHostnames: [
 		'dns-analytics-staging.mcp.cloudflare.com',
 		'dns-analytics.mcp.cloudflare.com',

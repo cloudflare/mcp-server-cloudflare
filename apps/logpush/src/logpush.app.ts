@@ -13,6 +13,7 @@ const LogPushScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'logpush',
 	serviceHostnames: ['logs-staging.mcp.cloudflare.com', 'logs.mcp.cloudflare.com'],
 	scopes: LogPushScopes,
 	register: registerLogsTools,

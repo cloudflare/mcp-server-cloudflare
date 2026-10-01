@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { fetchCloudflareApi } from './cloudflare-api'
 import { McpError } from './mcp-error'
 import { server } from './test/msw-server'
-import { USER_AGENT } from './user-agent'
+import { getUserAgent } from './user-agent'
 
 const ENDPOINT = 'https://api.cloudflare.com/client/v4/accounts/test-account-id/workers/scripts'
 
@@ -33,7 +33,7 @@ describe('fetchCloudflareApi', () => {
 		)
 
 		await fetchCloudflareApi(baseParams)
-		expect(headers?.get('User-Agent')).toBe(USER_AGENT)
+		expect(headers?.get('User-Agent')).toBe(getUserAgent())
 		expect(headers?.get('Authorization')).toBe('Bearer test-api-token')
 	})
 

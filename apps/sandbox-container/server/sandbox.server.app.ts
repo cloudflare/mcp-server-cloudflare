@@ -16,6 +16,7 @@ const ContainerScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'sandbox-container',
 	serviceHostnames: ['containers-staging.mcp.cloudflare.com', 'containers.mcp.cloudflare.com'],
 	scopes: ContainerScopes,
 	serverOptions: { instructions: BASE_INSTRUCTIONS },

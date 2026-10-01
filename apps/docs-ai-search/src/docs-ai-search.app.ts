@@ -6,6 +6,7 @@ import { registerDocsTools } from '@repo/mcp-common/src/shared-tools/docs-ai-sea
 import type { Env } from './docs-ai-search.context'
 
 const app = createPublicMcpApp<Env>({
+	serverId: 'docs-ai-search',
 	serviceHostnames: ['docs-staging.mcp.cloudflare.com', 'docs.mcp.cloudflare.com'],
 	createSentry: ({ env, executionCtx, request }) => initSentry(env, executionCtx, request),
 	register(context) {

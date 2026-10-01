@@ -17,6 +17,7 @@ const GraphQLScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'graphql',
 	serviceHostnames: ['graphql-staging.mcp.cloudflare.com', 'graphql.mcp.cloudflare.com'],
 	scopes: GraphQLScopes,
 	serverOptions: { instructions: DEPRECATION_INSTRUCTIONS },

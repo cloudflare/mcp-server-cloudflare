@@ -18,6 +18,7 @@ const ObservabilityScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'workers-observability',
 	serviceHostnames: [
 		'observability-staging.mcp.cloudflare.com',
 		'observability.mcp.cloudflare.com',

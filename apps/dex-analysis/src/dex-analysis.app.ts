@@ -15,6 +15,7 @@ const DexScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'dex-analysis',
 	serviceHostnames: ['dex-staging.mcp.cloudflare.com', 'dex.mcp.cloudflare.com'],
 	scopes: DexScopes,
 	register: registerDEXTools,
