@@ -28,6 +28,7 @@ const BuildsScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'workers-builds',
 	serviceHostnames: ['builds-staging.mcp.cloudflare.com', 'builds.mcp.cloudflare.com'],
 	scopes: BuildsScopes,
 	serverOptions: { instructions: BUILDS_INSTRUCTIONS },

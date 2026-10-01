@@ -4,6 +4,7 @@ import { MetricsTracker } from '@repo/mcp-observability'
 
 import { createCloudflareOAuthRouter } from './oauth-router'
 import { createCloudflareMcpHandler } from './server'
+import { setUserAgentServer } from './user-agent'
 
 import type { CloudflareOAuthEnv } from './oauth-router'
 import type { CloudflareMcpHandler, CloudflareMcpServerFactoryOptions } from './server'
@@ -32,6 +33,8 @@ type ServerAssemblyOptions<Env> = Pick<
 >
 
 export type CreatePublicMcpAppOptions<Env> = ServerAssemblyOptions<Env> & {
+	/** This server's ID in the outbound User-Agent, `mcp-server-cloudflare/<serverId>`: its app directory name. */
+	serverId: string
 	/** Staging and production service hostnames; localhost policy is added centrally. */
 	serviceHostnames: readonly string[]
 }
@@ -86,9 +89,10 @@ export function createAuthenticatedMcpApp<Env extends StandardMcpEnv & Cloudflar
 }
 
 function createMcpAppFoundation<Env extends StandardMcpEnv>(
-	{ serviceHostnames, ...serverOptions }: CreatePublicMcpAppOptions<Env>,
+	{ serverId, serviceHostnames, ...serverOptions }: CreatePublicMcpAppOptions<Env>,
 	requireAuth: boolean
 ): McpAppFoundation<Env> {
+	setUserAgentServer(serverId)
 	const mcpRequestPolicy = {
 		allowedHostnames: [...localhostAllowedHostnames(), ...serviceHostnames],
 		allowedOriginHostnames: [

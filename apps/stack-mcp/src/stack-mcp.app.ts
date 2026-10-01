@@ -6,6 +6,7 @@ import { STACK_LIBRARIES, toPublicLibrary } from './types/stack.types'
 import type { Env } from './stack-mcp.context'
 
 const app = createPublicMcpApp<Env>({
+	serverId: 'stack-mcp',
 	serviceHostnames: ['stack-staging.mcp.cloudflare.com', 'stack.mcp.cloudflare.com'],
 	register: registerStackTools,
 })

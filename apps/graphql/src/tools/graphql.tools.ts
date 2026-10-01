@@ -2,6 +2,7 @@ import * as LZString from 'lz-string'
 import { z } from 'zod'
 
 import { requireRequestProps } from '@repo/mcp-common/src/request-context'
+import { cloudflareFetch } from '@repo/mcp-common/src/user-agent'
 
 import type { McpRegistrationContext } from '@repo/mcp-common/src/registration-context'
 import type { Env } from '../graphql.context'
@@ -232,7 +233,7 @@ async function fetchTypeDetails(typeName: string, apiToken: string): Promise<Typ
  * @returns Response data
  */
 async function executeGraphQLRequest<T>(query: string, apiToken: string): Promise<T> {
-	const response = await fetch(CLOUDFLARE_GRAPHQL_ENDPOINT, {
+	const response = await cloudflareFetch(CLOUDFLARE_GRAPHQL_ENDPOINT, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -275,7 +276,7 @@ async function executeGraphQLQuery(query: string, variables: any, apiToken: stri
 	// Clone the variables to avoid modifying the original
 	const queryVariables = { ...variables }
 
-	const response = await fetch(CLOUDFLARE_GRAPHQL_ENDPOINT, {
+	const response = await cloudflareFetch(CLOUDFLARE_GRAPHQL_ENDPOINT, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',

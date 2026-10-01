@@ -20,6 +20,7 @@ const BindingsScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'workers-bindings',
 	serviceHostnames: ['bindings-staging.mcp.cloudflare.com', 'bindings.mcp.cloudflare.com'],
 	scopes: BindingsScopes,
 	register(context) {

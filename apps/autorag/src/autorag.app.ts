@@ -40,6 +40,7 @@ const AutoRAGScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'autorag',
 	serviceHostnames: ['autorag-staging.mcp.cloudflare.com', 'autorag.mcp.cloudflare.com'],
 	scopes: AutoRAGScopes,
 	serverOptions: { instructions: DEPRECATION_INSTRUCTIONS },

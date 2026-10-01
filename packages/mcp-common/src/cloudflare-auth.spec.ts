@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { getAuthToken, refreshAuthToken } from './cloudflare-auth'
 import { McpError } from './mcp-error'
 import { server } from './test/msw-server'
+import { getUserAgent } from './user-agent'
 
 const TOKEN_ENDPOINT = 'https://dash.cloudflare.com/oauth2/token'
 
@@ -35,9 +36,16 @@ describe('getAuthToken', () => {
 	})
 
 	it('returns parsed token on success', async () => {
-		server.use(http.post(TOKEN_ENDPOINT, () => HttpResponse.json(validTokenResponse)))
+		let userAgent: string | null = null
+		server.use(
+			http.post(TOKEN_ENDPOINT, ({ request }) => {
+				userAgent = request.headers.get('User-Agent')
+				return HttpResponse.json(validTokenResponse)
+			})
+		)
 
 		const result = await getAuthToken(baseParams)
+		expect(userAgent).toBe(getUserAgent())
 		expect(result.access_token).toBe('test-access-token')
 		expect(result.refresh_token).toBe('test-refresh-token')
 		expect(result.expires_in).toBe(3600)
@@ -206,9 +214,16 @@ describe('refreshAuthToken', () => {
 	}
 
 	it('returns parsed token on success', async () => {
-		server.use(http.post(TOKEN_ENDPOINT, () => HttpResponse.json(validTokenResponse)))
+		let userAgent: string | null = null
+		server.use(
+			http.post(TOKEN_ENDPOINT, ({ request }) => {
+				userAgent = request.headers.get('User-Agent')
+				return HttpResponse.json(validTokenResponse)
+			})
+		)
 
 		const result = await refreshAuthToken(baseParams)
+		expect(userAgent).toBe(getUserAgent())
 		expect(result.access_token).toBe('test-access-token')
 		expect(result.refresh_token).toBe('test-refresh-token')
 	})

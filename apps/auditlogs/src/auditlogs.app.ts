@@ -26,6 +26,7 @@ const AuditlogScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'auditlogs',
 	serviceHostnames: ['auditlogs-staging.mcp.cloudflare.com', 'auditlogs.mcp.cloudflare.com'],
 	scopes: AuditlogScopes,
 	serverOptions: { instructions: DEPRECATION_INSTRUCTIONS },

@@ -9,6 +9,7 @@ export type Env = {
 }
 
 const app = createPublicMcpApp<Env>({
+	serverId: 'demo-day',
 	serviceHostnames: ['demo-day.mcp.cloudflare.com'],
 	register(context) {
 		context.registerTool(

@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { fetchCloudflareApi } from './cloudflare-api'
 import { McpError } from './mcp-error'
 import { server } from './test/msw-server'
+import { getUserAgent } from './user-agent'
 
 const ENDPOINT = 'https://api.cloudflare.com/client/v4/accounts/test-account-id/workers/scripts'
 
@@ -20,6 +21,20 @@ describe('fetchCloudflareApi', () => {
 
 		const result = await fetchCloudflareApi(baseParams)
 		expect(result).toEqual(responseData)
+	})
+
+	it('sends the User-Agent and the bearer token', async () => {
+		let headers: Headers | undefined
+		server.use(
+			http.get(ENDPOINT, ({ request }) => {
+				headers = request.headers
+				return HttpResponse.json({ result: null })
+			})
+		)
+
+		await fetchCloudflareApi(baseParams)
+		expect(headers?.get('User-Agent')).toBe(getUserAgent())
+		expect(headers?.get('Authorization')).toBe('Bearer test-api-token')
 	})
 
 	it('throws McpError with status 404 for not found', async () => {

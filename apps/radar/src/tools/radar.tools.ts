@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getCloudflareClient } from '@repo/mcp-common/src/cloudflare-api'
 import { PaginationLimitParam, PaginationOffsetParam } from '@repo/mcp-common/src/pagination'
 import { requireRequestProps } from '@repo/mcp-common/src/request-context'
+import { cloudflareFetch } from '@repo/mcp-common/src/user-agent'
 
 import {
 	AiDimensionParam,
@@ -160,7 +161,7 @@ async function fetchRadarApi(
 		}
 	}
 
-	const response = await fetch(url.toString(), {
+	const response = await cloudflareFetch(url.toString(), {
 		method: 'GET',
 		headers: {
 			Authorization: `Bearer ${accessToken}`,

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { McpError, safeStatusCode } from './mcp-error'
+import { cloudflareFetch } from './user-agent'
 
 import type { AuthRequest } from '@cloudflare/workers-oauth-provider'
 
@@ -186,7 +187,7 @@ export async function getAuthToken({
 		code,
 		code_verifier,
 	}).toString()
-	const resp = await fetch('https://dash.cloudflare.com/oauth2/token', {
+	const resp = await cloudflareFetch('https://dash.cloudflare.com/oauth2/token', {
 		method: 'POST',
 		headers: {
 			Authorization: `Basic ${btoa(`${client_id}:${client_secret}`)}`,
@@ -217,7 +218,7 @@ export async function refreshAuthToken({
 		refresh_token,
 	})
 
-	const resp = await fetch('https://dash.cloudflare.com/oauth2/token', {
+	const resp = await cloudflareFetch('https://dash.cloudflare.com/oauth2/token', {
 		method: 'POST',
 		body: params.toString(),
 		headers: {

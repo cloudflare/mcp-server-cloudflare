@@ -12,6 +12,7 @@ const BrowserScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'browser-rendering',
 	serviceHostnames: ['browser-staging.mcp.cloudflare.com', 'browser.mcp.cloudflare.com'],
 	scopes: BrowserScopes,
 	register: registerBrowserTools,

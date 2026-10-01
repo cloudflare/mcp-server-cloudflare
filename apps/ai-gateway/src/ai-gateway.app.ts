@@ -12,6 +12,7 @@ const AIGatewayScopes = {
 } as const
 
 const app = createAuthenticatedMcpApp<Env>({
+	serverId: 'ai-gateway',
 	serviceHostnames: ['ai-gateway-staging.mcp.cloudflare.com', 'ai-gateway.mcp.cloudflare.com'],
 	scopes: AIGatewayScopes,
 	register: registerAIGatewayTools,

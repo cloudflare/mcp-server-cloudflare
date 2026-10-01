@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { cloudflareFetch } from '@repo/mcp-common/src/user-agent'
+
 import {
 	BlogListCursorParam,
 	BlogListLimitParam,
@@ -22,7 +24,7 @@ function formatError(message: string) {
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
-	const res = await fetch(url)
+	const res = await cloudflareFetch(url)
 	if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`)
 	return res.json() as Promise<T>
 }
@@ -64,7 +66,7 @@ Examples of good queries:
 		},
 		async ({ query }) => {
 			try {
-				const res = await fetch(`${searchBase}/search`, {
+				const res = await cloudflareFetch(`${searchBase}/search`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ query }),
