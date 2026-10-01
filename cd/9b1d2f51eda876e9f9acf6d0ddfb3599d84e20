@@ -1,0 +1,69 @@
+.changeset/outbound-user-agent.md
+  s_379d5d0e28a496::t_7c6f6ac36ed486 3-6,8-9,11-12,14-20,23
+apps/ai-gateway/src/ai-gateway.app.ts
+  s_379d5d0e28a496::t_e40a108f53d741 15
+apps/auditlogs/src/auditlogs.app.ts
+  s_379d5d0e28a496::t_9d0f1114ec56ca 29
+apps/autorag/src/autorag.app.ts
+  s_379d5d0e28a496::t_90a5feab27a0e4 43
+apps/browser-rendering/src/browser.app.ts
+  s_379d5d0e28a496::t_77aeb66eebafe9 15
+apps/cloudflare-blog/src/cloudflare-blog.app.ts
+  s_379d5d0e28a496::t_30ea001f04aff0 8
+apps/cloudflare-one-casb/src/cf1-casb.app.ts
+  s_379d5d0e28a496::t_5cb124296bf438 15
+apps/demo-day/src/demo-day.app.ts
+  s_379d5d0e28a496::t_b217fc28cc1593 12
+apps/dex-analysis/src/dex-analysis.app.ts
+  s_379d5d0e28a496::t_b69331dc8fd9b9 18
+apps/dns-analytics/src/dns-analytics.app.ts
+  s_379d5d0e28a496::t_7b9d1535b47caa 19
+apps/docs-ai-search/src/docs-ai-search.app.ts
+  s_379d5d0e28a496::t_9a01e457be5dfe 9
+apps/graphql/src/graphql.app.ts
+  s_379d5d0e28a496::t_a4b1a2c763225f 20
+apps/logpush/src/logpush.app.ts
+  s_379d5d0e28a496::t_1351588ad198a7 16
+apps/radar/src/radar.app.ts
+  s_379d5d0e28a496::t_eb8dfe24a0f292 41
+apps/sandbox-container/server/sandbox.server.app.ts
+  s_379d5d0e28a496::t_d0817cb337fb70 19
+apps/stack-mcp/src/stack-mcp.app.ts
+  s_379d5d0e28a496::t_6be4e19eabf966 9
+apps/workers-bindings/src/bindings.app.ts
+  s_379d5d0e28a496::t_b1a19de234ac1a 23
+apps/workers-builds/src/workers-builds.app.ts
+  s_379d5d0e28a496::t_cc7222c093709f 31
+apps/workers-observability/src/workers-observability.app.ts
+  s_379d5d0e28a496::t_e9517b2531ecb7 21
+packages/mcp-common/README.md
+  s_379d5d0e28a496::t_deaace49c2d4d3 34
+packages/mcp-common/src/cloudflare-api.spec.ts
+  s_379d5d0e28a496::t_08e4730127c3fa 7,36
+packages/mcp-common/src/cloudflare-api.ts
+  s_379d5d0e28a496::t_12b9efb2cd1546 5,15,19
+packages/mcp-common/src/cloudflare-auth.spec.ts
+  s_379d5d0e28a496::t_2a5a5e59fbf85f 7,48,226
+packages/mcp-common/src/mcp-app.ts
+  s_379d5d0e28a496::t_b3b55150d4549c 7,36-37,92,95
+packages/mcp-common/src/user-agent.spec.ts
+  s_379d5d0e28a496::t_2b662f576ae075 5,27,36,44,48-63
+packages/mcp-common/src/user-agent.ts
+  s_379d5d0e28a496::t_2fc8c04e831047 1-16,18-20,34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "cd9b1d2f51eda876e9f9acf6d0ddfb3599d84e20",
+  "prompts": {},
+  "sessions": {
+    "s_379d5d0e28a496": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a0f6ae-35ab-7049-9efa-0bf09d568c4f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
