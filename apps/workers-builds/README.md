@@ -8,7 +8,7 @@ connections, with Cloudflare OAuth built-in.
 
 It integrates tools to provide insights and management capabilities for your Cloudflare Workers Builds.
 
-The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth/account context for every request. `/sse` is not the deprecated HTTP+SSE transport. Every tool call names its Worker or build explicitly; OAuth remains durable security state, but no active selection, MCP protocol session, or protocol Durable Object is retained.
+The `/mcp` URL uses a stateless SDK v2 handler that creates a fresh server with request-scoped auth/account context for every request. The retired `/sse` URL returns `410 Gone` pointing at `/mcp`. Every tool call names its Worker or build explicitly; OAuth remains durable security state, but no active selection, MCP protocol session, or protocol Durable Object is retained.
 
 ## 🔨 Available Tools
 

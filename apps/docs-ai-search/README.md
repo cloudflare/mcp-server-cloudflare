@@ -4,7 +4,7 @@ This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introdu
 
 The Cloudflare account this worker is deployed on has an AI Search instance configured with the complete Cloudflare Developer Documentation.
 
-The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server for every request. `/sse` is not the deprecated HTTP+SSE transport. The handler supports modern MCP requests and stateless 2025 compatibility without an MCP protocol session. This public documentation server does not require authentication.
+The `/mcp` URL uses a stateless SDK v2 handler that creates a fresh server for every request. The retired `/sse` URL returns `410 Gone` pointing at `/mcp`. The handler supports modern MCP requests and stateless 2025 compatibility without an MCP protocol session. This public documentation server does not require authentication.
 
 ## 🔨 Available Tools
 

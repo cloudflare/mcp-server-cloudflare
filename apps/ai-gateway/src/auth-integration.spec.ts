@@ -76,34 +76,45 @@ async function responseDocument(response: Response): Promise<Record<string, any>
 }
 
 function helperOptions(): OAuthProviderOptions<Env> {
+	// The worker's own provider configuration, so tokens minted here validate there.
 	return {
 		apiRoute: '/mcp',
 		apiHandler: { fetch: () => new Response('unused') },
 		defaultHandler: { fetch: () => new Response('unused') },
 		authorizeEndpoint: '/oauth/authorize',
 		tokenEndpoint: '/token',
-		allowImplicitFlow: true,
+		resourceMetadata: { resource: endpoint },
 	}
 }
 
-async function issueOAuthToken(resource: string) {
+async function s256(value: string): Promise<string> {
+	const digest = new Uint8Array(
+		await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
+	)
+	return btoa(String.fromCharCode(...digest))
+		.replace(/\+/g, '-')
+		.replace(/\//g, '_')
+		.replace(/=+$/, '')
+}
+
+/** Complete an authorization with the provider helpers, then redeem the code at the worker's /token. */
+async function issueOAuthToken() {
 	const helpers = getOAuthApi(helperOptions(), testEnv)
 	const client = await helpers.createClient({
 		redirectUris: ['https://client.example.com/callback'],
 		tokenEndpointAuthMethod: 'none',
-		// The provider validates registered capabilities, so the implicit flow
-		// this helper uses to mint a token must be registered explicitly.
-		grantTypes: ['implicit'],
-		responseTypes: ['token'],
 	})
-	const result = await helpers.completeAuthorization({
+	const verifier = 'auth-integration-verifier-'.repeat(3)
+	const { redirectTo } = await helpers.completeAuthorization({
 		request: {
-			responseType: 'token',
+			responseType: 'code',
 			clientId: client.clientId,
 			redirectUri: client.redirectUris[0],
 			scope: ['account:read', 'aig:read'],
 			state: 'test-state',
-			resource,
+			codeChallenge: await s256(verifier),
+			codeChallengeMethod: 'S256',
+			resource: endpoint,
 		},
 		userId: 'oauth-user',
 		metadata: {},
@@ -114,8 +125,26 @@ async function issueOAuthToken(resource: string) {
 			account: { id: 'oauth-account', name: 'OAuth account' },
 		},
 	})
-	const token = new URLSearchParams(new URL(result.redirectTo).hash.slice(1)).get('access_token')
-	if (!token) throw new Error('OAuth helper did not issue an access token')
+	const code = new URL(redirectTo).searchParams.get('code')
+	if (!code) throw new Error('OAuth helper did not issue an authorization code')
+
+	const response = await worker.fetch(
+		new Request('https://ai-gateway.mcp.cloudflare.com/token', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: new URLSearchParams({
+				grant_type: 'authorization_code',
+				code,
+				redirect_uri: client.redirectUris[0],
+				client_id: client.clientId,
+				code_verifier: verifier,
+			}),
+		}),
+		testEnv,
+		executionContext()
+	)
+	const { access_token: token } = (await response.json()) as { access_token?: string }
+	if (!token) throw new Error(`Token endpoint did not issue an access token (${response.status})`)
 	return token
 }
 
@@ -127,7 +156,7 @@ afterEach(async () => {
 
 describe('AI Gateway exported Worker authentication', () => {
 	it('bridges a provider-validated OAuth token into a fresh SDK server and real tool call', async () => {
-		const token = await issueOAuthToken(endpoint)
+		const token = await issueOAuthToken()
 		const response = await worker.fetch(toolRequest(token), testEnv, executionContext())
 		const document = await responseDocument(response)
 
@@ -137,29 +166,28 @@ describe('AI Gateway exported Worker authentication', () => {
 		expect(getCloudflareClientMock).toHaveBeenCalledWith('oauth-upstream-token')
 	})
 
-	it('serves the /sse URL through the same stateless handler with path-bound OAuth', async () => {
-		const sseEndpoint = 'https://ai-gateway.mcp.cloudflare.com/sse'
-		const token = await issueOAuthToken(sseEndpoint)
+	it('answers /sse with a 410 naming /mcp, even with a valid OAuth token', async () => {
+		const token = await issueOAuthToken()
 		const response = await worker.fetch(
-			toolRequest(token, sseEndpoint),
+			toolRequest(token, 'https://ai-gateway.mcp.cloudflare.com/sse'),
 			testEnv,
 			executionContext()
 		)
-		const document = await responseDocument(response)
 
-		expect(response.status).toBe(200)
-		expect(response.headers.get('mcp-session-id')).toBeNull()
-		expect(document.result.content[0].text).toContain('oauth-account:oauth-upstream-token')
-		expect(getCloudflareClientMock).toHaveBeenCalledWith('oauth-upstream-token')
+		expect(response.status).toBe(410)
+		expect(await response.json()).toMatchObject({ url: endpoint })
+		expect(getCloudflareClientMock).not.toHaveBeenCalled()
 	})
 
-	it('rejects an OAuth token bound to a different path on the same origin', async () => {
-		const token = await issueOAuthToken('https://ai-gateway.mcp.cloudflare.com/other')
-		const response = await worker.fetch(toolRequest(token), testEnv, executionContext())
+	it('publishes /mcp as the protected resource', async () => {
+		const response = await worker.fetch(
+			new Request('https://ai-gateway.mcp.cloudflare.com/.well-known/oauth-protected-resource/mcp'),
+			testEnv,
+			executionContext()
+		)
 
-		expect(response.status).toBe(401)
-		expect(await response.json()).toMatchObject({ error: 'invalid_token' })
-		expect(getCloudflareClientMock).not.toHaveBeenCalled()
+		expect(response.status).toBe(200)
+		expect(await response.json()).toMatchObject({ resource: endpoint })
 	})
 
 	it('validates parallel API tokens through the exported Worker without leaking request props', async () => {

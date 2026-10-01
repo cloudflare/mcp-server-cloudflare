@@ -1,6 +1,13 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
-import { OAuthError, parseRedirectApproval, validateOAuthState } from './workers-oauth-utils'
+import {
+	consentApprovalSecret,
+	OAuthError,
+	parseRedirectApproval,
+	renderApprovalDialog,
+} from './workers-oauth-utils'
+
+import type { ConsentDescription } from '@cloudflare/workers-oauth-provider'
 
 describe('OAuthError', () => {
 	it('creates an error with code, description, and statusCode', () => {
@@ -38,322 +45,123 @@ describe('OAuthError', () => {
 	})
 })
 
+/** POST the consent form with these fields. */
+function consentPost(fields: Record<string, string>): Request {
+	return new Request('https://example.com/oauth/authorize', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+		body: new URLSearchParams(fields),
+	})
+}
+
+async function expectOAuthError(promise: Promise<unknown>, code: string, status: number) {
+	const error = await promise.then(
+		() => undefined,
+		(e: unknown) => e
+	)
+	expect(error).toBeInstanceOf(OAuthError)
+	expect(error).toMatchObject({ code, statusCode: status })
+}
+
 describe('parseRedirectApproval', () => {
 	it('throws OAuthError 405 for non-POST requests', async () => {
-		const request = new Request('https://example.com/oauth/authorize', {
-			method: 'GET',
-		})
-
-		try {
-			await parseRedirectApproval(request, 'test-secret')
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(OAuthError)
-			const err = e as OAuthError
-			expect(err.statusCode).toBe(405)
-			expect(err.code).toBe('invalid_request')
-		}
+		await expectOAuthError(
+			parseRedirectApproval(new Request('https://example.com/oauth/authorize')),
+			'invalid_request',
+			405
+		)
 	})
 
-	it('throws OAuthError 400 for missing form token', async () => {
-		const formData = new FormData()
-		formData.set('state', btoa(JSON.stringify({ oauthReqInfo: { clientId: 'test' } })))
-		// no csrf_token
-
-		const request = new Request('https://example.com/oauth/authorize', {
-			method: 'POST',
-			body: formData,
-		})
-
-		try {
-			await parseRedirectApproval(request, 'test-secret')
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(OAuthError)
-			const err = e as OAuthError
-			expect(err.statusCode).toBe(400)
-			expect(err.code).toBe('invalid_request')
-			expect(err.description).toContain('Missing required form token')
-		}
+	it('throws OAuthError 400 without a consent handle', async () => {
+		await expectOAuthError(
+			parseRedirectApproval(consentPost({ decision: 'approve' })),
+			'invalid_request',
+			400
+		)
 	})
 
-	it('throws OAuthError 403 for form token mismatch', async () => {
-		const formData = new FormData()
-		formData.set('csrf_token', 'form-token')
-		formData.set('state', btoa(JSON.stringify({ oauthReqInfo: { clientId: 'test' } })))
-
-		const request = new Request('https://example.com/oauth/authorize', {
-			method: 'POST',
-			body: formData,
-			headers: {
-				Cookie: '__Host-CSRF_TOKEN=different-token',
-			},
-		})
-
-		try {
-			await parseRedirectApproval(request, 'test-secret')
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(OAuthError)
-			const err = e as OAuthError
-			expect(err.statusCode).toBe(403)
-			expect(err.code).toBe('access_denied')
-			expect(err.description).toBe('Request validation failed')
-		}
+	it('returns the handle and an approve decision', async () => {
+		await expect(
+			parseRedirectApproval(consentPost({ handle: 'h1', decision: 'approve' }))
+		).resolves.toEqual({ handle: 'h1', decision: 'approve' })
 	})
 
-	it('throws OAuthError 400 for missing state', async () => {
-		const csrfToken = 'matching-token'
-		const formData = new FormData()
-		formData.set('csrf_token', csrfToken)
-		// no state
-
-		const request = new Request('https://example.com/oauth/authorize', {
-			method: 'POST',
-			body: formData,
-			headers: {
-				Cookie: `__Host-CSRF_TOKEN=${csrfToken}`,
-			},
-		})
-
-		try {
-			await parseRedirectApproval(request, 'test-secret')
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(OAuthError)
-			const err = e as OAuthError
-			expect(err.statusCode).toBe(400)
-			expect(err.code).toBe('invalid_request')
-			expect(err.description).toContain('Missing state')
-		}
+	it('returns a deny decision for Cancel', async () => {
+		await expect(
+			parseRedirectApproval(consentPost({ handle: 'h1', decision: 'deny' }))
+		).resolves.toEqual({ handle: 'h1', decision: 'deny' })
 	})
 
-	it('throws OAuthError 400 for malformed state encoding', async () => {
-		const csrfToken = 'matching-token'
-		const formData = new FormData()
-		formData.set('csrf_token', csrfToken)
-		formData.set('state', '!!!not-valid-base64!!!')
-
-		const request = new Request('https://example.com/oauth/authorize', {
-			method: 'POST',
-			body: formData,
-			headers: {
-				Cookie: `__Host-CSRF_TOKEN=${csrfToken}`,
-			},
+	it('treats a missing decision as approval', async () => {
+		await expect(parseRedirectApproval(consentPost({ handle: 'h1' }))).resolves.toEqual({
+			handle: 'h1',
+			decision: 'approve',
 		})
-
-		try {
-			await parseRedirectApproval(request, 'test-secret')
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(OAuthError)
-			const err = e as OAuthError
-			expect(err.statusCode).toBe(400)
-			expect(err.code).toBe('invalid_request')
-			expect(err.description).toContain('Invalid state encoding')
-		}
-	})
-
-	it('throws OAuthError 400 for invalid state data', async () => {
-		const csrfToken = 'matching-token'
-		const formData = new FormData()
-		formData.set('csrf_token', csrfToken)
-		formData.set('state', btoa(JSON.stringify({ noOauthReqInfo: true })))
-
-		const request = new Request('https://example.com/oauth/authorize', {
-			method: 'POST',
-			body: formData,
-			headers: {
-				Cookie: `__Host-CSRF_TOKEN=${csrfToken}`,
-			},
-		})
-
-		try {
-			await parseRedirectApproval(request, 'test-secret')
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(OAuthError)
-			const err = e as OAuthError
-			expect(err.statusCode).toBe(400)
-			expect(err.code).toBe('invalid_request')
-			expect(err.description).toContain('Invalid state data')
-		}
 	})
 })
 
-describe('validateOAuthState', () => {
-	function createMockKV(data: Record<string, string | null> = {}) {
-		return {
-			get: vi.fn(async (key: string) => data[key] ?? null),
-			put: vi.fn(async () => {}),
-			delete: vi.fn(async () => {}),
-		} as unknown as KVNamespace
+describe('renderApprovalDialog', () => {
+	const consent: ConsentDescription = {
+		clientId: 'client-1',
+		clientName: '<script>alert(1)</script>',
+		redirectUri: 'http://localhost:3000/callback',
+		redirectHost: 'localhost',
+		redirectIsLoopback: true,
+		scope: ['account:read'],
 	}
 
-	it('throws OAuthError 400 for missing state parameter', async () => {
-		const request = new Request('https://example.com/callback')
-		const kv = createMockKV()
-
-		try {
-			await validateOAuthState(request, kv)
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(OAuthError)
-			const err = e as OAuthError
-			expect(err.statusCode).toBe(400)
-			expect(err.code).toBe('invalid_request')
-			expect(err.description).toContain('Missing state parameter')
-		}
-	})
-
-	it('throws OAuthError 400 for un-decodable state', async () => {
-		const request = new Request('https://example.com/callback?state=not-base64-json!')
-		const kv = createMockKV()
-
-		try {
-			await validateOAuthState(request, kv)
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(OAuthError)
-			const err = e as OAuthError
-			expect(err.statusCode).toBe(400)
-			expect(err.code).toBe('invalid_request')
-			expect(err.description).toContain('Failed to decode state parameter')
-		}
-	})
-
-	it('throws OAuthError 400 for state without token', async () => {
-		// Valid base64 JSON but missing the 'state' field
-		const state = btoa(JSON.stringify({ other: 'data' }))
-		const request = new Request(`https://example.com/callback?state=${state}`)
-		const kv = createMockKV()
-
-		try {
-			await validateOAuthState(request, kv)
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(OAuthError)
-			const err = e as OAuthError
-			expect(err.statusCode).toBe(400)
-			expect(err.code).toBe('invalid_request')
-			expect(err.description).toContain('State token not found')
-		}
-	})
-
-	it('throws OAuthError 400 for expired/missing state in KV', async () => {
-		const stateToken = 'test-state-token'
-		const state = btoa(JSON.stringify({ state: stateToken }))
-		const request = new Request(`https://example.com/callback?state=${state}`)
-		const kv = createMockKV() // no data in KV
-
-		try {
-			await validateOAuthState(request, kv)
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(OAuthError)
-			const err = e as OAuthError
-			expect(err.statusCode).toBe(400)
-			expect(err.code).toBe('invalid_request')
-			expect(err.description).toContain('Invalid or expired state')
-		}
-	})
-
-	it('throws OAuthError 400 for expired authorization session', async () => {
-		const stateToken = 'test-state-token'
-		const state = btoa(JSON.stringify({ state: stateToken }))
-		const storedData = JSON.stringify({
-			oauthReqInfo: {
-				clientId: 'test-client',
-				scope: ['read'],
-				state: 'test',
-				responseType: 'code',
-				redirectUri: 'https://example.com',
-			},
-			codeVerifier: 'test-verifier',
+	function render(overrides: Partial<ConsentDescription> = {}) {
+		return renderApprovalDialog(new Request('https://example.com/oauth/authorize?x=1'), {
+			consent: { ...consent, ...overrides },
+			server: { name: 'Test Server' },
+			handle: 'handle-"1"',
+			headers: new Headers({ 'Set-Cookie': '__Host-oauth-consent-x=y', 'X-Frame-Options': 'DENY' }),
 		})
-		const kv = createMockKV({ [`oauth:state:${stateToken}`]: storedData })
+	}
 
-		const request = new Request(`https://example.com/callback?state=${state}`)
-		// no Cookie header
-
-		try {
-			await validateOAuthState(request, kv)
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(OAuthError)
-			const err = e as OAuthError
-			expect(err.statusCode).toBe(400)
-			expect(err.code).toBe('invalid_request')
-			expect(err.description).toContain('session expired')
-		}
+	it('posts only the handle and offers approve and deny', async () => {
+		const html = await render().text()
+		expect(html).toContain('name="handle" value="handle-&quot;1&quot;"')
+		expect(html).toContain('name="decision" value="approve"')
+		expect(html).toContain('name="decision" value="deny"')
+		expect(html).toContain('action="/oauth/authorize"')
+		expect(html).not.toContain('name="state"')
 	})
 
-	it('throws OAuthError 403 for state hash mismatch', async () => {
-		const stateToken = 'test-state-token'
-		const state = btoa(JSON.stringify({ state: stateToken }))
-		const storedData = JSON.stringify({
-			oauthReqInfo: {
-				clientId: 'test-client',
-				scope: ['read'],
-				state: 'test',
-				responseType: 'code',
-				redirectUri: 'https://example.com',
-			},
-			codeVerifier: 'test-verifier',
-		})
-		const kv = createMockKV({ [`oauth:state:${stateToken}`]: storedData })
-
-		const request = new Request(`https://example.com/callback?state=${state}`, {
-			headers: {
-				Cookie: '__Host-CONSENTED_STATE=wrong-hash-value',
-			},
-		})
-
-		try {
-			await validateOAuthState(request, kv)
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(OAuthError)
-			const err = e as OAuthError
-			expect(err.statusCode).toBe(403)
-			expect(err.code).toBe('access_denied')
-			expect(err.description).toBe('Session validation failed')
-		}
+	it('escapes client-supplied values', async () => {
+		const html = await render().text()
+		expect(html).not.toContain('<script>alert(1)</script>')
+		expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;')
 	})
 
-	it('throws OAuthError 400 for invalid stored state format', async () => {
-		const stateToken = 'test-state-token'
-		const state = btoa(JSON.stringify({ state: stateToken }))
+	it('warns about a local redirect and shows a CIMD client domain', async () => {
+		expect(await render().text()).toContain('an app on your computer')
+		const remote = await render({
+			redirectUri: 'https://client.example.com/cb',
+			redirectIsLoopback: false,
+			clientDomain: 'client.example.com',
+		}).text()
+		expect(remote).not.toContain('an app on your computer')
+		expect(remote).toContain('Published by')
+	})
 
-		// Compute hash of stateToken to match cookie
-		const encoder = new TextEncoder()
-		const data = encoder.encode(stateToken)
-		const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-		const hashArray = Array.from(new Uint8Array(hashBuffer))
-		const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+	it("sends beginConsent()'s headers with the page", () => {
+		const response = render()
+		expect(response.headers.get('set-cookie')).toBe('__Host-oauth-consent-x=y')
+		expect(response.headers.get('x-frame-options')).toBe('DENY')
+		expect(response.headers.get('content-type')).toBe('text/html; charset=utf-8')
+	})
+})
 
-		// Store invalid data (missing codeVerifier)
-		const storedData = JSON.stringify({
-			oauthReqInfo: { clientId: 'test-client' },
-			// missing codeVerifier
-		})
-		const kv = createMockKV({ [`oauth:state:${stateToken}`]: storedData })
+describe('consentApprovalSecret', () => {
+	it('derives a stable 64-character key from any cookie secret', async () => {
+		const secret = await consentApprovalSecret('short')
+		expect(secret).toMatch(/^[0-9a-f]{64}$/)
+		expect(await consentApprovalSecret('short')).toBe(secret)
+		expect(await consentApprovalSecret('other')).not.toBe(secret)
+	})
 
-		const request = new Request(`https://example.com/callback?state=${state}`, {
-			headers: {
-				Cookie: `__Host-CONSENTED_STATE=${hashHex}`,
-			},
-		})
-
-		try {
-			await validateOAuthState(request, kv)
-			expect.unreachable()
-		} catch (e) {
-			expect(e).toBeInstanceOf(OAuthError)
-			const err = e as OAuthError
-			expect(err.statusCode).toBe(400)
-			expect(err.code).toBe('invalid_request')
-			expect(err.description).toBe('Invalid authorization state')
-		}
+	it('refuses an empty cookie secret', async () => {
+		await expect(consentApprovalSecret('')).rejects.toThrow('MCP_COOKIE_ENCRYPTION_KEY')
 	})
 })

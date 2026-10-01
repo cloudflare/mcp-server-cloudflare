@@ -37,7 +37,7 @@ function toResult(chunk: AiSearchChunk, fallback?: StackLibrary) {
 /**
  * Registers the Developer Stack tools for one request. The stack is scoped to the
  * subset selected via the `?libs=` URL param (or the whole stack when unscoped),
- * read from the request URL so both `/mcp` and `/sse` honor it.
+ * read from the request URL.
  */
 export function registerStackTools<Env extends RequiredEnv>(context: McpRegistrationContext<Env>) {
 	const env = context.env
