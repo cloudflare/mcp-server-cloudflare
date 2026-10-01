@@ -10,6 +10,13 @@ The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fr
 
 ## 🔨 Available Tools
 
+### Draft MCP Events
+
+An ANS-backed issue-event bridge is being prototyped in `packages/mcp-common/src/events`.
+The event catalogue is limited to real-time issues.
+This draft does not enable subscriptions or callback routes.
+See [the implementation status and prerequisites](../../docs/mcp-events.md).
+
 Currently available tools:
 
 | **Category**          | **Tool**                     | **Description**                                                                                                                                                            |
