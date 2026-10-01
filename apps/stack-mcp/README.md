@@ -38,11 +38,11 @@ https://stack.mcp.cloudflare.com/mcp?libs=cloudflare,hono,vite
 
 When scoped, `list_libraries` and `search_dev_stack` (including its `library` enum) only expose the selected libraries, and cross-stack search is limited to them. Unknown slugs are ignored, and an empty or all-invalid `libs` falls back to the whole stack.
 
-Scoping is read from the connection URL on every request, so it applies whether the client connects to `/mcp` or the `/sse` alias.
+Scoping is read from the connection URL on every request.
 
 ## Connect to the remote MCP server
 
-Connect an MCP client directly to `https://stack.mcp.cloudflare.com/mcp` using Streamable HTTP. The `/sse` path serves the same stateless transport for backward compatibility.
+Connect an MCP client directly to `https://stack.mcp.cloudflare.com/mcp` using Streamable HTTP. The retired `/sse` path returns `410 Gone` pointing at `/mcp`.
 
 ```json
 {

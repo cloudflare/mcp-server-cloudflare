@@ -6,7 +6,7 @@ connections, with Cloudflare OAuth built-in.
 It integrates tools powered by the [Cloudflare Browser Run API](https://developers.cloudflare.com/browser-run/) to fetch
 web pages, convert them to markdown, and take screenshots.
 
-The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth/account context for every request. `/sse` is not the deprecated HTTP+SSE transport. OAuth grants and token validation remain durable security state; the server stores no MCP protocol session. The Browser Run session tools below manage application-level browser sessions, not MCP protocol sessions.
+The `/mcp` URL uses a stateless SDK v2 handler that creates a fresh server with request-scoped auth/account context for every request. The retired `/sse` URL returns `410 Gone` pointing at `/mcp`. OAuth grants and token validation remain durable security state; the server stores no MCP protocol session. The Browser Run session tools below manage application-level browser sessions, not MCP protocol sessions.
 
 ## 🔨 Available Tools
 
