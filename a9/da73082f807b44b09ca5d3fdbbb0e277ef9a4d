@@ -1,0 +1,103 @@
+.changeset/retire-sse-oauth-provider-1x.md
+  s_379d5d0e28a496::t_d4d52cfcc31ca3 1-30
+README.md
+  s_379d5d0e28a496::t_30b695f093d4f3 7
+apps/ai-gateway/README.md
+  s_379d5d0e28a496::t_29f0a523b632ba 9
+apps/ai-gateway/src/auth-integration.spec.ts
+  s_379d5d0e28a496::t_8f3609a7a81134 79,86,90-101,107-108,110,115-117,128-147,159,169-170,172,177-179,182-187,189-190
+apps/auditlogs/README.md
+  s_379d5d0e28a496::t_f4c9270d571e32 32
+apps/autorag/README.md
+  s_379d5d0e28a496::t_b58ce373c1212d 37
+apps/browser-rendering/README.md
+  s_379d5d0e28a496::t_965059e181bd8f 9
+apps/cloudflare-blog/README.md
+  s_379d5d0e28a496::t_5cb62f8707da2d 5
+apps/cloudflare-one-casb/README.md
+  s_379d5d0e28a496::t_2168a541ac6f46 5
+apps/dex-analysis/README.md
+  s_379d5d0e28a496::t_38457e48f560ea 8
+apps/dns-analytics/README.md
+  s_379d5d0e28a496::t_cb2ecccc50c348 8
+apps/docs-ai-search/README.md
+  s_379d5d0e28a496::t_fc3915e7dfef9c 7
+apps/graphql/README.md
+  s_379d5d0e28a496::t_fdc67952d39580 29
+apps/logpush/README.md
+  s_379d5d0e28a496::t_542d58243ac03f 8
+apps/radar/README.md
+  s_379d5d0e28a496::t_025d064adb3b39 21
+apps/sandbox-container/README.md
+  s_379d5d0e28a496::t_468ded5ca67f87 7
+apps/stack-mcp/README.md
+  s_379d5d0e28a496::t_d3029913aa8a9b 41,45
+apps/stack-mcp/src/tools/stack.tools.ts
+  s_379d5d0e28a496::t_f735ce62f28e7c 40
+apps/workers-bindings/README.md
+  s_379d5d0e28a496::t_7dfb5d419b1179 8
+apps/workers-builds/README.md
+  s_379d5d0e28a496::t_a22d0ffd8743ff 8
+apps/workers-observability/README.md
+  s_379d5d0e28a496::t_f0547f3f9f10c0 9
+packages/mcp-common/README.md
+  s_379d5d0e28a496::t_29de1e69bc3ddf 27,52,72
+packages/mcp-common/src/api-token-mode.spec.ts
+  s_379d5d0e28a496::t_69202834dbfa77 83,117,133,351
+packages/mcp-common/src/api-token-mode.ts
+  s_379d5d0e28a496::t_073a2d48b514d0 7,137,143-144
+packages/mcp-common/src/cloudflare-auth.ts
+  s_379d5d0e28a496::t_b75737c35278b5 112,114,125,133
+packages/mcp-common/src/cloudflare-oauth-flow.spec.ts
+  s_379d5d0e28a496::t_a0ea383de9593c 1-245
+packages/mcp-common/src/cloudflare-oauth-handler.spec.ts
+  s_379d5d0e28a496::t_3b222c4004d075 49-51,274-276,665-668
+packages/mcp-common/src/cloudflare-oauth-handler.ts
+  s_379d5d0e28a496::t_2c444a9f996e0a 3,24,37,402-404,408,410,412-416,420,424-426,428-433,482,484,486-487,490,493-496,499,506-507,550,552-555,558-562,578-581,596,598-609,611-613,648-650,667-668
+packages/mcp-common/src/oauth-router.spec.ts
+  s_379d5d0e28a496::t_fdea6c5f68d9e7 45-57,59-63,66,70,78-94,175,202
+packages/mcp-common/src/oauth-router.ts
+  s_379d5d0e28a496::t_3bba197cbe4ac2 13,47,52-54,66-69,82-83,97,99-100,107,111-112
+packages/mcp-common/src/server.spec.ts
+  s_379d5d0e28a496::t_834e873e7fdcdb 194,197,208-209,218-225,227,229-249
+packages/mcp-common/src/server.ts
+  s_b2fd9413bbc158::t_ff7a9b139b4f80 10,128-129,154-156,159,173
+packages/mcp-common/src/test/stateless-app.ts
+  s_b2fd9413bbc158::t_65c6e26f6f1a0d 165-166,169-191
+packages/mcp-common/src/transport-migration.ts
+  s_b2fd9413bbc158::t_29d8de8bc05914 1-6,10-16,19-26,28,34,36-37
+packages/mcp-common/src/workers-oauth-utils.spec.ts
+  s_379d5d0e28a496::t_b506e1dd2a7524 1,3-10,48-53,55,57-64,66-72,75-80,83-86,89-92,95-98,103-110,113-120,122-128,131-134,137-145,148-152,154,156-161,164-165
+packages/mcp-common/src/workers-oauth-utils.ts
+  s_b2fd9413bbc158::t_a67df9ee0cd3c7 1,36-37,39,45-48,52-53,56,59,62-66,68-72,198-205,270,273,275-277,279-282,284-290,292,294,297-298,307-309,313-314,317-318,322-323,325,331-333,336,340-341,343-345,347-351
+packages/mcp-common/vitest.config.ts
+  s_379d5d0e28a496::t_01d383ee6dde8f 16
+pnpm-lock.yaml
+  s_379d5d0e28a496::t_28aba7c4d5b3a6 10-11,74,768,1363-1364,5777
+pnpm-workspace.yaml
+  s_379d5d0e28a496::t_63545c5c3db644 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "a9da73082f807b44b09ca5d3fdbbb0e277ef9a4d",
+  "prompts": {},
+  "sessions": {
+    "s_379d5d0e28a496": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a0f6ae-35ab-7049-9efa-0bf09d568c4f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_b2fd9413bbc158": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a0f2d1-5590-743a-9714-84520cc557ec",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
