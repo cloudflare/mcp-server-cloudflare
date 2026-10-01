@@ -19,6 +19,7 @@ import {
 } from './cloudflare-auth'
 import { McpError, safeStatusCode } from './mcp-error'
 import { useSentry } from './sentry'
+import { cloudflareFetch } from './user-agent'
 import { V4Schema } from './v4-api'
 import {
 	bindStateToSession,
@@ -176,10 +177,10 @@ export async function getUserAndAccounts(
 		const userRequest =
 			tokenOwner === 'account'
 				? Promise.resolve(undefined)
-				: fetch('https://api.cloudflare.com/client/v4/user', { headers })
+				: cloudflareFetch('https://api.cloudflare.com/client/v4/user', { headers })
 		;[userResponse, accountsResponse] = await Promise.all([
 			userRequest,
-			fetch('https://api.cloudflare.com/client/v4/accounts', { headers }),
+			cloudflareFetch('https://api.cloudflare.com/client/v4/accounts', { headers }),
 		])
 	} catch (error) {
 		console.error('Cloudflare API request failed', error)

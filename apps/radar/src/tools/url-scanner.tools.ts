@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { requireRequestProps } from '@repo/mcp-common/src/request-context'
+import { cloudflareFetch } from '@repo/mcp-common/src/user-agent'
 
 import {
 	CreateScanResult,
@@ -36,7 +37,7 @@ export function registerUrlScannerTools(context: McpRegistrationContext<Env>) {
 				if (query) url.searchParams.set('q', query)
 				if (size) url.searchParams.set('size', String(size))
 
-				const res = await fetch(url.toString(), {
+				const res = await cloudflareFetch(url.toString(), {
 					headers: { Authorization: `Bearer ${props.accessToken}` },
 				})
 
@@ -88,14 +89,17 @@ export function registerUrlScannerTools(context: McpRegistrationContext<Env>) {
 				if (visibility) body.visibility = visibility
 				if (screenshotResolution) body.screenshotsResolutions = [screenshotResolution]
 
-				const res = await fetch(`${URLSCANNER_API_BASE}/${accountId}/urlscanner/v2/scan`, {
-					method: 'POST',
-					headers: {
-						Authorization: `Bearer ${props.accessToken}`,
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(body),
-				})
+				const res = await cloudflareFetch(
+					`${URLSCANNER_API_BASE}/${accountId}/urlscanner/v2/scan`,
+					{
+						method: 'POST',
+						headers: {
+							Authorization: `Bearer ${props.accessToken}`,
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(body),
+					}
+				)
 
 				if (!res.ok) {
 					const errorData = await res.json().catch(() => ({}))
@@ -144,7 +148,7 @@ export function registerUrlScannerTools(context: McpRegistrationContext<Env>) {
 			try {
 				const props = requireRequestProps(context)
 
-				const res = await fetch(
+				const res = await cloudflareFetch(
 					`${URLSCANNER_API_BASE}/${accountId}/urlscanner/v2/result/${scanId}`,
 					{
 						headers: { Authorization: `Bearer ${props.accessToken}` },
@@ -214,7 +218,7 @@ export function registerUrlScannerTools(context: McpRegistrationContext<Env>) {
 
 				const screenshotUrl = `${URLSCANNER_API_BASE}/${accountId}/urlscanner/v2/screenshots/${scanId}.png`
 				// Verify the screenshot exists
-				const response = await fetch(screenshotUrl, {
+				const response = await cloudflareFetch(screenshotUrl, {
 					method: 'HEAD',
 					headers: { Authorization: `Bearer ${props.accessToken}` },
 				})
@@ -263,9 +267,12 @@ export function registerUrlScannerTools(context: McpRegistrationContext<Env>) {
 			try {
 				const props = requireRequestProps(context)
 
-				const res = await fetch(`${URLSCANNER_API_BASE}/${accountId}/urlscanner/v2/har/${scanId}`, {
-					headers: { Authorization: `Bearer ${props.accessToken}` },
-				})
+				const res = await cloudflareFetch(
+					`${URLSCANNER_API_BASE}/${accountId}/urlscanner/v2/har/${scanId}`,
+					{
+						headers: { Authorization: `Bearer ${props.accessToken}` },
+					}
+				)
 
 				if (!res.ok) {
 					if (res.status === 404) {

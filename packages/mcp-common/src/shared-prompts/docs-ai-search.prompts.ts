@@ -1,3 +1,5 @@
+import { cloudflareFetch } from '../user-agent'
+
 import type { McpRegistrationContext } from '../registration-context'
 
 /**
@@ -17,7 +19,7 @@ export function registerPrompts<Env>(context: McpRegistrationContext<Env>) {
 					content: {
 						type: 'text',
 						text: await (
-							await fetch('https://developers.cloudflare.com/workers/prompt.txt', {
+							await cloudflareFetch('https://developers.cloudflare.com/workers/prompt.txt', {
 								cf: { cacheEverything: true, cacheTtl: 3600 },
 							})
 						).text(),

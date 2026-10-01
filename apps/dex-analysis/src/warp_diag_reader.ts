@@ -1,6 +1,8 @@
 import { DurableObject } from 'cloudflare:workers'
 import JSZip from 'jszip'
 
+import { cloudflareFetch } from '@repo/mcp-common/src/user-agent'
+
 import { type Env } from './dex-analysis.context'
 
 // Helper for reading large WARP diag zip archives.
@@ -76,7 +78,7 @@ export class WarpDiagReader extends DurableObject<Env> {
 			}
 		}
 
-		const res = await fetch(url, { headers })
+		const res = await cloudflareFetch(url, { headers })
 
 		if (res.status !== 200) {
 			throw new Error(`failed to download zip, non-200 status code: ${res.status}`)

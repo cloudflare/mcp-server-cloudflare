@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { cloudflareFetch } from '../user-agent'
+
 import type { McpRegistrationContext } from '../registration-context'
 
 interface RequiredEnv {
@@ -89,7 +91,7 @@ export function registerDocsTools<Env extends RequiredEnv>(context: McpRegistrat
 			},
 		},
 		async () => {
-			const res = await fetch(
+			const res = await cloudflareFetch(
 				'https://developers.cloudflare.com/workers/prompts/pages-to-workers.txt',
 				{
 					cf: { cacheEverything: true, cacheTtl: 3600 },
