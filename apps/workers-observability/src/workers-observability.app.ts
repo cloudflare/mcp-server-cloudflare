@@ -9,6 +9,9 @@ import { registerObservabilityTools } from './tools/workers-observability.tools'
 
 import type { Env } from './workers-observability.context'
 
+/** Points users of this deprecated server to the Cloudflare API MCP server. */
+export const DEPRECATION_INSTRUCTIONS = `DEPRECATED: This Workers Observability MCP server is deprecated. Use the Cloudflare API MCP server at https://mcp.cloudflare.com/mcp instead. It covers the full Cloudflare API, including Workers Observability.`
+
 const ObservabilityScopes = {
 	...RequiredScopes,
 	'account:read': 'See your account info such as account details, analytics, and memberships.',
@@ -25,7 +28,9 @@ const app = createAuthenticatedMcpApp<Env>({
 	],
 	scopes: ObservabilityScopes,
 	serverOptions: {
-		instructions: `# Cloudflare Workers Observability Tool
+		instructions: `${DEPRECATION_INSTRUCTIONS}
+
+# Cloudflare Workers Observability Tool
 * A Cloudflare Worker is a serverless function
 * Workers Observability lets you inspect structured logs for your Cloudflare Workers
 
