@@ -65,7 +65,7 @@ export const zQueryFilter = z.object({
 
     • PREFERRED KEYS (faster & always available):
       - $metadata.service: Worker service name
-			- $metadata.origin: Trigger type (e.g., fetch, scheduled, etc.)
+			- $metadata.origin: Trigger type (e.g., fetch, cron, etc.)
 			- $metadata.trigger: Trigger type (e.g., GET /users, POST /orders, etc.)
       - $metadata.message: Log message text (present in nearly all logs)
       - $metadata.error: Error message (when applicable)
@@ -248,20 +248,11 @@ const zCloudflareMiniEventDetails = z.object({
 export const zCloudflareMiniEvent = z.object({
 	event: zCloudflareMiniEventDetails,
 	scriptName: z.string(),
-	outcome: z.string(),
-	eventType: z.enum([
-		'fetch',
-		'scheduled',
-		'alarm',
-		'cron',
-		'queue',
-		'email',
-		'tail',
-		'rpc',
-		'websocket',
-		'workflow',
-		'unknown',
-	]),
+	// One invalid event rejects the whole response, so stay loose on fields
+	// nothing reads: cron invocations and console.log lines have no outcome,
+	// and the API can add event types and execution models at any time.
+	outcome: z.string().optional(),
+	eventType: z.string(),
 	entrypoint: z.string().optional(),
 	scriptVersion: z
 		.object({
@@ -271,7 +262,7 @@ export const zCloudflareMiniEvent = z.object({
 		})
 		.optional(),
 	truncated: z.boolean().optional(),
-	executionModel: z.enum(['durableObject', 'stateless']).optional(),
+	executionModel: z.string().optional(),
 	requestId: z.string(),
 	cpuTimeMs: z.number().optional(),
 	wallTimeMs: z.number().optional(),
