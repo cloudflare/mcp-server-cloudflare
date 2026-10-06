@@ -1,0 +1,27 @@
+.changeset/deprecate-workers-builds-mcp.md
+  s_52c8ddd8416f80::t_f40468c9806561 1-7
+apps/workers-builds/CONTRIBUTING.md
+  s_52c8ddd8416f80::t_01098dd49a135c 3,5,7,9,11-13,18,20,27-29,31,33,35,42,48
+apps/workers-builds/README.md
+  s_52c8ddd8416f80::t_a73228cf669db8 3-39,66-67,70
+apps/workers-builds/src/workers-builds.app.ts
+  s_52c8ddd8416f80::t_f16ade83cb6098 11-25,49
+apps/workers-builds/src/workers-builds.spec.ts
+  s_52c8ddd8416f80::t_e6b697f3f23675 6-10,86-106,124-134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "d0aaa2e3cb47cf4497c6f33c0ee38cdcd4c20d99",
+  "prompts": {},
+  "sessions": {
+    "s_52c8ddd8416f80": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11212-8fae-7577-b219-6dd2154b8532",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
