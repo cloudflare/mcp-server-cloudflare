@@ -5,6 +5,9 @@ import { registerLogsTools } from './tools/logpush.tools'
 
 import type { Env } from './logpush.context'
 
+/** Points users of this deprecated server to the Cloudflare API MCP server. */
+export const DEPRECATION_INSTRUCTIONS = `DEPRECATED: This Logpush MCP server is deprecated. Use the Cloudflare API MCP server at https://mcp.cloudflare.com/mcp instead. It covers the full Cloudflare API, including Logpush.`
+
 const LogPushScopes = {
 	...RequiredScopes,
 	'account:read': 'See your account info such as account details, analytics, and memberships.',
@@ -16,6 +19,7 @@ const app = createAuthenticatedMcpApp<Env>({
 	serverId: 'logpush',
 	serviceHostnames: ['logs-staging.mcp.cloudflare.com', 'logs.mcp.cloudflare.com'],
 	scopes: LogPushScopes,
+	serverOptions: { instructions: DEPRECATION_INSTRUCTIONS },
 	register: registerLogsTools,
 })
 
