@@ -1,0 +1,35 @@
+.changeset/deprecate-workers-bindings-mcp.md
+  s_52c8ddd8416f80::t_e80e0e98950997 1-5
+README.md
+  s_dbc24d989a9d60::t_12a15dec023217 28-38,63
+apps/workers-bindings/README.md
+  s_52c8ddd8416f80::t_615a0709e12aea 3-5
+apps/workers-bindings/src/bindings.app.ts
+  s_52c8ddd8416f80::t_b1241cffcaa965 14-16,29
+apps/workers-bindings/src/bindings.spec.ts
+  s_dbc24d989a9d60::t_a6e9a3717b5eb2 2,6,20-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "f548cdcf62e872a9e12d10f91757cba234cbe45b",
+  "prompts": {},
+  "sessions": {
+    "s_52c8ddd8416f80": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11212-8fae-7577-b219-6dd2154b8532",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_dbc24d989a9d60": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11212-b575-7212-9cc1-7d84063c5640",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
