@@ -1,0 +1,43 @@
+.changeset/rename-code-mode-server.md
+  s_52c8ddd8416f80::t_951f757bd24425 1-7
+README.md
+  s_865f42acb91bc2::t_2592f76f9c2b6b 9-20,46,53,65
+apps/auditlogs/README.md
+  s_52c8ddd8416f80::t_f9ff72f8edbf2b 21
+apps/auditlogs/src/auditlogs.app.ts
+  s_52c8ddd8416f80::t_6bfe05a95f86af 16-17
+apps/autorag/README.md
+  s_52c8ddd8416f80::t_17023ee896aaac 19
+apps/autorag/src/autorag.app.ts
+  s_52c8ddd8416f80::t_3833eb322b5c04 19
+apps/graphql/README.md
+  s_52c8ddd8416f80::t_7261b67e6e865e 21
+apps/radar/README.md
+  s_52c8ddd8416f80::t_b0ea8221e32384 19
+apps/radar/src/radar.app.ts
+  s_52c8ddd8416f80::t_5c638ac555b85f 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "e5e04200bb81c0feb3dfa2682b70f9bd8e5b3577",
+  "prompts": {},
+  "sessions": {
+    "s_52c8ddd8416f80": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11212-8fae-7577-b219-6dd2154b8532",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_865f42acb91bc2": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11213-46c2-71a5-8aa3-2a3ca8b13c14",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
