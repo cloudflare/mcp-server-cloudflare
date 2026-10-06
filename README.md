@@ -18,7 +18,6 @@ Cloudflare offers the following MCP servers. The domain-specific servers are inc
 | [**Container server**](/apps/sandbox-container)                         | Spin up a sandbox development environment                                                       | `https://containers.mcp.cloudflare.com/mcp`    |
 | [**Browser Run server**](/apps/browser-rendering)                       | Fetch web pages, convert them to markdown and take screenshots                                  | `https://browser.mcp.cloudflare.com/mcp`       |
 | [**AI Gateway server**](/apps/ai-gateway)                               | Search your logs, get details about the prompts and responses                                   | `https://ai-gateway.mcp.cloudflare.com/mcp`    |
-| [**DNS Analytics server**](/apps/dns-analytics)                         | Optimize DNS performance and debug issues based on current setup                                | `https://dns-analytics.mcp.cloudflare.com/mcp` |
 | [**Digital Experience Monitoring server**](/apps/dex-analysis)          | Get quick insight on critical applications for your organization                                | `https://dex.mcp.cloudflare.com/mcp`           |
 | [**Cloudflare One CASB server**](/apps/cloudflare-one-casb)             | Quickly identify any security misconfigurations for SaaS applications to safeguard users & data | `https://casb.mcp.cloudflare.com/mcp`          |
 | [**Cloudflare Blog server**](/apps/cloudflare-blog)                     | Search and read posts from the Cloudflare Blog                                                  | `https://blog.mcp.cloudflare.com/mcp`          |
@@ -29,13 +28,14 @@ Cloudflare offers the following MCP servers. The domain-specific servers are inc
 
 Please migrate to the [Cloudflare API MCP Server](https://mcp.cloudflare.com/mcp) at your earliest convenience.
 
-| Server Name                              | Description                                       | Server URL                                 |
-| ---------------------------------------- | ------------------------------------------------- | ------------------------------------------ |
-| [**Audit Logs server**](/apps/auditlogs) | Query audit logs and generate reports for review  | `https://auditlogs.mcp.cloudflare.com/mcp` |
-| [**AutoRAG server**](/apps/autorag)      | Search and query account AutoRAG instances        | `https://autorag.mcp.cloudflare.com/mcp`   |
-| [**GraphQL server**](/apps/graphql)      | Get analytics data using Cloudflare's GraphQL API | `https://graphql.mcp.cloudflare.com/mcp`   |
-| [**Logpush server**](/apps/logpush)      | Get quick summaries for Logpush job health        | `https://logs.mcp.cloudflare.com/mcp`      |
-| [**Radar server**](/apps/radar)          | Explore Cloudflare Radar internet insights        | `https://radar.mcp.cloudflare.com/mcp`     |
+| Server Name                                     | Description                                                      | Server URL                                     |
+| ----------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------- |
+| [**Audit Logs server**](/apps/auditlogs)        | Query audit logs and generate reports for review                 | `https://auditlogs.mcp.cloudflare.com/mcp`     |
+| [**AutoRAG server**](/apps/autorag)             | Search and query account AutoRAG instances                       | `https://autorag.mcp.cloudflare.com/mcp`       |
+| [**DNS Analytics server**](/apps/dns-analytics) | Optimize DNS performance and debug issues based on current setup | `https://dns-analytics.mcp.cloudflare.com/mcp` |
+| [**GraphQL server**](/apps/graphql)             | Get analytics data using Cloudflare's GraphQL API                | `https://graphql.mcp.cloudflare.com/mcp`       |
+| [**Logpush server**](/apps/logpush)             | Get quick summaries for Logpush job health                       | `https://logs.mcp.cloudflare.com/mcp`          |
+| [**Radar server**](/apps/radar)                 | Explore Cloudflare Radar internet insights                       | `https://radar.mcp.cloudflare.com/mcp`         |
 
 </details>
 
