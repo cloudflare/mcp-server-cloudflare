@@ -18,7 +18,7 @@ Configure the replacement server in your MCP client:
 }
 ```
 
-The replacement uses [Code Mode](https://blog.cloudflare.com/code-mode-mcp/). Its `search` and `execute` tools cover the full Cloudflare API, including `POST /client/v4/graphql`. See the [GraphQL Analytics API example](https://github.com/cloudflare/mcp#graphql-analytics-api) in [`cloudflare/mcp`](https://github.com/cloudflare/mcp).
+The replacement's `search` and `execute` tools cover the full Cloudflare API, including `POST /client/v4/graphql`. See the [GraphQL Analytics API example](https://github.com/cloudflare/mcp#graphql-analytics-api) in [`cloudflare/mcp`](https://github.com/cloudflare/mcp).
 
 The tools below still work for now, but no new features will be added. Please migrate to the Cloudflare API MCP server.
 
