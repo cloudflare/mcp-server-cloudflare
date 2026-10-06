@@ -1,5 +1,8 @@
 # Cloudflare Workers Bindings MCP Server
 
+> [!WARNING]
+> This server is deprecated. Use the [Cloudflare API MCP server](https://github.com/cloudflare/mcp) at `https://mcp.cloudflare.com/mcp` instead. It covers the full Cloudflare API, including Workers Bindings.
+
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP
 connections, with Cloudflare OAuth built-in.
 

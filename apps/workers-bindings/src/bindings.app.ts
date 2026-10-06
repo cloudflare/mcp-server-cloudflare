@@ -11,6 +11,9 @@ import { registerR2BucketTools } from './tools/r2_bucket.tools'
 
 import type { Env } from './bindings.context'
 
+/** Points users of this deprecated server to the Cloudflare API MCP server. */
+export const DEPRECATION_INSTRUCTIONS = `DEPRECATED: This Workers Bindings MCP server is deprecated. Use the Cloudflare API MCP server at https://mcp.cloudflare.com/mcp instead. It covers the full Cloudflare API, including Workers Bindings.`
+
 const BindingsScopes = {
 	...RequiredScopes,
 	'account:read': 'See your account info such as account details, analytics, and memberships.',
@@ -23,6 +26,7 @@ const app = createAuthenticatedMcpApp<Env>({
 	serverId: 'workers-bindings',
 	serviceHostnames: ['bindings-staging.mcp.cloudflare.com', 'bindings.mcp.cloudflare.com'],
 	scopes: BindingsScopes,
+	serverOptions: { instructions: DEPRECATION_INSTRUCTIONS },
 	register(context) {
 		registerKVTools(context)
 		registerWorkersTools(context)
