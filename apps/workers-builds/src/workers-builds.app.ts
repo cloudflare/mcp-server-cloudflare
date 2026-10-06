@@ -8,6 +8,9 @@ import { registerBuildsTools } from './tools/workers-builds.tools'
 
 import type { Env } from './workers-builds.context'
 
+/** Points users of this deprecated server to the Cloudflare API MCP server. */
+export const DEPRECATION_INSTRUCTIONS = `DEPRECATED: This Workers Builds MCP server is deprecated. Use the Cloudflare API MCP server at https://mcp.cloudflare.com/mcp instead. It covers the full Cloudflare API, including Workers Builds.`
+
 export const BUILDS_INSTRUCTIONS = fmt.trim(`
 	# Cloudflare Workers Builds Tool
 	* A Cloudflare Worker is a serverless function.
@@ -31,7 +34,7 @@ const app = createAuthenticatedMcpApp<Env>({
 	serverId: 'workers-builds',
 	serviceHostnames: ['builds-staging.mcp.cloudflare.com', 'builds.mcp.cloudflare.com'],
 	scopes: BuildsScopes,
-	serverOptions: { instructions: BUILDS_INSTRUCTIONS },
+	serverOptions: { instructions: `${DEPRECATION_INSTRUCTIONS}\n\n${BUILDS_INSTRUCTIONS}` },
 	createSentry: ({ env, executionCtx, request, props }) =>
 		props?.type === 'user_token'
 			? initSentryWithUser(env, executionCtx, props.user.id, request)
