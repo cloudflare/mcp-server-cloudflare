@@ -1,0 +1,27 @@
+.changeset/deprecate-dns-analytics-mcp.md
+  s_52c8ddd8416f80::t_33d01f2041c1d4 1-7
+apps/dns-analytics/CONTRIBUTING.md
+  s_52c8ddd8416f80::t_d12879baa49c15 3,5,7,9,11-13,18,20,31,33,35,42,48
+apps/dns-analytics/README.md
+  s_52c8ddd8416f80::t_5fa38931907ae1 3-36,69-70,73
+apps/dns-analytics/src/dns-analytics.app.ts
+  s_52c8ddd8416f80::t_81db206719038a 10-24,40
+apps/dns-analytics/src/dns-analytics.spec.ts
+  s_52c8ddd8416f80::t_8bc5663d13e78d 2,6,19-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "97483865b6111b8bbb5ec381c5cd55ad948c4889",
+  "prompts": {},
+  "sessions": {
+    "s_52c8ddd8416f80": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11212-8fae-7577-b219-6dd2154b8532",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
