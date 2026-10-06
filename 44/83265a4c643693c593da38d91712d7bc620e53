@@ -1,0 +1,27 @@
+.changeset/deprecate-ai-gateway-mcp.md
+  s_52c8ddd8416f80::t_f33e9287e06745 1-7
+apps/ai-gateway/CONTRIBUTING.md
+  s_52c8ddd8416f80::t_7442ff5494ddf9 3,5,7,9,11-13,18,20,31,33,35,42,48
+apps/ai-gateway/README.md
+  s_52c8ddd8416f80::t_2a238034ea7b13 3-36,67-68,71
+apps/ai-gateway/src/ai-gateway.app.ts
+  s_52c8ddd8416f80::t_1993334037813e 8-22,33
+apps/ai-gateway/src/ai-gateway.spec.ts
+  s_52c8ddd8416f80::t_95c53c73bc048c 2,6,25-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "4483265a4c643693c593da38d91712d7bc620e53",
+  "prompts": {},
+  "sessions": {
+    "s_52c8ddd8416f80": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11212-8fae-7577-b219-6dd2154b8532",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
