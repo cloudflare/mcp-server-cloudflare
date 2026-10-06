@@ -1,0 +1,27 @@
+.changeset/deprecate-logpush-mcp.md
+  s_52c8ddd8416f80::t_c16794dd344d5a 1-7
+apps/logpush/CONTRIBUTING.md
+  s_52c8ddd8416f80::t_b923e505a0fe98 1-52
+apps/logpush/README.md
+  s_52c8ddd8416f80::t_3cbb57041291f0 3-26,50-51,53-54
+apps/logpush/src/logpush.app.ts
+  s_52c8ddd8416f80::t_edcfcb305467b1 8-21,33
+apps/logpush/src/logpush.spec.ts
+  s_52c8ddd8416f80::t_572e7eaaadd2b7 2,6,19-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "4640fd311dab56ba6e3da77edb9ce29db1a096d4",
+  "prompts": {},
+  "sessions": {
+    "s_52c8ddd8416f80": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11212-8fae-7577-b219-6dd2154b8532",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
