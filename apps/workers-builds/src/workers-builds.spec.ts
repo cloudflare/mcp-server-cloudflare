@@ -3,7 +3,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { testStatelessMcpApp } from '@repo/mcp-common/src/test/stateless-app'
 
-import worker, { BUILDS_INSTRUCTIONS, mcpHandler } from './workers-builds.app'
+import worker, {
+	BUILDS_INSTRUCTIONS,
+	DEPRECATION_INSTRUCTIONS,
+	mcpHandler,
+} from './workers-builds.app'
 
 import type { Env } from './workers-builds.context'
 
@@ -79,6 +83,27 @@ function toolCall(arguments_: Record<string, unknown>) {
 	})
 }
 
+function initializeRequest() {
+	return new Request('https://builds.mcp.cloudflare.com/mcp', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Accept: 'application/json, text/event-stream',
+			Host: 'builds.mcp.cloudflare.com',
+		},
+		body: JSON.stringify({
+			jsonrpc: '2.0',
+			id: 'builds-initialize',
+			method: 'initialize',
+			params: {
+				protocolVersion: '2025-11-25',
+				capabilities: {},
+				clientInfo: { name: 'builds-test', version: '1.0.0' },
+			},
+		}),
+	})
+}
+
 async function responseDocument(response: Response): Promise<Record<string, any>> {
 	const text = await response.text()
 	if (response.headers.get('content-type')?.includes('application/json')) return JSON.parse(text)
@@ -94,6 +119,17 @@ beforeEach(() => {
 	listBuildsMock.mockReset()
 	getBuildMock.mockReset()
 	getBuildLogsMock.mockReset()
+})
+
+describe('Workers Builds server deprecation', () => {
+	it('advertises the Cloudflare API MCP server before the Builds usage instructions', async () => {
+		const response = await mcpHandler.fetch(initializeRequest(), env as unknown as Env, context())
+
+		expect(response.status).toBe(200)
+		expect(await responseDocument(response)).toMatchObject({
+			result: { instructions: `${DEPRECATION_INSTRUCTIONS}\n\n${BUILDS_INSTRUCTIONS}` },
+		})
+	})
 })
 
 describe('Workers Builds stateless state boundary', () => {
