@@ -1,0 +1,43 @@
+.changeset/deprecate-workers-builds-mcp.md
+  s_5cfd25d288ea5e::t_8de766e37d19e0 1-5
+README.md
+  s_52c8ddd8416f80::t_ec494d90bd2b13 32-38
+apps/workers-builds/README.md
+  s_5cfd25d288ea5e::t_23e8176c470f63 3-5
+apps/workers-builds/src/workers-builds.app.ts
+  s_5cfd25d288ea5e::t_fb60b91328f539 11-13,37
+apps/workers-builds/src/workers-builds.spec.ts
+  s_7131be7e5a394e::t_2ea493f5c815ab 6-10,86-106,124-134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "4a62e3feb7112058f585042febf78017ea98b430",
+  "prompts": {},
+  "sessions": {
+    "s_52c8ddd8416f80": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11212-8fae-7577-b219-6dd2154b8532",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_5cfd25d288ea5e": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11213-19dd-7244-8844-1b70b7418dd1",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_7131be7e5a394e": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11212-d70d-71e4-aea3-bae68f8d2bc4",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
