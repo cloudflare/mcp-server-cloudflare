@@ -1,0 +1,23 @@
+.changeset/observability-optional-outcome.md
+  s_52c8ddd8416f80::t_eb61f3dc73ef6c 1-5
+apps/workers-observability/src/types/workers-logs.types.ts
+  s_52c8ddd8416f80::t_f983b686e8fe7f 68,251-255,265
+apps/workers-observability/src/workers-logs.types.spec.ts
+  s_52c8ddd8416f80::t_7361dec512cd2a 1-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "2a89af9cf63222c168c41fcfa0cde7a506974387",
+  "prompts": {},
+  "sessions": {
+    "s_52c8ddd8416f80": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11212-8fae-7577-b219-6dd2154b8532",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
