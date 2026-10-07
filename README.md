@@ -56,6 +56,26 @@ Learn more about the Code Mode server here: [`cloudflare/mcp`](https://github.co
 
 Connect any MCP client with remote-server support directly to a URL in the table above. [Cloudflare AI Playground](https://playground.ai.cloudflare.com/) also accepts server URLs in its interface.
 
+### Static API-Token Authentication
+
+In addition to OAuth in interactive environments, all hosted remote MCP servers support standard Bearer token authentication with a Cloudflare API token. This is particularly useful for headless environments, CI pipelines, or persistent MCP configurations (such as Claude Code `.mcp.json` or Cursor `mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "cloudflare-api": {
+      "type": "http",
+      "url": "https://mcp.cloudflare.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${CLOUDFLARE_API_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+Ensure your API token has the appropriate read/write permissions for the specific domain or tools you intend to use.
+
 ## Using Cloudflare's MCP servers from the OpenAI Responses API
 
 To use one of Cloudflare's MCP servers with [OpenAI's responses API](https://openai.com/index/new-tools-and-features-in-the-responses-api/), you will need to provide the Responses API with an API token that has the scopes (permissions) required for that particular MCP server.
