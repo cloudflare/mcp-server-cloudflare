@@ -29,7 +29,7 @@ connections, with Cloudflare OAuth built-in.
 
 Audit logs summarize the history of changes made within your Cloudflare account. Audit logs include account level actions like zone configuration changes. The tool is powered by the [Audit Log API](https://developers.cloudflare.com/api/resources/accounts/subresources/logs/subresources/audit/methods/list/).
 
-The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth/account context for every request. `/sse` is not the deprecated HTTP+SSE transport. OAuth grants and token validation remain durable security state; the server stores no MCP protocol session.
+The `/mcp` URL uses a stateless SDK v2 handler that creates a fresh server with request-scoped auth/account context for every request. The retired `/sse` URL returns `410 Gone` pointing at `/mcp`. OAuth grants and token validation remain durable security state; the server stores no MCP protocol session.
 
 ## 🔨 Available Tools
 

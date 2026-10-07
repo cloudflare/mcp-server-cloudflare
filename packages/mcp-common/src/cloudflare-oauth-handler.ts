@@ -1,12 +1,11 @@
 import {
 	AuthorizationError,
+	authorizationErrorRedirect,
 	CimdFetchError,
 	GrantType,
 	OAuthError as ProviderOAuthError,
 } from '@cloudflare/workers-oauth-provider'
-import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
-import { z } from 'zod'
 
 import { AuthUser } from '@repo/mcp-observability'
 
@@ -22,14 +21,10 @@ import { useSentry } from './sentry'
 import { cloudflareFetch } from './user-agent'
 import { V4Schema } from './v4-api'
 import {
-	bindStateToSession,
-	clientIdAlreadyApproved,
-	createOAuthState,
-	generateCSRFProtection,
+	consentApprovalSecret,
 	OAuthError,
 	parseRedirectApproval,
 	renderApprovalDialog,
-	validateOAuthState,
 } from './workers-oauth-utils'
 
 import type {
@@ -39,6 +34,7 @@ import type {
 	TokenExchangeCallbackResult,
 } from '@cloudflare/workers-oauth-provider'
 import type { Context } from 'hono'
+import type { z } from 'zod'
 import type { MetricsTracker } from '@repo/mcp-observability'
 import type { AuthProps } from './auth-props'
 import type { BaseHonoContext } from './sentry'
@@ -74,12 +70,6 @@ type AuthContext = {
 		MCP_SERVER_DESCRIPTION?: string
 	}
 } & BaseHonoContext
-
-const AuthQuery = z.object({
-	code: z.string().describe('OAuth code from CF dash'),
-	state: z.string().describe('Value of the OAuth state'),
-	scope: z.string().describe('OAuth scopes granted'),
-})
 
 type UserSchema = z.infer<typeof CloudflareUserSchema>
 type AccountsSchema = z.infer<typeof CloudflareAccountsSchema>
@@ -409,42 +399,38 @@ export async function handleTokenExchangeCallback(
 }
 
 /**
- * Helper function to redirect to Cloudflare OAuth
- *
- * Note: We pass the stateToken as a simple string in the URL.
- * The existing getAuthorizationURL function will wrap it with the oauthReqInfo
- * before base64-encoding.
- * On callback, we extract the stateToken, look up the original oauthReqInfo in KV.
+ * Saves the approved request with a fresh PKCE verifier (`beginUpstream()`, bound to this browser)
+ * and redirects to Cloudflare's authorization screen with the resulting opaque `state`.
+ * Call only after consent: approved now, or remembered.
  */
 async function redirectToCloudflare(
 	c: Context<AuthContext>,
-	oauthReqInfo: AuthRequest,
-	stateToken: string,
-	codeChallenge: string,
+	approvedRequest: AuthRequest,
 	scopes: Record<string, string>,
-	additionalHeaders: Record<string, string> = {}
+	headers?: Headers
 ): Promise<Response> {
-	// Create a modified oauthReqInfo that includes our stateToken
-	const stateWithToken: AuthRequest = {
-		...oauthReqInfo,
-		state: stateToken, // embed our KV state token
-	}
-
+	const { codeChallenge, codeVerifier } = await generatePKCECodes()
+	const upstream = await c.env.OAUTH_PROVIDER.beginUpstream(approvedRequest, {
+		data: { codeVerifier } satisfies UpstreamData,
+		headers,
+	})
 	const { authUrl } = await getAuthorizationURL({
 		client_id: c.env.CLOUDFLARE_CLIENT_ID,
 		redirect_uri: new URL('/oauth/callback', c.req.url).href,
-		state: stateWithToken,
+		state: upstream.state,
 		scopes,
 		codeChallenge,
 	})
+	upstream.headers.set('Location', authUrl)
+	return new Response(null, { status: 302, headers: upstream.headers })
+}
 
-	return new Response(null, {
-		status: 302,
-		headers: {
-			...additionalHeaders,
-			Location: authUrl,
-		},
-	})
+/** What `beginUpstream()` keeps server-side for the callback. */
+type UpstreamData = { codeVerifier: string }
+
+/** Remembered consent belongs to the browser: the user is known only after Cloudflare sign-in. */
+async function rememberConsent(c: Context<AuthContext>) {
+	return { secret: await consentApprovalSecret(c.env.MCP_COOKIE_ENCRYPTION_KEY) }
 }
 
 /**
@@ -493,41 +479,32 @@ export function createAuthHandlers({
 			}
 			oauthReqInfo.scope = Object.keys(scopes)
 
-			// Check if client was previously approved (skip consent if so)
+			// A client this browser already approved, for these scopes, skips the page.
 			if (
-				await clientIdAlreadyApproved(
+				await c.env.OAUTH_PROVIDER.isConsentRemembered(
 					c.req.raw,
-					oauthReqInfo.clientId,
-					c.env.MCP_COOKIE_ENCRYPTION_KEY
+					oauthReqInfo,
+					await rememberConsent(c)
 				)
 			) {
-				// Client already approved - create state and redirect immediately
-				const { codeChallenge, codeVerifier } = await generatePKCECodes()
-				const stateToken = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV, codeVerifier)
-				const { setCookie: sessionCookie } = await bindStateToSession(stateToken)
-
-				return redirectToCloudflare(c, oauthReqInfo, stateToken, codeChallenge, scopes, {
-					'Set-Cookie': sessionCookie,
-				})
+				return redirectToCloudflare(c, oauthReqInfo, scopes)
 			}
 
-			// Client not approved - show consent dialog
-			const { token: csrfToken, setCookie: csrfCookie } = generateCSRFProtection()
+			// describeConsent() first: a failed client lookup leaves nothing in KV.
+			const consentDescription = await c.env.OAUTH_PROVIDER.describeConsent(oauthReqInfo)
+			// The request stays server-side; the page posts back only this browser-bound handle.
+			const consent = await c.env.OAUTH_PROVIDER.beginConsent(oauthReqInfo)
 
-			// Render approval dialog
 			const response = renderApprovalDialog(c.req.raw, {
-				client: await c.env.OAUTH_PROVIDER.lookupClient(oauthReqInfo.clientId),
+				consent: consentDescription,
 				server: {
 					name: c.env.MCP_SERVER_NAME || 'Cloudflare MCP Server',
 					logo: 'https://images.mcp.cloudflare.com/mcp.svg',
 					description:
 						c.env.MCP_SERVER_DESCRIPTION || 'This server uses Cloudflare for authentication.',
 				},
-				state: {
-					oauthReqInfo,
-				},
-				csrfToken,
-				setCookie: csrfCookie,
+				handle: consent.handle,
+				headers: consent.headers,
 			})
 
 			return response
@@ -570,44 +547,19 @@ export function createAuthHandlers({
 	 */
 	app.post(`/oauth/authorize`, async (c) => {
 		try {
-			// Validates CSRF token, extracts state, and generates approved client cookie
-			const { state, headers } = await parseRedirectApproval(
-				c.req.raw,
-				c.env.MCP_COOKIE_ENCRYPTION_KEY
-			)
+			const { handle, decision } = await parseRedirectApproval(c.req.raw)
 
-			if (!state.oauthReqInfo) {
-				return new OAuthError(
-					'invalid_request',
-					'Missing OAuth request info in state',
-					400
-				).toResponse()
+			if (decision === 'deny') {
+				// Back to the MCP client with access_denied, its state and iss.
+				const denied = await c.env.OAUTH_PROVIDER.denyConsent(c.req.raw, handle)
+				return new Response(null, { status: 302, headers: denied.headers })
 			}
 
-			const oauthReqInfo = state.oauthReqInfo as AuthRequest
-
-			// Create OAuth state in KV and bind to session
-			const { codeChallenge, codeVerifier } = await generatePKCECodes()
-			const stateToken = await createOAuthState(oauthReqInfo, c.env.OAUTH_KV, codeVerifier)
-			const { setCookie: sessionCookie } = await bindStateToSession(stateToken)
-
-			// Build redirect response
-			const redirectResponse = await redirectToCloudflare(
-				c,
-				oauthReqInfo,
-				stateToken,
-				codeChallenge,
-				scopes
-			)
-
-			// Add both cookies: approved client cookie (if present) and session binding cookie
-			// Note: We must use append() for multiple Set-Cookie headers, not combine with commas
-			if (headers['Set-Cookie']) {
-				redirectResponse.headers.append('Set-Cookie', headers['Set-Cookie'])
-			}
-			redirectResponse.headers.append('Set-Cookie', sessionCookie)
-
-			return redirectResponse
+			// The request comes back from storage, not from the form.
+			const approved = await c.env.OAUTH_PROVIDER.approveConsent(c.req.raw, handle, {
+				remember: await rememberConsent(c),
+			})
+			return redirectToCloudflare(c, approved.request, scopes, approved.headers)
 		} catch (e) {
 			c.var.sentry?.recordError(e)
 			let message: string | undefined
@@ -623,6 +575,10 @@ export function createAuthHandlers({
 					errorMessage: `Authorize POST Error: ${message}`,
 				})
 			)
+			// The consent page expired, was used, or was opened in another browser.
+			if (e instanceof AuthorizationError) {
+				return new OAuthError(e.code, e.description, 400).toResponse()
+			}
 			if (e instanceof OAuthError) {
 				return e.toResponse()
 			}
@@ -637,18 +593,24 @@ export function createAuthHandlers({
 	/**
 	 * GET /oauth/callback - Handle OAuth callback from Cloudflare
 	 */
-	app.get(`/oauth/callback`, zValidator('query', AuthQuery), async (c) => {
+	app.get(`/oauth/callback`, async (c) => {
 		try {
-			const { code } = c.req.valid('query')
+			// Recover the approved request: single use, bound to this browser by its cookie.
+			const {
+				request: oauthReqInfo,
+				data: { codeVerifier },
+				headers,
+			} = await c.env.OAUTH_PROVIDER.finishUpstream<UpstreamData>(c.req.raw)
 
-			// Validate state using dual validation (KV + session cookie)
-			const { oauthReqInfo, codeVerifier, clearCookie } = await validateOAuthState(
-				c.req.raw,
-				c.env.OAUTH_KV
-			)
+			// The user declined (or sign-in failed) at Cloudflare: tell the MCP client.
+			if (c.req.query('error')) {
+				headers.set('Location', authorizationErrorRedirect(oauthReqInfo, 'access_denied'))
+				return new Response(null, { status: 302, headers })
+			}
 
-			if (!oauthReqInfo.clientId) {
-				return new OAuthError('invalid_request', 'Invalid OAuth request info', 400).toResponse()
+			const code = c.req.query('code')
+			if (!code) {
+				return new OAuthError('invalid_request', 'Missing code', 400).toResponse()
 			}
 
 			// Exchange code for tokens and get user details, using the codeVerifier from KV.
@@ -683,14 +645,9 @@ export function createAuthHandlers({
 				})
 			)
 
-			// Redirect back to MCP client with cleared session cookie
-			return new Response(null, {
-				status: 302,
-				headers: {
-					Location: redirectTo,
-					'Set-Cookie': clearCookie,
-				},
-			})
+			// Back to the MCP client, clearing the upstream binding cookie.
+			headers.set('Location', redirectTo)
+			return new Response(null, { status: 302, headers })
 		} catch (e) {
 			c.var.sentry?.recordError(e)
 			let message: string | undefined
@@ -707,9 +664,8 @@ export function createAuthHandlers({
 					errorMessage: `Callback Error: ${message}`,
 				})
 			)
-			// completeAuthorization revalidates the reconstructed request; grants
-			// started under an older provider version can fail here as expected
-			// client errors rather than server faults.
+			// The sign-in expired, was used, or came back to another browser; or
+			// completeAuthorization refused the request.
 			if (e instanceof AuthorizationError) {
 				return new OAuthError(e.code, e.description, 400).toResponse()
 			}

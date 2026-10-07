@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { CloudflareAccountsSchema, CloudflareUserSchema } from './auth-props'
 import { getUserAndAccounts } from './cloudflare-oauth-handler'
 import { McpError } from './mcp-error'
+import { mcpResource } from './transport-migration'
 
 import type {
 	ResolveExternalTokenInput,
@@ -133,12 +134,14 @@ function externalTokenError(error: McpError, tokenOwner: CloudflareTokenOwner): 
  */
 export async function resolveExternalToken({
 	token,
+	request,
 	env,
 }: ResolveExternalTokenInput<ExternalTokenEnv>): Promise<ResolveExternalTokenResult> {
 	const tokenOwner = cloudflareTokenOwner(token)
 	try {
 		const identity = await getCachedIdentity(token, tokenOwner, env.OAUTH_KV)
-		return { props: buildAuthProps(token, identity) }
+		// A Cloudflare credential is good for this origin's MCP endpoint, the provider's one resource.
+		return { props: buildAuthProps(token, identity), audience: mcpResource(request.url) }
 	} catch (error) {
 		if (error instanceof McpError) throw externalTokenError(error, tokenOwner)
 		throw error

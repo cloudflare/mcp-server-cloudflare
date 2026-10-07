@@ -8,7 +8,7 @@ connections, with Cloudflare OAuth built-in.
 
 It integrates tools powered by the [Cloudflare Logpush API](https://developers.cloudflare.com/logs/) to provide insights into Logpush jobs.
 
-The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth/account context for every request. `/sse` is not the deprecated HTTP+SSE transport. OAuth remains durable security state; no MCP protocol session or protocol Durable Object is retained.
+The `/mcp` URL uses a stateless SDK v2 handler that creates a fresh server with request-scoped auth/account context for every request. The retired `/sse` URL returns `410 Gone` pointing at `/mcp`. OAuth remains durable security state; no MCP protocol session or protocol Durable Object is retained.
 
 ## 🔨 Available Tools
 
