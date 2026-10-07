@@ -13,12 +13,36 @@ export async function get_file_name_from_path(path: string): Promise<string> {
 	return path
 }
 
+export class PathTraversalError extends Error {
+	constructor(requestedPath: string) {
+		super(`Path escapes the working directory: ${requestedPath}`)
+		this.name = 'PathTraversalError'
+	}
+}
+
+/**
+ * Resolves a client-supplied file/directory path against the container's working
+ * directory, rejecting anything (`../` segments, an absolute path like `/etc/passwd`)
+ * that would resolve outside of it. Every filesystem access in this file takes a
+ * client-controlled path and must go through this before touching `fs`.
+ */
+export function resolve_in_workdir(requestedPath: string): string {
+	const base = process.cwd()
+	const resolved = path.resolve(base, `.${path.sep}${requestedPath}`)
+	const relative = path.relative(base, resolved)
+
+	if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+		throw new PathTraversalError(requestedPath)
+	}
+
+	return resolved
+}
+
 export async function list_files_in_directory(dirPath: string): Promise<string[]> {
+	const resolvedDir = resolve_in_workdir(dirPath)
 	const files: string[] = []
 	try {
-		const dir = await fs.readdir(path.join(process.cwd(), dirPath), {
-			withFileTypes: true,
-		})
+		const dir = await fs.readdir(resolvedDir, { withFileTypes: true })
 		for (const dirent of dir) {
 			const relPath = path.relative(process.cwd(), `${dirPath}/${dirent.name}`)
 			files.push(`file:///${relPath}`)
