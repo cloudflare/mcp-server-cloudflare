@@ -1,0 +1,16 @@
+import { cloudflareTest } from '@cloudflare/vitest-pool-workers'
+import { defineConfig } from 'vitest/config'
+
+import type { Env } from './src/workers-scripts.context'
+
+export interface TestEnv extends Env {}
+
+export default defineConfig({
+	plugins: [
+		cloudflareTest({
+			remoteBindings: false,
+			wrangler: { configPath: `${__dirname}/wrangler.jsonc` },
+		}),
+	],
+	test: {},
+})
