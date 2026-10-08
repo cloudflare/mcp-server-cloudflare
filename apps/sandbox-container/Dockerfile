@@ -1,63 +1,24 @@
-# Use Alpine as base for minimal size
-FROM alpine:3.19 as base
+# The sandbox users' commands run in. The Worker drives it with ctx.container.exec(), so the image
+# runs no server: it only needs the toolchains and a process that keeps it alive.
+FROM node:24.20.0-trixie-slim
 
-# Install necessary packages while minimizing layers
-# We combine commands with && and clean cache in the same layer
-# to reduce the image size
-RUN apk update && \
-    apk add --no-cache \
-    # Core utilities
-    git \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
     curl \
-    wget \
-    # Build essentials
-    build-base \
-    # Python and pip
+    git \
     python3 \
-    py3-pip \
-    # Node and npm
-    nodejs \
-    npm && \
-    # Clean up the cache to reduce image size
-    rm -rf /var/cache/apk/* && \
-    # Create symlink for python
-    ln -sf /usr/bin/python3 /usr/bin/python
+    python3-pip \
+    python3-venv \
+    wget && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -sf /usr/bin/python3 /usr/bin/python && \
+    # exec() processes don't inherit image ENV, so pip's PEP 668 opt-out lives in its config file.
+    printf '[global]\nbreak-system-packages = true\nroot-user-action = ignore\n' > /etc/pip.conf && \
+    npm install -g pnpm && \
+    npm cache clean --force
 
-# Install pnpm in a separate layer for better caching
-RUN npm install -g pnpm && \
-    rm -rf /root/.npm
+WORKDIR /workdir
 
-# Set up pnpm environment
-ENV PNPM_HOME=/usr/local/bin
-ENV PATH=$PNPM_HOME:$PATH
-
-# Set working directory
-WORKDIR /app
-
-# Set environment variables
-ENV PATH="/app/node_modules/.bin:${PATH}"
-
-###
-# STAGE: PRUNE -  Generate a partial monorepo for the sandbox-container app. The output will be placed into a directory named "out"
-###
-FROM base AS prune
-WORKDIR /app
-RUN pnpm install turbo --global
-COPY . .
-RUN turbo prune containers-starter
-
-###
-# STAGE: INSTALL & RUN
-###
-FROM base AS installer
-WORKDIR /app
-
-COPY --from=prune /app/out/ .
-RUN pnpm install --frozen-lockfile --only=production
-
-WORKDIR /app/apps/sandbox-container
-
-# Expose the port your Node.js server will run on
-EXPOSE 8080
-
-CMD ["pnpm", "run", "start:container"]
+ENTRYPOINT ["sleep", "infinity"]

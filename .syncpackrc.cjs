@@ -5,6 +5,12 @@ const config = {
 	lintFormatting: false, // handled by prettier
 	versionGroups: [
 		{
+			label:
+				'sandbox-container needs a newer wrangler for the durable_object container scheduling policy',
+			packages: ['containers-mcp'],
+			dependencies: ['wrangler'],
+		},
+		{
 			label: 'use the workspace catalog for the MCP migration stack',
 			dependencies: [
 				'@cloudflare/workers-oauth-provider',
