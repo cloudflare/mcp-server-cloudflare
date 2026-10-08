@@ -6,18 +6,18 @@ These MCP servers allow your [MCP Client](https://modelcontextprotocol.io/client
 
 Every server in this repository exposes the same stateless Streamable HTTP handler at `/mcp` and `/sse` through a fresh SDK v2 server factory. `/sse` remains as a URL compatibility alias; it does not use the deprecated HTTP+SSE transport. A legacy SSE `GET /sse` request receives a `410 Gone` Problem Details response with two migration options: configure the existing URL to use Streamable HTTP, or switch to the recommended `/mcp` URL for future compatibility. Modern 2026 requests and stateless 2025 requests share the same request-scoped implementation without an MCP protocol session. OAuth, credentials, account selection, application caches, and product Durable Objects remain application/security state where required.
 
-Cloudflare offers the following MCP servers. The domain-specific servers are included in this repository, while the recommended Code Mode server is maintained in [`cloudflare/mcp`](https://github.com/cloudflare/mcp):
+Cloudflare offers the following MCP servers. The domain-specific servers are included in this repository, while the recommended Cloudflare API MCP Server is maintained in [`cloudflare/mcp`](https://github.com/cloudflare/mcp):
 
-| Server Name                                                             | Description                                                                                     | Server URL                                  |
-| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| [**Code Mode server (recommended)**](https://github.com/cloudflare/mcp) | Best when you want broad access across Cloudflare's APIs through code execution                 | `https://mcp.cloudflare.com/mcp`            |
-| [**Documentation server**](/apps/docs-ai-search)                        | Get up-to-date reference information on Cloudflare                                              | `https://docs.mcp.cloudflare.com/mcp`       |
-| [**Container server**](/apps/sandbox-container)                         | Spin up a sandbox development environment                                                       | `https://containers.mcp.cloudflare.com/mcp` |
-| [**Browser Run server**](/apps/browser-rendering)                       | Fetch web pages, convert them to markdown and take screenshots                                  | `https://browser.mcp.cloudflare.com/mcp`    |
-| [**Digital Experience Monitoring server**](/apps/dex-analysis)          | Get quick insight on critical applications for your organization                                | `https://dex.mcp.cloudflare.com/mcp`        |
-| [**Cloudflare One CASB server**](/apps/cloudflare-one-casb)             | Quickly identify any security misconfigurations for SaaS applications to safeguard users & data | `https://casb.mcp.cloudflare.com/mcp`       |
-| [**Cloudflare Blog server**](/apps/cloudflare-blog)                     | Search and read posts from the Cloudflare Blog                                                  | `https://blog.mcp.cloudflare.com/mcp`       |
-| [**Demo Day server**](/apps/demo-day)                                   | Demonstrate a minimal Cloudflare MCP server                                                     | `https://demo-day.mcp.cloudflare.com/mcp`   |
+| Server Name                                                                      | Description                                                                                     | Server URL                                  |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| [**Cloudflare API MCP Server (recommended)**](https://github.com/cloudflare/mcp) | Best when you want broad access across Cloudflare's APIs through code execution                 | `https://mcp.cloudflare.com/mcp`            |
+| [**Documentation server**](/apps/docs-ai-search)                                 | Get up-to-date reference information on Cloudflare                                              | `https://docs.mcp.cloudflare.com/mcp`       |
+| [**Container server**](/apps/sandbox-container)                                  | Spin up a sandbox development environment                                                       | `https://containers.mcp.cloudflare.com/mcp` |
+| [**Browser Run server**](/apps/browser-rendering)                                | Fetch web pages, convert them to markdown and take screenshots                                  | `https://browser.mcp.cloudflare.com/mcp`    |
+| [**Digital Experience Monitoring server**](/apps/dex-analysis)                   | Get quick insight on critical applications for your organization                                | `https://dex.mcp.cloudflare.com/mcp`        |
+| [**Cloudflare One CASB server**](/apps/cloudflare-one-casb)                      | Quickly identify any security misconfigurations for SaaS applications to safeguard users & data | `https://casb.mcp.cloudflare.com/mcp`       |
+| [**Cloudflare Blog server**](/apps/cloudflare-blog)                              | Search and read posts from the Cloudflare Blog                                                  | `https://blog.mcp.cloudflare.com/mcp`       |
+| [**Demo Day server**](/apps/demo-day)                                            | Demonstrate a minimal Cloudflare MCP server                                                     | `https://demo-day.mcp.cloudflare.com/mcp`   |
 
 <details>
 <summary><strong>Deprecated servers</strong></summary>
@@ -43,14 +43,14 @@ Please migrate to the [Cloudflare API MCP Server](https://mcp.cloudflare.com/mcp
 
 Cloudflare provides two categories of MCP servers:
 
-- **Code Mode server** (`mcp.cloudflare.com`) in [`cloudflare/mcp`](https://github.com/cloudflare/mcp):
+- **Cloudflare API MCP Server** (`mcp.cloudflare.com`) in [`cloudflare/mcp`](https://github.com/cloudflare/mcp):
   best when you want broad access across Cloudflare's APIs through code execution.
 - **Domain-specific servers** (`*.mcp.cloudflare.com`) in this repository:
   best when you want curated, typed tools for a specific Cloudflare product area.
 
 ### When should you use each?
 
-Use the **Code Mode server** when:
+Use the **Cloudflare API MCP Server** when:
 
 - you need broad API coverage across many Cloudflare products
 - you prefer a smaller set of general-purpose tools
@@ -62,7 +62,7 @@ Use the **domain-specific servers** in this repository when:
 - you want more guided, typed interactions
 - you are working primarily within one Cloudflare domain such as Browser Run or containers
 
-Learn more about the Code Mode server here: [`cloudflare/mcp`](https://github.com/cloudflare/mcp).
+Learn more about the Cloudflare API MCP Server here: [`cloudflare/mcp`](https://github.com/cloudflare/mcp).
 
 ## Connect to an MCP server
 

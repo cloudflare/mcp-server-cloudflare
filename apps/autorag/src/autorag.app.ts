@@ -16,7 +16,7 @@ to the unified Cloudflare MCP server at:
     https://mcp.cloudflare.com/mcp
 
 That server covers the full Cloudflare API — including AI Search, which
-replaces AutoRAG — via Code Mode (two generic tools: \`search\` and \`execute\`).
+replaces AutoRAG — through two generic tools: \`search\` and \`execute\`.
 It supports both OAuth (connect to the URL and authorize) and Cloudflare API
 tokens (send as a bearer token).
 

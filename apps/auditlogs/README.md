@@ -18,7 +18,7 @@ Configure the replacement server in your MCP client:
 }
 ```
 
-The replacement uses [Code Mode](https://blog.cloudflare.com/code-mode-mcp/). Its `search` and `execute` tools cover the full Cloudflare API and return the complete Audit Logs API response. Clients that need endpoint-specific tools can use `https://mcp.cloudflare.com/mcp?codemode=false`; Audit Logs is exposed as `get_accounts_logs_audit`. See [`cloudflare/mcp`](https://github.com/cloudflare/mcp) for details.
+The replacement's `search` and `execute` tools cover the full Cloudflare API and return the complete Audit Logs API response. Clients that need endpoint-specific tools can use `https://mcp.cloudflare.com/mcp?codemode=false`; Audit Logs is exposed as `get_accounts_logs_audit`. See [`cloudflare/mcp`](https://github.com/cloudflare/mcp) for details.
 
 The tool below still works for now, but no new features will be added. Please migrate to the Cloudflare API MCP server.
 

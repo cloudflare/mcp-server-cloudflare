@@ -12,7 +12,7 @@ import type { Env } from './radar.context'
 export const DEPRECATION_INSTRUCTIONS = `⚠️ DEPRECATED: This Radar MCP server is deprecated.
 
 The unified Cloudflare MCP server at mcp.cloudflare.com/mcp already covers all
-Radar API endpoints (along with the rest of the Cloudflare API) via Code Mode —
+Radar API endpoints (along with the rest of the Cloudflare API) through
 two generic tools (\`search\` and \`execute\`) that give agents access to the full
 Cloudflare API through code execution. It supports both OAuth (connect to the URL
 and authorize) and Cloudflare API tokens (send as a bearer token).

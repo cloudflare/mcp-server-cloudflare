@@ -16,7 +16,7 @@ All new work should move to the unified server:
 }
 ```
 
-That server uses [Code Mode](https://blog.cloudflare.com/code-mode-mcp/) — two generic tools (`search` and `execute`) that give agents access to the full Cloudflare API through code execution. It supports both OAuth (connect to the URL and authorize) and Cloudflare API tokens (send as a bearer token). See [`cloudflare/mcp`](https://github.com/cloudflare/mcp) for details.
+That server has two generic tools (`search` and `execute`) that give agents access to the full Cloudflare API through code execution. It supports both OAuth (connect to the URL and authorize) and Cloudflare API tokens (send as a bearer token). See [`cloudflare/mcp`](https://github.com/cloudflare/mcp) for details.
 
 ### What about my existing AutoRAG instances?
 

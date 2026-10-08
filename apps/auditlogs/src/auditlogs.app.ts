@@ -13,8 +13,8 @@ Use the Cloudflare API MCP server instead:
     https://mcp.cloudflare.com/mcp
 
 It covers Audit Logs v2 through the full Cloudflare API, including filters and
-cursor pagination for GET /accounts/{account_id}/logs/audit. Its Code Mode
-search and execute tools support both OAuth and Cloudflare API tokens.
+cursor pagination for GET /accounts/{account_id}/logs/audit. Its search and
+execute tools support both OAuth and Cloudflare API tokens.
 
 This Audit Logs server continues to respond for now, but will be retired. Please
 migrate at your earliest convenience.`
