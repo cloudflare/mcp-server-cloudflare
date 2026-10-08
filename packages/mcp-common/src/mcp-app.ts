@@ -33,7 +33,7 @@ type ServerAssemblyOptions<Env> = Pick<
 >
 
 export type CreatePublicMcpAppOptions<Env> = ServerAssemblyOptions<Env> & {
-	/** This server's ID in the outbound User-Agent, `mcp-server-cloudflare/<serverId>`: its app directory name. */
+	/** This server's ID in the outbound User-Agent, `mcp-server-cloudflare (<serverId>; +<repo URL>)`: its app directory name. */
 	serverId: string
 	/** Staging and production service hostnames; localhost policy is added centrally. */
 	serviceHostnames: readonly string[]
