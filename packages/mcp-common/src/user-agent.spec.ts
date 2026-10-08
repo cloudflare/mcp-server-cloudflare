@@ -19,6 +19,12 @@ function captureHeaders(): { headers?: Headers } {
 }
 
 describe('cloudflareFetch', () => {
+	it('names the product and repo before a server is set', () => {
+		expect(getUserAgent()).toBe(
+			'mcp-server-cloudflare (+https://github.com/cloudflare/mcp-server-cloudflare)'
+		)
+	})
+
 	it('sets the User-Agent and keeps the caller headers', async () => {
 		const seen = captureHeaders()
 
@@ -53,8 +59,12 @@ describe('setUserAgentServer', () => {
 
 		await cloudflareFetch(URL)
 
-		expect(getUserAgent()).toBe('mcp-server-cloudflare/workers-bindings')
-		expect(seen.headers?.get('User-Agent')).toBe('mcp-server-cloudflare/workers-bindings')
+		expect(getUserAgent()).toBe(
+			'mcp-server-cloudflare (workers-bindings; +https://github.com/cloudflare/mcp-server-cloudflare)'
+		)
+		expect(seen.headers?.get('User-Agent')).toBe(
+			'mcp-server-cloudflare (workers-bindings; +https://github.com/cloudflare/mcp-server-cloudflare)'
+		)
 	})
 
 	it.each(['', 'Workers Bindings', 'bindings/2', '-bindings'])('rejects %j', (serverId) => {
