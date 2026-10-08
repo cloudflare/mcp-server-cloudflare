@@ -7,10 +7,10 @@
 	"containers": [
 		{
 			"name": "sandbox-container",
-			"image": "./Dockerfile",
 			"class_name": "UserContainer",
-			"max_instances": 2,
-			"rollout_step_percentage": 100
+			// UserContainer picks the image and instance size when it starts the container.
+			"scheduling_policy": "durable_object",
+			"images": { "sandbox": { "dockerfile": "./Dockerfile" } }
 		}
 	],
 	"durable_objects": {
@@ -83,12 +83,10 @@
 			"containers": [
 				{
 					"name": "sandbox-container-staging",
-					// UPDATE WHEN DEPLOYING A NEW IMAGE
-					"image": "registry.cloudchamber.cfdata.org/sandbox-container:d802004",
 					"class_name": "UserContainer",
-					"max_instances": 5,
-					"rollout_step_percentage": 100,
-					"instances": 3
+					// UserContainer picks the image and instance size when it starts the container.
+					"scheduling_policy": "durable_object",
+					"images": { "sandbox": { "dockerfile": "./Dockerfile" } }
 				}
 			],
 			"durable_objects": {
@@ -132,12 +130,10 @@
 			"containers": [
 				{
 					"name": "sandbox-container",
-					// UPDATE WHEN DEPLOYING A NEW IMAGE
-					"image": "registry.cloudchamber.cfdata.org/sandbox-container:d802004",
 					"class_name": "UserContainer",
-					"max_instances": 50,
-					"rollout_step_percentage": 100,
-					"instances": 10
+					// UserContainer picks the image and instance size when it starts the container.
+					"scheduling_policy": "durable_object",
+					"images": { "sandbox": { "dockerfile": "./Dockerfile" } }
 				}
 			],
 			"durable_objects": {

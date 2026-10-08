@@ -6,6 +6,9 @@ import { ContainerEvent } from './metrics'
 
 import type { Env } from './sandbox.server.context'
 
+/** Most sandboxes that may run at once across all users. */
+export const MAX_CONTAINERS = 50
+
 export class ContainerManager extends DurableObject<Env> {
 	readonly metrics: MetricsTracker
 

@@ -4,7 +4,7 @@ This is a simple MCP-based interface for a sandboxed development environment.
 
 ## Local dev
 
-Cloudchamber local dev isn't implemented yet, so we are doing a bit of a hack to just run the server in your local environment. Because of this, testing the container(s) and container manager locally is not possible at this time.
+`wrangler dev` builds `Dockerfile` and runs the sandbox in Docker, so the Docker daemon must be running.
 
 Do the following from within the sandbox-container app:
 
@@ -14,16 +14,8 @@ Do the following from within the sandbox-container app:
 4. Run `pnpx @modelcontextprotocol/inspector` to start the MCP inspector client.
 5. Open the inspector client in your browser and connect to the server via `http://localhost:8976/mcp`.
 
-Note: Temporary files created through files tool calls are stored in the workdir folder of this app.
-
 ## Deploying
 
-1. Make sure the docker daemon is running
+CI deploys staging on every push to `main` and production on release. `wrangler deploy` builds `Dockerfile` and pushes it as the `sandbox` image, so the deploy machine needs Docker.
 
-2. Disable WARP and run
-
-```
-npx https://prerelease-registry.devprod.cloudflare.dev/workers-sdk/runs/14387504770/npm-package-wrangler-8740 deploy
-```
-
-3. Connect an MCP client directly to your deployed `/mcp` URL. If you use Claude Desktop, disable WARP first.
+The Container applications use the `durable_object` scheduling policy, which can't be changed after an application is created. `UserContainer` picks the image and instance size when it starts a container, so a new image reaches users the next time they call `container_initialize`; running containers keep their image.

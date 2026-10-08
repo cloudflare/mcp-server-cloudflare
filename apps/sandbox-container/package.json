@@ -7,20 +7,15 @@
 		"check:types": "run-tsc",
 		"check:lint": "run-eslint-workers",
 		"deploy": "run-wrangler-deploy",
-		"dev": "concurrently \"tsx container/sandbox.container.app.ts\" \"wrangler dev --var \"ENVIRONMENT:dev\"\"",
-		"build:container": "docker build --platform linux/amd64 --tag sandbox-container:$(git rev-parse --short HEAD) -f Dockerfile ../../ && wrangler containers push sandbox-container:$(git rev-parse --short HEAD)",
+		"dev": "wrangler dev --var ENVIRONMENT:dev",
 		"start": "wrangler dev",
-		"start:container": "tsx container/sandbox.container.app.ts",
-		"postinstall": "mkdir -p workdir",
-		"test": "vitest run --config vitest.config.ts && vitest run --config vitest.config.node.ts",
+		"test": "vitest run",
 		"types": "wrangler types",
 		"eval:dev": "start-server-and-test --expect 404 eval:server http://localhost:8976 'vitest --testTimeout=60000 --config vitest.config.evals.ts'",
-		"eval:server": "concurrently \"tsx container/sandbox.container.app.ts\" \"wrangler dev --var ENVIRONMENT:test --var DEV_DISABLE_OAUTH:true --var DEV_CLOUDFLARE_EMAIL:mcp-server-eval-account@workers-for-platforms-dev.cfdata.org\"",
+		"eval:server": "wrangler dev --var ENVIRONMENT:test --var DEV_DISABLE_OAUTH:true --var DEV_CLOUDFLARE_EMAIL:mcp-server-eval-account@workers-for-platforms-dev.cfdata.org",
 		"eval:ci": "start-server-and-test --expect 404 eval:server http://localhost:8976 'vitest run --testTimeout=60000 --config vitest.config.evals.ts'"
 	},
 	"dependencies": {
-		"@hono/node-server": "1.13.8",
-		"@hono/zod-validator": "0.4.3",
 		"@n8n/json-schema-to-zod": "1.1.0",
 		"@repo/eval-tools": "workspace:*",
 		"@repo/mcp-common": "workspace:*",
@@ -31,18 +26,14 @@
 		"hono": "4.7.6",
 		"mime": "4.0.6",
 		"simple-git-hooks": "2.12.1",
-		"tsx": "4.19.3",
 		"vitest-evals": "0.1.4",
 		"zod": "4.4.3"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.16.11",
-		"@types/mock-fs": "4.13.4",
 		"@types/node": "22.15.17",
 		"ai": "6.0.194",
-		"concurrently": "9.1.2",
-		"mock-fs": "5.5.0",
 		"start-server-and-test": "2.0.11",
-		"wrangler": "4.96.0"
+		"wrangler": "4.148.0"
 	}
 }

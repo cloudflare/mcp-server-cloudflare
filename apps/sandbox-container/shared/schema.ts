@@ -17,24 +17,3 @@ export type FilePathParam = z.infer<typeof FilePathParam>
 export const FilePathParam = z.object({
 	path: z.string(),
 })
-
-export type FileList = z.infer<typeof FileList>
-export const FileList = z.object({
-	resources: z
-		.object({
-			uri: z.string(),
-			name: z.string(),
-			description: z.string().optional(),
-			mimeType: z.string().optional(),
-		})
-		.array(),
-})
-
-export type FilesContextSchema = z.infer<typeof FilesContextSchema>
-export const FilesContextSchema = z.object({
-	files: z
-		.object({
-			uri: z.string(),
-		})
-		.array(),
-})
