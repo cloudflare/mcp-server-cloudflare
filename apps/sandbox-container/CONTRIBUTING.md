@@ -16,6 +16,6 @@ Do the following from within the sandbox-container app:
 
 ## Deploying
 
-CI deploys staging on every push to `main` and production on release. `wrangler deploy` builds `Dockerfile` and pushes it as the `sandbox` image, so the deploy machine needs Docker.
+CI deploys staging on every push to `main` and production on release. `wrangler deploy` builds `Dockerfile` and pushes it as the `sandbox` image, so the deploy machine needs Docker. The account's only image registry is `registry.cloudchamber.cfdata.org`, not the default `registry.cloudflare.com`, so the `deploy` script sets `CLOUDFLARE_CONTAINER_REGISTRY`.
 
 The Container applications use the `durable_object` scheduling policy, which can't be changed after an application is created. `UserContainer` picks the image and instance size when it starts a container, so a new image reaches users the next time they call `container_initialize`; running containers keep their image.
