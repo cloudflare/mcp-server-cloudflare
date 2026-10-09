@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { OAuthError, parseRedirectApproval, validateOAuthState } from './workers-oauth-utils'
+import {
+	OAuthError,
+	parseRedirectApproval,
+	renderApprovalDialog,
+	validateOAuthState,
+} from './workers-oauth-utils'
 
 describe('OAuthError', () => {
 	it('creates an error with code, description, and statusCode', () => {
@@ -35,6 +40,38 @@ describe('OAuthError', () => {
 		}).toResponse()
 
 		expect(response.headers.get('retry-after')).toBe('17')
+	})
+})
+
+describe('renderApprovalDialog', () => {
+	it('shows the client, redirect destination, and every requested scope', async () => {
+		const response = renderApprovalDialog(new Request('https://mcp.example.com/oauth/authorize'), {
+			client: {
+				clientId: 'https://chatgpt.com/oauth/codex',
+				clientName: 'Codex',
+				redirectUris: ['http://127.0.0.1:4321/callback'],
+				tokenEndpointAuthMethod: 'none',
+			},
+			redirectUri: 'http://127.0.0.1:4321/callback',
+			cancelUri: 'http://127.0.0.1:4321/callback?error=access_denied&state=client-state',
+			scopes: ['user:read', 'workers:write'],
+			state: { oauthReqInfo: { clientId: 'client-id' } },
+			csrfToken: 'csrf-token',
+			setCookie: '__Host-CSRF_TOKEN=csrf-token',
+		})
+
+		const html = await response.text()
+		expect(html).toContain('Authorize Codex')
+		expect(html).toContain('Codex')
+		expect(html).toContain('http://127.0.0.1:4321/callback')
+		expect(html).toContain('user:read')
+		expect(html).toContain('workers:write')
+		expect(html).not.toContain('chatgpt.com')
+		expect(html).toContain('error=access_denied&amp;state=client-state')
+		expect(response.headers.get('content-security-policy')).toContain("frame-ancestors 'none'")
+		expect(response.headers.get('content-security-policy')).not.toContain('script-src')
+		expect(response.headers.get('referrer-policy')).toBe('no-referrer')
+		expect(response.headers.get('x-frame-options')).toBe('DENY')
 	})
 })
 
