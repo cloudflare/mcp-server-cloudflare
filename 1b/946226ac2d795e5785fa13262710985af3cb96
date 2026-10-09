@@ -1,0 +1,39 @@
+.changeset/sandbox-managed-image.md
+  s_0d768e1dfbc208::t_8e480d439711f3 1-5
+apps/sandbox-container/CONTRIBUTING.md
+  s_0d768e1dfbc208::t_eeb0d334467791 7,17-18,21-25,27
+apps/sandbox-container/README.md
+  s_0d768e1dfbc208::t_30a37e6d2adab9 9-11
+apps/sandbox-container/package.json
+  s_50fc654a67ddc0::t_471b953fb53ece 9
+apps/sandbox-container/server/sandboxTemplate.ts
+  s_50fc654a67ddc0::t_b0154051ce3a3a 1-37
+apps/sandbox-container/server/userContainer.ts
+  s_50fc654a67ddc0::t_9afcf085dfdfe1 5-11,17,31-42,59-61,96-109,115-164,251-263,267,269-272,278-280,282-287,293-294,300,305,321-327,340
+apps/sandbox-container/wrangler.jsonc
+  s_50fc654a67ddc0::t_2a7af0a98f80cb 11-12,86-87,132-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "1b946226ac2d795e5785fa13262710985af3cb96",
+  "prompts": {},
+  "sessions": {
+    "s_0d768e1dfbc208": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11d74-80ac-7234-8533-734a6acf4f10",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_50fc654a67ddc0": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11775-ab75-75cf-b880-75b0f35ef359",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
