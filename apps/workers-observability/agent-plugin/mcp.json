@@ -1,0 +1,9 @@
+{
+	"$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+	"mcpServers": {
+		"cloudflare-observability": {
+			"type": "streamable-http",
+			"url": "https://observability.mcp.cloudflare.com/mcp"
+		}
+	}
+}
