@@ -6,7 +6,9 @@ It integrates tools for running a sandbox container with your MCP client. With t
 
 The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server for every request. `/sse` is not the deprecated HTTP+SSE transport. `UserContainer` and `ContainerManager` remain application Durable Objects for per-user container lifecycle and capacity management; there is no MCP protocol session or protocol Durable Object.
 
-Each user's sandbox is a Container controlled by their `UserContainer` Durable Object through the native `ctx.container` API, with the `durable_object` [scheduling policy](https://developers.cloudflare.com/containers/configuration/scheduling-policy/). The Durable Object starts the image built from `Dockerfile` and runs every tool as a process with `ctx.container.exec()`; the container itself runs no server.
+Each user's sandbox is a Container controlled by their `UserContainer` Durable Object through the native `ctx.container` API, with the `durable_object` [scheduling policy](https://developers.cloudflare.com/containers/configuration/scheduling-policy/). Every tool runs as a process with `ctx.container.exec()`; the container itself runs no server.
+
+Sandboxes start from a [snapshot](https://developers.cloudflare.com/containers/guides/snapshots/) of the Cloudflare-managed `cloudflare/debian-trixie` image with Python, pip, git, build tools and pnpm installed. One `UserContainer` instance, `__sandbox-template__`, builds that snapshot the first time a sandbox starts and keeps the handle (`server/sandboxTemplate.ts`). Every restore refreshes the snapshot's 30-day lifetime; if a restore fails, for example because the snapshot expired, the template is rebuilt.
 
 ## Tools
 
