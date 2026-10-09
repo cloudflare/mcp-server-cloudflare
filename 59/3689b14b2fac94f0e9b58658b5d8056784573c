@@ -1,0 +1,21 @@
+.changeset/sandbox-exec-timeout.md
+  s_50fc654a67ddc0::t_7169f8b5803aa9 1-5
+apps/sandbox-container/server/userContainer.ts
+  s_50fc654a67ddc0::t_58c6de0b042a9c 25-28,33-34,55-102,226-235,239-243,402-404,414-419,422-437,439-441
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "593689b14b2fac94f0e9b58658b5d8056784573c",
+  "prompts": {},
+  "sessions": {
+    "s_50fc654a67ddc0": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11775-ab75-75cf-b880-75b0f35ef359",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
