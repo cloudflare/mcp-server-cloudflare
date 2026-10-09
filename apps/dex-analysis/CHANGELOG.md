@@ -1,5 +1,13 @@
 # dex-analysis
 
+## 0.5.6
+
+### Patch Changes
+
+- ab883e5: Send `User-Agent: mcp-server-cloudflare (<server>; +https://github.com/cloudflare/mcp-server-cloudflare)` on every outbound request to Cloudflare, with `<server>` taken from the new `serverId` option of `createPublicMcpApp()` / `createAuthenticatedMcpApp()`. It covers the Cloudflare SDK client, `fetchCloudflareApi`, the OAuth token exchange and refresh, the identity probe, and the direct `fetch` calls in the Radar, URL Scanner, GraphQL, DEX, Blog and docs tools.
+- Updated dependencies [ab883e5]
+  - @repo/mcp-common@0.20.11
+
 ## 0.5.5
 
 ### Patch Changes
