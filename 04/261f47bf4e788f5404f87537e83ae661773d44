@@ -1,0 +1,67 @@
+apps/ai-gateway/package.json
+  s_50fc654a67ddc0::t_c91786d0525213 26
+apps/auditlogs/package.json
+  s_50fc654a67ddc0::t_fbb7fb78807f88 25
+apps/autorag/package.json
+  s_50fc654a67ddc0::t_0ee05f1b6eac30 24
+apps/browser-rendering/package.json
+  s_50fc654a67ddc0::t_f619faec73d853 26
+apps/cloudflare-blog/package.json
+  s_50fc654a67ddc0::t_9c1632001f0284 24
+apps/cloudflare-one-casb/package.json
+  s_50fc654a67ddc0::t_b4cc037cc4650f 25
+apps/demo-day/package.json
+  s_50fc654a67ddc0::t_9ce2a34c29a8be 24
+apps/dex-analysis/package.json
+  s_50fc654a67ddc0::t_7ac2f5b92d431d 27
+apps/dns-analytics/package.json
+  s_50fc654a67ddc0::t_860aad4a658164 25
+apps/docs-ai-search/package.json
+  s_50fc654a67ddc0::t_74035a590558a6 23
+apps/graphql/package.json
+  s_50fc654a67ddc0::t_84dc13ce03b066 27
+apps/logpush/package.json
+  s_50fc654a67ddc0::t_ac25daa3a63709 24
+apps/radar/package.json
+  s_50fc654a67ddc0::t_cb5d923a658d2d 25
+apps/sandbox-container/package.json
+  s_50fc654a67ddc0::t_3b232e90ed8af1 37
+apps/stack-mcp/package.json
+  s_50fc654a67ddc0::t_a11ba48014660c 24
+apps/workers-bindings/package.json
+  s_50fc654a67ddc0::t_20768b4250d4cf 25
+apps/workers-builds/package.json
+  s_50fc654a67ddc0::t_3067fcfec69164 26
+apps/workers-observability/package.json
+  s_50fc654a67ddc0::t_d3eecc49950a4b 26
+packages/eval-tools/package.json
+  s_50fc654a67ddc0::t_5da969145832a1 20
+packages/mcp-common/package.json
+  s_50fc654a67ddc0::t_52ebe42cf488c2 35
+pnpm-lock.yaml
+  s_0d768e1dfbc208::t_b64558b88ec8b9 38,87,101-102,115,132-133,146,160-161,174,194-195,208,222-223,236,253-254,264,278-279,295,312-313,329,343-344,354,368-369,385,402-403,416,430-431,447,461-462,480,505,516-517,530,544-545,560,582,596-597,610,613,630-631,650,664-665,713,722,730-731,765,781,807-808,1661-1662,1673-1674,1679-1680,1689-1690,1699-1700,1709-1710,1719-1720,1729-1730,1739-1740,1749-1750,1759-1760,1769-1770,1779-1780,1790-1791,1802-1803,1814-1815,1826-1827,1838-1839,1850-1851,1862-1863,1874-1875,1885-1886,1889-1890,1900-1901,1912-1913,1924-1925,4117-4118,4625-4626,5200-5201,5545,5915,5926,5934,5942,6210,6212,6220,6222,6225,6227,6233,6239,6245,6251,6257,6263,6269,6275,6281,6287,6295,6297,6305,6307,6315,6317,6325,6327,6335,6337,6345,6347,6355,6357,6365,6367,6375,6380,6382,6388,6394,6400,6447,6465,7033,7045,8677,8680,8769,8900,9208,9235,9241-9265,9821,9827,9838
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "04261f47bf4e788f5404f87537e83ae661773d44",
+  "prompts": {},
+  "sessions": {
+    "s_0d768e1dfbc208": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11d74-80ac-7234-8533-734a6acf4f10",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_50fc654a67ddc0": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11775-ab75-75cf-b880-75b0f35ef359",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
