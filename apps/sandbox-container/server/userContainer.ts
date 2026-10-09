@@ -22,10 +22,16 @@ const INSTANCE = 'lite'
 const INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000
 const DEFAULT_EXEC_TIMEOUT_MS = 2 * 60 * 1000
 const MAX_EXEC_TIMEOUT_MS = 10 * 60 * 1000
+/** Extra time the Worker waits past a command's own timeout before giving up on it. */
+const EXEC_TIMEOUT_BACKSTOP_MS = 5 * 1000
+/** Exit status of a process killed by SIGKILL (128 + 9). */
+const SIGKILL_EXIT_CODE = 137
 /** exec() processes get only PATH from the image, so give them the rest of a usual shell. */
 const EXEC_ENV = { HOME: '/root', LANG: 'C.UTF-8' }
 /** There is no MIME type for a directory; Claude accepts this one. */
 const DIRECTORY_CONTENT_TYPE = 'text/directory'
+/** After the process exits, stop reading once its pipes have been quiet this long. */
+const OUTPUT_GRACE_MS = 250
 const START_ATTEMPTS = 20
 const START_RETRY_DELAY_MS = 500
 /** The template build installs packages, so it gets more CPU than a sandbox and a long timeout. */
@@ -45,6 +51,54 @@ type RunResult = { exitCode: number; stdout: Uint8Array; stderr: string }
 type FileContents =
 	| { type: 'text'; textOutput: string; mimeType: string | undefined }
 	| { type: 'base64'; base64Output: string; mimeType: string | undefined }
+
+/** Read a stream into memory until it ends or is cancelled. */
+function collectStream(stream: ReadableStream | null): {
+	done: Promise<void>
+	cancel: () => void
+	bytes: () => Uint8Array
+	lastChunkAt: () => number
+} {
+	const chunks: Uint8Array[] = []
+	let lastChunkAt = Date.now()
+	if (!stream) {
+		return {
+			done: Promise.resolve(),
+			cancel: () => {},
+			bytes: () => new Uint8Array(),
+			lastChunkAt: () => 0,
+		}
+	}
+	const reader = stream.getReader()
+	const done = (async () => {
+		try {
+			for (;;) {
+				const { value, done } = await reader.read()
+				if (done) {
+					return
+				}
+				chunks.push(value as Uint8Array)
+				lastChunkAt = Date.now()
+			}
+		} catch {
+			// Cancelled, or the process went away; keep what arrived.
+		}
+	})()
+	return {
+		done,
+		cancel: () => void reader.cancel().catch(() => {}),
+		lastChunkAt: () => lastChunkAt,
+		bytes: () => {
+			const result = new Uint8Array(chunks.reduce((size, chunk) => size + chunk.length, 0))
+			let offset = 0
+			for (const chunk of chunks) {
+				result.set(chunk, offset)
+				offset += chunk.length
+			}
+			return result
+		},
+	}
+}
 
 /** Decode bytes as UTF-8, or undefined if they aren't valid UTF-8 (so are likely binary). */
 function decodeUtf8(bytes: Uint8Array): string | undefined {
@@ -169,14 +223,24 @@ export class UserContainer extends DurableObject<Env> {
 
 	async container_exec(params: ExecParams): Promise<string> {
 		const timeoutMs = Math.min(params.timeout ?? DEFAULT_EXEC_TIMEOUT_MS, MAX_EXEC_TIMEOUT_MS)
-		const result = await this.run(['sh', '-c', params.args], {
-			timeoutMs,
-			stderr: params.streamStderr ? 'combined' : 'ignore',
-		})
+		const startedAt = Date.now()
+		// GNU timeout runs the command in its own process group and SIGKILLs the whole group, so
+		// children the command started die with it. The Worker-side timeout is only a backstop.
+		const result = await this.run(
+			['timeout', '--signal=KILL', `${timeoutMs / 1000}`, 'sh', '-c', params.args],
+			{
+				timeoutMs: timeoutMs + EXEC_TIMEOUT_BACKSTOP_MS,
+				stderr: params.streamStderr ? 'combined' : 'ignore',
+			}
+		)
 		if (result === 'timeout') {
 			return `Process killed after ${timeoutMs}ms timeout`
 		}
-		return `${new TextDecoder().decode(result.stdout)}Process exited with code: ${result.exitCode}`
+		const output = new TextDecoder().decode(result.stdout)
+		if (result.exitCode === SIGKILL_EXIT_CODE && Date.now() - startedAt >= timeoutMs) {
+			return `${output}Process killed after ${timeoutMs}ms timeout`
+		}
+		return `${output}Process exited with code: ${result.exitCode}`
 	}
 
 	async container_file_delete(filePath: string): Promise<boolean> {
@@ -335,6 +399,9 @@ export class UserContainer extends DurableObject<Env> {
 		// process exits.
 		const controller = new AbortController()
 		const timer = setTimeout(() => controller.abort(), timeoutMs)
+		const timedOut = new Promise<'timeout'>((resolve) => {
+			controller.signal.addEventListener('abort', () => resolve('timeout'), { once: true })
+		})
 		try {
 			const proc = await container.exec(cmd, {
 				cwd,
@@ -344,15 +411,34 @@ export class UserContainer extends DurableObject<Env> {
 				stderr,
 				signal: controller.signal,
 			})
-			const output = await proc.output()
-			// Aborting sends SIGKILL; the process then exits with 137 instead of rejecting.
-			if (controller.signal.aborted) {
+			const stdout = collectStream(proc.stdout)
+			const stderrOutput = collectStream(proc.stderr)
+			const exited = await Promise.race([proc.exitCode, timedOut])
+			if (exited === 'timeout' || controller.signal.aborted) {
+				stdout.cancel()
+				stderrOutput.cancel()
 				return 'timeout'
 			}
+			// A background process the command started keeps the pipes open after it exits (and the
+			// runtime then reports exitCode about 2s late). Read until the pipes close or go quiet, then
+			// leave that process running, like a shell does.
+			const drained = Promise.all([stdout.done, stderrOutput.done])
+			let closed = false
+			void drained.then(() => {
+				closed = true
+			})
+			while (
+				!closed &&
+				Date.now() - Math.max(stdout.lastChunkAt(), stderrOutput.lastChunkAt()) < OUTPUT_GRACE_MS
+			) {
+				await Promise.race([drained, new Promise((resolve) => setTimeout(resolve, 50))])
+			}
+			stdout.cancel()
+			stderrOutput.cancel()
 			return {
-				exitCode: output.exitCode,
-				stdout: new Uint8Array(output.stdout),
-				stderr: new TextDecoder().decode(output.stderr),
+				exitCode: exited,
+				stdout: stdout.bytes(),
+				stderr: new TextDecoder().decode(stderrOutput.bytes()),
 			}
 		} catch (error) {
 			if (controller.signal.aborted) {
