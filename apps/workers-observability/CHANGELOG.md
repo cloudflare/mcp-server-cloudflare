@@ -1,5 +1,16 @@
 # workers-observability
 
+## 0.5.6
+
+### Patch Changes
+
+- 3666aa9: Deprecate the Workers Observability MCP server in favor of the Cloudflare API MCP server at https://mcp.cloudflare.com/mcp. The existing tools keep working for now.
+- 632916d: Use a least-privilege AI Search instance binding for Cloudflare documentation search.
+- fb6d832: Return `query_worker_observability` events that have no `$workers.outcome`, such as cron invocations and `console.log` lines, instead of rejecting the whole response. Unknown event types and execution models no longer reject the response either.
+- ab883e5: Send `User-Agent: mcp-server-cloudflare (<server>; +https://github.com/cloudflare/mcp-server-cloudflare)` on every outbound request to Cloudflare, with `<server>` taken from the new `serverId` option of `createPublicMcpApp()` / `createAuthenticatedMcpApp()`. It covers the Cloudflare SDK client, `fetchCloudflareApi`, the OAuth token exchange and refresh, the identity probe, and the direct `fetch` calls in the Radar, URL Scanner, GraphQL, DEX, Blog and docs tools.
+- Updated dependencies [ab883e5]
+  - @repo/mcp-common@0.20.11
+
 ## 0.5.5
 
 ### Patch Changes

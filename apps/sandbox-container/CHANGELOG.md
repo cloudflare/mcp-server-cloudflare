@@ -1,5 +1,20 @@
 # containers-mcp
 
+## 0.3.0
+
+### Minor Changes
+
+- e9ddba2: Run sandboxes on the Containers `durable_object` scheduling policy. `UserContainer` starts the image itself and runs every tool through native `ctx.container.exec()`, so the container no longer runs an HTTP server and starts faster. `container_exec` now honours its `timeout`, and `container_file_read` returns text files with unknown extensions, such as `.py`, as text.
+- 14829c3: Start sandboxes from a snapshot of the Cloudflare-managed `cloudflare/debian-trixie` image instead of a custom Dockerfile. The snapshot is built once with the same toolchain and restored for every sandbox, so deploys no longer build or push an image. A failed start no longer resets the sandbox's Durable Object.
+
+### Patch Changes
+
+- ab883e5: Send `User-Agent: mcp-server-cloudflare (<server>; +https://github.com/cloudflare/mcp-server-cloudflare)` on every outbound request to Cloudflare, with `<server>` taken from the new `serverId` option of `createPublicMcpApp()` / `createAuthenticatedMcpApp()`. It covers the Cloudflare SDK client, `fetchCloudflareApi`, the OAuth token exchange and refresh, the identity probe, and the direct `fetch` calls in the Radar, URL Scanner, GraphQL, DEX, Blog and docs tools.
+- ffb1245: Push the sandbox image to the account's `registry.cloudchamber.cfdata.org` registry on deploy.
+- e4cf085: `container_exec` timeouts now return on time and kill everything the command started, keeping the output produced before the timeout. A command that starts a background process, such as a dev server, returns once the command exits and leaves that process running.
+- Updated dependencies [ab883e5]
+  - @repo/mcp-common@0.20.11
+
 ## 0.2.19
 
 ### Patch Changes
