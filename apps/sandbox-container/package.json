@@ -34,6 +34,6 @@
 		"@types/node": "22.15.17",
 		"ai": "6.0.194",
 		"start-server-and-test": "2.0.11",
-		"wrangler": "4.148.0"
+		"wrangler": "4.149.0"
 	}
 }

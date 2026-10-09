@@ -20,7 +20,7 @@
 		"prettier": "3.5.3",
 		"typescript": "5.5.4",
 		"vitest": "4.1.8",
-		"wrangler": "4.96.0"
+		"wrangler": "4.149.0"
 	},
 	"type": "module"
 }

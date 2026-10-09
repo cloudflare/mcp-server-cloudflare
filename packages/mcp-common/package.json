@@ -32,7 +32,7 @@
 		"@vitest/ui": "4.1.8",
 		"msw": "2.14.6",
 		"vitest": "4.1.8",
-		"wrangler": "4.96.0"
+		"wrangler": "4.149.0"
 	},
 	"type": "module"
 }
