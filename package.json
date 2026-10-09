@@ -27,6 +27,7 @@
 	"devDependencies": {
 		"@changesets/cli": "2.28.1",
 		"@cloudflare/vitest-pool-workers": "0.16.11",
+		"@cloudflare/workers-types": "4.20250416.0",
 		"@ianvs/prettier-plugin-sort-imports": "4.4.1",
 		"@repo/eslint-config": "workspace:*",
 		"@repo/tools": "workspace:*",
