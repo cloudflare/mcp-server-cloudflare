@@ -6,7 +6,7 @@
 	"scripts": {
 		"check:types": "run-tsc",
 		"check:lint": "run-eslint-workers",
-		"deploy": "CLOUDFLARE_CONTAINER_REGISTRY=registry.cloudchamber.cfdata.org run-wrangler-deploy",
+		"deploy": "run-wrangler-deploy",
 		"dev": "wrangler dev --var ENVIRONMENT:dev",
 		"start": "wrangler dev",
 		"test": "vitest run",

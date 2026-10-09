@@ -8,9 +8,8 @@
 		{
 			"name": "sandbox-container",
 			"class_name": "UserContainer",
-			// UserContainer picks the image and instance size when it starts the container.
-			"scheduling_policy": "durable_object",
-			"images": { "sandbox": { "dockerfile": "./Dockerfile" } }
+			// UserContainer starts each sandbox from a snapshot of the managed cloudflare/debian-trixie image.
+			"scheduling_policy": "durable_object"
 		}
 	],
 	"durable_objects": {
@@ -84,9 +83,8 @@
 				{
 					"name": "sandbox-container-staging",
 					"class_name": "UserContainer",
-					// UserContainer picks the image and instance size when it starts the container.
-					"scheduling_policy": "durable_object",
-					"images": { "sandbox": { "dockerfile": "./Dockerfile" } }
+					// UserContainer starts each sandbox from a snapshot of the managed cloudflare/debian-trixie image.
+					"scheduling_policy": "durable_object"
 				}
 			],
 			"durable_objects": {
@@ -131,9 +129,8 @@
 				{
 					"name": "sandbox-container",
 					"class_name": "UserContainer",
-					// UserContainer picks the image and instance size when it starts the container.
-					"scheduling_policy": "durable_object",
-					"images": { "sandbox": { "dockerfile": "./Dockerfile" } }
+					// UserContainer starts each sandbox from a snapshot of the managed cloudflare/debian-trixie image.
+					"scheduling_policy": "durable_object"
 				}
 			],
 			"durable_objects": {

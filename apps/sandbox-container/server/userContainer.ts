@@ -2,12 +2,19 @@ import { DurableObject } from 'cloudflare:workers'
 import mime from 'mime'
 
 import { getContainerManager, MAX_CONTAINERS } from './containerManager'
+import {
+	BASE_IMAGE,
+	getTemplateContainer,
+	KEEP_ALIVE_ENTRYPOINT,
+	TEMPLATE_SETUP,
+	TEMPLATE_VERSION,
+} from './sandboxTemplate'
 import { bytesToBase64, toWorkdirPath } from './utils'
 
 import type { ExecParams, FileWrite } from '../shared/schema'
 import type { Env } from './sandbox.server.context'
 
-/** Where commands run and file paths resolve. The image creates it. */
+/** Where commands run and file paths resolve. The template creates it. */
 const WORKDIR = '/workdir'
 /** Matches the old application's instance size: 1/16 vCPU, 256 MiB, 2 GB disk. */
 const INSTANCE = 'lite'
@@ -21,6 +28,18 @@ const EXEC_ENV = { HOME: '/root', LANG: 'C.UTF-8' }
 const DIRECTORY_CONTENT_TYPE = 'text/directory'
 const START_ATTEMPTS = 20
 const START_RETRY_DELAY_MS = 500
+/** The template build installs packages, so it gets more CPU than a sandbox and a long timeout. */
+const TEMPLATE_BUILD_INSTANCE = 'standard-1'
+const TEMPLATE_SETUP_TIMEOUT_MS = 10 * 60 * 1000
+const TEMPLATE_STORAGE_KEY = `template-snapshot-v${TEMPLATE_VERSION}`
+
+type StartOptions = { containerSnapshot: ContainerSnapshot } | { image: string }
+type InstanceType = typeof INSTANCE | typeof TEMPLATE_BUILD_INSTANCE
+type SandboxStartOptions = StartOptions & {
+	instance: InstanceType
+	enableInternet: boolean
+	entrypoint: string[]
+}
 
 type RunResult = { exitCode: number; stdout: Uint8Array; stderr: string }
 type FileContents =
@@ -37,6 +56,9 @@ function decodeUtf8(bytes: Uint8Array): string | undefined {
 }
 
 export class UserContainer extends DurableObject<Env> {
+	/** On the template instance: the build in progress, shared by concurrent callers. */
+	private templateBuild: Promise<ContainerSnapshot> | undefined
+
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env)
 		// A Durable Object restart drops the timeout, so set it again on a container that kept running.
@@ -71,10 +93,73 @@ export class UserContainer extends DurableObject<Env> {
 			}
 		}
 
-		await this.ctx.blockConcurrencyWhile(() => this.startContainer())
+		// Fetched outside blockConcurrencyWhile: the first build can outlast its 30 second limit.
+		const template = getTemplateContainer(this.env)
+		const snapshot = await template.getTemplateSnapshot()
+		const error = await this.startBlockingRequests({ containerSnapshot: snapshot })
+		if (error !== undefined) {
+			// The snapshot may have expired after 30 days without a restore. Rebuild it once.
+			console.error('Starting from the template snapshot failed, rebuilding it', error)
+			await template.discardTemplateSnapshot(snapshot.id)
+			const rebuilt = await template.getTemplateSnapshot()
+			const retryError = await this.startBlockingRequests({ containerSnapshot: rebuilt })
+			if (retryError !== undefined) {
+				throw new Error(`Failed to start container: ${String(retryError)}`)
+			}
+		}
 		await containerManager.trackContainer(this.ctx.id.toString())
 
 		return 'Created new container'
+	}
+
+	/**
+	 * Called on the template instance. Returns the snapshot user sandboxes start from, building it
+	 * from BASE_IMAGE first if this TEMPLATE_VERSION has none.
+	 */
+	async getTemplateSnapshot(): Promise<ContainerSnapshot> {
+		const stored = await this.ctx.storage.get<ContainerSnapshot>(TEMPLATE_STORAGE_KEY)
+		if (stored) {
+			return stored
+		}
+		this.templateBuild ??= this.buildTemplateSnapshot().finally(() => {
+			this.templateBuild = undefined
+		})
+		return this.templateBuild
+	}
+
+	/** Called on the template instance. Forgets a snapshot that no longer restores. */
+	async discardTemplateSnapshot(id: string): Promise<void> {
+		const stored = await this.ctx.storage.get<ContainerSnapshot>(TEMPLATE_STORAGE_KEY)
+		if (stored?.id === id) {
+			await this.ctx.storage.delete(TEMPLATE_STORAGE_KEY)
+		}
+	}
+
+	private async buildTemplateSnapshot(): Promise<ContainerSnapshot> {
+		const container = this.requireContainer()
+		await this.destroyContainer()
+		const startError = await this.startContainer({ image: BASE_IMAGE }, TEMPLATE_BUILD_INSTANCE)
+		if (startError !== undefined) {
+			throw new Error(`Failed to start the template container: ${String(startError)}`)
+		}
+		try {
+			const setup = await this.run(['sh', '-c', TEMPLATE_SETUP], {
+				cwd: '/',
+				timeoutMs: TEMPLATE_SETUP_TIMEOUT_MS,
+				stderr: 'combined',
+			})
+			if (setup === 'timeout' || setup.exitCode !== 0) {
+				const output = setup === 'timeout' ? 'timed out' : new TextDecoder().decode(setup.stdout)
+				throw new Error(`Template setup failed: ${output.slice(-2000)}`)
+			}
+			const snapshot = await container.snapshotContainer({
+				name: `sandbox-template-v${TEMPLATE_VERSION}`,
+			})
+			await this.ctx.storage.put(TEMPLATE_STORAGE_KEY, snapshot)
+			return snapshot
+		} finally {
+			await this.destroyContainer()
+		}
 	}
 
 	async container_ping(): Promise<string> {
@@ -164,40 +249,60 @@ export class UserContainer extends DurableObject<Env> {
 	}
 
 	/**
+	 * startContainer() inside blockConcurrencyWhile, so no request runs against a half-started
+	 * container. Returns the error rather than throwing it: a callback that throws resets the
+	 * Durable Object, and the caller could no longer recover.
+	 */
+	private async startBlockingRequests(source: StartOptions): Promise<unknown> {
+		let error: unknown
+		await this.ctx.blockConcurrencyWhile(async () => {
+			error = await this.startContainer(source)
+		})
+		return error
+	}
+
+	/**
 	 * Start a container and wait until it runs commands. A container can be briefly unavailable
 	 * after destroy(), and start() returns before the container is ready, so both are retried.
+	 * Returns undefined once it's ready, or the last error.
 	 */
-	private async startContainer(): Promise<void> {
+	private async startContainer(
+		source: StartOptions,
+		instance: InstanceType = INSTANCE
+	): Promise<unknown> {
 		const container = this.requireContainer()
 		let lastError: unknown
 		for (let attempt = 0; attempt < START_ATTEMPTS; attempt++) {
 			try {
 				if (!container.running) {
-					// The old @cloudflare/workers-types that agents pulls in also declares
-					// ContainerStartupOptions, without `image`, and wins the merge.
-					container.start({
-						image: container.images.sandbox,
-						instance: INSTANCE,
+					const options: SandboxStartOptions = {
+						...source,
+						instance,
 						enableInternet: true,
-					} as ContainerStartupOptions)
+						entrypoint: KEEP_ALIVE_ENTRYPOINT,
+					}
+					// The old @cloudflare/workers-types that agents pulls in also declares
+					// ContainerStartupOptions, without image, instance or containerSnapshot, and wins the
+					// merge. SandboxStartOptions carries the checking instead.
+					container.start(options as unknown as ContainerStartupOptions)
 					this.ctx.waitUntil(
 						container.monitor().catch((error) => console.error('Container exited', error))
 					)
 				}
 				await container.setInactivityTimeout(INACTIVITY_TIMEOUT_MS)
-				await this.runOrThrow(['true'])
-				return
+				await this.runOrThrow(['true'], { cwd: '/' })
+				return undefined
 			} catch (error) {
 				lastError = error
 				await new Promise((resolve) => setTimeout(resolve, START_RETRY_DELAY_MS))
 			}
 		}
-		throw new Error(`Failed to start container: ${String(lastError)}`)
+		return lastError ?? new Error('Container did not start')
 	}
 
 	private async runOrThrow(
 		cmd: string[],
-		options: { stdin?: string; timeoutMs?: number } = {}
+		options: { stdin?: string; timeoutMs?: number; cwd?: string } = {}
 	): Promise<RunResult> {
 		const result = await this.run(cmd, options)
 		if (result === 'timeout') {
@@ -213,7 +318,13 @@ export class UserContainer extends DurableObject<Env> {
 			stdin,
 			timeoutMs = DEFAULT_EXEC_TIMEOUT_MS,
 			stderr = 'pipe',
-		}: { stdin?: string; timeoutMs?: number; stderr?: 'pipe' | 'combined' | 'ignore' } = {}
+			cwd = WORKDIR,
+		}: {
+			stdin?: string
+			timeoutMs?: number
+			stderr?: 'pipe' | 'combined' | 'ignore'
+			cwd?: string
+		} = {}
 	): Promise<RunResult | 'timeout'> {
 		const container = this.requireContainer()
 		if (!container.running) {
@@ -226,7 +337,7 @@ export class UserContainer extends DurableObject<Env> {
 		const timer = setTimeout(() => controller.abort(), timeoutMs)
 		try {
 			const proc = await container.exec(cmd, {
-				cwd: WORKDIR,
+				cwd,
 				env: EXEC_ENV,
 				stdin: stdin === undefined ? undefined : new Blob([stdin]).stream(),
 				stdout: 'pipe',
