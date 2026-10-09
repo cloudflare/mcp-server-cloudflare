@@ -1,5 +1,7 @@
 # Cloudflare Documentation MCP Server (via AI Search) 🔭
 
+[![context cost](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fathakur3%2Fmcp-context-cost%2Fmain%2Fbadges%2Fcloudflare-docs.json)](https://athakur3.github.io/mcp-context-cost/METHODOLOGY)
+
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP connections. It uses Cloudflare AI Search (AutoRAG) to provide contextual search of the Cloudflare Developer Documentation.
 
 The Cloudflare account this worker is deployed on has an AI Search instance configured with the complete Cloudflare Developer Documentation.
