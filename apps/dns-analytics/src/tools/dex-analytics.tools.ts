@@ -33,7 +33,7 @@ export function registerAnalyticTools<Env>(context: McpRegistrationContext<Env>)
 				const params: ReportGetParams = {
 					zone_id: zone,
 					metrics: 'responseTimeAvg,queryCount,uncachedCount,staleCount',
-					dimensions: 'responseCode,responseCached',
+					dimensions: 'responseCode',
 					since: start_date,
 				}
 				const result = await client.dns.analytics.reports.get(params)
