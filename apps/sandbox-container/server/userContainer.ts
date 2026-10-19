@@ -33,6 +33,12 @@ const DIRECTORY_CONTENT_TYPE = 'text/directory'
 /** After the process exits, stop reading once its pipes have been quiet this long. */
 const OUTPUT_GRACE_MS = 250
 const START_ATTEMPTS = 20
+/**
+ * The runtime names each container after its Durable Object ID: 64 hex characters, one more than a
+ * DNS label allows. Anything that resolves its own hostname then fails, e.g. Python's http.server
+ * dies in socket.getfqdn() with "label too long". Every sandbox gets this name instead.
+ */
+const SANDBOX_HOSTNAME = 'sandbox'
 const START_RETRY_DELAY_MS = 500
 /** The template build installs packages, so it gets more CPU than a sandbox and a long timeout. */
 const TEMPLATE_BUILD_INSTANCE = 'standard-1'
@@ -304,6 +310,24 @@ export class UserContainer extends DurableObject<Env> {
 		return `Wrote file: ${file.path}`
 	}
 
+	/** Rename the running container to SANDBOX_HOSTNAME. Best effort: a failure doesn't stop it. */
+	private async setHostname(): Promise<void> {
+		const result = await this.run(
+			[
+				'sh',
+				'-c',
+				'hostname "$1" && { grep -qw "$1" /etc/hosts || echo "127.0.1.1 $1" >> /etc/hosts; }',
+				'sh',
+				SANDBOX_HOSTNAME,
+			],
+			{ cwd: '/', stderr: 'combined' }
+		)
+		if (result === 'timeout' || result.exitCode !== 0) {
+			const output = result === 'timeout' ? 'timed out' : new TextDecoder().decode(result.stdout)
+			console.error('Failed to set the sandbox hostname', output)
+		}
+	}
+
 	private requireContainer(): Container {
 		const container = this.ctx.container
 		if (!container) {
@@ -355,6 +379,7 @@ export class UserContainer extends DurableObject<Env> {
 				}
 				await container.setInactivityTimeout(INACTIVITY_TIMEOUT_MS)
 				await this.runOrThrow(['true'], { cwd: '/' })
+				await this.setHostname()
 				return undefined
 			} catch (error) {
 				lastError = error
