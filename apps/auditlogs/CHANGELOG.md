@@ -1,5 +1,19 @@
 # auditlogs
 
+## 0.2.6
+
+### Patch Changes
+
+- 20c92ec: Accept `api` as a valid Audit Logs actor context in requests and responses.
+- 52a4054: Deprecate the dedicated Audit Logs MCP server in favor of the Cloudflare API MCP server at https://mcp.cloudflare.com/mcp. The replacement covers Audit Logs v2 filters and cursor pagination through the full Cloudflare API.
+
+  The existing tool continues to work for now. The server exposes migration guidance through MCP instructions and is no longer advertised in the root server list or `server.json`.
+
+- ab883e5: Send `User-Agent: mcp-server-cloudflare (<server>; +https://github.com/cloudflare/mcp-server-cloudflare)` on every outbound request to Cloudflare, with `<server>` taken from the new `serverId` option of `createPublicMcpApp()` / `createAuthenticatedMcpApp()`. It covers the Cloudflare SDK client, `fetchCloudflareApi`, the OAuth token exchange and refresh, the identity probe, and the direct `fetch` calls in the Radar, URL Scanner, GraphQL, DEX, Blog and docs tools.
+- c1b64eb: Refer to the replacement as the Cloudflare API MCP server, not Code Mode, in the deprecation instructions.
+- Updated dependencies [ab883e5]
+  - @repo/mcp-common@0.20.11
+
 ## 0.2.5
 
 ### Patch Changes
