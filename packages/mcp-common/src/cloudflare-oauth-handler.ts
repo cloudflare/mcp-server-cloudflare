@@ -94,11 +94,47 @@ function retryAfterHeaders(...responses: Response[]): Record<string, string> {
 	}
 }
 
-/** Classifies one or more identity-probe failures by priority. */
+/**
+ * Cloudflare refuses an unrecognized, expired or revoked credential with 403 and
+ * `9109: Invalid access token`: the same status and code it uses when a valid
+ * token lacks a permission (`9109: Unauthorized to access requested resource`).
+ * Only the message tells them apart.
+ */
+const INVALID_CREDENTIAL_MESSAGE = /^invalid access token$/i
+
+const CloudflareErrorsSchema = z.object({
+	errors: z.array(z.object({ message: z.string() })).optional(),
+})
+
+/** Whether Cloudflare refused any of these credentials itself, rather than a permission it lacks. */
+async function rejectsCredential(...responses: Response[]): Promise<boolean> {
+	for (const response of responses) {
+		if (response.status !== 401 && response.status !== 403) continue
+		try {
+			const parsed = CloudflareErrorsSchema.safeParse(await response.clone().json())
+			const rejected =
+				parsed.success &&
+				(parsed.data.errors ?? []).some((error) =>
+					INVALID_CREDENTIAL_MESSAGE.test(error.message.trim())
+				)
+			if (rejected) return true
+		} catch {
+			// Not a Cloudflare error envelope; classify by status alone.
+		}
+	}
+	return false
+}
+
+/**
+ * Classifies one or more identity-probe failures by priority. The MCP
+ * authorization spec requires 401 for invalid or expired tokens and reserves
+ * 403 with `insufficient_scope` for a valid token that lacks scope.
+ */
 function throwIdentityProbeError(
 	statuses: readonly [number, ...number[]],
 	internalMessage: string,
-	headers: Record<string, string> = {}
+	headers: Record<string, string> = {},
+	credentialRejected = false
 ): never {
 	if (statuses.some((status) => status >= 500)) {
 		throw new McpError('Cloudflare API is temporarily unavailable', 502, {
@@ -113,7 +149,7 @@ function throwIdentityProbeError(
 			headers,
 		})
 	}
-	if (statuses.includes(401)) {
+	if (statuses.includes(401) || credentialRejected) {
 		throw new McpError('Access token is invalid or expired', 401, {
 			reportToSentry: false,
 			internalMessage,
@@ -137,11 +173,16 @@ function throwIdentityProbeError(
 	})
 }
 
-function throwCombinedApiError(userResponse: Response, accountsResponse: Response): never {
+function throwCombinedApiError(
+	userResponse: Response,
+	accountsResponse: Response,
+	credentialRejected: boolean
+): never {
 	throwIdentityProbeError(
 		[userResponse.status, accountsResponse.status],
 		`Upstream user=${userResponse.status}, accounts=${accountsResponse.status}`,
-		retryAfterHeaders(userResponse, accountsResponse)
+		retryAfterHeaders(userResponse, accountsResponse),
+		credentialRejected
 	)
 }
 
@@ -200,7 +241,8 @@ export async function getUserAndAccounts(
 		throwIdentityProbeError(
 			[accountsResponse.status],
 			`Upstream accounts=${accountsResponse.status}`,
-			retryAfterHeaders(accountsResponse)
+			retryAfterHeaders(accountsResponse),
+			await rejectsCredential(accountsResponse)
 		)
 	}
 
@@ -212,7 +254,11 @@ export async function getUserAndAccounts(
 		} else {
 			console.warn(message)
 		}
-		throwCombinedApiError(userResponse, accountsResponse)
+		throwCombinedApiError(
+			userResponse,
+			accountsResponse,
+			await rejectsCredential(userResponse, accountsResponse)
+		)
 	}
 
 	// Parse accounts with safeParse for graceful degradation
@@ -244,7 +290,8 @@ export async function getUserAndAccounts(
 		throwIdentityProbeError(
 			[accountsResponse.status],
 			`Upstream accounts=${accountsResponse.status}`,
-			retryAfterHeaders(accountsResponse)
+			retryAfterHeaders(accountsResponse),
+			await rejectsCredential(accountsResponse)
 		)
 	}
 
@@ -280,7 +327,8 @@ export async function getUserAndAccounts(
 		throwIdentityProbeError(
 			[userResponse.status],
 			`Upstream user=${userResponse.status}`,
-			retryAfterHeaders(userResponse)
+			retryAfterHeaders(userResponse),
+			await rejectsCredential(userResponse)
 		)
 	}
 

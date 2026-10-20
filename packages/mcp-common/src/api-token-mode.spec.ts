@@ -206,6 +206,68 @@ describe('resolveExternalToken', () => {
 		})
 	})
 
+	// Bodies captured from api.cloudflare.com: an expired or unknown token, and a
+	// valid token without the permission an endpoint needs. Both are 403 with 9109.
+	const invalidToken = () =>
+		HttpResponse.json(
+			{ success: false, errors: [{ code: 9109, message: 'Invalid access token' }] },
+			{ status: 403 }
+		)
+	const missingPermission = () =>
+		HttpResponse.json(
+			{
+				success: false,
+				errors: [{ code: 9109, message: 'Unauthorized to access requested resource' }],
+			},
+			{ status: 403 }
+		)
+
+	it.each([
+		['user', 'cfoat_expired-token'],
+		['legacy', 'e'.repeat(40)],
+	])(
+		'maps a rejected %s credential to invalid_token 401, not insufficient_scope',
+		async (_, token) => {
+			server.use(
+				http.get('https://api.cloudflare.com/client/v4/user', invalidToken),
+				http.get('https://api.cloudflare.com/client/v4/accounts', invalidToken)
+			)
+
+			await expect(
+				resolveExternalToken(resolveInput(token, kvStub().namespace))
+			).rejects.toMatchObject({
+				code: 'invalid_token',
+				statusCode: 401,
+				description: 'Access token is invalid or expired',
+			})
+		}
+	)
+
+	it('maps a rejected account credential to invalid_token 401', async () => {
+		server.use(http.get('https://api.cloudflare.com/client/v4/accounts', invalidToken))
+
+		await expect(
+			resolveExternalToken(resolveInput('cfat_expired-token', kvStub().namespace))
+		).rejects.toMatchObject({ code: 'invalid_token', statusCode: 401 })
+	})
+
+	it('keeps insufficient_scope for a valid user token without user access', async () => {
+		server.use(
+			http.get('https://api.cloudflare.com/client/v4/user', missingPermission),
+			http.get('https://api.cloudflare.com/client/v4/accounts', () =>
+				HttpResponse.json({ success: true, result: [{ id: 'account-1', name: 'Account One' }] })
+			)
+		)
+
+		await expect(
+			resolveExternalToken(resolveInput('cfut_no-user-scope', kvStub().namespace))
+		).rejects.toMatchObject({
+			code: 'insufficient_scope',
+			statusCode: 403,
+			requiredScopes: ['user:read', 'account:read'],
+		})
+	})
+
 	it('maps insufficient permissions to insufficient_scope with step-up guidance', async () => {
 		server.use(
 			http.get('https://api.cloudflare.com/client/v4/user', () =>
