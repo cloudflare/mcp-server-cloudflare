@@ -1,0 +1,31 @@
+.changeset/invalid-token-401.md
+  s_50fc654a67ddc0::t_3fc4df3f39a6ad 1-23
+packages/mcp-common/src/api-token-mode.spec.ts
+  s_50fc654a67ddc0::t_033a87a40af15d 209-270
+packages/mcp-common/src/cloudflare-oauth-handler.ts
+  s_793ccda59c9326::t_32858a9bc1c41f 97-132,136-137,152,176-180,184-185,244-245,257-261,293-294,330-331
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "580e0a342de9f69e3bb44564ef57050db3f06412",
+  "prompts": {},
+  "sessions": {
+    "s_50fc654a67ddc0": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11775-ab75-75cf-b880-75b0f35ef359",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    },
+    "s_793ccda59c9326": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "01a11d88-06eb-711a-bf73-b9b34e6b2051",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Matt Carey <mcarey@cloudflare.com>"
+    }
+  }
+}
