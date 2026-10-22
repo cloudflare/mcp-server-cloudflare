@@ -1,6 +1,6 @@
 {
 	"name": "@repo/mcp-common",
-	"version": "0.20.11",
+	"version": "0.21.0",
 	"private": true,
 	"sideEffects": false,
 	"main": "./src/index.ts",
