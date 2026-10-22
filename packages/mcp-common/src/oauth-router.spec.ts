@@ -1,4 +1,3 @@
-import { resourceMatches } from '@cloudflare/workers-oauth-provider'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 
@@ -43,32 +42,32 @@ const executionContext = {
 } as ExecutionContext
 
 describe('OAuth router resource policy', () => {
-	it('uses exact RFC 8707 matching for same-origin resource paths', () => {
-		expect(
-			resourceMatches('https://mcp.example.com/other', 'https://mcp.example.com/mcp', false)
-		).toBe(false)
-		expect(
-			resourceMatches('https://mcp.example.com/mcp', 'https://mcp.example.com/mcp', false)
-		).toBe(true)
+	it('publishes <origin>/mcp as the one protected resource', async () => {
+		const router = createCloudflareOAuthRouter<CloudflareOAuthEnv>({
+			apiHandler,
+			scopes: {},
+			metrics,
+			mcpRequestPolicy,
+		})
+
+		const response = await router.fetch(
+			new Request('https://mcp.example.com/.well-known/oauth-protected-resource/mcp'),
+			testEnv(),
+			executionContext
+		)
+
+		expect(response.status).toBe(200)
+		await expect(response.json()).resolves.toMatchObject({
+			resource: 'https://mcp.example.com/mcp',
+			authorization_servers: ['https://mcp.example.com'],
+		})
 	})
 
-	it('rejects the expired origin-only compatibility override', () => {
-		expect(() =>
-			createCloudflareOAuthRouter<CloudflareOAuthEnv>({
-				apiHandler,
-				scopes: {},
-				metrics,
-				mcpRequestPolicy,
-				provider: { resourceMatchOriginOnly: true } as never,
-			})
-		).toThrow('resourceMatchOriginOnly')
-	})
-
-	it('routes legacy SSE stream requests to the migration handler before OAuth', async () => {
+	it('sends every /sse request to the handler before OAuth, with or without a token', async () => {
 		const router = createCloudflareOAuthRouter<CloudflareOAuthEnv>({
 			apiHandler: {
 				fetch() {
-					return new Response('migration', { status: 410 })
+					return new Response('moved', { status: 410 })
 				},
 			},
 			scopes: {},
@@ -76,17 +75,23 @@ describe('OAuth router resource policy', () => {
 			mcpRequestPolicy,
 		})
 
-		const response = await router.fetch(
-			new Request('https://mcp.example.com/sse', {
-				method: 'GET',
-				headers: { Accept: 'text/event-stream', Host: 'mcp.example.com' },
-			}),
-			testEnv(),
-			executionContext
-		)
-
-		expect(response.status).toBe(410)
-		await expect(response.text()).resolves.toBe('migration')
+		const requests: Array<{ method: string; headers: Record<string, string> }> = [
+			{ method: 'GET', headers: { Accept: 'text/event-stream' } },
+			{ method: 'POST', headers: {} },
+			{ method: 'POST', headers: { Authorization: `Bearer ${'a'.repeat(40)}` } },
+		]
+		for (const init of requests) {
+			const response = await router.fetch(
+				new Request('https://mcp.example.com/sse', {
+					...init,
+					headers: { ...init.headers, Host: 'mcp.example.com' },
+				}),
+				testEnv(),
+				executionContext
+			)
+			expect(response.status).toBe(410)
+			await expect(response.text()).resolves.toBe('moved')
+		}
 	})
 
 	it('returns a retryable response when a Wrangler OAuth identity probe is rate limited', async () => {
@@ -167,7 +172,7 @@ describe('OAuth router resource policy', () => {
 		})
 	})
 
-	it('serves /sse with a direct API token through the provider hook', async () => {
+	it('serves /mcp with a direct API token through the provider hook', async () => {
 		server.use(
 			http.get('https://api.cloudflare.com/client/v4/user', () =>
 				HttpResponse.json({
@@ -194,7 +199,7 @@ describe('OAuth router resource policy', () => {
 		})
 
 		const response = await router.fetch(
-			new Request('https://mcp.example.com/sse', {
+			new Request('https://mcp.example.com/mcp', {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${'a'.repeat(40)}`,

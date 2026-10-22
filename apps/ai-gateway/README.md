@@ -9,7 +9,7 @@ connections, with Cloudflare OAuth built-in.
 It integrates tools powered by the [Cloudflare AI Gateway API](https://developers.cloudflare.com/ai-gateway/) to search
 your AI Gateway logs, inspect prompts and responses, and get details about gateway usage.
 
-The `/mcp` and `/sse` URLs use the same stateless SDK v2 handler and create a fresh server with request-scoped auth/account context for every request. `/sse` is not the deprecated HTTP+SSE transport. OAuth grants and token validation remain durable security state; the server stores no MCP protocol session.
+The `/mcp` URL uses a stateless SDK v2 handler that creates a fresh server with request-scoped auth/account context for every request. The retired `/sse` URL returns `410 Gone` pointing at `/mcp`. OAuth grants and token validation remain durable security state; the server stores no MCP protocol session.
 
 ## 🔨 Available Tools
 

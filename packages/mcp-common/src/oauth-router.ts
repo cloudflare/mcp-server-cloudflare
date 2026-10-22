@@ -10,7 +10,7 @@ import {
 	resolveExternalToken,
 } from './api-token-mode'
 import { createAuthHandlers, handleTokenExchangeCallback } from './cloudflare-oauth-handler'
-import { isLegacySseStreamRequest } from './transport-migration'
+import { isRetiredSseRequest, MCP_ROUTE, mcpResource } from './transport-migration'
 
 import type { OAuthProviderOptions } from '@cloudflare/workers-oauth-provider'
 import type { MetricsTracker } from '@repo/mcp-observability'
@@ -24,8 +24,6 @@ export interface CloudflareOAuthEnv extends Cloudflare.Env {
 	DEV_CLOUDFLARE_EMAIL: string
 	DEV_DISABLE_OAUTH: string
 }
-
-const MCP_ROUTES = ['/mcp', '/sse']
 
 export interface CreateCloudflareOAuthRouterOptions<Env extends CloudflareOAuthEnv> {
 	apiHandler: RequestHandler<Env>
@@ -46,14 +44,14 @@ export interface CreateCloudflareOAuthRouterOptions<Env extends CloudflareOAuthE
 		| 'tokenEndpoint'
 		| 'tokenExchangeCallback'
 		| 'resolveExternalToken'
-		| 'resourceMatchOriginOnly'
+		| 'resourceMetadata'
 	>
 }
 
 /**
- * Routes OAuth grants, API-token validation, and both MCP URLs through one
- * stateless API handler. `/sse` is only a URL alias for the same Streamable HTTP
- * handler as `/mcp`; OAuth grants and KV remain durable application/security state.
+ * Routes OAuth grants and API-token validation to the stateless `/mcp` handler. The OAuth
+ * protected resource is `<origin>/mcp`: every token is bound to it. The retired `/sse` URL
+ * goes straight to the handler, which points it at `/mcp`.
  */
 export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 	apiHandler,
@@ -62,15 +60,13 @@ export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 	mcpRequestPolicy,
 	provider,
 }: CreateCloudflareOAuthRouterOptions<Env>): RequestHandler<Env> {
-	if (provider && 'resourceMatchOriginOnly' in provider) {
-		throw new TypeError(
-			'resourceMatchOriginOnly is deprecated and not supported here; OAuth resources must match exactly'
-		)
-	}
 	const defaultHandler = createAuthHandlers({ scopes, metrics })
 	return {
 		async fetch(request, env, ctx) {
-			if (MCP_ROUTES.includes(new URL(request.url).pathname)) {
+			// Before OAuth: a client still configured with /sse must see where to go, not a 401.
+			if (isRetiredSseRequest(request)) return apiHandler.fetch(request, env, ctx)
+
+			if (new URL(request.url).pathname === MCP_ROUTE) {
 				const hostRejection = hostHeaderValidationResponse(
 					request,
 					mcpRequestPolicy.allowedHostnames
@@ -83,11 +79,8 @@ export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 					return apiHandler.fetch(request, env, ctx)
 				}
 
-				// Let the MCP handler own browser preflight and the unauthenticated SSE
-				// migration response so its exact HTTP policy is preserved. The OAuth
-				// Provider would otherwise challenge GET /sse before clients see the
-				// actionable replacement endpoint.
-				if (request.method === 'OPTIONS' || isLegacySseStreamRequest(request)) {
+				// Let the MCP handler own browser preflight so its exact CORS policy is preserved.
+				if (request.method === 'OPTIONS') {
 					return apiHandler.fetch(request, env, ctx)
 				}
 			}
@@ -101,19 +94,22 @@ export function createCloudflareOAuthRouter<Env extends CloudflareOAuthEnv>({
 				accessTokenTTL: 3600,
 				refreshTokenTTL: 2_592_000,
 				...provider,
-				apiRoute: MCP_ROUTES,
+				apiRoute: MCP_ROUTE,
 				apiHandler,
+				// One canonical resource per origin: tokens are bound to `<origin>/mcp`.
+				resourceMetadata: { resource: mcpResource(request.url) },
 				defaultHandler,
 				authorizeEndpoint: '/oauth/authorize',
 				tokenEndpoint: '/token',
 				// The provider resolves its own access tokens first, then delegates
 				// direct Cloudflare API/OAuth credentials to resolveExternalToken.
 				resolveExternalToken,
+				// An upstream invalid_grant thrown here revokes the grant (workers-oauth-provider 1.1+).
 				tokenExchangeCallback: (options) =>
 					handleTokenExchangeCallback(
 						options,
-						env.CLOUDFLARE_CLIENT_ID,
-						env.CLOUDFLARE_CLIENT_SECRET
+						options.env.CLOUDFLARE_CLIENT_ID,
+						options.env.CLOUDFLARE_CLIENT_SECRET
 					),
 			}).fetch(request, env, ctx)
 		},

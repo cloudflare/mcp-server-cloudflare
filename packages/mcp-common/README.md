@@ -24,7 +24,7 @@ Use `createPublicMcpApp()` or `createAuthenticatedMcpApp()` for application entr
 - the Cloudflare MCP playground Origin policy
 - a fresh SDK v2 server for every request
 - the default stateless 2025 compatibility path
-- the `/sse` URL alias for the same Streamable HTTP handler as `/mcp`
+- a `410 Gone` for the retired `/sse` URL, naming `/mcp`
 - OAuth and API-token routing for authenticated applications
 
 ```ts
@@ -49,7 +49,7 @@ export default app.worker
 
 For lower-level use, `createCloudflareMcpHandler()` accepts explicit server metadata, observability factories, and HTTP policy. It delegates protocol routing, CORS, Host/Origin validation, and legacy compatibility to `createMcpHandler()` from the isolated `agents/mcp/server` entry point. Do not construct a global MCP server. Do not set `legacy: 'reject'`: the default `legacy: 'stateless'` fallback is part of the migration contract.
 
-The shared handler serves `POST` and CORS `OPTIONS` on `/mcp` and `/sse`. The latter is a URL alias, not the deprecated HTTP+SSE transport. A legacy SSE `GET /sse` request returns `410 Gone` with an `application/problem+json` body that offers two Streamable HTTP migrations: keep the existing URL by changing the configured transport, or switch to the recommended `/mcp` URL for future compatibility. The SDK continues to return `405` for other stateless legacy stream and session-deletion requests. MCP request bodies are capped at 4 MiB before SDK parsing, and OAuth resources use strict path-aware matching.
+The shared handler serves `POST` and CORS `OPTIONS` on `/mcp`. Every request to the retired `/sse` URL, before any authentication, returns `410 Gone` with an `application/problem+json` body naming the `/mcp` URL. It is not a redirect: MCP SDK clients that follow one to `/mcp` with OAuth reject its protected resource metadata with an error that never mentions `/mcp`. The SDK continues to return `405` for other stateless legacy stream and session-deletion requests. MCP request bodies are capped at 4 MiB before SDK parsing.
 
 ## Request registration context
 
@@ -69,7 +69,7 @@ Shared tools capture the registration context instead of a stateful server objec
 
 ## Authentication routing
 
-`createAuthenticatedMcpApp()` composes `createCloudflareOAuthRouter()` internally. OAuth grants, KV, credentials, refresh tokens, and API-token validation remain application/security state; only MCP protocol sessions are removed. `/mcp` and `/sse` use the same handler while retaining exact path-aware OAuth resource matching.
+`createAuthenticatedMcpApp()` composes `createCloudflareOAuthRouter()` internally. OAuth grants, KV, credentials, refresh tokens, and API-token validation remain application/security state; only MCP protocol sessions are removed. The OAuth protected resource is `<origin>/mcp`; every token is bound to it.
 
 Workers OAuth Provider and API-token routing populate `ExecutionContext.props`. The request-scoped server factory reads and validates `ctx.props` before setting `McpRegistrationContext.props`. SDK `ctx.http.authInfo` is optional and is present only when a compatible caller supplies it. Do not log raw tokens or authentication props.
 

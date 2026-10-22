@@ -13,6 +13,7 @@ export default defineConfig({
 			miniflare: {
 				compatibilityDate: '2026-03-09',
 				compatibilityFlags: ['nodejs_compat'],
+				kvNamespaces: ['OAUTH_KV'],
 				bindings: {
 					CLOUDFLARE_MOCK_ACCOUNT_ID: 'mock-account-id',
 					CLOUDFLARE_MOCK_API_TOKEN: 'mock-api-token',

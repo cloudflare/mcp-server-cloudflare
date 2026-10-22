@@ -46,6 +46,9 @@ function makeRefreshOptions(propsOverride: Record<string, unknown>): TokenExchan
 		userId: 'test-user',
 		scope: [],
 		requestedScope: [],
+		subjectClientId: 'test',
+		resource: 'https://mcp.example.com/mcp',
+		env: {},
 	}
 }
 
@@ -268,6 +271,9 @@ describe('handleTokenExchangeCallback', () => {
 				userId: 'test-user',
 				scope: [],
 				requestedScope: [],
+				subjectClientId: 'test',
+				resource: 'https://mcp.example.com/mcp',
+				env: {},
 			}
 
 			const result = await handleTokenExchangeCallback(options, clientId, clientSecret)
@@ -656,7 +662,10 @@ describe('createAuthHandlers authorize route', () => {
 				async parseAuthRequest() {
 					return { clientId } as Awaited<ReturnType<OAuthHelpers['parseAuthRequest']>>
 				},
-				async lookupClient() {
+				async isConsentRemembered() {
+					return false
+				},
+				async describeConsent() {
 					throw new CimdFetchError(clientId, new Error('HTTP 403'))
 				},
 			}),
