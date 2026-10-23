@@ -15,6 +15,10 @@ testStatelessMcpApp<Env>({
 	authenticated: true,
 	authenticatedWorker: worker,
 	expectedTools: ['dns_report', 'show_account_dns_settings', 'show_zone_dns_settings'],
+	requiredToolInputs: {
+		dns_report: ['zoneId', 'days'],
+		show_zone_dns_settings: ['zoneId'],
+	},
 })
 
 function initializeRequest() {
